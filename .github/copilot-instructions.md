@@ -35,16 +35,6 @@ No hay servidor personalizado, API ni integración con base de datos.
 `eslint.config.mjs`: Reglas de lint.
 `README.md`: Información y flujo de trabajo básico.
 
-## Example Patterns
-
-```tsx
-// Ejemplo: sección responsiva con Tailwind
-<div className="flex flex-col gap-4 sm:flex-row items-center">
-  <img src="/globe.svg" alt="Globe" className="w-16 h-16" />
-  <span className="text-lg font-semibold">Kinesiologia a Domicilio</span>
-</div>
-```
-
 ## Workflow & Commit Best Practices
 
 - Realiza los cambios de manera **paso a paso**: divide tareas grandes en pasos pequeños y verifica el resultado en cada etapa.
