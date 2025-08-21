@@ -26,6 +26,7 @@ Usa SVGs desde `public/` para íconos e imágenes.
 La fuente se define globalmente; usa `font-sans` para texto principal.
 No hay servidor personalizado, API ni integración con base de datos.
 Diseño mobile-first: define primero estilos base para pantallas pequeñas y luego añade mejoras progresivas con breakpoints (`sm:`, `md:`, etc.). Evita sobre-especificar en móviles para reducir CSS.
+Refactor por componentes: extrae piezas reutilizables (botones genéricos, layouts, elementos de navegación) a `src/components/`. Elementos específicos de una sección (ej: partes internas del hero) pueden vivir en una subcarpeta local `src/app/hero/` para mantener cohesión sin contaminar el espacio global. Si un componente local se reutiliza en otra sección, muévelo después a `src/components/`.
 
 ## Key Files
 
