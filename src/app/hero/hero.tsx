@@ -6,9 +6,9 @@ export default function HeroSection() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="bg-slate-50 px-4 py-12 sm:py-16 dark:bg-neutral-900"
+      className="flex flex-1 items-center bg-slate-50 px-4 py-10 sm:py-12 dark:bg-neutral-900"
     >
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 sm:flex-row md:gap-12">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-8 sm:flex-row md:gap-12">
         <div className="w-full max-w-2xl text-center sm:text-left">
           <h1
             id="hero-heading"
@@ -23,8 +23,7 @@ export default function HeroSection() {
             Adultos mayores, post operatorios, cuidados paliativos.
           </p>
           <p className="mt-4 text-base leading-relaxed text-slate-700 dark:text-slate-300 sm:mt-6 sm:text-xl">
-            Terapia física y rehabilitación en la comodidad y seguridad de tu
-            hogar.
+            Terapia física y rehabilitación en la comodidad de tu hogar.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
             <Link
