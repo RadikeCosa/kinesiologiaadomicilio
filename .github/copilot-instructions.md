@@ -25,6 +25,7 @@ Mantén la lógica de las páginas mínima; prefiere componentes sin estado.
 Usa SVGs desde `public/` para íconos e imágenes.
 La fuente se define globalmente; usa `font-sans` para texto principal.
 No hay servidor personalizado, API ni integración con base de datos.
+Diseño mobile-first: define primero estilos base para pantallas pequeñas y luego añade mejoras progresivas con breakpoints (`sm:`, `md:`, etc.). Evita sobre-especificar en móviles para reducir CSS.
 
 ## Key Files
 
