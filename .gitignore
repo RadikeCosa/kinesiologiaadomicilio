@@ -42,3 +42,7 @@ next-env.d.ts
 
 # github
 /github
+
+# local docs (no versionar)
+SEO_QUICK_WINS.md
+LINEAMIENTOS_SEO_FUTUROS.md

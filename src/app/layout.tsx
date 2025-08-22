@@ -68,11 +68,55 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es-AR">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-dvh flex-col`}
       >
-        {children}
+        {/* Skip link para accesibilidad / SEO (mejora de experiencia) */}
+        <a
+          href="#contenido"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 rounded bg-sky-600 px-4 py-2 text-sm font-semibold text-white"
+        >
+          Saltar al contenido principal
+        </a>
+        {/* Script JSON-LD para negocio local */}
+        <script
+          type="application/ld+json"
+          // Mantener inline para que aparezca temprano; ajustar datos reales cuando estén disponibles
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "MedicalBusiness",
+              name: "Kinesiología a Domicilio Neuquén",
+              image:
+                "https://kinesiologiaadomicilio.vercel.app/og-placeholder.png",
+              url: "https://kinesiologiaadomicilio.vercel.app/",
+              logo: "https://kinesiologiaadomicilio.vercel.app/favicon.ico",
+              description:
+                "Kinesiología y rehabilitación funcional a domicilio en Neuquén: postoperatorios, adultos mayores y cuidados paliativos.",
+              areaServed: {
+                "@type": "AdministrativeArea",
+                name: "Neuquén Capital",
+              },
+              priceRange: "$$",
+              serviceType: [
+                "Rehabilitación post-operatoria",
+                "Terapia física domiciliaria",
+                "Cuidados paliativos",
+                "Adultos mayores",
+              ],
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer service",
+                telephone: "+54 9 299 521 7189",
+                availableLanguage: ["es"],
+              },
+            }),
+          }}
+        />
+        <main id="contenido" className="flex flex-1 flex-col">
+          {children}
+        </main>
       </body>
     </html>
   );

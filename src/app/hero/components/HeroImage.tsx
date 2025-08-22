@@ -5,7 +5,7 @@ export function HeroImage() {
     <div className="mt-4 w-full max-w-xs sm:mt-0 sm:max-w-[22.5rem]">
       {/* ~20% menos que 28rem (md) */}
       <Image
-        src="/hero-image.png"
+        src="/hero-image.webp"
         alt="Sesión de kinesiología a domicilio en Neuquén Capital"
         width={300}
         height={450}

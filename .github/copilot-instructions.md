@@ -46,6 +46,68 @@ Refactor por componentes: extrae piezas reutilizables (botones genéricos, layou
 - Prefiere commits pequeños y atómicos para facilitar revisiones y revertir cambios si es necesario.
 - Usa **ramas de desarrollo** siguiendo convenciones comunes (por ejemplo, `feature/nombre`, `fix/nombre`, `hotfix/nombre`). Haz PRs desde estas ramas hacia `main`.
 
+## SEO (Resumen Operativo)
+
+### Quick Wins Ya Aplicados
+
+- `lang=es-AR` en `layout.tsx`.
+- Skip link + `<main>` semántico.
+- JSON-LD `MedicalBusiness` inline (layout).
+- Sitemap inicial (`app/sitemap.ts`).
+- Sección placeholder `#servicios` para evitar anchor roto.
+
+### Al Crear Nuevas Páginas de Servicio
+
+1. Definir keyword primaria + 1–2 secundarias (intención transaccional local).
+2. Incluir `export const metadata` con title (≤60 chars) y description única (140–160 chars).
+3. Un solo `h1`. Estructurar con `h2`/`h3` ordenados.
+4. Contenido mínimo inicial: intro (≥90 palabras), beneficios, proceso, indicaciones, CTA WhatsApp, enlaces internos (hub servicios / contacto / otro servicio relacionado).
+5. Actualizar sitemap (`app/sitemap.ts`).
+6. Mantener densidad natural (evitar stuffing).
+
+### Structured Data
+
+- Mantener `MedicalBusiness` global en layout (actualizar si cambia teléfono / servicios).
+- Añadir `FAQPage` SOLO en página /faq (o sección única) sin duplicar preguntas exactas en múltiples schemata.
+- Añadir `BreadcrumbList` cuando exista profundidad (`/servicios/…`).
+- Para blog futuro: usar `Article`/`BlogPosting` con autor y fecha.
+
+### Performance & Accesibilidad
+
+- Usar `next/image` siempre; imágenes principales < 200 KB (preferir WebP/AVIF en `public/`).
+- Lighthouse objetivo: Performance ≥ 90, SEO ≥ 90, A11y ≥ 90.
+- Evitar librerías grandes innecesarias; preferir utilidades nativas.
+
+### Interlinking
+
+- Cada servicio enlaza al hub `/servicios`, a otro servicio relacionado y a contacto.
+- Blog (cuando exista) enlaza hacia servicios relevantes y viceversa.
+
+### PR Checklist SEO
+
+- [ ] Title único correcto (sin stuffing, ≤60 chars).
+- [ ] Meta description única (CTA / beneficio).
+- [ ] H1 único y coherente con intención.
+- [ ] Enlaces internos agregados (hub / contacto / relacionados).
+- [ ] Sitemap actualizado.
+- [ ] Schema válido (si aplica FAQ/Breadcrumb/Article).
+- [ ] Imágenes optimizadas (<200 KB) y `alt` descriptivo.
+- [ ] Lighthouse A11y & SEO ≥ 90 (local test).
+- [ ] No enlaces rotos (anchors existentes).
+
+### Mantenimiento Trimestral
+
+- Revisar Search Console: nuevas queries → decidir nuevas páginas.
+- Auditar Core Web Vitals (Vercel / PSI) y ajustar.
+- Validar JSON-LD tras cambios estructurales.
+
+### Futuro (Backlog Breve)
+
+- Manifest + theme-color + iconos extendidos.
+- Automatizar generación de sitemap a partir del árbol de rutas.
+- Helper central para JSON-LD (evitar duplicación).
+- FAQ global y expansión blog (clusters temáticos: post-operatorio, cuidados paliativos, adultos mayores).
+
 ---
 
 Si alguna convención o flujo no está claro, consulta al usuario antes de hacer cambios.
