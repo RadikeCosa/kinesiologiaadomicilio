@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación",
@@ -96,15 +96,12 @@ export default function ServicesPage() {
             Contactanos por WhatsApp para una consulta personalizada sin
             compromiso.
           </p>
-          <Link
-            href="https://wa.me/5492995217189?text=Hola%20quisiera%20consultar%20sobre%20los%20servicios%20de%20kinesiologia%20a%20domicilio"
-            target="_blank"
-            rel="noopener noreferrer"
+          <WhatsAppButton
+            message="Hola quisiera consultar sobre los servicios de kinesiología a domicilio"
             className="mt-6 inline-flex items-center justify-center rounded-full bg-green-600 px-8 py-3 text-base font-semibold text-white transition hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
           >
-            <WhatsAppIcon className="mr-2 h-5 w-5" />
             Consultá por WhatsApp
-          </Link>
+          </WhatsAppButton>
         </div>
       </div>
 

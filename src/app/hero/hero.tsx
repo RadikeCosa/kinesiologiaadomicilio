@@ -1,4 +1,4 @@
-import { HeroWhatsAppButton } from "./components/HeroWhatsAppButton";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { HeroSecondaryLink } from "./components/HeroSecondaryLink";
 import { HeroServiceTypesList } from "./components/HeroServiceTypesList";
 import { HeroImage } from "./components/HeroImage";
@@ -28,7 +28,13 @@ export default function HeroSection() {
             Terapia física y rehabilitación en la comodidad de tu hogar.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
-            <HeroWhatsAppButton />
+            <WhatsAppButton
+              message="Hola quisiera consultar por una sesión de kinesiología a domicilio"
+              className="inline-flex items-center justify-center rounded-full bg-green-600 px-7 py-3 text-base font-semibold text-white transition hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:bg-green-600 dark:hover:bg-green-500"
+              iconSize="h-6 w-6"
+            >
+              Hacé tu consulta
+            </WhatsAppButton>
             <HeroSecondaryLink />
           </div>
           <HeroServiceTypesList />
