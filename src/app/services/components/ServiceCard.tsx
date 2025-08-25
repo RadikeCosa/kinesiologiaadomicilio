@@ -7,7 +7,7 @@ interface ServiceCardProps {
 
 export function ServiceCard({ service }: ServiceCardProps) {
   return (
-    <div className="flex flex-col rounded-2xl bg-white p-8 shadow-lg ring-1 ring-slate-200 dark:bg-neutral-800 dark:ring-neutral-700">
+    <div className="flex flex-col rounded-2xl bg-white p-8 shadow-lg ring-1 ring-slate-200 dark:bg-neutral-800 dark:ring-neutral-700 transition-all hover:shadow-xl">
       <div className="flex items-center gap-4">
         <span className="text-2xl" aria-hidden="true">
           {service.icon}

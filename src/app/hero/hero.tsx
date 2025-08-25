@@ -8,7 +8,7 @@ export default function HeroSection() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="flex flex-1 items-center bg-slate-50 px-4 py-10 sm:py-12 dark:bg-neutral-900"
+      className="flex flex-1 items-center px-4 py-10 sm:py-12"
     >
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-8 sm:flex-row md:gap-12">
         <div className="w-full max-w-2xl text-center sm:text-left">

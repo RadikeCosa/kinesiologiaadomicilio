@@ -14,18 +14,19 @@ export const metadata: Metadata = {
 
 export default function ServicesPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:py-24">
-      <div className="text-center">
-        <h1 className="text-balance text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
-          Servicios de kinesiología a domicilio
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-          Ofrecemos atención kinesiológica especializada en la comodidad de tu
-          hogar. Cada sesión está diseñada según las necesidades específicas del
-          paciente, con equipamiento profesional y técnicas actualizadas para
-          garantizar una recuperación efectiva y segura.
-        </p>
-      </div>
+    <div className="bg-slate-50 dark:bg-neutral-900 min-h-screen">
+      <div className="mx-auto max-w-4xl px-4 py-16 sm:py-24">
+        <div className="text-center">
+          <h1 className="text-balance text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
+            Servicios de kinesiología a domicilio
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+            Ofrecemos atención kinesiológica especializada en la comodidad de tu
+            hogar. Cada sesión está diseñada según las necesidades específicas del
+            paciente, con equipamiento profesional y técnicas actualizadas para
+            garantizar una recuperación efectiva y segura.
+          </p>
+        </div>
 
       <ServicesGrid />
 
@@ -63,6 +64,7 @@ export default function ServicesPage() {
             Contacto →
           </Link>
         </nav>
+      </div>
       </div>
     </div>
   );

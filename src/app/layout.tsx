@@ -70,7 +70,7 @@ export default function RootLayout({
   return (
     <html lang="es-AR">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-dvh flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-dvh flex-col bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-slate-100`}
       >
         {/* Skip link para accesibilidad / SEO (mejora de experiencia) */}
         <a
