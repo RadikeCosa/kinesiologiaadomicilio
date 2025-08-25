@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import type { Service } from "../types/Service";
 
 interface ServiceCardProps {
@@ -19,15 +19,13 @@ export function ServiceCard({ service }: ServiceCardProps) {
       <p className="mt-4 flex-auto text-base leading-7 text-slate-600 dark:text-slate-300">
         {service.description}
       </p>
-      <Link
-        href={service.href}
-        className="mt-6 inline-flex items-center justify-center rounded-full bg-sky-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+      <WhatsAppButton
+        message={service.whatsappMessage}
+        className="mt-6 inline-flex items-center justify-center rounded-full bg-green-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+        iconSize="h-4 w-4"
       >
-        Ver detalles
-        <span className="ml-2" aria-hidden="true">
-          →
-        </span>
-      </Link>
+        Consultar
+      </WhatsAppButton>
     </div>
   );
 }
