@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { ScrollDownButton } from "@/components/ScrollDownButton";
 import { ServicesGrid } from "./components/ServicesGrid";
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   return (
     <div className="bg-slate-50 dark:bg-neutral-900 min-h-screen">
+      <ScrollDownButton targetId="servicios-grid" />
       <div className="mx-auto max-w-4xl px-4 py-16 sm:py-24">
         <div className="text-center">
           <h1 className="text-balance text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
@@ -28,7 +30,9 @@ export default function ServicesPage() {
           </p>
         </div>
 
-        <ServicesGrid />
+        <div id="servicios-grid">
+          <ServicesGrid />
+        </div>
 
         <div className="mt-16 text-center">
           <div className="rounded-2xl bg-sky-50 p-8 dark:bg-sky-950">
