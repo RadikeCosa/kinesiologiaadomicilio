@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://kinesiologiaadomicilio.vercel.app/services",
   },
+  keywords: [
+    "servicios kinesiología domicilio",
+    "rehabilitación postoperatoria Neuquén",
+    "kinesiología adultos mayores",
+    "cuidados paliativos kinesiología",
+    "terapia física domiciliaria",
+  ],
 };
 
 export default function ServicesPage() {
@@ -59,13 +66,6 @@ export default function ServicesPage() {
               className="text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300"
             >
               ← Volver al inicio
-            </Link>
-            <span className="mx-4 text-slate-400">|</span>
-            <Link
-              href="/contacto"
-              className="text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300"
-            >
-              Contacto →
             </Link>
           </nav>
         </div>
