@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { WhatsAppButton } from "./WhatsAppButton";
+import { BUSINESS_CONFIG } from "@/lib/config";
 
 export function Footer() {
+  const { location, phone, phoneClean, name } = BUSINESS_CONFIG;
+
   return (
     <footer
       className="bg-slate-100 dark:bg-neutral-800 border-t border-slate-200 dark:border-neutral-700"
@@ -17,15 +20,15 @@ export function Footer() {
             <address className="mt-4 not-italic text-slate-600 dark:text-slate-400">
               <p className="flex items-center gap-2">
                 <span aria-hidden="true">📍</span>
-                <span>Neuquén Capital, Argentina</span>
+                <span>{location.city}, {location.country}</span>
               </p>
               <p className="mt-2 flex items-center gap-2">
                 <span aria-hidden="true">📞</span>
                 <a
-                  href="tel:+5492995217189"
+                  href={`tel:+${phoneClean}`}
                   className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
                 >
-                  +54 9 299 521 7189
+                  {phone}
                 </a>
               </p>
             </address>
@@ -82,7 +85,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="mt-8 border-t border-slate-200 dark:border-neutral-700 pt-6 text-center text-sm text-slate-500 dark:text-slate-500">
           <p>
-            © {new Date().getFullYear()} Kinesiología a Domicilio Neuquén.
+            © {new Date().getFullYear()} {name}.
             Todos los derechos reservados.
           </p>
         </div>

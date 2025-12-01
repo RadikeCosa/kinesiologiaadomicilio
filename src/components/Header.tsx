@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { getWhatsAppUrl, BUSINESS_CONFIG } from "@/lib/config";
 
 export function Header() {
+  const contactUrl = getWhatsAppUrl("Hola quisiera consultar por kinesio a domicilio");
+
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-sm dark:bg-neutral-900/80 border-b border-slate-200 dark:border-neutral-700">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
@@ -9,7 +12,7 @@ export function Header() {
           className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-slate-100"
         >
           <span aria-hidden="true">💪</span>
-          <span className="hidden sm:inline">Kinesiología Neuquén</span>
+          <span className="hidden sm:inline">{BUSINESS_CONFIG.shortName}</span>
           <span className="sm:hidden">Kinesio NQN</span>
         </Link>
 
@@ -33,7 +36,7 @@ export function Header() {
             </li>
             <li>
               <Link
-                href="https://wa.me/5492995217189?text=Hola%20quisiera%20consultar%20por%20kinesio%20a%20domicilio"
+                href={contactUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"

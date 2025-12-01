@@ -129,25 +129,25 @@ export default function RootLayout({
                 name: "Servicios de Kinesiología",
                 itemListElement: [
                   {
-                    "@type": "OfferCatalog",
+                    "@type": "Offer",
                     name: "Rehabilitación Post-operatoria",
                     description:
                       "Recuperación especializada después de cirugías ortopédicas, traumatológicas y cardíacas.",
                   },
                   {
-                    "@type": "OfferCatalog",
+                    "@type": "Offer",
                     name: "Kinesiología para Adultos Mayores",
                     description:
                       "Terapia física adaptada para mantener movilidad, fuerza y autonomía en la tercera edad.",
                   },
                   {
-                    "@type": "OfferCatalog",
+                    "@type": "Offer",
                     name: "Cuidados Paliativos",
                     description:
                       "Acompañamiento kinesiológico para mejorar calidad de vida y confort.",
                   },
                   {
-                    "@type": "OfferCatalog",
+                    "@type": "Offer",
                     name: "Terapia Física General",
                     description:
                       "Sesiones para lesiones deportivas, dolor crónico y prevención.",

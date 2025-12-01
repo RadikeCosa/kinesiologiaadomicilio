@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { WhatsAppIcon } from "./WhatsAppIcon";
+import { getWhatsAppUrl } from "@/lib/config";
 
 interface WhatsAppButtonProps {
   /** Texto del mensaje que se enviará por WhatsApp */
@@ -18,9 +19,7 @@ export function WhatsAppButton({
   className = "inline-flex items-center justify-center rounded-full bg-green-600 px-8 py-3 text-base font-semibold text-white transition hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400",
   iconSize = "h-5 w-5",
 }: WhatsAppButtonProps) {
-  // Codificar el mensaje para URL
-  const encodedMessage = encodeURIComponent(message);
-  const whatsappUrl = `https://wa.me/5492995217189?text=${encodedMessage}`;
+  const whatsappUrl = getWhatsAppUrl(message);
 
   return (
     <Link
