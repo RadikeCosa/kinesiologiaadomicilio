@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ScrollDepthTracker } from "@/components/ScrollDepthTracker";
 
 import "./globals.css";
 
@@ -85,6 +86,8 @@ export default function RootLayout({
         >
           Saltar al contenido principal
         </a>
+
+        <ScrollDepthTracker />
 
         <Header />
 
