@@ -52,6 +52,7 @@ export default function ServicesPage() {
             </p>
             <WhatsAppButton
               message="Hola quisiera consultar sobre los servicios de kinesiología a domicilio"
+              ctaLocation="services"
               className="mt-6 inline-flex items-center justify-center rounded-full bg-green-600 px-8 py-3 text-base font-semibold text-white transition hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
             >
               Consultá por WhatsApp
