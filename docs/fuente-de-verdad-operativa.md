@@ -30,7 +30,6 @@ No es, en su estado actual, una plataforma transaccional ni un sistema con gesti
 - Verificación de Google Search Console declarada en metadata (`verification.google`).
 
 ### Parcialmente implementado
-- Centralización de datos de negocio: existe `BUSINESS_CONFIG`, pero parte de los datos de negocio/SEO también está hardcodeada en `layout.tsx` (metadata/JSON-LD), por lo que la centralización es parcial.
 - Medición analítica: el tracking está codificado, pero no hay evidencia versionada de QA operativa en entorno real (Realtime/DebugView/capturas).
 
 ### No implementado / fuera de alcance actual
@@ -58,7 +57,7 @@ No es, en su estado actual, una plataforma transaccional ni un sistema con gesti
 - `src/app/layout.tsx` funciona como marco global de la app:
   - define metadata y viewport,
   - monta `Header` y `Footer`,
-  - inyecta JSON-LD,
+  - ensambla metadata/JSON-LD global derivando datos de `BUSINESS_CONFIG` y `servicesData`,
   - monta tracker de scroll,
   - e inyecta GA4 si existe `NEXT_PUBLIC_GA_ID`.
 
@@ -154,20 +153,20 @@ Mapa orientador (no exhaustivo):
 | Datos globales de negocio/contacto/base URL | `src/lib/config.ts` (`BUSINESS_CONFIG`) | `Header`, `Footer`, `WhatsAppButton`, `PhoneLink` |
 | Catálogo de servicios | `src/app/services/data/servicesData.ts` | `ServicesGrid` / `ServiceCard` |
 | Structured data (JSON-LD) | `src/app/layout.tsx` (ensamblado inline) | Script `application/ld+json` global |
-| Hero editorial (H1/subtítulo/CTA) | `src/app/hero/hero.tsx` | Home (`src/app/page.tsx`) vía `HeroSection` |
-| Navegación global compartida (header/footer) | `Header.tsx` y `Footer.tsx` (duplicada deliberadamente) | Layout global |
+| Hero editorial (H1/subtítulo/CTA) | `src/app/hero/heroContent.ts` | `hero.tsx` (consumidor) → Home (`src/app/page.tsx`) |
+| Navegación global compartida (header/footer) | `src/lib/navLinks.ts` (`NAV_LINKS`) | `Header.tsx` y `Footer.tsx` |
 
 ### Qué está centralizado hoy (y qué no)
 - **Sí centralizado:** datos de contacto/base del negocio para superficies de UI en `BUSINESS_CONFIG`.
 - **Sí centralizado:** catálogo del grid de servicios en `servicesData.ts`.
-- **No centralizado todavía:** JSON-LD (negocio + servicios) sigue definido en `layout.tsx`.
-- **No centralizado todavía:** copy editorial del hero sigue inline en `hero.tsx`.
-- **No centralizado todavía:** navegación global `Inicio/Servicios` sigue duplicada entre header y footer.
+- **Sí centralizado:** JSON-LD global se ensambla en `layout.tsx` derivando negocio desde `BUSINESS_CONFIG` y catálogo desde `servicesData.ts`.
+- **Sí centralizado:** copy editorial del hero se define en `heroContent.ts` y se consume desde `hero.tsx`.
+- **Sí centralizado:** navegación global `Inicio/Servicios` se define en `NAV_LINKS` y la consumen header/footer.
 
 ### Regla operativa de edición rápida
 - Si cambia **contacto/base URL**, tocar primero `src/lib/config.ts` y luego verificar `src/app/layout.tsx`, `src/app/sitemap.ts` y `src/app/robots.ts`.
 - Si cambia **catálogo de servicios**, tocar `src/app/services/data/servicesData.ts` y luego verificar coherencia en `Footer`, `HeroServiceTypesList` y JSON-LD en `layout.tsx`.
-- Si cambia **copy editorial del hero**, tocar `src/app/hero/hero.tsx` (y `HeroSecondaryLink.tsx` si aplica).
+- Si cambia **copy editorial del hero**, tocar `src/app/hero/heroContent.ts` (y revisar `hero.tsx`/`HeroSecondaryLink.tsx` solo si cambia la estructura de render).
 - `layout.tsx` **ensambla** metadata/JSON-LD global, pero **no es fuente primaria** de negocio ni catálogo.
 
 ## 9) Decisiones de implementación ya materializadas
@@ -179,7 +178,9 @@ Mapa orientador (no exhaustivo):
 - Tracking centralizado en helpers (`src/lib/analytics.ts`) y componentes instrumentados.
 - Uso de Metadata API de Next para SEO.
 - Inyección manual de JSON-LD en layout global.
-- Configuración parcial centralizada de negocio en `BUSINESS_CONFIG`.
+- Configuración de negocio/base URL centralizada en `BUSINESS_CONFIG` y derivada en layout/sitemap/robots.
+- Navegación global compartida en `NAV_LINKS` (`src/lib/navLinks.ts`).
+- Copy editorial del hero centralizada en `heroContent.ts`.
 
 ## 10) Límites y guardrails de la centralización actual
 
@@ -194,7 +195,7 @@ Mapa orientador (no exhaustivo):
 ### Validación automática observada
 - `npm run lint`: ejecuta correctamente, sin warnings/errores de ESLint.
 
-### Validación automática con falla
+### Validación automática observada (build)
 - `npm run build`: ejecuta correctamente en el estado actual del repo.
 
 ### Validación manual
@@ -224,11 +225,12 @@ Checklist rápido por tipo de cambio:
   3) alinear `serviceType`/`hasOfferCatalog` en JSON-LD (`layout.tsx`).
 
 - **Cambio de copy editorial del hero**
-  1) editar `src/app/hero/hero.tsx`;
-  2) si impacta CTA secundaria, ajustar `src/app/hero/components/HeroSecondaryLink.tsx`.
+  1) editar `src/app/hero/heroContent.ts`;
+  2) si impacta estructura/composición, ajustar `src/app/hero/hero.tsx` y/o `src/app/hero/components/HeroSecondaryLink.tsx`.
 
 - **Cambio de navegación global compartida**
-  1) actualizar ambos consumidores (`src/components/Header.tsx` y `src/components/Footer.tsx`), ya que hoy no existe fuente compartida.
+  1) editar `src/lib/navLinks.ts`;
+  2) validar visualmente ambos consumidores (`src/components/Header.tsx` y `src/components/Footer.tsx`).
 
 ## 13) Nota de cierre
 
@@ -250,4 +252,6 @@ Este documento deja asentado el **estado operativo actual** de centralización y
 - `src/components/PhoneLink.tsx`
 - `src/components/ScrollDepthTracker.tsx`
 - `src/app/services/data/servicesData.ts`
+- `src/app/hero/heroContent.ts`
+- `src/lib/navLinks.ts`
 - `src/app/robots.ts`
