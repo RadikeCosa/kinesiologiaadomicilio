@@ -24,7 +24,7 @@ No es, en su estado actual, una plataforma transaccional ni un sistema con gesti
 - Metadata SEO global + metadata específica en `/services`.
 - Open Graph / Twitter cards.
 - JSON-LD tipo `MedicalBusiness` en layout global.
-- `sitemap.xml` vía `src/app/sitemap.ts` y `robots.txt` en `public/`.
+- `sitemap.xml` vía `src/app/sitemap.ts` y `robots.txt` vía `src/app/robots.ts`.
 - Integración base de GA4 (condicional por `NEXT_PUBLIC_GA_ID`).
 - Eventos custom de medición (`generate_lead`, `phone_click`, `scroll_50`, `scroll_90`).
 - Verificación de Google Search Console declarada en metadata (`verification.google`).
@@ -86,7 +86,7 @@ Mapa orientador (no exhaustivo):
 - `src/components/*`: componentes reutilizables de navegación, contacto y tracking.
 - `src/lib/config.ts`: datos de negocio/contacto + helper WhatsApp.
 - `src/lib/analytics.ts`: funciones de tracking.
-- `public/`: assets estáticos (`hero-image.webp`, `og-placeholder.png`, `robots.txt`).
+- `public/`: assets estáticos (`hero-image.webp`, `og-placeholder.png`).
 - `docs/analytics-handoff.md`: estado técnico específico de analytics.
 
 ## 6) Funcionalidad actual visible
@@ -125,7 +125,7 @@ Mapa orientador (no exhaustivo):
   - enlace de WhatsApp.
 
 ### Indexación técnica
-- `public/robots.txt` permite crawl e informa sitemap.
+- `src/app/robots.ts` expone reglas de crawl y sitemap.
 - `src/app/sitemap.ts` publica URLs de `/` y `/services`.
 
 ### Analytics (GA4)
@@ -165,7 +165,7 @@ Mapa orientador (no exhaustivo):
 - **No centralizado todavía:** navegación global `Inicio/Servicios` sigue duplicada entre header y footer.
 
 ### Regla operativa de edición rápida
-- Si cambia **contacto/base URL**, tocar primero `src/lib/config.ts` y luego verificar `src/app/layout.tsx`, `src/app/sitemap.ts` y `public/robots.txt`.
+- Si cambia **contacto/base URL**, tocar primero `src/lib/config.ts` y luego verificar `src/app/layout.tsx`, `src/app/sitemap.ts` y `src/app/robots.ts`.
 - Si cambia **catálogo de servicios**, tocar `src/app/services/data/servicesData.ts` y luego verificar coherencia en `Footer`, `HeroServiceTypesList` y JSON-LD en `layout.tsx`.
 - Si cambia **copy editorial del hero**, tocar `src/app/hero/hero.tsx` (y `HeroSecondaryLink.tsx` si aplica).
 - `layout.tsx` **ensambla** metadata/JSON-LD global, pero **no es fuente primaria** de negocio ni catálogo.
@@ -195,7 +195,7 @@ Mapa orientador (no exhaustivo):
 - `npm run lint`: ejecuta correctamente, sin warnings/errores de ESLint.
 
 ### Validación automática con falla
-- `npm run build`: falla por `Module not found: Can't resolve '@next/third-parties/google'` en `layout.tsx` y `analytics.ts`.
+- `npm run build`: ejecuta correctamente en el estado actual del repo.
 
 ### Validación manual
 - No hay en el repo evidencia versionada (checklist/capturas/reportes) de validación manual de:
@@ -216,7 +216,7 @@ Checklist rápido por tipo de cambio:
 - **Cambio de contacto o base URL**
   1) editar `src/lib/config.ts`;
   2) alinear `metadataBase`/canonical/JSON-LD en `src/app/layout.tsx`;
-  3) alinear `src/app/sitemap.ts` y `public/robots.txt`.
+  3) alinear `src/app/sitemap.ts` y `src/app/robots.ts`.
 
 - **Cambio de catálogo de servicios**
   1) editar `src/app/services/data/servicesData.ts`;
@@ -250,4 +250,4 @@ Este documento deja asentado el **estado operativo actual** de centralización y
 - `src/components/PhoneLink.tsx`
 - `src/components/ScrollDepthTracker.tsx`
 - `src/app/services/data/servicesData.ts`
-- `public/robots.txt`
+- `src/app/robots.ts`

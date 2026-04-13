@@ -157,9 +157,8 @@ export default function RootLayout({
         </main>
 
         <Footer />
+        {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>
-
-      {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
     </html>
   );
 }

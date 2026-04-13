@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { BUSINESS_CONFIG } from "@/lib/config";
 
-// Sitemap inicial: se ampliará cuando se agreguen más rutas (servicios, contacto, etc.)
+// Sitemap actual de rutas públicas; ampliar cuando se agreguen nuevas páginas.
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = BUSINESS_CONFIG.url;
   const now = new Date();

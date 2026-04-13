@@ -28,11 +28,11 @@ No incluye por ahora tests automatizados, CI/CD en GitHub Actions ni formularios
 
 Rutas y carpetas principales:
 
-- `src/app/`: rutas de la app (home, servicios), layout global, estilos y sitemap.
+- `src/app/`: rutas de la app (home, servicios), layout global, estilos, `sitemap.ts` y `robots.ts`.
 - `src/app/services/`: página de servicios, tipos, data y componentes de cards/grilla.
 - `src/components/`: componentes compartidos (Header, Footer, botones, etc.).
 - `src/lib/config.ts`: datos de contacto y helper para links de WhatsApp.
-- `public/`: assets estáticos (`hero-image.webp`, `og-placeholder.png`, `robots.txt`).
+- `public/`: assets estáticos (`hero-image.webp`, `og-placeholder.png`).
 - `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `postcss.config.mjs`: configuración del proyecto.
 
 ## Scripts disponibles

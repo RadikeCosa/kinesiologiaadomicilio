@@ -86,7 +86,7 @@ Criterio: incluyo fuentes que contienen copy visible, datos de negocio/contacto,
     - Rol: source of truth SEO global actual, pero hardcodeado y separado de `config.ts`.
     - Dependencias: monta `Header` y `Footer`; no importa `BUSINESS_CONFIG`.
 
-- `src/app/sitemap.ts` y `public/robots.txt`
+- `src/app/sitemap.ts` y `src/app/robots.ts`
 
     - Propósito: indexación técnica.
     - Contenido: base URL hardcodeada y rutas sitemap.
@@ -100,7 +100,7 @@ _(Te los junto porque están fuertemente ligados.)_
 
 ### Dominio: datos globales del negocio / contacto
 
-- Dónde vive hoy: `config.ts` + strings repetidas en `layout.tsx` JSON-LD/metadata + `sitemap.ts`/`robots.txt`.
+- Dónde vive hoy: `config.ts` + strings repetidas en `layout.tsx` JSON-LD/metadata + `sitemap.ts`/`robots.ts`.
 - Centralización: parcial.
 - Fuente primaria clara: para UI/contacto: `config.ts`; para SEO global hoy: `layout.tsx`.
 - Riesgo: alto (múltiples fuentes).
@@ -128,7 +128,7 @@ _(Te los junto porque están fuertemente ligados.)_
 - **URL canónica/base**
     - `config.ts.url` vs `metadataBase`, `canonical`, `openGraph.url`, JSON-LD `@id/url/image/logo`, `sitemap.ts` base, `robots` sitemap.
     - Tipo: literal multiarchivo.
-    - Archivos: `config.ts`, `layout.tsx`, `sitemap.ts`, `robots.txt`.
+    - Archivos: `config.ts`, `layout.tsx`, `sitemap.ts`, `robots.ts`.
     - Riesgo: alto; un cambio de dominio exige tocar muchos lugares.
 
 ### Dominio: catálogo de servicios
