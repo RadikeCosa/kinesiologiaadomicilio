@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+
 import "./globals.css";
+
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
 export const viewport: Viewport = {
   themeColor: [
@@ -74,18 +78,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es-AR">
-      <body
-        className="font-sans antialiased flex min-h-dvh flex-col bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-slate-100"
-      >
-        {/* Skip link para accesibilidad / SEO (mejora de experiencia) */}
+      <body className="font-sans antialiased flex min-h-dvh flex-col bg-slate-50 dark:bg-neutral-900 text-slate-900 dark:text-slate-100">
         <a
           href="#contenido"
           className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 rounded bg-sky-600 px-4 py-2 text-sm font-semibold text-white"
         >
           Saltar al contenido principal
         </a>
+
         <Header />
-        {/* Script JSON-LD para negocio local */}
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -165,11 +167,15 @@ export default function RootLayout({
             }),
           }}
         />
+
         <main id="contenido" className="flex flex-1 flex-col">
           {children}
         </main>
+
         <Footer />
       </body>
+
+      {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
     </html>
   );
 }
