@@ -145,19 +145,30 @@ Mapa orientador (no exhaustivo):
 - Este documento es consistente con `docs/analytics-handoff.md`.
 - Para detalle fino de eventos, parámetros y límites de medición, tomar como referencia primaria ese documento.
 
-## 8) Fuente de verdad de datos/configuración
+## 8) Fuente de verdad operativa por dominio (estado actual)
 
-### Fuentes de verdad actuales (parciales)
-- **Contacto/base del negocio:** `src/lib/config.ts` (`BUSINESS_CONFIG`).
-- **Servicios listados en UI:** `src/app/services/data/servicesData.ts`.
-- **Eventos y taxonomía de tracking:** `src/lib/analytics.ts`.
+### Matriz de fuentes primarias y consumidores
 
-### Puntos con riesgo de drift
-- Datos de negocio (nombre, teléfono, ubicación, URL) también aparecen hardcodeados en `src/app/layout.tsx` dentro de metadata y JSON-LD.
-- Copy de servicios está en más de un lugar (hero/footer/services data), por lo que puede desalinearse semánticamente con el tiempo.
+| Dominio | Fuente primaria actual | Consumidores principales |
+| --- | --- | --- |
+| Datos globales de negocio/contacto/base URL | `src/lib/config.ts` (`BUSINESS_CONFIG`) | `Header`, `Footer`, `WhatsAppButton`, `PhoneLink` |
+| Catálogo de servicios | `src/app/services/data/servicesData.ts` | `ServicesGrid` / `ServiceCard` |
+| Structured data (JSON-LD) | `src/app/layout.tsx` (ensamblado inline) | Script `application/ld+json` global |
+| Hero editorial (H1/subtítulo/CTA) | `src/app/hero/hero.tsx` | Home (`src/app/page.tsx`) vía `HeroSection` |
+| Navegación global compartida (header/footer) | `Header.tsx` y `Footer.tsx` (duplicada deliberadamente) | Layout global |
 
-### Regla operativa sugerida (actual)
-Hasta nueva consolidación, tratar `src/lib/config.ts` como referencia primaria para contacto, y revisar `layout.tsx` en cada cambio de datos del negocio para mantener consistencia SEO/JSON-LD.
+### Qué está centralizado hoy (y qué no)
+- **Sí centralizado:** datos de contacto/base del negocio para superficies de UI en `BUSINESS_CONFIG`.
+- **Sí centralizado:** catálogo del grid de servicios en `servicesData.ts`.
+- **No centralizado todavía:** JSON-LD (negocio + servicios) sigue definido en `layout.tsx`.
+- **No centralizado todavía:** copy editorial del hero sigue inline en `hero.tsx`.
+- **No centralizado todavía:** navegación global `Inicio/Servicios` sigue duplicada entre header y footer.
+
+### Regla operativa de edición rápida
+- Si cambia **contacto/base URL**, tocar primero `src/lib/config.ts` y luego verificar `src/app/layout.tsx`, `src/app/sitemap.ts` y `public/robots.txt`.
+- Si cambia **catálogo de servicios**, tocar `src/app/services/data/servicesData.ts` y luego verificar coherencia en `Footer`, `HeroServiceTypesList` y JSON-LD en `layout.tsx`.
+- Si cambia **copy editorial del hero**, tocar `src/app/hero/hero.tsx` (y `HeroSecondaryLink.tsx` si aplica).
+- `layout.tsx` **ensambla** metadata/JSON-LD global, pero **no es fuente primaria** de negocio ni catálogo.
 
 ## 9) Decisiones de implementación ya materializadas
 
@@ -170,14 +181,13 @@ Hasta nueva consolidación, tratar `src/lib/config.ts` como referencia primaria 
 - Inyección manual de JSON-LD en layout global.
 - Configuración parcial centralizada de negocio en `BUSINESS_CONFIG`.
 
-## 10) Riesgos, límites y deuda visible
+## 10) Límites y guardrails de la centralización actual
 
-- **Riesgo de consistencia de datos** por duplicación entre `config.ts` y `layout.tsx`.
-- **Deuda de validación analítica**: sin evidencia versionada de QA de eventos en entorno real.
-- **Sin cobertura de tests automatizados**, lo que aumenta dependencia de QA manual.
-- **Superficie funcional acotada** (landing), sin flujo transaccional ni formularios propios.
-- **Dependencia de configuración externa** (GA4/GSC) para cerrar ciclo de medición.
-- Build actual falla localmente por resolución del módulo `@next/third-parties/google` pese a figurar en dependencias (estado a revisar).
+- **Mensajes de WhatsApp contextuales** se mantienen inline por intención comercial/analítica (header, hero, footer, services y por servicio).
+- **Metadata editorial por ruta** se mantiene local (`layout.tsx` para global, `services/page.tsx` para `/services`) para conservar control SEO por superficie.
+- **Microcopy no repetido** (párrafos introductorios o CTA únicos de una sección) se mantiene inline para evitar sobre-centralización.
+- **JSON-LD global** sigue en `layout.tsx`: es consumidor técnico del dominio SEO, no repositorio maestro de negocio/servicios.
+- Esta centralización es **pragmática y acotada**: no hay CMS, no hay capa i18n, no hay diccionario global de todos los strings.
 
 ## 11) Estado de validación (evidencia)
 
@@ -193,34 +203,36 @@ Hasta nueva consolidación, tratar `src/lib/config.ts` como referencia primaria 
   - scroll tracking en entorno desplegado,
   - operación efectiva de Search Console.
 
-## 12) Guía mínima para futuros cambios
+## 12) Guía operativa de mantenimiento (cierre documental)
 
-Antes de cambiar, revisar en este orden:
-1. `README.md` (estado general del proyecto).
-2. `docs/analytics-handoff.md` (si el cambio toca medición).
-3. Este documento (visión operativa integrada).
+Orden sugerido de consulta para cambios de contenido/configuración:
+1. Este documento (`docs/fuente-de-verdad-operativa.md`).
+2. `src/lib/config.ts` (si toca negocio/contacto/URL).
+3. `src/app/services/data/servicesData.ts` (si toca catálogo de servicios).
+4. `src/app/layout.tsx` (si toca metadata técnica/JSON-LD global).
 
-Si cambia contacto/negocio:
-- actualizar `src/lib/config.ts`,
-- revisar y ajustar metadata + JSON-LD en `src/app/layout.tsx`,
-- validar links de WhatsApp/teléfono en header/footer/hero/services.
+Checklist rápido por tipo de cambio:
 
-Si cambia tracking:
-- tocar `src/lib/analytics.ts`,
-- revisar uso en `WhatsAppButton`, `PhoneLink`, `ScrollDepthTracker`,
-- confirmar nombres de eventos/parámetros para no romper reportes.
+- **Cambio de contacto o base URL**
+  1) editar `src/lib/config.ts`;
+  2) alinear `metadataBase`/canonical/JSON-LD en `src/app/layout.tsx`;
+  3) alinear `src/app/sitemap.ts` y `public/robots.txt`.
 
-Si cambia SEO:
-- revisar `layout.tsx` + metadata de ruta (`/services`),
-- revisar `src/app/sitemap.ts` y `public/robots.txt` si hay rutas nuevas.
+- **Cambio de catálogo de servicios**
+  1) editar `src/app/services/data/servicesData.ts`;
+  2) validar consistencia visual/semántica en `HeroServiceTypesList` y lista de servicios del footer;
+  3) alinear `serviceType`/`hasOfferCatalog` en JSON-LD (`layout.tsx`).
 
-## 13) Próximos pasos razonables (documentales/operativos)
+- **Cambio de copy editorial del hero**
+  1) editar `src/app/hero/hero.tsx`;
+  2) si impacta CTA secundaria, ajustar `src/app/hero/components/HeroSecondaryLink.tsx`.
 
-1. Documentar una matriz única de datos de negocio (qué campo vive en `config.ts` y dónde se replica en metadata/JSON-LD).
-2. Incorporar evidencia versionada mínima de QA de analytics (capturas o checklist por evento).
-3. Definir procedimiento operativo de Search Console (propiedad, envío sitemap, revisión periódica).
-4. Registrar convención de naming de eventos y parámetros GA4 para evitar drift futuro.
-5. Resolver y documentar la causa de la falla de build para restablecer baseline técnico verificable.
+- **Cambio de navegación global compartida**
+  1) actualizar ambos consumidores (`src/components/Header.tsx` y `src/components/Footer.tsx`), ya que hoy no existe fuente compartida.
+
+## 13) Nota de cierre
+
+Este documento deja asentado el **estado operativo actual** de centralización y sus límites. No abre nuevas fases técnicas ni propone refactors adicionales; se usa como referencia práctica para mantener consistencia en cambios futuros.
 
 ---
 
