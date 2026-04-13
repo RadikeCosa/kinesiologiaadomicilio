@@ -14,7 +14,7 @@ Actualmente incluye:
 - Metadata SEO básica, Open Graph/Twitter y JSON-LD tipo `MedicalBusiness`.
 - Sitemap y `robots.txt`.
 
-No incluye por ahora tests automatizados, CI/CD en GitHub Actions, formularios propios ni integración de analytics.
+No incluye por ahora tests automatizados, CI/CD en GitHub Actions ni formularios propios. La medición base con Google Analytics 4 sí está implementada en el código.
 
 ## Stack real
 
@@ -77,5 +77,5 @@ npm run start
 - Los estilos están implementados con **Tailwind utilities** y estilos globales en `src/app/globals.css`.
 - `src/lib/config.ts` concentra datos de contacto usados por componentes y links de WhatsApp; parte de la metadata/JSON-LD sigue definida en `src/app/layout.tsx`.
 - Los assets públicos viven en `public/`.
-- No hay variables de entorno utilizadas actualmente en el código.
+- Se utiliza la variable de entorno `NEXT_PUBLIC_GA_ID` para inyectar Google Analytics 4 desde el layout global.
 - Deploy objetivo: **Vercel**
