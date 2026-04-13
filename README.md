@@ -4,170 +4,152 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwind-css)](https://tailwindcss.com/)
-[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000?logo=vercel)](https://vercel.com/)
+[![Deploy (Vercel)](https://img.shields.io/badge/Deploy-Vercel-000?logo=vercel)](https://vercel.com/)
 
-> 🚧 **Proyecto en construcción** — Landing page profesional para un servicio de kinesiología y rehabilitación a domicilio en Neuquén, Argentina.
+Breve: Landing page modern y accesible para un servicio de kinesiología y rehabilitación a domicilio en Neuquén, Argentina — enfocada en conversión local (WhatsApp CTA), rendimiento y SEO local.
 
-## 🌐 Demo en Vivo
+Demo en vivo
+🔗 https://kinesiologiaadomicilio.vercel.app
 
-🔗 **[kinesiologiaadomicilio.vercel.app](https://kinesiologiaadomicilio.vercel.app)**
+Preview
+![Preview](public/images/preview.png) <!-- Añade una captura en public/images/preview.png -->
 
----
+Contenido rápido
+- Estado: En desarrollo (alpha)
+- Stack: Next.js 15 (App Router), React 19, TypeScript 5, Tailwind CSS 4
+- Deploy: Vercel
 
-## 📋 Descripción del Proyecto
+Tabla de contenido
+- Descripción
+- Características
+- Pre-requisitos
+- Quick start
+- Scripts
+- Estructura del proyecto
+- Configuración (qué editar)
+- Accesibilidad y rendimiento
+- Roadmap
+- Contribuir
+- Licencia y contacto
 
-Landing page moderna y optimizada para un negocio de kinesiología domiciliaria. El sitio está diseñado para convertir visitantes en clientes mediante una experiencia de usuario fluida y un fuerte enfoque en SEO local.
+Descripción
+Landing page optimizada para convertir visitantes locales en pacientes, con foco en:
+- CTA directo a WhatsApp
+- SEO local (Neuquén)
+- Accesibilidad (WCAG)
+- Alto rendimiento (Core Web Vitals)
 
-### Objetivos del Proyecto
+Características principales
+- Responsive + mobile-first
+- Dark mode automático
+- Metadata dinámica, Open Graph y JSON-LD (MedicalBusiness)
+- Sitemap y robots.txt generados
+- Componentes React reutilizables y tipados con TypeScript
+- Imagen optimizada con next/image (WebP)
+- Preparado para desplegar en Vercel
 
-- **Conversión**: CTA prominentes con integración directa a WhatsApp
-- **SEO Local**: Posicionamiento para búsquedas de kinesiología en Neuquén
-- **Performance**: Carga rápida y excelente puntuación en Core Web Vitals
-- **Accesibilidad**: Cumplimiento de estándares WCAG
+Pre-requisitos
+- Node.js >= 18 (recomendado 18.x o 20.x)
+- npm, pnpm o yarn
+- Git
 
----
+Quick start (local)
+1. Clona el repo
+   git clone https://github.com/RadikeCosa/kinesiologiaadomicilio.git
+   cd kinesiologiaadomicilio
 
-## 🛠️ Stack Tecnológico
+2. Instala dependencias (elige uno)
+   npm install
+   # o
+   # pnpm install
 
-| Categoría | Tecnología |
-|-----------|------------|
-| **Framework** | Next.js 15.4 (App Router) |
-| **UI Library** | React 19 |
-| **Lenguaje** | TypeScript 5 |
-| **Estilos** | Tailwind CSS 4 |
-| **Linting** | ESLint 9 |
-| **Deploy** | Vercel |
+3. Ejecuta en desarrollo
+   npm run dev
+   # abre http://localhost:3000
 
----
+Build y preview de producción
+   npm run build
+   npm run start
+   # o para preview en local
+   npm run build
+   npm run preview
 
-## ✨ Características Implementadas
+Scripts disponibles
+| Comando | Descripción |
+|--------:|------------|
+| `npm run dev` | Inicia el servidor de desarrollo (Turbopack) |
+| `npm run build` | Genera build de producción |
+| `npm run start` | Inicia la app en modo producción |
+| `npm run preview` | Preview del build local |
+| `npm run lint` | Ejecuta ESLint |
 
-### 🎨 Diseño & UI
-- ✅ **Responsive Design** — Mobile-first con breakpoints para tablet y desktop
-- ✅ **Dark Mode** — Soporte nativo para tema claro/oscuro según preferencias del sistema
-- ✅ **Componentes Reutilizables** — Arquitectura modular con componentes aislados
-- ✅ **Hero Section** — Diseño impactante con imagen optimizada y CTAs claros
-
-### 🔍 SEO & Marketing
-- ✅ **Metadata Dinámica** — Títulos y descripciones únicas por página
-- ✅ **Open Graph & Twitter Cards** — Preview optimizado para redes sociales
-- ✅ **JSON-LD Schema** — Structured data `MedicalBusiness` para rich snippets
-- ✅ **Sitemap Dinámico** — Generación automática de sitemap.xml
-- ✅ **Robots.txt** — Configuración para crawlers
-- ✅ **Canonical URLs** — URLs canónicas para evitar contenido duplicado
-
-### ♿ Accesibilidad
-- ✅ **Skip Links** — Navegación por teclado para saltar al contenido principal
-- ✅ **ARIA Labels** — Etiquetas semánticas para lectores de pantalla
-- ✅ **HTML Semántico** — Uso correcto de elementos `<main>`, `<nav>`, `<header>`, `<footer>`
-- ✅ **Landmarks** — Regiones navegables para tecnologías asistivas
-
-### ⚡ Performance
-- ✅ **Static Generation** — Páginas pre-renderizadas para carga instantánea
-- ✅ **Turbopack** — Build system ultra-rápido en desarrollo
-- ✅ **Imágenes Optimizadas** — Formato WebP con next/image
-- ✅ **Font Optimization** — Carga optimizada de tipografías
-
-### 🔧 Arquitectura
-- ✅ **App Router** — Arquitectura moderna de Next.js 15
-- ✅ **Configuración Centralizada** — Datos de negocio en archivo de config
-- ✅ **Type Safety** — Tipado estricto con TypeScript
-- ✅ **Separación de Concerns** — Componentes, datos y tipos organizados
-
----
-
-## 📁 Estructura del Proyecto
-
-```
+Estructura del proyecto
 src/
 ├── app/
 │   ├── hero/              # Sección hero
-│   │   ├── components/    # HeroImage, HeroSecondaryLink, HeroServiceTypesList
-│   │   └── hero.tsx       # Componente principal del hero
+│   │   ├── components/
+│   │   └── hero.tsx
 │   ├── services/          # Página de servicios
-│   │   ├── components/    # ServiceCard, ServicesGrid
-│   │   ├── data/          # Datos de servicios
-│   │   └── types/         # Interfaces TypeScript
-│   ├── layout.tsx         # Layout raíz con metadata global
-│   ├── page.tsx           # Página principal
-│   ├── sitemap.ts         # Sitemap dinámico
-│   └── globals.css        # Estilos globales
-├── components/            # Componentes compartidos
-│   ├── Header.tsx
-│   ├── Footer.tsx
-│   ├── WhatsAppButton.tsx
-│   ├── WhatsAppIcon.tsx
-│   └── ScrollDownButton.tsx
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── globals.css
+├── components/            # Componentes compartidos (Header, Footer, WhatsAppButton...)
 └── lib/
-    └── config.ts          # Configuración centralizada del negocio
-```
+    └── config.ts          # Configuración central (editar aquí datos del negocio)
 
----
+Qué editar (configuración del negocio)
+- Abre `src/lib/config.ts` y actualiza:
+  - Nombre del negocio
+  - Teléfono y plantilla de WhatsApp (deeplink)
+  - Ciudad / dirección para Schema y SEO
+  - Horarios si aplica
+- Reemplaza la imagen `public/images/preview.png` con una captura real.
 
-## 🚀 Instalación y Desarrollo
+SEO, Social y Open Graph
+- Metadata dinámica en el layout
+- JSON-LD con tipo `MedicalBusiness` ya configurado (editar datos en config.ts)
+- Añadir `og:image` (usa /public/images/og-image.png) para mejores previews
 
-```bash
-# Clonar el repositorio
-git clone https://github.com/RadikeCosa/kinesiologiaadomicilio.git
-cd kinesiologiaadomicilio
+Accesibilidad y Performance
+- Se agregaron skip links, ARIA attributes y landmarks semánticos.
+- Para auditar: ejecutar Lighthouse en Chrome (Performance / Accessibility / SEO).
+- Recomendación: ejecutar `npm run build` y revisar Core Web Vitals en la página desplegada en Vercel.
 
-# Instalar dependencias
-npm install
+Tests / Lint
+- ESLint: `npm run lint`
+- (Si añades testing) recomiendo configurar Vitest / Playwright para pruebas unitarias y end-to-end.
 
-# Iniciar servidor de desarrollo
-npm run dev
+Deployment
+- Deploy automático en Vercel. Conectar el repo y configurar variables de entorno en el dashboard de Vercel si fuera necesario.
+- Si quieres usar GitHub Actions: añade un workflow para CI (lint, build, test).
 
-# Abrir en el navegador
-open http://localhost:3000
-```
-
-### Scripts Disponibles
-
-| Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Inicia el servidor de desarrollo con Turbopack |
-| `npm run build` | Genera el build de producción |
-| `npm run start` | Inicia el servidor de producción |
-| `npm run lint` | Ejecuta ESLint para verificar código |
-
----
-
-## 📊 Habilidades Demostradas
-
-Este proyecto demuestra competencias en:
-
-- **Frontend Development** — React, Next.js, TypeScript
-- **CSS & Design Systems** — Tailwind CSS, responsive design, dark mode
-- **SEO Técnico** — Metadata, structured data, sitemaps
-- **Web Performance** — Optimización de imágenes, SSG, code splitting
-- **Accesibilidad Web** — WCAG, ARIA, navegación por teclado
-- **Buenas Prácticas** — Clean code, arquitectura modular, type safety
-
----
-
-## 🗺️ Roadmap
-
+Roadmap (rápido)
 - [ ] Página de contacto con formulario
-- [ ] Blog con artículos sobre rehabilitación
-- [ ] Testimonios de pacientes
-- [ ] Integración con Google Analytics
-- [ ] PWA (Progressive Web App)
-- [ ] Internacionalización (i18n)
+- [ ] Blog y artículos sobre rehabilitación
+- [ ] Testimonios y casos de éxito
+- [ ] Integración con Google Analytics / Consentimiento de cookies
+- [ ] PWA (instalable) y i18n
 
----
+Contribuir
+1. Abre un issue describiendo la propuesta.
+2. Crea una rama: `feature/descripcion-corta`
+3. Haz PR con descripción y capturas si corresponde.
+4. Sigue el estilo de código y corre `npm run lint`.
 
-## 📄 Licencia
+Sugerencias adicionales (para añadir a repo)
+- Añadir `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` y plantillas en `.github/ISSUE_TEMPLATE` y `.github/PULL_REQUEST_TEMPLATE`.
+- Añadir badge de CI (GitHub Actions) / Vercel en la parte superior cuando estén activos.
+- Añadir screenshots en `public/images/` y generar `og-image.png`.
 
-Este proyecto es privado y está en desarrollo activo.
+Licencia
+Este proyecto es privado y está en desarrollo activo. Para usos o licencias, contacta a:
+**Radike Cosa** — https://github.com/RadikeCosa
 
----
-
-## 👤 Autor
-
-**Radike Cosa**
-
+Contacto
 - GitHub: [@RadikeCosa](https://github.com/RadikeCosa)
+- Email: <tu-email@ejemplo.com> (reemplaza con tu email profesional)
 
----
-
-> 💼 *¿Interesado en mi trabajo? No dudes en contactarme para oportunidades laborales.*
+Gracias por ver el proyecto — si quieres, aplico estos cambios en un PR y agrego:
+- Capturas (si me pasas imágenes)
+- Badges de CI/Vercel
+- CONTRIBUTING + CODE_OF_CONDUCT
