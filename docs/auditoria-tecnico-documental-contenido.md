@@ -1,344 +1,66 @@
-Auditoría técnico-documental del contenido actual (estado real del repo)
+# Auditoría técnico-documental del contenido — reencuadre histórico + estado vigente
 
-A continuación te dejo un relevamiento 100% basado en archivos reales del repositorio, sin implementar cambios.
+> Nota editorial (2026-04-13): este archivo nació como auditoría de drift en un estado previo.  
+> Desde entonces hubo implementación efectiva en código.  
+> Esta versión se mantiene como **auditoría histórica corregida** para no inducir decisiones operativas erróneas.
 
-## 1) Inventario completo de fuentes actuales de contenido
+## 1) Qué sigue vigente de la auditoría original
 
-Criterio: incluyo fuentes que contienen copy visible, datos de negocio/contacto, catálogo de servicios, metadata/SEO y structured data.
+- Sigue siendo válido que `config.ts` es fuente primaria de datos de negocio/contacto.
+- Sigue siendo válido que `servicesData.ts` es fuente primaria del catálogo de servicios.
+- Sigue siendo válido que el proyecto prioriza una centralización pragmática (sin CMS ni sobre-abstracción).
 
-### A. Configuración de negocio/contacto (dato reusable)
+## 2) Correcciones operativas obligatorias (estado real actual)
 
-- `src/lib/config.ts`
+### A) `layout.tsx` sí deriva de fuentes compartidas
+Corrección:
+- `layout.tsx` **sí** importa y usa `BUSINESS_CONFIG`.
+- `layout.tsx` **sí** importa y usa `servicesData` para armar `serviceType` y `hasOfferCatalog` del JSON-LD.
 
-    - Propósito: centralizar datos del negocio y helper para links de WhatsApp.
-    - Contenido: nombre, nombre corto, teléfono, teléfono limpio, ubicación (ciudad/región/país/coordenadas), URL base, y `getWhatsAppUrl`.
-    - Rol: source of truth claro para contacto/base de negocio (parcial respecto SEO porque `layout` no deriva de acá).
-    - Consumidores actuales: `Header`, `Footer`, `WhatsAppButton`.
+Implicancia:
+- Ya no corresponde afirmar que SEO/JSON-LD está totalmente hardcodeado y aislado de fuentes de dominio.
 
-### B. Catálogo de servicios (dato reusable)
+### B) `robots.ts` y `sitemap.ts` no están hardcodeados en dominio
+Corrección:
+- Ambos consumen `BUSINESS_CONFIG.url`.
 
-- `src/app/services/data/servicesData.ts`
+Implicancia:
+- Cambio de dominio/base URL tiene un punto de verdad técnico claro en `config.ts`, con consumidores en layout/sitemap/robots.
 
-    - Propósito: dataset de servicios para cards de la página `/services`.
-    - Contenido: `title`, `description`, `icon`, `whatsappMessage` para 4 servicios.
-    - Rol: source of truth de facto para el grid/cards de servicios.
-    - Consumidores actuales: `ServicesGrid` → `ServiceCard`.
+### C) Footer no mantiene servicios manuales
+Corrección:
+- Footer deriva la lista de servicios desde `servicesData`.
 
-### C. Copy/presentación de páginas (inline en JSX)
+Implicancia:
+- El drift footer vs catálogo principal quedó mitigado en la implementación actual.
 
-- `src/app/page.tsx` (home)
+### D) HeroServiceTypesList no usa array inline manual
+Corrección:
+- `HeroServiceTypesList` deriva ítems desde `servicesData` y usa `shortTitle` opcional.
 
-    - Propósito: estructura home + preview “Nuestros Servicios”.
-    - Contenido: heading/subheading de preview y CTA “Ver todos los servicios”.
-    - Rol: consumo/presentación; no centralizado.
-    - Dependencias: usa `HeroSection` y `ScrollDownButton`, pero el copy del preview está inline.
+Implicancia:
+- Hero y catálogo comparten fuente de dominio para tipos de servicio.
 
-- `src/app/services/page.tsx`
+### E) Header y Footer sí comparten fuente de navegación
+Corrección:
+- La navegación global compartida vive en `src/lib/navLinks.ts` (`NAV_LINKS`).
+- Header y Footer consumen esa fuente.
 
-    - Propósito: página de servicios.
-    - Contenido: copy editorial de intro, CTA final, metadata específica de ruta.
-    - Rol: mezcla presentación + SEO de ruta; no centralizado.
-    - Dependencias: `ServicesGrid`, `WhatsAppButton`.
+Implicancia:
+- Ya no corresponde indicar que los labels `Inicio/Servicios` están duplicados sin fuente común.
 
-- `src/app/hero/hero.tsx`
+## 3) Estado actual por dominio (resumen útil)
 
-    - Propósito: hero principal home.
-    - Contenido: H1, texto de apoyo, mensaje WhatsApp, CTA label.
-    - Rol: presentación/copy editorial inline.
-    - Dependencias: `WhatsAppButton`, `HeroSecondaryLink`, `HeroServiceTypesList`, `HeroImage`.
+- **Negocio/contacto/base URL:** `src/lib/config.ts`.
+- **Catálogo de servicios:** `src/app/services/data/servicesData.ts`.
+- **Navegación global (`Inicio`/`Servicios`):** `src/lib/navLinks.ts`.
+- **Hero editorial:** `src/app/hero/heroContent.ts`.
+- **SEO/JSON-LD global:** `src/app/layout.tsx` como ensamblador, derivando de `config.ts` + `servicesData.ts`.
 
-- `src/app/hero/components/HeroServiceTypesList.tsx`
+## 4) Uso recomendado de este archivo
 
-    - Propósito: lista breve de tipos de servicio en hero.
-    - Contenido: array inline items (labels de servicios abreviados).
-    - Rol: presentación; duplicación semántica con catálogo de servicios.
-    - Dependencias: usado por `hero.tsx`.
-
-- `src/app/hero/components/HeroSecondaryLink.tsx`
-
-    - Propósito: CTA secundario “Ver servicios”.
-    - Contenido: label inline.
-    - Rol: presentación.
-    - Dependencias: usado por `hero.tsx`.
-
-### D. Navegación/CTA globales
-
-- `src/components/Header.tsx`
-
-    - Propósito: nav principal + CTA contacto.
-    - Contenido: labels nav (“Inicio”, “Servicios”), CTA “Contactar/WhatsApp”, mensaje WhatsApp inline.
-    - Rol: presentación + CTAs; parcialmente derivado de config (solo `shortName`).
-    - Dependencias: `BUSINESS_CONFIG`, `WhatsAppButton`.
-
-- `src/components/Footer.tsx`
-
-    - Propósito: contacto, navegación, lista resumida de servicios.
-    - Contenido: contacto derivado de config, navegación inline, lista de servicios inline, CTA WhatsApp inline.
-    - Rol: mixto; contacto sí deriva, servicios no.
-    - Dependencias: `BUSINESS_CONFIG`, `PhoneLink`, `WhatsAppButton`.
-
-### E. SEO global + structured data
-
-- `src/app/layout.tsx`
-
-    - Propósito: metadata global, JSON-LD MedicalBusiness, shell global.
-    - Contenido: título, descripción, OG/Twitter, keywords, canonical, verificación Google, JSON-LD con negocio + catálogo + contacto.
-    - Rol: source of truth SEO global actual, pero hardcodeado y separado de `config.ts`.
-    - Dependencias: monta `Header` y `Footer`; no importa `BUSINESS_CONFIG`.
-
-- `src/app/sitemap.ts` y `src/app/robots.ts`
-
-    - Propósito: indexación técnica.
-    - Contenido: base URL hardcodeada y rutas sitemap.
-    - Rol: fuente técnica SEO; separada de config/layout.
-    - Dependencias: ninguna directa.
-
-## 2) Clasificación por dominio de contenido + riesgo de drift
-## 3) Duplicaciones reales detectadas
-
-_(Te los junto porque están fuertemente ligados.)_
-
-### Dominio: datos globales del negocio / contacto
-
-- Dónde vive hoy: `config.ts` + strings repetidas en `layout.tsx` JSON-LD/metadata + `sitemap.ts`/`robots.ts`.
-- Centralización: parcial.
-- Fuente primaria clara: para UI/contacto: `config.ts`; para SEO global hoy: `layout.tsx`.
-- Riesgo: alto (múltiples fuentes).
-
-#### Duplicaciones concretas
-
-- **Nombre del negocio**
-    - `BUSINESS_CONFIG.name` vs JSON-LD `name` en `layout`.
-    - Tipo: literal.
-    - Archivos: `config.ts` / `layout.tsx`.
-    - Riesgo práctico: si cambiás naming comercial, UI y schema pueden divergir.
-
-- **Teléfono / WhatsApp**
-    - `config.ts` (`phone`, `phoneClean`) vs JSON-LD `contactPoint.telephone` y `sameAs` con `wa.me`.
-    - Tipo: literal/parcial.
-    - Archivos: `config.ts` / `layout.tsx`.
-    - Riesgo: contacto visible y datos estructurados inconsistentes.
-
-- **Ubicación / geo**
-    - `config.ts.location` vs `address/geo/areaServed` en JSON-LD.
-    - Tipo: literal/parcial.
-    - Archivos: `config.ts` / `layout.tsx`.
-    - Riesgo: drift SEO local.
-
-- **URL canónica/base**
-    - `config.ts.url` vs `metadataBase`, `canonical`, `openGraph.url`, JSON-LD `@id/url/image/logo`, `sitemap.ts` base, `robots` sitemap.
-    - Tipo: literal multiarchivo.
-    - Archivos: `config.ts`, `layout.tsx`, `sitemap.ts`, `robots.ts`.
-    - Riesgo: alto; un cambio de dominio exige tocar muchos lugares.
-
-### Dominio: catálogo de servicios
-
-- Dónde vive hoy: `servicesData.ts` (completo para cards), pero también footer, hero list y JSON-LD tienen versiones propias.
-- Centralización: disperso.
-- Fuente primaria clara: sí para página `/services` (cards), no para resto de superficies.
-- Riesgo: alto.
-
-#### Duplicaciones concretas
-
-1) **Servicios en `servicesData.ts` vs footer**
-    - Ej.: “Rehabilitación post-operatoria”, “Adultos mayores”, “Cuidados paliativos”, “Terapia física general”.
-    - Tipo: semántica (no siempre misma capitalización/forma).
-    - Archivos: `servicesData.ts` / `Footer.tsx`.
-    - Riesgo: el footer puede quedar desactualizado al editar catálogo.
-
-2) **Servicios en `servicesData.ts` vs JSON-LD `serviceType` + `hasOfferCatalog`**
-    - Nombres y descripciones muy similares, no derivados.
-    - Tipo: parcial/semántica.
-    - Archivos: `servicesData.ts` / `layout.tsx`.
-    - Riesgo: SEO schema puede divergir del contenido real de la página.
-
-3) **Servicios en `servicesData.ts` vs `HeroServiceTypesList`**
-    - Hero usa lista abreviada (items) con “Rehab post-operatoria”, “Adultos mayores”, etc.
-    - Tipo: semántica.
-    - Archivos: `servicesData.ts` / `HeroServiceTypesList.tsx`.
-    - Riesgo: mensaje comercial inconsistente entre hero y catálogo.
-
-### Dominio: navegación principal / labels globales
-
-- Dónde vive hoy: header y footer por separado.
-- Centralización: no.
-- Fuente primaria clara: no.
-- Riesgo: medio (pocas entradas, pero duplicadas).
-
-#### Duplicación concreta
-
-8) **Labels de nav “Inicio” / “Servicios”**
-    - Tipo: literal.
-    - Archivos: `Header.tsx` / `Footer.tsx`.
-    - Riesgo: cambios de nomenclatura desalineados.
-
-### Dominio: CTA labels y mensajes WhatsApp
-
-- Dónde vive hoy: inline por componente/página.
-- Centralización: no.
-- Fuente primaria clara: no.
-- Riesgo: medio-alto (copy drift y tracking labels inconsistentes).
-
-#### Duplicaciones/variaciones
-
-9) **Mensajes de WhatsApp similares pero distintos por superficie**
-    - Header: “consultar por kinesio a domicilio”.
-    - Hero: “consultar por una sesión...”.
-    - Footer: “consultar sobre kinesiología a domicilio”.
-    - Services page: “consultar sobre los servicios...”.
-    - Services data: uno por servicio.
-    - Tipo: semántica (intencional parcial, pero sin convención central).
-    - Archivos: `Header.tsx`, `hero.tsx`, `Footer.tsx`, `services/page.tsx`, `servicesData.ts`.
-    - Riesgo: tono inconsistente + analytics difícil de comparar por variación de labels/mensajes.
-
-    - Labels CTA parecidos para ir a servicios: “Ver servicios” (hero) vs “Ver todos los servicios” (home preview).
-    - Tipo: parcial.
-    - Archivos: `HeroSecondaryLink.tsx` / `page.tsx`.
-
-### Dominio: copy SEO / metadata
-
-- Dónde vive hoy: `layout.tsx` (global) + `services/page.tsx` (ruta).
-- Centralización: razonable por convención Next, pero no derivada de config de negocio.
-- Fuente primaria clara: sí (cada segmento en su archivo de metadata).
-- Riesgo: medio.
-
-### Dominio: structured data / JSON-LD
-
-- Dónde vive hoy: `layout.tsx` inline.
-- Centralización: no derivado desde config/servicesData.
-- Fuente primaria clara: sí (layout), pero aislada.
-- Riesgo: alto por duplicar negocio y servicios ya definidos en otros módulos.
-
-## 4) Evaluación específica de `src/app/services/data/servicesData.ts`
-
-### Qué resuelve bien hoy
-
-- Resuelve bien el catálogo UI de `/services`: título, descripción, icono y mensaje WhatsApp por servicio.
-- Tiene tipado asociado (`Service`) y consumidor único claro (`ServicesGrid`/`ServiceCard`).
-
-### Qué usos actuales podría abastecer sin cambios conceptuales
-
-- Lista resumida del footer (nombres).
-- Lista de tipos del hero (labels).
-- `serviceType` y `OfferCatalog` del JSON-LD (nombres + descripciones).
-- Eventualmente SEO keywords de servicios por ruta (si se quiere consistencia semántica).
-
-### Qué no cubre bien todavía
-
-- No incluye slug/id estable.
-- No distingue “label corto” vs “label largo” (hero/footer/schema).
-- No tiene campos SEO específicos (si se necesitaran matices de wording).
-
-### Recomendación puntual
-
-- Sí conviene fortalecer este archivo existente como base única de dominio servicios.
-- No conviene crear ahora un “services copy file” separado: sería abrir otra fuente y aumentar drift en esta etapa.
-
-## 5) Evaluación específica del hero
-
-### Textos enterrados en JSX
-
-- H1 principal, subtítulo, sr-only, CTA “Hacé tu consulta”, mensaje WA, y link “Ver servicios” están inline en `hero.tsx`/`HeroSecondaryLink.tsx`.
-- Lista de tipos de servicio en array inline items dentro de `HeroServiceTypesList`.
-
-### Qué pertenece a “copy editorial del hero”
-
-- H1, subtítulo, texto de apoyo, CTA principal/secundario.
-
-### Qué pertenece a “catálogo de servicios”
-
-- La lista de tipos (aunque abreviada) pertenece semánticamente al dominio servicios.
-
-### Recomendación
-
-- Sí, el hero merece separar su copy editorial en un `heroContent` mínimo.
-- La parte de tipos/servicios del hero debería derivar del dominio servicios (no quedar manual en componente).
-- Riesgo si no se centraliza antes de editar copy: alto riesgo de inconsistencias entre hero, grid, footer y JSON-LD.
-
-## 6) Evaluación de header, footer y structured data
-
-### Header
-
-- Duplica labels de navegación con footer (“Inicio”, “Servicios”).
-- Tiene copy CTA y mensaje WA hardcodeados.
-- Solo el nombre corto deriva de `BUSINESS_CONFIG`.
-
-### Footer
-
-- Contacto sí deriva de config (bien).
-- Servicios del footer están hardcodeados (no derivan de `servicesData`).
-- Duplicación semántica clara con catálogo principal.
-
-### Structured data (`layout.tsx`)
-
-- Duplica negocio/contacto/ubicación/url y catálogo de servicios manualmente.
-- No deriva de `config.ts` ni `servicesData.ts`.
-- Metadata y JSON-LD están “alineados en intención”, pero técnicamente pueden divergir porque son bloques manuales separados (y ambos separados de config).
-
-## 7) Fuente de verdad recomendada por dominio (mínima y pragmática)
-
-- **Negocio/contacto**: conservar `src/lib/config.ts` como primaria.
-- **Servicios**: conservar y fortalecer `src/app/services/data/servicesData.ts` como primaria.
-- **Hero editorial**: consolidar en archivo de contenido propio (mínimo), separado del catálogo.
-- **Navegación/header-footer labels**: consolidar en una pequeña fuente compartida (`const` simple), no arquitectura nueva.
-- **SEO global**: conservar metadata en `layout.tsx` (convención Next), pero derivar campos repetidos de `config` cuando aplique.
-- **Structured data**: mantener en `layout.tsx` como ubicación, pero derivar negocio/servicios desde fuentes existentes.
-- **CTA labels/mensajes comunes**: consolidar solo los que son globales/repetidos; dejar mensajes por servicio donde tenga sentido contextual.
-
-### Qué conservaría
-
-- `config.ts` y `servicesData.ts` como núcleos de dominio.
-- Ubicación de metadata por ruta (`layout.tsx` y `services/page.tsx`) por convención de framework.
-
-Qué consolidaría
-
-    Servicios en footer/hero/schema.
-
-    Nav labels header/footer.
-
-    Algunos textos CTA repetidos.
-
-Qué NO tocaría todavía
-
-    No crear CMS, i18n ni capa de abstracción grande.
-
-    No sobrecentralizar cada string aislado de una sola superficie.
-
-8) Secuencia mínima recomendada (para futura implementación)
-
-    Eliminar drift de servicios en superficies secundarias
-    (footer + hero types + JSON-LD service catalog).
-
-    Alinear datos de negocio SEO/JSON-LD con config.ts
-    (name, phone, location, url).
-
-    Unificar labels globales de navegación y CTA repetidos
-    (header/footer y CTAs duplicados).
-
-    Extraer copy editorial del hero
-    (sin mezclarlo con catálogo).
-
-    Revisión final de metadata vs JSON-LD
-    para garantizar consistencia semántica.
-
-9) Riesgos y límites
-
-    Zonas claras:
-
-        config.ts ya funciona bien como base de contacto/UI.
-
-        servicesData.ts ya funciona bien para cards del catálogo.
-
-    Ambigüedad semántica:
-
-        Algunos mensajes de WhatsApp distintos pueden ser intencionales por contexto (no toda diferencia es error).
-
-    “Duplicación” con propósito distinto:
-
-        Metadata y texto visible no deben ser idénticos palabra por palabra; sí deben ser coherentes.
-
-    Qué no centralizar aún:
-
-        Strings de microcopy únicos de una sola pantalla que no se reutilizan.
-
-
+- Usar este documento como referencia histórica de cómo se detectó drift.
+- Para operación actual, priorizar:
+  1. `docs/fuente-de-verdad-operativa.md`
+  2. `docs/analytics-handoff.md`
+  3. código fuente vigente.

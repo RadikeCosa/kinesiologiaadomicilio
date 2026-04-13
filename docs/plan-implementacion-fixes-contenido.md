@@ -1,278 +1,110 @@
+# Plan de implementación de fixes de contenido
 
-**Plan por fases (mínimo, preciso, ejecutable)**
+> Estado de actualización: 2026-04-13 (UTC)
+> Tipo de documento: plan vivo con trazabilidad de ejecución.
 
-### Fase 1 — Consolidar catálogo de servicios en superficies secundarias
+## Resumen ejecutivo
 
-**Objetivo**
+Este plan se mantiene como guía por fases, pero **ya no representa un backlog íntegramente pendiente**. A la fecha:
+
+- Fase 1: ✅ completa.
+- Fase 2: ✅ completa en el alcance definido.
+- Fase 3: ✅ completa en el alcance técnico base.
+- Fase 4: ✅ completa.
+- Fase 5: 🟨 parcialmente completa (remanente opcional de higiene).
+
+---
+
+## Fase 1 — Consolidar catálogo de servicios en superficies secundarias
+
+**Estado actual:** ✅ Completa
+
+**Objetivo original**  
 Eliminar drift de servicios fuera del grid principal, usando `servicesData.ts` como fuente primaria única del dominio servicios.
 
-**Alcance (archivos probables)**
+**Qué se implementó**
+- Footer deriva lista de servicios desde `servicesData`.
+- `HeroServiceTypesList` deriva ítems desde `servicesData` (incluyendo `shortTitle` cuando aplica).
 
-- `src/app/services/data/servicesData.ts`
-- `src/components/Footer.tsx`
-- `src/app/hero/components/HeroServiceTypesList.tsx`
-- (sin tocar aún JSON-LD en esta fase)
-
-**Cambio conceptual**
-
-- Footer y lista de hero dejan de mantener listas manuales de servicios.
-- Se derivan desde catálogo existente (con variante corta si hace falta).
-
-**Fuente de verdad consolidada**
-
-- Servicios = `servicesData.ts`.
-
-**Duplicaciones que elimina**
-
-- Lista manual en footer vs catálogo.
-- Lista manual en hero vs catálogo.
-
-**Fuera de alcance explícito**
-
-- Metadata de páginas.
-- JSON-LD de `layout.tsx`.
-- Copy editorial de hero (H1/subtitle/CTA principal).
-
-**Done de fase**
-
-- Footer ya no tiene array/lista de servicios hardcodeada.
-- `HeroServiceTypesList` ya no define manualmente servicios que pertenecen al catálogo.
+**Criterio de cierre (cumplido)**
 - El catálogo visible en `/services`, footer y hero deriva del mismo origen.
 
-### Fase 2 — Derivar structured data de fuentes existentes (servicios + negocio)
+---
 
-**Objetivo**
-Reducir el drift SEO estructurado: que JSON-LD no replique manualmente servicios/negocio ya existentes en `servicesData.ts` y `config.ts`.
+## Fase 2 — Derivar structured data de fuentes existentes (servicios + negocio)
 
-**Alcance (archivos probables)**
+**Estado actual:** ✅ Completa en el alcance planteado
 
-- `src/app/layout.tsx`
-- `src/lib/config.ts`
-- `src/app/services/data/servicesData.ts`
+**Objetivo original**  
+Reducir drift SEO estructurado: que JSON-LD no replique manualmente servicios/negocio ya existentes en `servicesData.ts` y `config.ts`.
 
-**Cambio conceptual**
+**Qué se implementó**
+- JSON-LD en `layout.tsx` deriva `serviceType` y `hasOfferCatalog` desde `servicesData`.
+- JSON-LD deriva `name`, `telephone`, `address`, `geo`, `url` y `sameAs` desde `BUSINESS_CONFIG`.
 
-- `serviceType` / `hasOfferCatalog` del JSON-LD se arma desde catálogo.
-- `name`, `telephone`, `address`, `geo`, `url` del JSON-LD se deriva de `config`.
+**Criterio de cierre (cumplido)**
+- Cambios en catálogo o contacto impactan JSON-LD sin duplicación manual relevante.
 
-**Fuente de verdad consolidada**
+---
 
-- Negocio/contacto = `config.ts`
-- Servicios = `servicesData.ts`
-- `layout.tsx` queda como consumidor/ensamblador SEO global.
+## Fase 3 — Alinear metadata global y datos técnicos de URL/base
 
-**Duplicaciones que elimina**
+**Estado actual:** ✅ Completa en el alcance técnico base
 
-- Servicios manuales en JSON-LD.
-- Teléfono/nombre/ubicación/url repetidos manualmente en JSON-LD respecto `config`.
-
-**Fuera de alcance explícito**
-
-- No tocar aún copy editorial visible del hero.
-- No introducir arquitectura SEO nueva.
-
-**Done de fase**
-
-- JSON-LD no contiene nombres/descripciones de servicios escritos a mano.
-- JSON-LD no repite manualmente campos de negocio ya definidos en `config`.
-- Un cambio en catálogo o contacto impacta JSON-LD sin edición manual duplicada.
-
-### Fase 3 — Alinear metadata global y datos técnicos de URL/base
-
-**Objetivo**
+**Objetivo original**  
 Disminuir drift entre metadata/canonical/base URL/sitemap/robots y datos de negocio base.
 
-**Alcance (archivos probables)**
+**Qué se implementó**
+- `metadataBase` y `canonical` global usan `BUSINESS_CONFIG.url`.
+- `sitemap.ts` y `robots.ts` usan `BUSINESS_CONFIG.url`.
 
-- `src/app/layout.tsx`
-- `src/app/sitemap.ts`
-- `src/app/robots.ts`
-- `src/lib/config.ts`
+**Criterio de cierre (cumplido en alcance base)**
+- Base URL/canonical/sitemap/robots quedan alineados con un único punto de edición lógico (`config.ts`).
 
-**Cambio conceptual**
+---
 
-- `layout` deja de hardcodear valores globales derivables de `config` (al menos URL/base y nombre/contacto donde corresponda).
-- Alineación explícita con `sitemap`/`robots` para evitar divergencia de dominio/canonical.
+## Fase 4 — Separar hero editorial del dominio servicios (`heroContent`)
 
-**Fuente de verdad consolidada**
+**Estado actual:** ✅ Completa
 
-- Datos globales negocio/url = `config.ts` (como base de referencia).
-
-**Duplicaciones que elimina**
-
-- Repetición de URL base y datos globales en varias capas SEO técnicas.
-
-**Fuera de alcance explícito**
-
-- Keywords/description editoriales finas (pueden seguir por archivo de ruta).
-- No tocar aún labels de navegación/CTA.
-
-**Done de fase**
-
-- Base URL/canonical/sitemap/robots están alineados y mantenibles con un único punto de edición lógico.
-- `layout.tsx` reduce hardcodes de negocio/contacto duplicados.
-
-### Fase 4 — Separar hero editorial del dominio servicios (heroContent mínimo)
-
-**Objetivo**
+**Objetivo original**  
 Ordenar el hero como dominio editorial propio sin mezclarlo con catálogo.
 
-**Alcance (archivos probables)**
+**Qué se implementó**
+- Copy editorial del hero centralizada en `src/app/hero/heroContent.ts`.
+- `hero.tsx` consume `heroContent`.
+- La parte de tipos de servicio del hero permanece derivada del catálogo.
 
-- `src/app/hero/hero.tsx`
-- `src/app/hero/components/HeroSecondaryLink.tsx`
-- nuevo archivo mínimo de contenido editorial de hero (ej. `heroContent`)
+**Criterio de cierre (cumplido)**
+- El hero ya no tiene copy editorial crítica enterrada únicamente en JSX.
 
-**Cambio conceptual**
+---
 
-- H1/subtítulo/CTA editorial del hero se centralizan en una fuente pequeña de copy de hero.
-- La parte “tipos de servicio” del hero permanece derivada del catálogo (resultado de Fase 1).
+## Fase 5 — Micro-consolidación de labels globales de navegación/CTA
 
-**Fuente de verdad consolidada**
+**Estado actual:** 🟨 Parcialmente completa
 
-- Hero editorial = archivo mínimo `heroContent`
-- Hero de servicios = `servicesData.ts`
-
-**Duplicaciones que elimina**
-
-- Strings de hero repartidos entre componentes.
-
-**Fuera de alcance explícito**
-
-- No convertir todo el sitio en sistema de content files.
-- No mover copy única de una sola pantalla que no se repite.
-
-**Done de fase**
-
-- El hero no tiene copy editorial crítica enterrada en JSX.
-- Hero editorial y catálogo quedan explícitamente separados por dominio.
-
-### Fase 5 — Micro-consolidación de labels globales de navegación/CTA
-
-**Objetivo**
+**Objetivo original**  
 Reducir inconsistencias de labels globales repetidos (header/footer y CTAs recurrentes), sin sobrecentralizar.
 
-**Alcance (archivos probables)**
+**Qué se implementó**
+- Labels globales de navegación (`Inicio`, `Servicios`) centralizadas en `NAV_LINKS`.
+- Header y Footer consumen la misma fuente.
 
-- `src/components/Header.tsx`
-- `src/components/Footer.tsx`
-- pequeño módulo shared de labels (solo los repetidos)
+**Remanente real (opcional, no bloqueante)**
+- Revisar solo labels CTA globales repetidos no cubiertos por `NAV_LINKS`.
+- Mantener inline los mensajes contextuales de WhatsApp cuando aporten valor comercial/analítico.
 
-**Cambio conceptual**
+---
 
-- Consolidar únicamente labels repetidos: nav principal y CTAs globales recurrentes.
-- Dejar inline los textos únicos/contextuales.
+## Riesgo y alcance remanente
 
-**Fuente de verdad consolidada**
+No hay deuda crítica obligatoria derivada de este plan para mantener alineación documental-técnica.
 
-- Labels globales repetidos = fuente compartida mínima.
+Pendientes posibles (si se decide invertir tiempo):
+1. Ajuste fino de wording en CTAs globales repetidos.
+2. Revisión periódica para evitar que este plan vuelva a quedar desfasado frente al código.
 
-**Duplicaciones que elimina**
+## Decisión operativa
 
-- “Inicio/Servicios” duplicados en header/footer.
-- Algunos labels CTA globales redundantes.
-
-**Fuera de alcance explícito**
-
-- No unificar todos los mensajes WhatsApp (algunos deben seguir contextuales por intención).
-- No crear diccionario global de todo el sitio.
-
-**Done de fase**
-
-- Header y footer consumen los mismos labels globales de navegación.
-- No se centralizan strings únicos de bajo valor.
-
-### Orden recomendado y justificación
-
-- **Fase 1 primero (alto impacto, bajo riesgo):**
-  Corrige drift visible en UI (footer/hero) con cambios acotados y prepara fase SEO siguiente.
-
-- **Fase 2 después (alto impacto SEO, riesgo medio):**
-  Aprovecha consolidación de servicios para derivar JSON-LD sin inventar nuevas fuentes.
-
-- **Fase 3 luego (consistencia técnica global):**
-  Cierra duplicaciones de URL/base/contacto en metadata/sitemap/robots.
-
-- **Fase 4 después (editorial):**
-  Separa hero cuando los dominios ya están limpios; evita mezclar “copy” con “catálogo”.
-
-- **Fase 5 al final (higiene fina):**
-  Micro-centralización de labels compartidos sin frenar lo importante.
-
-Este orden evita refactor grande, reduce riesgo acumulativo y deja cada fase con valor independiente.
-
-### Riesgos por fase (y cómo acotarlos)
-
-**Fase 1**
-
-- Técnico: bajo (consumidores de listas).
-
-- Semántico/editorial: medio (labels cortos del hero pueden requerir variante).
-
-- Sobrecen: bajo si solo se derivan servicios repetidos.
-
-**Fase 2**
-
-- Técnico: medio (mapeo de catálogo a schema.org).
-
-- Semántico: medio (texto schema vs copy UI no siempre idéntico).
-
-- Sobrecen: bajo si `layout` sigue siendo ensamblador y no se crea capa extra.
-
-**Fase 3**
-
-- Técnico: medio-bajo (alinear URL/canonical/sitemap/robots).
-
-- Semántico: bajo.
-
-- Sobrecen: bajo si solo se derivan campos claramente globales.
-
-**Fase 4**
-
-- Técnico: bajo.
-
-- Semántico: medio (tono y posicionamiento de hero).
-
-- Sobrecen: medio si se intenta externalizar todo; mantenerlo mínimo.
-
-**Fase 5**
-
-- Técnico: bajo.
-
-- Semántico: bajo-medio (consistencia de wording).
-
-- Sobrecen: alto si se intenta centralizar absolutamente todos los textos; evitarlo.
-
-### Recomendación sobre diseño de fuentes (confirmaciones pedidas)
-
-**`servicesData.ts`:**
-No reemplazar. Sí conviene fortalecerlo levemente (campos mínimos para variantes cortas/SEO-schema si son necesarias), sin crear “services copy file” aparte.
-
-**`config.ts`:**
-Debe seguir como fuente primaria de negocio/contacto.
-
-**Fuente compartida para labels globales nav/CTA:**
-Sí, pero mínima y tardía (fase 5), solo para textos repetidos en múltiples superficies.
-
-**`heroContent`:**
-Sí conviene, pero en fase posterior (fase 4), cuando catálogo/SEO ya estén consolidados para no mezclar dominios.
-
-### Resultado final esperado (sin sobre-refactor)
-
-#### Al terminar las fases:
-
-- **Centralizado claramente**
-  - Negocio/contacto: `config.ts`.
-  - Servicios: `servicesData.ts`.
-  - Hero editorial: `heroContent` mínimo.
-  - Labels globales repetidos: fuente compartida mínima (solo lo necesario).
-
-- **Derivado consistentemente**
-  - Footer/hero servicios y JSON-LD desde catálogo.
-  - JSON-LD y metadata global con datos de negocio alineados a `config`.
-  - URL base/canonical/sitemap/robots sin drift.
-
-- **Legítimamente inline (no centralizar todavía)**
-  - Copy único de una sección que no se repite.
-  - Mensajes WhatsApp contextuales por intención (cuando aportan valor real).
-  - Microcopy puramente presentacional de un solo componente
+Este documento queda como **plan con trazabilidad ejecutada** (no como backlog completamente pendiente).
