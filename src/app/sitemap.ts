@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
+import { BUSINESS_CONFIG } from "@/lib/config";
 
 // Sitemap inicial: se ampliará cuando se agreguen más rutas (servicios, contacto, etc.)
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://kinesiologiaadomicilio.vercel.app";
+  const base = BUSINESS_CONFIG.url;
   const now = new Date();
   return [
     {

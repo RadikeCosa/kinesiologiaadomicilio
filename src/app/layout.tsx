@@ -3,10 +3,61 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ScrollDepthTracker } from "@/components/ScrollDepthTracker";
+import { BUSINESS_CONFIG } from "@/lib/config";
+import { servicesData } from "@/app/services/data/servicesData";
 
 import "./globals.css";
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
+const businessUrl = BUSINESS_CONFIG.url;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "MedicalBusiness",
+  "@id": `${businessUrl}/#organization`,
+  name: BUSINESS_CONFIG.name,
+  image: `${businessUrl}/og-placeholder.png`,
+  url: `${businessUrl}/`,
+  logo: `${businessUrl}/favicon.ico`,
+  description:
+    "Kinesiología y rehabilitación funcional a domicilio en Neuquén: postoperatorios, adultos mayores y cuidados paliativos.",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: BUSINESS_CONFIG.location.city,
+    addressRegion: BUSINESS_CONFIG.location.region,
+    addressCountry: BUSINESS_CONFIG.location.countryCode,
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: BUSINESS_CONFIG.location.coordinates.latitude,
+    longitude: BUSINESS_CONFIG.location.coordinates.longitude,
+  },
+  areaServed: {
+    "@type": "City",
+    name: BUSINESS_CONFIG.location.city,
+    "@id": "https://www.wikidata.org/wiki/Q44753",
+  },
+  priceRange: "$$",
+  serviceType: servicesData.map((service) => service.title),
+  medicalSpecialty: "PhysicalTherapy",
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Servicios de Kinesiología",
+    itemListElement: servicesData.map((service) => ({
+      "@type": "Offer",
+      name: service.title,
+      description: service.description,
+    })),
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer service",
+    telephone: BUSINESS_CONFIG.phone,
+    availableLanguage: ["es"],
+    areaServed: BUSINESS_CONFIG.location.countryCode,
+  },
+  sameAs: [`https://wa.me/${BUSINESS_CONFIG.phoneClean}`],
+};
 
 export const viewport: Viewport = {
   themeColor: [
@@ -21,12 +72,12 @@ export const metadata: Metadata = {
   title: "Kinesiología y rehabilitación a domicilio en Neuquén",
   description:
     "Atención profesional y personalizada en la comodidad del hogar. Sesiones de kinesiología y rehabilitación funcional, cuidados paliativos y recuperación postoperatoria en Neuquén.",
-  metadataBase: new URL("https://kinesiologiaadomicilio.vercel.app"),
+  metadataBase: new URL(businessUrl),
   openGraph: {
     title: "Kinesiología y rehabilitación a domicilio en Neuquén",
     description:
       "Atención profesional y personalizada en la comodidad del hogar. Sesiones de kinesiología y rehabilitación funcional, cuidados paliativos y recuperación postoperatoria en Neuquén.",
-    url: "https://kinesiologiaadomicilio.vercel.app",
+    url: businessUrl,
     siteName: "Rehabilitación a domicilio Neuquén",
     locale: "es_AR",
     type: "website",
@@ -63,7 +114,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Rehabilitación a domicilio Neuquén" }],
   alternates: {
-    canonical: "https://kinesiologiaadomicilio.vercel.app",
+    canonical: businessUrl,
   },
   robots: {
     index: true,
@@ -97,80 +148,7 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "MedicalBusiness",
-              "@id": "https://kinesiologiaadomicilio.vercel.app/#organization",
-              name: "Kinesiología a Domicilio Neuquén",
-              image:
-                "https://kinesiologiaadomicilio.vercel.app/og-placeholder.png",
-              url: "https://kinesiologiaadomicilio.vercel.app/",
-              logo: "https://kinesiologiaadomicilio.vercel.app/favicon.ico",
-              description:
-                "Kinesiología y rehabilitación funcional a domicilio en Neuquén: postoperatorios, adultos mayores y cuidados paliativos.",
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Neuquén",
-                addressRegion: "Neuquén",
-                addressCountry: "AR",
-              },
-              geo: {
-                "@type": "GeoCoordinates",
-                latitude: -38.9516,
-                longitude: -68.0591,
-              },
-              areaServed: {
-                "@type": "City",
-                name: "Neuquén Capital",
-                "@id": "https://www.wikidata.org/wiki/Q44753",
-              },
-              priceRange: "$$",
-              serviceType: [
-                "Rehabilitación post-operatoria",
-                "Terapia física domiciliaria",
-                "Cuidados paliativos",
-                "Kinesiología para adultos mayores",
-              ],
-              medicalSpecialty: "PhysicalTherapy",
-              hasOfferCatalog: {
-                "@type": "OfferCatalog",
-                name: "Servicios de Kinesiología",
-                itemListElement: [
-                  {
-                    "@type": "Offer",
-                    name: "Rehabilitación Post-operatoria",
-                    description:
-                      "Recuperación especializada después de cirugías ortopédicas, traumatológicas y cardíacas.",
-                  },
-                  {
-                    "@type": "Offer",
-                    name: "Kinesiología para Adultos Mayores",
-                    description:
-                      "Terapia física adaptada para mantener movilidad, fuerza y autonomía en la tercera edad.",
-                  },
-                  {
-                    "@type": "Offer",
-                    name: "Cuidados Paliativos",
-                    description:
-                      "Acompañamiento kinesiológico para mejorar calidad de vida y confort.",
-                  },
-                  {
-                    "@type": "Offer",
-                    name: "Terapia Física General",
-                    description:
-                      "Sesiones para lesiones deportivas, dolor crónico y prevención.",
-                  },
-                ],
-              },
-              contactPoint: {
-                "@type": "ContactPoint",
-                contactType: "customer service",
-                telephone: "+54 9 299 521 7189",
-                availableLanguage: ["es"],
-                areaServed: "AR",
-              },
-              sameAs: ["https://wa.me/5492995217189"],
-            }),
+            __html: JSON.stringify(structuredData),
           }}
         />
 

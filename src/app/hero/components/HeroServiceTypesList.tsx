@@ -20,8 +20,8 @@ export function HeroServiceTypesList({
         align === "auto" ? "mx-auto w-fit" : ""
       }`}
     >
-        {items.map(({ key, label, full }) => (
-          <li key={key} className="flex items-start gap-2 min-w-0">
+      {items.map(({ key, label, full }) => (
+        <li key={key} className="flex items-start gap-2 min-w-0">
           <span
             aria-hidden="true"
             className="flex h-4 w-4 items-center justify-center"

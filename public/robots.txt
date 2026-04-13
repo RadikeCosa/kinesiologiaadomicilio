@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://kinesiologiaadomicilio.vercel.app/sitemap.xml
