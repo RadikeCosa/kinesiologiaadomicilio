@@ -155,6 +155,10 @@ Mapa orientador (no exhaustivo):
 | Structured data (JSON-LD) | `src/app/layout.tsx` (ensamblado inline) | Script `application/ld+json` global |
 | Hero editorial (H1/subtítulo/CTA) | `src/app/hero/heroContent.ts` | `hero.tsx` (consumidor) → Home (`src/app/page.tsx`) |
 | Navegación global compartida (header/footer) | `src/lib/navLinks.ts` (`NAV_LINKS`) | `Header.tsx` y `Footer.tsx` |
+| Variantes y tamaños de CTA | `src/components/ui/ctaStyles.ts` (`getCtaClass`) | `WhatsAppButton`, `HeroSecondaryLink`, CTA principal en Home |
+| Wrapper de ancho/padding horizontal | `src/components/ui/Container.tsx` | `Header`, `Footer`, `Hero`, `Home`, `Services` |
+| Escalas repetidas de intro de sección | `src/components/ui/styleTokens.ts` + `src/components/ui/SectionIntro.tsx` | Intro de Home y intro de `/services` |
+| CSS global base | `src/app/globals.css` | Carga de Tailwind global |
 
 ### Qué está centralizado hoy (y qué no)
 - **Sí centralizado:** datos de contacto/base del negocio para superficies de UI en `BUSINESS_CONFIG`.
@@ -162,11 +166,19 @@ Mapa orientador (no exhaustivo):
 - **Sí centralizado:** JSON-LD global se ensambla en `layout.tsx` derivando negocio desde `BUSINESS_CONFIG` y catálogo desde `servicesData.ts`.
 - **Sí centralizado:** copy editorial del hero se define en `heroContent.ts` y se consume desde `hero.tsx`.
 - **Sí centralizado:** navegación global `Inicio/Servicios` se define en `NAV_LINKS` y la consumen header/footer.
+- **Sí centralizado:** estilos de CTA reutilizables (variant + size + focus ring) en `getCtaClass`.
+- **Sí centralizado:** wrapper presentacional mínimo `Container` para `mx-auto` + `px-4` + ancho máximo por sección.
+- **Sí centralizado:** patrón de intro de sección (`title + lead`) vía `SectionIntro` y `styleTokens`.
+- **Sí acotado en global:** `globals.css` contiene solo el punto de entrada de Tailwind.
 
 ### Regla operativa de edición rápida
 - Si cambia **contacto/base URL**, tocar primero `src/lib/config.ts` y luego verificar `src/app/layout.tsx`, `src/app/sitemap.ts` y `src/app/robots.ts`.
 - Si cambia **catálogo de servicios**, tocar `src/app/services/data/servicesData.ts` y luego verificar coherencia en `Footer`, `HeroServiceTypesList` y JSON-LD en `layout.tsx`.
 - Si cambia **copy editorial del hero**, tocar `src/app/hero/heroContent.ts` (y revisar `hero.tsx`/`HeroSecondaryLink.tsx` solo si cambia la estructura de render).
+- Si cambia **look/jerarquía de CTAs**, tocar primero `src/components/ui/ctaStyles.ts`; luego revisar consumidores (`WhatsAppButton`, `HeroSecondaryLink`, CTA principal en Home).
+- Si cambia **ancho/padding horizontal base** de secciones, tocar primero `src/components/ui/Container.tsx`.
+- Si cambia **intro de secciones repetidas** (título + lead), tocar `src/components/ui/SectionIntro.tsx` y/o `src/components/ui/styleTokens.ts`.
+- Si cambia **estilo global base**, tocar `src/app/globals.css` (sin mover estilos de componentes ahí).
 - `layout.tsx` **ensambla** metadata/JSON-LD global, pero **no es fuente primaria** de negocio ni catálogo.
 
 ## 9) Decisiones de implementación ya materializadas
@@ -190,6 +202,14 @@ Mapa orientador (no exhaustivo):
 - **JSON-LD global** sigue en `layout.tsx`: es consumidor técnico del dominio SEO, no repositorio maestro de negocio/servicios.
 - Esta centralización es **pragmática y acotada**: no hay CMS, no hay capa i18n, no hay diccionario global de todos los strings.
 
+### Guardrails específicos de estilos (estado actual)
+- No hay **design system formal** ni librería externa de componentes UI.
+- `getCtaClass` centraliza solo el patrón de CTA repetido; no todos los links/botones del sitio deben pasar por esa API.
+- `Container` y `SectionIntro` existen porque resuelven repetición real; evitar crear nuevas primitives si solo se usan una vez.
+- Mantener clases Tailwind inline en casos específicos de una sola pantalla/sección para preservar legibilidad local.
+- `globals.css` se mantiene mínimo (base global): no usarlo como “segunda capa de componentes”.
+- Si una clase/utilidad se repite en 2+ superficies estables y con misma semántica visual, evaluar extracción; si no, mantener inline.
+
 ## 11) Estado de validación (evidencia)
 
 ### Validación automática observada
@@ -212,6 +232,13 @@ Orden sugerido de consulta para cambios de contenido/configuración:
 3. `src/app/services/data/servicesData.ts` (si toca catálogo de servicios).
 4. `src/app/layout.tsx` (si toca metadata técnica/JSON-LD global).
 
+Orden sugerido de consulta para cambios visuales/presentacionales:
+1. `src/components/ui/ctaStyles.ts` (si toca look/size/foco de CTAs repetidos).
+2. `src/components/ui/Container.tsx` (si toca gutter/ancho base compartido).
+3. `src/components/ui/SectionIntro.tsx` y `src/components/ui/styleTokens.ts` (si toca patrón de intro repetido).
+4. Componente/página puntual (si el cambio es local y no repetido).
+5. `src/app/globals.css` solo para base global de Tailwind.
+
 Checklist rápido por tipo de cambio:
 
 - **Cambio de contacto o base URL**
@@ -232,6 +259,15 @@ Checklist rápido por tipo de cambio:
   1) editar `src/lib/navLinks.ts`;
   2) validar visualmente ambos consumidores (`src/components/Header.tsx` y `src/components/Footer.tsx`).
 
+- **Cambio de estilo de CTA reutilizable**
+  1) editar `src/components/ui/ctaStyles.ts`;
+  2) verificar consumidores en `WhatsAppButton`, `HeroSecondaryLink` y CTA principal de Home;
+  3) correr `npm run lint` y `npm run build`.
+
+- **Cambio de composición repetida de intro**
+  1) editar `src/components/ui/SectionIntro.tsx` y/o `src/components/ui/styleTokens.ts`;
+  2) validar Home y `/services` para evitar drift.
+
 ## 13) Nota de cierre
 
 Este documento deja asentado el **estado operativo actual** de centralización y sus límites. No abre nuevas fases técnicas ni propone refactors adicionales; se usa como referencia práctica para mantener consistencia en cambios futuros.
@@ -249,6 +285,10 @@ Este documento deja asentado el **estado operativo actual** de centralización y
 - `src/lib/config.ts`
 - `src/lib/analytics.ts`
 - `src/components/WhatsAppButton.tsx`
+- `src/components/ui/ctaStyles.ts`
+- `src/components/ui/Container.tsx`
+- `src/components/ui/SectionIntro.tsx`
+- `src/components/ui/styleTokens.ts`
 - `src/components/PhoneLink.tsx`
 - `src/components/ScrollDepthTracker.tsx`
 - `src/app/services/data/servicesData.ts`
