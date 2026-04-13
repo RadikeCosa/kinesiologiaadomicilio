@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { WhatsAppButton } from "./WhatsAppButton";
 import { BUSINESS_CONFIG } from "@/lib/config";
+import { PhoneLink } from "./PhoneLink";
 
 export function Footer() {
   const { location, phone, phoneClean, name } = BUSINESS_CONFIG;
@@ -24,17 +25,20 @@ export function Footer() {
               </p>
               <p className="mt-2 flex items-center gap-2">
                 <span aria-hidden="true">📞</span>
-                <a
-                  href={`tel:+${phoneClean}`}
+                <PhoneLink
+                  destination={`tel:+${phoneClean}`}
+                  ctaLocation="footer"
+                  ctaLabel="Teléfono footer"
                   className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
                 >
                   {phone}
-                </a>
+                </PhoneLink>
               </p>
             </address>
             <div className="mt-4">
               <WhatsAppButton
                 message="Hola, quisiera consultar sobre kinesiología a domicilio"
+                ctaLocation="footer"
                 className="inline-flex items-center justify-center rounded-full bg-green-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
                 iconSize="h-4 w-4"
               >

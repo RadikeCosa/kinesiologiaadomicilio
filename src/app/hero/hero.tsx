@@ -30,6 +30,7 @@ export default function HeroSection() {
           <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
             <WhatsAppButton
               message="Hola quisiera consultar por una sesión de kinesiología a domicilio"
+              ctaLocation="hero"
               className="inline-flex items-center justify-center rounded-full bg-green-600 px-7 py-3 text-base font-semibold text-white transition hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 dark:bg-green-600 dark:hover:bg-green-500"
               iconSize="h-6 w-6"
             >
