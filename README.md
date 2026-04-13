@@ -78,4 +78,4 @@ npm run start
 - `src/lib/config.ts` concentra datos de contacto usados por componentes y links de WhatsApp; parte de la metadata/JSON-LD sigue definida en `src/app/layout.tsx`.
 - Los assets públicos viven en `public/`.
 - No hay variables de entorno utilizadas actualmente en el código.
-- Deploy objetivo: **Vercel** (coherente con las URLs canónicas/configuradas del proyecto).
+- Deploy objetivo: **Vercel**
