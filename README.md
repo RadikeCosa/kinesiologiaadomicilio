@@ -79,7 +79,3 @@ npm run start
 - Los assets públicos viven en `public/`.
 - No hay variables de entorno utilizadas actualmente en el código.
 - Deploy objetivo: **Vercel** (coherente con las URLs canónicas/configuradas del proyecto).
-
-## Estado / foco inmediato
-
-El proyecto cumple hoy una función clara de landing de captación con contacto por WhatsApp. El foco inmediato es consolidar esta base (contenido, consistencia visual/técnica y calidad de código) antes de sumar funcionalidades más complejas.
