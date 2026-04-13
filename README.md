@@ -1,155 +1,85 @@
-# 🏥 Kinesiología a Domicilio — Landing Page
+# Kinesiología a Domicilio
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.4-black?logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwind-css)](https://tailwindcss.com/)
-[![Deploy (Vercel)](https://img.shields.io/badge/Deploy-Vercel-000?logo=vercel)](https://vercel.com/)
+Landing page desarrollada con Next.js para un servicio de kinesiología y rehabilitación a domicilio en Neuquén, Argentina. Hoy funciona como sitio de presentación con navegación simple y llamados a la acción (CTA) hacia WhatsApp.
 
-Breve: Landing page modern y accesible para un servicio de kinesiología y rehabilitación a domicilio en Neuquén, Argentina — enfocada en conversión local (WhatsApp CTA), rendimiento y SEO local.
+## Estado actual del proyecto
 
-Demo en vivo
-🔗 https://kinesiologiaadomicilio.vercel.app
+Este repositorio está en una etapa **MVP / evolución temprana**.
 
-Preview
-![Preview](public/images/preview.png) <!-- Añade una captura en public/images/preview.png -->
+Actualmente incluye:
+- Página principal con hero y acceso rápido a servicios.
+- Página de servicios con listado y CTA de consulta por WhatsApp.
+- Header y footer con navegación básica.
+- Configuración de datos del negocio (nombre, teléfono, ubicación y URL) usada por navegación y contacto.
+- Metadata SEO básica, Open Graph/Twitter y JSON-LD tipo `MedicalBusiness`.
+- Sitemap y `robots.txt`.
 
-Contenido rápido
-- Estado: En desarrollo (alpha)
-- Stack: Next.js 15 (App Router), React 19, TypeScript 5, Tailwind CSS 4
-- Deploy: Vercel
+No incluye por ahora tests automatizados, CI/CD en GitHub Actions, formularios propios ni integración de analytics.
 
-Tabla de contenido
-- Descripción
-- Características
-- Pre-requisitos
-- Quick start
-- Scripts
-- Estructura del proyecto
-- Configuración (qué editar)
-- Accesibilidad y rendimiento
-- Roadmap
-- Contribuir
-- Licencia y contacto
+## Stack real
 
-Descripción
-Landing page optimizada para convertir visitantes locales en pacientes, con foco en:
-- CTA directo a WhatsApp
-- SEO local (Neuquén)
-- Accesibilidad (WCAG)
-- Alto rendimiento (Core Web Vitals)
+- **Next.js 15** (App Router)
+- **React 19**
+- **TypeScript**
+- **Tailwind CSS 4** (vía `@tailwindcss/postcss`)
+- **ESLint** con configuración de Next.js
 
-Características principales
-- Responsive + mobile-first
-- Dark mode automático
-- Metadata dinámica, Open Graph y JSON-LD (MedicalBusiness)
-- Sitemap y robots.txt generados
-- Componentes React reutilizables y tipados con TypeScript
-- Imagen optimizada con next/image (WebP)
-- Preparado para desplegar en Vercel
+## Estructura general
 
-Pre-requisitos
-- Node.js >= 18 (recomendado 18.x o 20.x)
-- npm, pnpm o yarn
-- Git
+Rutas y carpetas principales:
 
-Quick start (local)
-1. Clona el repo
-   git clone https://github.com/RadikeCosa/kinesiologiaadomicilio.git
-   cd kinesiologiaadomicilio
+- `src/app/`: rutas de la app (home, servicios), layout global, estilos y sitemap.
+- `src/app/services/`: página de servicios, tipos, data y componentes de cards/grilla.
+- `src/components/`: componentes compartidos (Header, Footer, botones, etc.).
+- `src/lib/config.ts`: datos de contacto y helper para links de WhatsApp.
+- `public/`: assets estáticos (`hero-image.webp`, `og-placeholder.png`, `robots.txt`).
+- `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `postcss.config.mjs`: configuración del proyecto.
 
-2. Instala dependencias (elige uno)
+## Scripts disponibles
+
+Scripts reales definidos en `package.json`:
+
+- `npm run dev`: inicia el servidor de desarrollo con Turbopack.
+- `npm run build`: genera la build de producción.
+- `npm run start`: levanta la app en modo producción (requiere build previa).
+- `npm run lint`: ejecuta ESLint.
+
+## Desarrollo local
+
+1. Instalar dependencias:
+   ```bash
    npm install
-   # o
-   # pnpm install
-
-3. Ejecuta en desarrollo
+   ```
+2. Iniciar entorno de desarrollo:
+   ```bash
    npm run dev
-   # abre http://localhost:3000
+   ```
+3. Abrir en navegador:
+   - `http://localhost:3000`
 
-Build y preview de producción
-   npm run build
-   npm run start
-   # o para preview en local
-   npm run build
-   npm run preview
+Validación básica recomendada antes de cambios relevantes:
 
-Scripts disponibles
-| Comando | Descripción |
-|--------:|------------|
-| `npm run dev` | Inicia el servidor de desarrollo (Turbopack) |
-| `npm run build` | Genera build de producción |
-| `npm run start` | Inicia la app en modo producción |
-| `npm run preview` | Preview del build local |
-| `npm run lint` | Ejecuta ESLint |
+```bash
+npm run lint
+npm run build
+```
 
-Estructura del proyecto
-src/
-├── app/
-│   ├── hero/              # Sección hero
-│   │   ├── components/
-│   │   └── hero.tsx
-│   ├── services/          # Página de servicios
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── globals.css
-├── components/            # Componentes compartidos (Header, Footer, WhatsAppButton...)
-└── lib/
-    └── config.ts          # Configuración central (editar aquí datos del negocio)
+Para validar producción local:
 
-Qué editar (configuración del negocio)
-- Abre `src/lib/config.ts` y actualiza:
-  - Nombre del negocio
-  - Teléfono y plantilla de WhatsApp (deeplink)
-  - Ciudad / dirección para Schema y SEO
-  - Horarios si aplica
-- Reemplaza la imagen `public/images/preview.png` con una captura real.
+```bash
+npm run build
+npm run start
+```
 
-SEO, Social y Open Graph
-- Metadata dinámica en el layout
-- JSON-LD con tipo `MedicalBusiness` ya configurado (editar datos en config.ts)
-- Añadir `og:image` (usa /public/images/og-image.png) para mejores previews
+## Convenciones y notas útiles
 
-Accesibilidad y Performance
-- Se agregaron skip links, ARIA attributes y landmarks semánticos.
-- Para auditar: ejecutar Lighthouse en Chrome (Performance / Accessibility / SEO).
-- Recomendación: ejecutar `npm run build` y revisar Core Web Vitals en la página desplegada en Vercel.
+- Se usa **App Router** (`src/app`) como estructura principal de rutas.
+- Los estilos están implementados con **Tailwind utilities** y estilos globales en `src/app/globals.css`.
+- `src/lib/config.ts` concentra datos de contacto usados por componentes y links de WhatsApp; parte de la metadata/JSON-LD sigue definida en `src/app/layout.tsx`.
+- Los assets públicos viven en `public/`.
+- No hay variables de entorno utilizadas actualmente en el código.
+- Deploy objetivo: **Vercel** (coherente con las URLs canónicas/configuradas del proyecto).
 
-Tests / Lint
-- ESLint: `npm run lint`
-- (Si añades testing) recomiendo configurar Vitest / Playwright para pruebas unitarias y end-to-end.
+## Estado / foco inmediato
 
-Deployment
-- Deploy automático en Vercel. Conectar el repo y configurar variables de entorno en el dashboard de Vercel si fuera necesario.
-- Si quieres usar GitHub Actions: añade un workflow para CI (lint, build, test).
-
-Roadmap (rápido)
-- [ ] Página de contacto con formulario
-- [ ] Blog y artículos sobre rehabilitación
-- [ ] Testimonios y casos de éxito
-- [ ] Integración con Google Analytics / Consentimiento de cookies
-- [ ] PWA (instalable) y i18n
-
-Contribuir
-1. Abre un issue describiendo la propuesta.
-2. Crea una rama: `feature/descripcion-corta`
-3. Haz PR con descripción y capturas si corresponde.
-4. Sigue el estilo de código y corre `npm run lint`.
-
-Sugerencias adicionales (para añadir a repo)
-- Añadir `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` y plantillas en `.github/ISSUE_TEMPLATE` y `.github/PULL_REQUEST_TEMPLATE`.
-- Añadir badge de CI (GitHub Actions) / Vercel en la parte superior cuando estén activos.
-- Añadir screenshots en `public/images/` y generar `og-image.png`.
-
-Licencia
-Este proyecto es privado y está en desarrollo activo. Para usos o licencias, contacta a:
-**Radike Cosa** — https://github.com/RadikeCosa
-
-Contacto
-- GitHub: [@RadikeCosa](https://github.com/RadikeCosa)
-- Email: <tu-email@ejemplo.com> (reemplaza con tu email profesional)
-
-Gracias por ver el proyecto — si quieres, aplico estos cambios en un PR y agrego:
-- Capturas (si me pasas imágenes)
-- Badges de CI/Vercel
-- CONTRIBUTING + CODE_OF_CONDUCT
+El proyecto cumple hoy una función clara de landing de captación con contacto por WhatsApp. El foco inmediato es consolidar esta base (contenido, consistencia visual/técnica y calidad de código) antes de sumar funcionalidades más complejas.
