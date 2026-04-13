@@ -340,3 +340,5 @@ Qué NO tocaría todavía
     Qué no centralizar aún:
 
         Strings de microcopy únicos de una sola pantalla que no se reutilizan.
+
+
