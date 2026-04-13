@@ -86,7 +86,7 @@ Disminuir drift entre metadata/canonical/base URL/sitemap/robots y datos de nego
 
 - `src/app/layout.tsx`
 - `src/app/sitemap.ts`
-- `public/robots.txt`
+- `src/app/robots.ts`
 - `src/lib/config.ts`
 
 **Cambio conceptual**
