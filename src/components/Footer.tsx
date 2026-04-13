@@ -2,6 +2,7 @@ import Link from "next/link";
 import { WhatsAppButton } from "./WhatsAppButton";
 import { BUSINESS_CONFIG } from "@/lib/config";
 import { PhoneLink } from "./PhoneLink";
+import { servicesData } from "@/app/services/data/servicesData";
 
 export function Footer() {
   const { location, phone, phoneClean, name } = BUSINESS_CONFIG;
@@ -78,10 +79,9 @@ export function Footer() {
               Servicios
             </h2>
             <ul className="mt-4 space-y-2 text-slate-600 dark:text-slate-400">
-              <li>Rehabilitación post-operatoria</li>
-              <li>Adultos mayores</li>
-              <li>Cuidados paliativos</li>
-              <li>Terapia física general</li>
+              {servicesData.map((service) => (
+                <li key={service.title}>{service.title}</li>
+              ))}
             </ul>
           </div>
         </div>

@@ -1,3 +1,5 @@
+import { servicesData } from "@/app/services/data/servicesData";
+
 interface HeroServiceTypesListProps {
   align?: "auto" | "left"; // auto centra bajo los botones; left lo alinea al contenedor
 }
@@ -5,13 +7,12 @@ interface HeroServiceTypesListProps {
 export function HeroServiceTypesList({
   align = "auto",
 }: HeroServiceTypesListProps) {
-  // Etiquetas acortadas para mantener una sola línea y alinear los íconos en una grilla 2x2
-  const items: { label: string; full?: string }[] = [
-    { label: "Rehab post-operatoria", full: "Rehabilitación Post-Operatoria" },
-    { label: "Adultos mayores" },
-    { label: "Cuidados Paliativos", full: "Cuidados Paliativos" },
-    { label: "A domicilio" },
-  ];
+  const items = servicesData.map((service) => ({
+    key: service.title,
+    label: service.shortTitle ?? service.title,
+    full: service.shortTitle ? service.title : undefined,
+  }));
+
   return (
     <ul
       aria-label="Tipos de servicios de kinesiología a domicilio"
@@ -19,8 +20,8 @@ export function HeroServiceTypesList({
         align === "auto" ? "mx-auto w-fit" : ""
       }`}
     >
-      {items.map(({ label, full }) => (
-        <li key={label} className="flex items-start gap-2 min-w-0">
+        {items.map(({ key, label, full }) => (
+          <li key={key} className="flex items-start gap-2 min-w-0">
           <span
             aria-hidden="true"
             className="flex h-4 w-4 items-center justify-center"
