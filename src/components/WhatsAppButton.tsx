@@ -4,6 +4,7 @@ import Link from "next/link";
 import { WhatsAppIcon } from "./WhatsAppIcon";
 import { getWhatsAppUrl } from "@/lib/config";
 import { trackGenerateLead, type CtaLocation } from "@/lib/analytics";
+import { getCtaClass } from "./ui/ctaStyles";
 
 interface WhatsAppButtonProps {
   /** Texto del mensaje que se enviará por WhatsApp */
@@ -12,6 +13,10 @@ interface WhatsAppButtonProps {
   children: React.ReactNode;
   /** Clases CSS adicionales para el botón */
   className?: string;
+  /** Variante visual del CTA */
+  variant?: "whatsapp" | "sky" | "secondary";
+  /** Tamaño visual del CTA */
+  size?: "sm" | "md";
   /** Tamaño del ícono de WhatsApp */
   iconSize?: string;
   /** Ubicación del CTA para analytics */
@@ -23,7 +28,9 @@ interface WhatsAppButtonProps {
 export function WhatsAppButton({
   message,
   children,
-  className = "inline-flex items-center justify-center rounded-full bg-green-600 px-8 py-3 text-base font-semibold text-white transition hover:bg-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400",
+  className,
+  variant = "whatsapp",
+  size = "md",
   iconSize = "h-5 w-5",
   ctaLocation = "other",
   ctaLabel,
@@ -36,7 +43,7 @@ export function WhatsAppButton({
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={className}
+      className={getCtaClass({ variant, size, className })}
       onClick={() =>
         trackGenerateLead({
           ctaLocation,

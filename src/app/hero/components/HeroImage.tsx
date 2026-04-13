@@ -12,7 +12,7 @@ export function HeroImage() {
         priority
         fetchPriority="high"
         sizes="(max-width: 640px) 85vw, (max-width: 1024px) 38vw, 360px"
-        className="h-auto w-full rounded-xl object-cover"
+        className="h-auto w-full rounded-2xl object-cover"
       />
     </div>
   );
