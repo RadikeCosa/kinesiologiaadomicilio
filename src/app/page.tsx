@@ -1,5 +1,6 @@
 import HeroSection from "./hero/hero";
-import { ScrollDownButton } from "@/components/ScrollDownButton";
+import { AboutSection } from "@/app/home/components/AboutSection";
+import { ServiceContextBanner } from "@/app/home/components/ServiceContextBanner";
 import Link from "next/link";
 import { getCtaClass } from "@/components/ui/ctaStyles";
 import { Container } from "@/components/ui/Container";
@@ -10,7 +11,8 @@ export default function Home() {
   return (
     <div className="bg-slate-50 dark:bg-neutral-900">
       <HeroSection />
-      <ScrollDownButton targetId="servicios-preview" />
+      <AboutSection />
+      <ServiceContextBanner />
 
       {/* Sección preview de servicios */}
       <section id="servicios-preview" className={SECTION_Y_SPACING}>

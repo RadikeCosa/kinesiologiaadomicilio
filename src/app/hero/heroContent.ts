@@ -5,10 +5,10 @@ export const heroContent = {
         suffix: "en Neuquén",
     },
     srOnly:
-        "Atención de kinesiología y rehabilitación domiciliaria en Neuquén: Adultos mayores, post operatorios, cuidados paliativos.",
-    supportText: "Terapia física y rehabilitación en la comodidad de tu hogar.",
-    ctaLabel: "Hacé tu consulta",
+        "Kinesiología y rehabilitación domiciliaria en Neuquén a cargo de Ramiro Cosa, kinesiólogo con más de 20 años de experiencia. Adultos mayores, postoperatorios y cuidados paliativos.",
+    supportText: "Acompañamiento kinesiológico profesional para tu familiar, en la comodidad de su hogar.",
+    ctaLabel: "Consultar por mi familiar",
     whatsappMessage:
-        "Hola quisiera consultar por una sesión de kinesiología a domicilio",
+        "Hola Ramiro, quisiera consultar sobre kinesiología a domicilio para un familiar",
     secondaryLinkLabel: "Ver servicios",
 };
