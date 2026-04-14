@@ -13,6 +13,9 @@ export const HOME_CONTENT = {
         ctaLabel: "Consultar con Ramiro",
         whatsappMessage: "Hola Ramiro, quisiera consultar sobre kinesiología a domicilio",
         photo: null,
+        photoPlaceholderTitle: "Foto profesional próximamente",
+        photoPlaceholderDescription:
+            "Mientras tanto, seguimos mejorando esta presentación.",
     },
     serviceContext: {
         title: "Cómo trabajamos",
