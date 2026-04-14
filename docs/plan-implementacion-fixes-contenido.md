@@ -1,6 +1,6 @@
 # Plan de implementación de fixes de contenido
 
-> Estado de actualización: 2026-04-13 (UTC)
+> Estado de actualización: 2026-04-14 (UTC)
 > Tipo de documento: plan vivo con trazabilidad de ejecución.
 
 ## Resumen ejecutivo
@@ -94,6 +94,11 @@ Reducir inconsistencias de labels globales repetidos (header/footer y CTAs recur
 **Remanente real (opcional, no bloqueante)**
 - Revisar solo labels CTA globales repetidos no cubiertos por `NAV_LINKS`.
 - Mantener inline los mensajes contextuales de WhatsApp cuando aporten valor comercial/analítico.
+
+
+**Alineación documental complementaria (2026-04-14)**
+- Se documenta como ajuste acotado ya implementado: el copy de `SectionIntro` usado en Home y `/services` dejó de estar inline y ahora vive en `src/content/sectionIntroContent.ts`.
+- `SectionIntro` se mantiene como componente presentacional puro; no se incorporaron defaults de contenido ni una capa global adicional tipo CMS/diccionario.
 
 ---
 

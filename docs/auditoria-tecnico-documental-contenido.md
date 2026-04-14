@@ -1,6 +1,6 @@
 # Auditoría técnico-documental del contenido — reencuadre histórico + estado vigente
 
-> Nota editorial (2026-04-13): este archivo nació como auditoría de drift en un estado previo.  
+> Nota editorial (2026-04-14): este archivo nació como auditoría de drift en un estado previo.  
 > Desde entonces hubo implementación efectiva en código.  
 > Esta versión se mantiene como **auditoría histórica corregida** para no inducir decisiones operativas erróneas.
 
@@ -49,6 +49,15 @@ Corrección:
 Implicancia:
 - Ya no corresponde indicar que los labels `Inicio/Servicios` están duplicados sin fuente común.
 
+
+### F) Intros de sección: separación explícita entre patrón visual y contenido editorial
+Corrección:
+- `SectionIntro` se mantiene como componente presentacional (`src/components/ui/SectionIntro.tsx`).
+- El copy de intros consumidas hoy por Home y `/services` se externalizó a `src/content/sectionIntroContent.ts` (`SECTION_INTRO_CONTENT`).
+
+Implicancia:
+- Ya no corresponde afirmar que esos textos introductorios siguen inline en los pages actuales; la centralización aplicada es mínima y acotada a ese caso de uso.
+
 ## 3) Estado actual por dominio (resumen útil)
 
 - **Negocio/contacto/base URL:** `src/lib/config.ts`.
@@ -56,6 +65,7 @@ Implicancia:
 - **Navegación global (`Inicio`/`Servicios`):** `src/lib/navLinks.ts`.
 - **Hero editorial:** `src/app/hero/heroContent.ts`.
 - **SEO/JSON-LD global:** `src/app/layout.tsx` como ensamblador, derivando de `config.ts` + `servicesData.ts`.
+- **Intros de sección (patrón + copy actual):** patrón visual en `src/components/ui/SectionIntro.tsx` y contenido editorial mínimo en `src/content/sectionIntroContent.ts`.
 
 ## 4) Uso recomendado de este archivo
 
