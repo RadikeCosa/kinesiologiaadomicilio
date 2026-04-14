@@ -6,6 +6,7 @@ import { getCtaClass } from "@/components/ui/ctaStyles";
 import { Container } from "@/components/ui/Container";
 import { SECTION_Y_SPACING } from "@/components/ui/styleTokens";
 import { SectionIntro } from "@/components/ui/SectionIntro";
+import { SECTION_INTRO_CONTENT } from "@/content/sectionIntroContent";
 
 export default function Home() {
   return (
@@ -18,8 +19,8 @@ export default function Home() {
       <section id="servicios-preview" className={SECTION_Y_SPACING}>
         <Container className="max-w-4xl text-center">
           <SectionIntro
-            title="Nuestros Servicios"
-            description="Atención kinesiológica especializada en tu hogar con equipamiento profesional"
+            title={SECTION_INTRO_CONTENT.homeServicesPreview.title}
+            description={SECTION_INTRO_CONTENT.homeServicesPreview.description}
             titleAs="h2"
           />
           <div className="mt-8">

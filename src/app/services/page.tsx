@@ -6,6 +6,7 @@ import { ServicesGrid } from "./components/ServicesGrid";
 import { Container } from "@/components/ui/Container";
 import { SECTION_Y_SPACING } from "@/components/ui/styleTokens";
 import { SectionIntro } from "@/components/ui/SectionIntro";
+import { SECTION_INTRO_CONTENT } from "@/content/sectionIntroContent";
 
 export const metadata: Metadata = {
   title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación",
@@ -29,8 +30,8 @@ export default function ServicesPage() {
       <ScrollDownButton targetId="servicios-grid" />
       <Container className={`max-w-4xl ${SECTION_Y_SPACING}`}>
         <SectionIntro
-          title="Servicios de kinesiología a domicilio"
-          description="Ofrecemos atención kinesiológica especializada en la comodidad de tu hogar. Cada sesión está diseñada según las necesidades específicas del paciente, con equipamiento profesional y técnicas actualizadas para garantizar una recuperación efectiva y segura."
+          title={SECTION_INTRO_CONTENT.servicesPage.title}
+          description={SECTION_INTRO_CONTENT.servicesPage.description}
           titleAs="h1"
         />
 
