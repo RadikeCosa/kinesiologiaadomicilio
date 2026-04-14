@@ -64,10 +64,10 @@ export function AboutSection() {
           <div className="mx-auto flex aspect-square w-full max-w-xs items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-neutral-600 dark:bg-neutral-700">
             <div className="text-center">
               <p className="text-base font-medium text-slate-700 dark:text-slate-200">
-                Foto profesional próximamente
+                {HOME_CONTENT.about.photoPlaceholderTitle}
               </p>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-300">
-                Mientras tanto, seguimos mejorando esta presentación.
+                {HOME_CONTENT.about.photoPlaceholderDescription}
               </p>
             </div>
           </div>

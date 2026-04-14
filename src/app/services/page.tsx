@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { SECTION_Y_SPACING } from "@/components/ui/styleTokens";
 import { SectionIntro } from "@/components/ui/SectionIntro";
 import { SECTION_INTRO_CONTENT } from "@/content/sectionIntroContent";
+import { SERVICES_PAGE_CONTENT } from "./servicesPageContent";
 
 export const metadata: Metadata = {
   title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación",
@@ -40,20 +41,19 @@ export default function ServicesPage() {
         <div className="mt-16 text-center">
           <div className="rounded-2xl bg-sky-50 p-8 dark:bg-sky-950">
             <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              ¿Tenés dudas sobre qué servicio necesitás?
+              {SERVICES_PAGE_CONTENT.consultationCta.title}
             </h2>
             <p className="mt-4 text-base text-slate-600 dark:text-slate-300">
-              Contactanos por WhatsApp para una consulta personalizada sin
-              compromiso.
+              {SERVICES_PAGE_CONTENT.consultationCta.description}
             </p>
             <WhatsAppButton
-              message="Hola quisiera consultar sobre los servicios de kinesiología a domicilio"
+              message={SERVICES_PAGE_CONTENT.consultationCta.whatsappMessage}
               ctaLocation="services"
               className="mt-6"
               variant="whatsapp"
               size="md"
             >
-              Consultá por WhatsApp
+              {SERVICES_PAGE_CONTENT.consultationCta.ctaLabel}
             </WhatsAppButton>
           </div>
         </div>
