@@ -4,9 +4,12 @@ import { ServiceContextBanner } from "@/app/home/components/ServiceContextBanner
 import Link from "next/link";
 import { getCtaClass } from "@/components/ui/ctaStyles";
 import { Container } from "@/components/ui/Container";
-import { SECTION_Y_SPACING } from "@/components/ui/styleTokens";
-import { SectionIntro } from "@/components/ui/SectionIntro";
-import { SECTION_INTRO_CONTENT } from "@/content/sectionIntroContent";
+import {
+  SECTION_LEAD_CLASS,
+  SECTION_TITLE_CLASS,
+  SECTION_Y_SPACING,
+} from "@/components/ui/styleTokens";
+import { HOME_CONTENT } from "@/app/home/homeContent";
 
 export default function Home() {
   return (
@@ -18,11 +21,14 @@ export default function Home() {
       {/* Sección preview de servicios */}
       <section id="servicios-preview" className={SECTION_Y_SPACING}>
         <Container className="max-w-4xl text-center">
-          <SectionIntro
-            title={SECTION_INTRO_CONTENT.homeServicesPreview.title}
-            description={SECTION_INTRO_CONTENT.homeServicesPreview.description}
-            titleAs="h2"
-          />
+          <header>
+            <h2 className={SECTION_TITLE_CLASS}>
+              {HOME_CONTENT.servicesPreviewIntro.title}
+            </h2>
+            <p className={SECTION_LEAD_CLASS}>
+              {HOME_CONTENT.servicesPreviewIntro.description}
+            </p>
+          </header>
           <div className="mt-8">
             <Link
               href="/services"

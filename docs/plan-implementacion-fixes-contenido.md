@@ -97,8 +97,8 @@ Reducir inconsistencias de labels globales repetidos (header/footer y CTAs recur
 
 
 **Alineación documental complementaria (2026-04-14)**
-- Se documenta como ajuste acotado ya implementado: el copy de `SectionIntro` usado en Home y `/services` dejó de estar inline y ahora vive en `src/content/sectionIntroContent.ts`.
-- `SectionIntro` se mantiene como componente presentacional puro; no se incorporaron defaults de contenido ni una capa global adicional tipo CMS/diccionario.
+- Se documenta como ajuste acotado ya implementado: `SectionIntro` fue eliminado por ser una abstracción de render demasiado pequeña.
+- El contenido editorial de intros sigue centralizado por superficie (`src/app/home/homeContent.ts` y `src/app/services/servicesPageContent.ts`) y el patrón visual mantiene tokens compartidos en `src/components/ui/styleTokens.ts`.
 
 ---
 

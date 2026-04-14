@@ -157,8 +157,8 @@ Mapa orientador (no exhaustivo):
 | Navegación global compartida (header/footer) | `src/lib/navLinks.ts` (`NAV_LINKS`) | `Header.tsx` y `Footer.tsx` |
 | Variantes y tamaños de CTA | `src/components/ui/ctaStyles.ts` (`getCtaClass`) | `WhatsAppButton`, `HeroSecondaryLink`, CTA principal en Home |
 | Wrapper de ancho/padding horizontal | `src/components/ui/Container.tsx` | `Header`, `Footer`, `Hero`, `Home`, `Services` |
-| Patrón visual de intro de sección | `src/components/ui/SectionIntro.tsx` + `src/components/ui/styleTokens.ts` | Intro de Home y intro de `/services` |
-| Contenido editorial de intros actuales | `src/content/sectionIntroContent.ts` (`SECTION_INTRO_CONTENT`) | `src/app/page.tsx` (home preview) y `src/app/services/page.tsx` (`/services`) |
+| Patrón visual de intro de sección | `src/components/ui/styleTokens.ts` (`SECTION_TITLE_CLASS` + `SECTION_LEAD_CLASS`) | `src/app/page.tsx` (home preview) y `src/app/services/page.tsx` (`/services`) |
+| Contenido editorial de intros actuales | `src/app/home/homeContent.ts` + `src/app/services/servicesPageContent.ts` | Home usa `HOME_CONTENT.servicesPreviewIntro`; `/services` usa `SERVICES_PAGE_CONTENT.intro` |
 | CSS global base | `src/app/globals.css` | Carga de Tailwind global |
 
 ### Qué está centralizado hoy (y qué no)
@@ -169,8 +169,9 @@ Mapa orientador (no exhaustivo):
 - **Sí centralizado:** navegación global `Inicio/Servicios` se define en `NAV_LINKS` y la consumen header/footer.
 - **Sí centralizado:** estilos de CTA reutilizables (variant + size + focus ring) en `getCtaClass`.
 - **Sí centralizado:** wrapper presentacional mínimo `Container` para `mx-auto` + `px-4` + ancho máximo por sección.
-- **Sí centralizado:** patrón visual de intro de sección (`title + lead`) vía `SectionIntro` y `styleTokens` (componente presentacional).
-- **Sí centralizado (mínimo y acotado):** contenido editorial de intros actuales en `src/content/sectionIntroContent.ts` consumido por Home y `/services`.
+- **Sí centralizado:** tokens visuales de intro (`title + lead`) en `styleTokens` y composición local explícita en cada página.
+- **Sí centralizado por superficie:** contenido editorial de intros en `src/app/home/homeContent.ts` (Home) y `src/app/services/servicesPageContent.ts` (`/services`).
+- **Nota de implementación:** `SectionIntro` fue eliminado por ser una abstracción de render demasiado pequeña; se mantiene markup explícito por página con tokens compartidos para preservar consistencia visual.
 - **Sí acotado en global:** `globals.css` contiene solo el punto de entrada de Tailwind.
 
 ### Regla operativa de edición rápida
@@ -179,8 +180,8 @@ Mapa orientador (no exhaustivo):
 - Si cambia **copy editorial del hero**, tocar `src/app/hero/heroContent.ts` (y revisar `hero.tsx`/`HeroSecondaryLink.tsx` solo si cambia la estructura de render).
 - Si cambia **look/jerarquía de CTAs**, tocar primero `src/components/ui/ctaStyles.ts`; luego revisar consumidores (`WhatsAppButton`, `HeroSecondaryLink`, CTA principal en Home).
 - Si cambia **ancho/padding horizontal base** de secciones, tocar primero `src/components/ui/Container.tsx`.
-- Si cambia **estructura/estilo del patrón visual de intro** (título + lead), tocar `src/components/ui/SectionIntro.tsx` y/o `src/components/ui/styleTokens.ts`.
-- Si cambia **copy editorial de intros actuales** (home preview o `/services`), tocar `src/content/sectionIntroContent.ts` y validar consumidores en `src/app/page.tsx` y `src/app/services/page.tsx`.
+- Si cambia **estructura/estilo del patrón visual de intro** (título + lead), tocar `src/components/ui/styleTokens.ts` y validar `src/app/page.tsx` + `src/app/services/page.tsx`.
+- Si cambia **copy editorial de intros actuales** (home preview o `/services`), tocar `src/app/home/homeContent.ts` y/o `src/app/services/servicesPageContent.ts`.
 - Si cambia **estilo global base**, tocar `src/app/globals.css` (sin mover estilos de componentes ahí).
 - `layout.tsx` **ensambla** metadata/JSON-LD global, pero **no es fuente primaria** de negocio ni catálogo.
 
@@ -201,14 +202,14 @@ Mapa orientador (no exhaustivo):
 
 - **Mensajes de WhatsApp contextuales** se mantienen inline por intención comercial/analítica (header, hero, footer, services y por servicio).
 - **Metadata editorial por ruta** se mantiene local (`layout.tsx` para global, `services/page.tsx` para `/services`) para conservar control SEO por superficie.
-- **Microcopy no repetido** (párrafos o CTA únicos de una sección) se mantiene inline para evitar sobre-centralización; solo se externalizó el copy de intros actualmente consumidas por `SectionIntro`.
+- **Microcopy no repetido** (párrafos o CTA únicos de una sección) se mantiene inline para evitar sobre-centralización; las intros editoriales se mantienen en content files por superficie.
 - **JSON-LD global** sigue en `layout.tsx`: es consumidor técnico del dominio SEO, no repositorio maestro de negocio/servicios.
 - Esta centralización es **pragmática y acotada**: no hay CMS, no hay capa i18n, no hay diccionario global de todos los strings.
 
 ### Guardrails específicos de estilos (estado actual)
 - No hay **design system formal** ni librería externa de componentes UI.
 - `getCtaClass` centraliza solo el patrón de CTA repetido; no todos los links/botones del sitio deben pasar por esa API.
-- `Container` y `SectionIntro` existen porque resuelven repetición real; evitar crear nuevas primitives si solo se usan una vez.
+- `Container` se mantiene como primitive compartida de layout; evitar crear nuevas primitives si solo se usan una vez.
 - Mantener clases Tailwind inline en casos específicos de una sola pantalla/sección para preservar legibilidad local.
 - `globals.css` se mantiene mínimo (base global): no usarlo como “segunda capa de componentes”.
 - Si una clase/utilidad se repite en 2+ superficies estables y con misma semántica visual, evaluar extracción; si no, mantener inline.
@@ -238,8 +239,8 @@ Orden sugerido de consulta para cambios de contenido/configuración:
 Orden sugerido de consulta para cambios visuales/presentacionales:
 1. `src/components/ui/ctaStyles.ts` (si toca look/size/foco de CTAs repetidos).
 2. `src/components/ui/Container.tsx` (si toca gutter/ancho base compartido).
-3. `src/components/ui/SectionIntro.tsx` y `src/components/ui/styleTokens.ts` (si toca patrón visual de intro repetido).
-4. `src/content/sectionIntroContent.ts` (si toca copy editorial de intros actuales).
+3. `src/components/ui/styleTokens.ts` (si toca patrón visual de intro repetido).
+4. `src/app/home/homeContent.ts` y/o `src/app/services/servicesPageContent.ts` (si toca copy editorial de intros actuales).
 5. Componente/página puntual (si el cambio es local y no repetido).
 6. `src/app/globals.css` solo para base global de Tailwind.
 
@@ -270,7 +271,7 @@ Checklist rápido por tipo de cambio:
   3) correr `npm run lint` y `npm run build`.
 
 - **Cambio de composición repetida de intro**
-  1) editar `src/components/ui/SectionIntro.tsx` y/o `src/components/ui/styleTokens.ts`;
+  1) editar markup local en `src/app/page.tsx` y/o `src/app/services/page.tsx` y, si aplica, `src/components/ui/styleTokens.ts`;
   2) validar Home y `/services` para evitar drift.
 
 ## 13) Nota de cierre
@@ -292,7 +293,6 @@ Este documento deja asentado el **estado operativo actual** de centralización y
 - `src/components/WhatsAppButton.tsx`
 - `src/components/ui/ctaStyles.ts`
 - `src/components/ui/Container.tsx`
-- `src/components/ui/SectionIntro.tsx`
 - `src/components/ui/styleTokens.ts`
 - `src/components/PhoneLink.tsx`
 - `src/components/ScrollDepthTracker.tsx`
