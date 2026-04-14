@@ -50,13 +50,14 @@ Implicancia:
 - Ya no corresponde indicar que los labels `Inicio/Servicios` están duplicados sin fuente común.
 
 
-### F) Intros de sección: separación explícita entre patrón visual y contenido editorial
+### F) Intros de sección: composición local + contenido por superficie
 Corrección:
-- `SectionIntro` se mantiene como componente presentacional (`src/components/ui/SectionIntro.tsx`).
-- El copy de intros consumidas hoy por Home y `/services` se externalizó a `src/content/sectionIntroContent.ts` (`SECTION_INTRO_CONTENT`).
+- `SectionIntro` fue eliminado por ser una abstracción de render demasiado pequeña.
+- El patrón visual de título + lead se mantiene con `SECTION_TITLE_CLASS` y `SECTION_LEAD_CLASS` en `src/components/ui/styleTokens.ts`.
+- El copy editorial se mantiene centralizado por superficie: Home en `src/app/home/homeContent.ts` y `/services` en `src/app/services/servicesPageContent.ts`.
 
 Implicancia:
-- Ya no corresponde afirmar que esos textos introductorios siguen inline en los pages actuales; la centralización aplicada es mínima y acotada a ese caso de uso.
+- Ya no corresponde afirmar que existe una fuente compartida genérica para intros; la centralización se mantiene, pero por superficie.
 
 ## 3) Estado actual por dominio (resumen útil)
 
@@ -65,7 +66,7 @@ Implicancia:
 - **Navegación global (`Inicio`/`Servicios`):** `src/lib/navLinks.ts`.
 - **Hero editorial:** `src/app/hero/heroContent.ts`.
 - **SEO/JSON-LD global:** `src/app/layout.tsx` como ensamblador, derivando de `config.ts` + `servicesData.ts`.
-- **Intros de sección (patrón + copy actual):** patrón visual en `src/components/ui/SectionIntro.tsx` y contenido editorial mínimo en `src/content/sectionIntroContent.ts`.
+- **Intros de sección (patrón + copy actual):** composición local en cada página, tokens en `src/components/ui/styleTokens.ts` y contenido editorial por superficie (`homeContent.ts` / `servicesPageContent.ts`).
 
 ## 4) Uso recomendado de este archivo
 

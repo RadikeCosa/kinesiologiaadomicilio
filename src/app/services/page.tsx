@@ -3,9 +3,11 @@ import Link from "next/link";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ServicesGrid } from "./components/ServicesGrid";
 import { Container } from "@/components/ui/Container";
-import { SECTION_Y_SPACING } from "@/components/ui/styleTokens";
-import { SectionIntro } from "@/components/ui/SectionIntro";
-import { SECTION_INTRO_CONTENT } from "@/content/sectionIntroContent";
+import {
+  SECTION_LEAD_CLASS,
+  SECTION_TITLE_CLASS,
+  SECTION_Y_SPACING,
+} from "@/components/ui/styleTokens";
 import { SERVICES_PAGE_CONTENT } from "./servicesPageContent";
 
 export const metadata: Metadata = {
@@ -28,11 +30,12 @@ export default function ServicesPage() {
   return (
     <div className="bg-slate-50 dark:bg-neutral-900 min-h-screen">
       <Container className={`max-w-4xl ${SECTION_Y_SPACING}`}>
-        <SectionIntro
-          title={SECTION_INTRO_CONTENT.servicesPage.title}
-          description={SECTION_INTRO_CONTENT.servicesPage.description}
-          titleAs="h1"
-        />
+        <header className="text-center">
+          <h1 className={SECTION_TITLE_CLASS}>{SERVICES_PAGE_CONTENT.intro.title}</h1>
+          <p className={SECTION_LEAD_CLASS}>
+            {SERVICES_PAGE_CONTENT.intro.description}
+          </p>
+        </header>
 
         <div id="servicios-grid">
           <ServicesGrid />
