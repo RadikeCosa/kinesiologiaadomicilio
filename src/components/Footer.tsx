@@ -11,25 +11,43 @@ export function Footer() {
 
   return (
     <footer
-      className="bg-slate-100 dark:bg-neutral-800 border-t border-slate-200 dark:border-neutral-700"
+      className="border-t border-slate-200/80 bg-slate-50 dark:border-neutral-800 dark:bg-neutral-950"
       role="contentinfo"
     >
-      <Container className="max-w-6xl py-8 sm:py-12">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Información de contacto */}
+      <Container className="max-w-6xl py-10 sm:py-14">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_0.85fr_1fr]">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Contacto
-            </h2>
-            <address className="mt-4 not-italic text-slate-600 dark:text-slate-400">
-              <p className="flex items-center gap-2">
-                <span aria-hidden="true">📍</span>
-                <span>
-                  {location.city}, {location.country}
-                </span>
+            <div className="flex items-center gap-3">
+              <span
+                aria-hidden="true"
+                className="h-2.5 w-2.5 rounded-full bg-sky-500 shadow-sm shadow-sky-500/30"
+              />
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-400">
+                Contacto
               </p>
-              <p className="mt-2 flex items-center gap-2">
-                <span aria-hidden="true">📞</span>
+            </div>
+
+            <h2 className="mt-4 text-xl font-semibold tracking-[0.01em] text-slate-900 dark:text-slate-100">
+              Kinesiología a domicilio en {location.city}
+            </h2>
+
+            <p className="mt-3 max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-400">
+              Atención profesional orientada a rehabilitación, movilidad y
+              acompañamiento funcional en domicilio.
+            </p>
+
+            <address className="mt-5 space-y-3 not-italic text-sm text-slate-600 dark:text-slate-400">
+              <p>
+                <span className="font-medium text-slate-900 dark:text-slate-200">
+                  Zona de atención:
+                </span>{" "}
+                {location.city}, {location.country}
+              </p>
+
+              <p>
+                <span className="font-medium text-slate-900 dark:text-slate-200">
+                  Teléfono:
+                </span>{" "}
                 <PhoneLink
                   destination={`tel:+${phoneClean}`}
                   ctaLocation="footer"
@@ -40,7 +58,8 @@ export function Footer() {
                 </PhoneLink>
               </p>
             </address>
-            <div className="mt-4">
+
+            <div className="mt-5">
               <WhatsAppButton
                 message="Hola, quisiera consultar sobre kinesiología a domicilio"
                 ctaLocation="footer"
@@ -52,12 +71,12 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Navegación */}
           <nav aria-label="Enlaces del pie de página">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
               Navegación
-            </h2>
-            <ul className="mt-4 space-y-2 text-slate-600 dark:text-slate-400">
+            </p>
+
+            <ul className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-400">
               {NAV_LINKS.map(({ href, label }) => (
                 <li key={href}>
                   <Link
@@ -71,21 +90,22 @@ export function Footer() {
             </ul>
           </nav>
 
-          {/* Servicios */}
           <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
               Servicios
-            </h2>
-            <ul className="mt-4 space-y-2 text-slate-600 dark:text-slate-400">
+            </p>
+
+            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
               {servicesData.map((service) => (
-                <li key={service.title}>{service.title}</li>
+                <li key={service.title}>
+                  {service.shortTitle ?? service.title}
+                </li>
               ))}
             </ul>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-8 border-t border-slate-200 dark:border-neutral-700 pt-6 text-center text-sm text-slate-500 dark:text-slate-500">
+        <div className="mt-10 border-t border-slate-200/80 pt-6 text-sm text-slate-500 dark:border-neutral-800 dark:text-slate-500">
           <p>
             © {new Date().getFullYear()} {name}. Todos los derechos reservados.
           </p>
