@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { ScrollDownButton } from "@/components/ScrollDownButton";
 import { ServicesGrid } from "./components/ServicesGrid";
 import { Container } from "@/components/ui/Container";
 import { SECTION_Y_SPACING } from "@/components/ui/styleTokens";
@@ -27,7 +26,6 @@ export const metadata: Metadata = {
 export default function ServicesPage() {
   return (
     <div className="bg-slate-50 dark:bg-neutral-900 min-h-screen">
-      <ScrollDownButton targetId="servicios-grid" />
       <Container className={`max-w-4xl ${SECTION_Y_SPACING}`}>
         <SectionIntro
           title={SECTION_INTRO_CONTENT.servicesPage.title}
