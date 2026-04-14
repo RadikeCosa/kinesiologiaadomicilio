@@ -1,8 +1,8 @@
 export const SERVICES_PAGE_CONTENT = {
   intro: {
-    title: "Servicios de kinesiología a domicilio",
+    title: "Atención kinésica domiciliaria para recuperación, movilidad y autonomía",
     description:
-      "Ofrecemos atención kinesiológica especializada en la comodidad de tu hogar. Cada sesión está diseñada según las necesidades específicas del paciente, con equipamiento profesional y técnicas actualizadas para garantizar una recuperación efectiva y segura.",
+      "Brindamos atención kinésica en domicilio para adultos que necesitan recuperar funcionalidad, mejorar su movilidad y sostener su autonomía. Cada plan se define con evaluación inicial, seguimiento personalizado y criterio profesional en cada etapa.",
   },
   consultationCta: {
     title: "¿Tenés dudas sobre qué servicio necesitás?",
