@@ -6,20 +6,30 @@ import { Container } from "./ui/Container";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-sm dark:bg-neutral-900/80 border-b border-slate-200 dark:border-neutral-700">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-950/85">
       <Container className="max-w-6xl">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 items-center justify-between gap-4">
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-md text-lg font-semibold text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 dark:text-slate-100"
+            className="group flex min-w-0 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2"
           >
-            <span aria-hidden="true">💪</span>
-            <span className="hidden sm:inline">{BUSINESS_CONFIG.shortName}</span>
-            <span className="sm:hidden">Kinesio NQN</span>
+            <span
+              aria-hidden="true"
+              className="h-2.5 w-2.5 rounded-full bg-sky-500 shadow-sm shadow-sky-500/30"
+            />
+
+            <div className="min-w-0 leading-none">
+              <span className="block truncate text-sm font-semibold tracking-[0.01em] text-slate-900 transition-colors group-hover:text-sky-700 dark:text-slate-100 dark:group-hover:text-sky-300 sm:text-base">
+                {BUSINESS_CONFIG.shortName}
+              </span>
+              <span className="hidden text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
+                Atención domiciliaria
+              </span>
+            </div>
           </Link>
 
           <nav aria-label="Navegación principal">
-            <ul className="flex items-center gap-1 sm:gap-4">
+            <ul className="flex items-center gap-1 sm:gap-3">
               {NAV_LINKS.map(({ href, label }) => (
                 <li key={href}>
                   <Link
