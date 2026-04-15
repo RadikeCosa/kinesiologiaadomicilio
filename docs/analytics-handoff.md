@@ -91,6 +91,7 @@ Además de los custom anteriores, GA4 puede registrar eventos automáticos (por 
 ### WhatsApp (`generate_lead`)
 - Header (CTA “Contactar”): `cta_location = "header"`.
 - Hero (CTA principal): `cta_location = "hero"`.
+- Home — sección “Cómo funciona” (CTA final): `cta_location = "how_it_works"`.
 - Servicios:
   - CTA en cada card de servicio: `cta_location = "services"`.
   - CTA final de página de servicios: `cta_location = "services"`.
@@ -103,8 +104,8 @@ Además de los custom anteriores, GA4 puede registrar eventos automáticos (por 
 - Tracker global activo desde layout (impacta todas las rutas renderizadas bajo ese layout).
 
 ### Valores actualmente usados de `cta_location`
-En el código existen los tipos posibles: `"hero" | "services" | "footer" | "header" | "contact" | "other"`.  
-En la instrumentación actualmente observada se usan: `"header"`, `"hero"`, `"services"`, `"footer"`.
+En el código existen los tipos posibles: `"hero" | "services" | "footer" | "header" | "contact" | "how_it_works" | "other"`.  
+En la instrumentación actualmente observada se usan: `"header"`, `"hero"`, `"how_it_works"`, `"services"`, `"footer"`.
 
 ## Validación realizada / evidencia disponible
 

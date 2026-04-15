@@ -59,12 +59,21 @@ Corrección:
 Implicancia:
 - Ya no corresponde afirmar que existe una fuente compartida genérica para intros; la centralización se mantiene, pero por superficie.
 
+### G) Home incorpora sección editorial “Cómo funciona” con fuente dedicada
+Corrección:
+- Home ahora compone explícitamente `HeroSection` + `AboutSection` + `HowItWorksSection` + bloque preview/contexto de servicios.
+- El contenido editorial de “Cómo funciona” vive en `src/app/home/howItWorksContent.ts` y se renderiza desde `src/app/home/components/HowItWorksSection.tsx`.
+
+Implicancia:
+- La centralización editorial del Home no se limita a hero + intro de preview; también cubre el bloque operativo “Cómo funciona” con fuente explícita por sección.
+
 ## 3) Estado actual por dominio (resumen útil)
 
 - **Negocio/contacto/base URL:** `src/lib/config.ts`.
 - **Catálogo de servicios:** `src/app/services/data/servicesData.ts`.
 - **Navegación global (`Inicio`/`Servicios`):** `src/lib/navLinks.ts`.
 - **Hero editorial:** `src/app/hero/heroContent.ts`.
+- **How it works editorial (Home):** `src/app/home/howItWorksContent.ts`.
 - **SEO/JSON-LD global:** `src/app/layout.tsx` como ensamblador, derivando de `config.ts` + `servicesData.ts`.
 - **Intros de sección (patrón + copy actual):** composición local en cada página, tokens en `src/components/ui/styleTokens.ts` y contenido editorial por superficie (`homeContent.ts` / `servicesPageContent.ts`).
 
