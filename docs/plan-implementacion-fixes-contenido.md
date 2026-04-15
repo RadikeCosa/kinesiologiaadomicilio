@@ -100,6 +100,10 @@ Reducir inconsistencias de labels globales repetidos (header/footer y CTAs recur
 - Se documenta como ajuste acotado ya implementado: `SectionIntro` fue eliminado por ser una abstracción de render demasiado pequeña.
 - El contenido editorial de intros sigue centralizado por superficie (`src/app/home/homeContent.ts` y `src/app/services/servicesPageContent.ts`) y el patrón visual mantiene tokens compartidos en `src/components/ui/styleTokens.ts`.
 
+**Continuidad menor registrada (2026-04-15)**
+- Home suma la sección editorial “Cómo funciona” con fuente dedicada en `src/app/home/howItWorksContent.ts` y render en `src/app/home/components/HowItWorksSection.tsx`.
+- El CTA de esa sección reutiliza infraestructura existente (`WhatsAppButton` + `generate_lead`) sin abrir una fase nueva del plan.
+
 ---
 
 ## Riesgo y alcance remanente

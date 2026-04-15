@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-14 (UTC)  
+> Última actualización: 2026-04-15 (UTC)  
 > Alcance: estado real del repositorio `kinesiologiaadomicilio` al momento de esta revisión.
 
 ## 1) Resumen ejecutivo del proyecto
@@ -62,9 +62,10 @@ No es, en su estado actual, una plataforma transaccional ni un sistema con gesti
   - e inyecta GA4 si existe `NEXT_PUBLIC_GA_ID`.
 
 ### Organización por dominio/página
-- Home (`src/app/page.tsx`) compone hero + preview de servicios.
+- Home (`src/app/page.tsx`) compone hero + about + how it works + preview/contexto de servicios.
 - Servicios (`src/app/services/page.tsx`) compone listado de servicios + CTA final.
 - Módulo hero separado (`src/app/hero/*`).
+- Módulo home separado para bloques editoriales adicionales (`src/app/home/*`).
 - Módulo servicios separado (`src/app/services/components`, `data`, `types`).
 
 ### Capa compartida
@@ -78,6 +79,8 @@ Mapa orientador (no exhaustivo):
 
 - `src/app/layout.tsx`: layout global, metadata, JSON-LD, GA4 y estructura base.
 - `src/app/page.tsx`: landing principal.
+- `src/app/home/howItWorksContent.ts`: contenido editorial de la sección “Cómo funciona” en Home.
+- `src/app/home/components/HowItWorksSection.tsx`: sección “Cómo funciona” (título, lead, 4 pasos y CTA WhatsApp).
 - `src/app/services/page.tsx`: página de servicios.
 - `src/app/sitemap.ts`: generación de sitemap.
 - `src/app/hero/*`: componentes del hero de home.
@@ -98,6 +101,7 @@ Mapa orientador (no exhaustivo):
 ### Funcionalidad presentacional
 - Navegación interna entre inicio y servicios.
 - Hero con imagen y lista de tipos de servicio.
+- Sección “Cómo funciona” en Home (título, lead, 4 pasos y CTA a WhatsApp).
 - Grid de servicios con cards informativas.
 - Botón de scroll down en home y services.
 - Modo visual con clases para claro/oscuro (sin toggle explícito en UI).
@@ -154,6 +158,7 @@ Mapa orientador (no exhaustivo):
 | Catálogo de servicios | `src/app/services/data/servicesData.ts` | `ServicesGrid` / `ServiceCard` |
 | Structured data (JSON-LD) | `src/app/layout.tsx` (ensamblado inline) | Script `application/ld+json` global |
 | Hero editorial (H1/subtítulo/CTA) | `src/app/hero/heroContent.ts` | `hero.tsx` (consumidor) → Home (`src/app/page.tsx`) |
+| How it works editorial (título/lead/pasos/CTA) | `src/app/home/howItWorksContent.ts` | `HowItWorksSection.tsx` → Home (`src/app/page.tsx`) |
 | Navegación global compartida (header/footer) | `src/lib/navLinks.ts` (`NAV_LINKS`) | `Header.tsx` y `Footer.tsx` |
 | Variantes y tamaños de CTA | `src/components/ui/ctaStyles.ts` (`getCtaClass`) | `WhatsAppButton`, `HeroSecondaryLink`, CTA principal en Home |
 | Wrapper de ancho/padding horizontal | `src/components/ui/Container.tsx` | `Header`, `Footer`, `Hero`, `Home`, `Services` |
@@ -166,6 +171,7 @@ Mapa orientador (no exhaustivo):
 - **Sí centralizado:** catálogo del grid de servicios en `servicesData.ts`.
 - **Sí centralizado:** JSON-LD global se ensambla en `layout.tsx` derivando negocio desde `BUSINESS_CONFIG` y catálogo desde `servicesData.ts`.
 - **Sí centralizado:** copy editorial del hero se define en `heroContent.ts` y se consume desde `hero.tsx`.
+- **Sí centralizado:** copy editorial de “Cómo funciona” se define en `src/app/home/howItWorksContent.ts` y se consume desde `HowItWorksSection.tsx`.
 - **Sí centralizado:** navegación global `Inicio/Servicios` se define en `NAV_LINKS` y la consumen header/footer.
 - **Sí centralizado:** estilos de CTA reutilizables (variant + size + focus ring) en `getCtaClass`.
 - **Sí centralizado:** wrapper presentacional mínimo `Container` para `mx-auto` + `px-4` + ancho máximo por sección.
@@ -178,6 +184,7 @@ Mapa orientador (no exhaustivo):
 - Si cambia **contacto/base URL**, tocar primero `src/lib/config.ts` y luego verificar `src/app/layout.tsx`, `src/app/sitemap.ts` y `src/app/robots.ts`.
 - Si cambia **catálogo de servicios**, tocar `src/app/services/data/servicesData.ts` y luego verificar coherencia en `Footer`, `HeroServiceTypesList` y JSON-LD en `layout.tsx`.
 - Si cambia **copy editorial del hero**, tocar `src/app/hero/heroContent.ts` (y revisar `hero.tsx`/`HeroSecondaryLink.tsx` solo si cambia la estructura de render).
+- Si cambia **copy editorial de “Cómo funciona”** (título/lead/pasos/CTA), tocar `src/app/home/howItWorksContent.ts` y validar `src/app/home/components/HowItWorksSection.tsx`.
 - Si cambia **look/jerarquía de CTAs**, tocar primero `src/components/ui/ctaStyles.ts`; luego revisar consumidores (`WhatsAppButton`, `HeroSecondaryLink`, CTA principal en Home).
 - Si cambia **ancho/padding horizontal base** de secciones, tocar primero `src/components/ui/Container.tsx`.
 - Si cambia **estructura/estilo del patrón visual de intro** (título + lead), tocar `src/components/ui/styleTokens.ts` y validar `src/app/page.tsx` + `src/app/services/page.tsx`.
@@ -197,6 +204,7 @@ Mapa orientador (no exhaustivo):
 - Configuración de negocio/base URL centralizada en `BUSINESS_CONFIG` y derivada en layout/sitemap/robots.
 - Navegación global compartida en `NAV_LINKS` (`src/lib/navLinks.ts`).
 - Copy editorial del hero centralizada en `heroContent.ts`.
+- Sección Home “Cómo funciona” separada en componente propio con fuente editorial dedicada (`howItWorksContent.ts`).
 
 ## 10) Límites y guardrails de la centralización actual
 
