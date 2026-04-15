@@ -11,7 +11,7 @@ export interface EvaluarContent {
   headline: string;
   subtitle: string;
   backLabel: string;
-  branches: EvaluarBranch[];
+  branches: readonly EvaluarBranch[];
 }
 
 export type EvaluarFlowState = "selection" | "result";

@@ -17,6 +17,18 @@ export default function Home() {
     <div className="bg-slate-50 dark:bg-neutral-900">
       <HeroSection />
       <AboutSection />
+
+      <section className="py-6" aria-label="Acceso a evaluación">
+        <Container className="max-w-4xl text-center">
+          <Link
+            href="/evaluar"
+            className={getCtaClass({ variant: "secondary", size: "md" })}
+          >
+            ¿Me puede ayudar un kinesiólogo a domicilio?
+          </Link>
+        </Container>
+      </section>
+
       <HowItWorksSection />
       <ServiceContextBanner />
 
