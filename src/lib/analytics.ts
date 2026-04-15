@@ -8,6 +8,7 @@ export type CtaLocation =
   | "footer"
   | "header"
   | "contact"
+  | "how_it_works"
   | "other";
 
 interface TrackBaseEventParams {
