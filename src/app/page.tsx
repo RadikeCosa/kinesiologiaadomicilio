@@ -1,6 +1,7 @@
 import HeroSection from "./hero/hero";
 import { AboutSection } from "@/app/home/components/AboutSection";
 import { ServiceContextBanner } from "@/app/home/components/ServiceContextBanner";
+import { HowItWorksSection } from "@/app/home/components/HowItWorksSection";
 import Link from "next/link";
 import { getCtaClass } from "@/components/ui/ctaStyles";
 import { Container } from "@/components/ui/Container";
@@ -16,6 +17,7 @@ export default function Home() {
     <div className="bg-slate-50 dark:bg-neutral-900">
       <HeroSection />
       <AboutSection />
+      <HowItWorksSection />
       <ServiceContextBanner />
 
       {/* Sección preview de servicios */}
