@@ -1,48 +1,47 @@
 # Kinesiología a Domicilio
 
-Landing page desarrollada con Next.js para un servicio de kinesiología y rehabilitación a domicilio en Neuquén, Argentina. Hoy funciona como sitio de presentación con navegación simple y llamados a la acción (CTA) hacia WhatsApp.
+Landing page desarrollada con Next.js para un servicio de kinesiología y rehabilitación a domicilio en Neuquén, Argentina.
 
-## Estado actual del proyecto
+## Estado actual (abril 2026)
 
-Este repositorio está en una etapa **MVP / evolución temprana**.
+El proyecto está en etapa **sitio de captación** (sin backend transaccional).
 
-Actualmente incluye:
-- Página principal con hero y acceso rápido a servicios.
-- Página de servicios con listado y CTA de consulta por WhatsApp.
-- Header y footer con navegación básica.
-- Configuración de datos del negocio (nombre, teléfono, ubicación y URL) usada por navegación y contacto.
-- Metadata SEO básica, Open Graph/Twitter y JSON-LD tipo `MedicalBusiness`.
-- Sitemap y `robots.txt`.
+### Rutas públicas implementadas
+- `/` (home)
+- `/services` (servicios)
+- `/evaluar` (flujo guiado para orientar si conviene consultar)
 
-No incluye por ahora tests automatizados, CI/CD en GitHub Actions ni formularios propios. La medición base con Google Analytics 4 sí está implementada en el código.
+### Funcionalidad disponible
+- Header y footer globales.
+- CTA de WhatsApp reutilizable en múltiples superficies.
+- Link telefónico en footer.
+- Sección de servicios con catálogo centralizado.
+- Flujo interactivo en `/evaluar` con ramas de orientación y CTA contextual de WhatsApp.
+- SEO técnico base (metadata, Open Graph/Twitter, JSON-LD, `robots.txt`, `sitemap.xml`).
+- GA4 integrado de forma directa (sin GTM) con eventos custom.
+
+### Fuentes de verdad principales
+- `src/lib/config.ts`: datos del negocio/contacto/base URL.
+- `src/app/services/data/servicesData.ts`: catálogo de servicios.
+- `src/lib/navLinks.ts`: navegación global (header/footer).
+- `src/app/hero/heroContent.ts`: copy del hero.
+- `src/app/home/homeContent.ts` y `src/app/home/howItWorksContent.ts`: contenido editorial de Home.
+- `src/app/evaluar/evaluar-content.ts`: contenido del flujo `/evaluar`.
 
 ## Stack real
 
 - **Next.js 15** (App Router)
 - **React 19**
 - **TypeScript**
-- **Tailwind CSS 4** (vía `@tailwindcss/postcss`)
-- **ESLint** con configuración de Next.js
-
-## Estructura general
-
-Rutas y carpetas principales:
-
-- `src/app/`: rutas de la app (home, servicios), layout global, estilos, `sitemap.ts` y `robots.ts`.
-- `src/app/services/`: página de servicios, tipos, data y componentes de cards/grilla.
-- `src/components/`: componentes compartidos (Header, Footer, botones, etc.).
-- `src/lib/config.ts`: datos de contacto y helper para links de WhatsApp.
-- `public/`: assets estáticos (`hero-image.webp`, `og-placeholder.png`).
-- `next.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `postcss.config.mjs`: configuración del proyecto.
+- **Tailwind CSS 4**
+- **ESLint**
 
 ## Scripts disponibles
 
-Scripts reales definidos en `package.json`:
-
-- `npm run dev`: inicia el servidor de desarrollo con Turbopack.
-- `npm run build`: genera la build de producción.
-- `npm run start`: levanta la app en modo producción (requiere build previa).
-- `npm run lint`: ejecuta ESLint.
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+- `npm run lint`
 
 ## Desarrollo local
 
@@ -50,32 +49,16 @@ Scripts reales definidos en `package.json`:
    ```bash
    npm install
    ```
-2. Iniciar entorno de desarrollo:
+2. Levantar entorno local:
    ```bash
    npm run dev
    ```
-3. Abrir en navegador:
+3. Abrir:
    - `http://localhost:3000`
 
-Validación básica recomendada antes de cambios relevantes:
+Checks recomendados antes de merge:
 
 ```bash
 npm run lint
 npm run build
 ```
-
-Para validar producción local:
-
-```bash
-npm run build
-npm run start
-```
-
-## Convenciones y notas útiles
-
-- Se usa **App Router** (`src/app`) como estructura principal de rutas.
-- Los estilos están implementados con **Tailwind utilities** y estilos globales en `src/app/globals.css`.
-- `src/lib/config.ts` concentra datos de contacto usados por componentes y links de WhatsApp; parte de la metadata/JSON-LD sigue definida en `src/app/layout.tsx`.
-- Los assets públicos viven en `public/`.
-- Se utiliza la variable de entorno `NEXT_PUBLIC_GA_ID` para inyectar Google Analytics 4 desde el layout global.
-- Deploy objetivo: **Vercel**
