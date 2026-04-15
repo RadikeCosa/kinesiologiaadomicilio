@@ -9,6 +9,7 @@ export const SERVICES_PAGE_CONTENT = {
     description:
       "Contactanos por WhatsApp para una consulta personalizada sin compromiso.",
     ctaLabel: "Consultá por WhatsApp",
+    evaluationLinkLabel: "¿No estás seguro? Hacé una evaluación rápida",
     whatsappMessage:
       "Hola quisiera consultar sobre los servicios de kinesiología a domicilio",
   },

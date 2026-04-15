@@ -3,6 +3,7 @@ import Link from "next/link";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { ServicesGrid } from "./components/ServicesGrid";
 import { Container } from "@/components/ui/Container";
+import { getCtaClass } from "@/components/ui/ctaStyles";
 import {
   SECTION_LEAD_CLASS,
   SECTION_TITLE_CLASS,
@@ -58,6 +59,14 @@ export default function ServicesPage() {
             >
               {SERVICES_PAGE_CONTENT.consultationCta.ctaLabel}
             </WhatsAppButton>
+            <div className="mt-4">
+              <Link
+                href="/evaluar"
+                className={getCtaClass({ variant: "secondary", size: "md" })}
+              >
+                {SERVICES_PAGE_CONTENT.consultationCta.evaluationLinkLabel}
+              </Link>
+            </div>
           </div>
         </div>
 
