@@ -9,6 +9,7 @@ export type CtaLocation =
   | "header"
   | "contact"
   | "how_it_works"
+  | "evaluar"
   | "other";
 
 interface TrackBaseEventParams {
