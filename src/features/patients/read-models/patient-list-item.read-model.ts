@@ -1,4 +1,4 @@
-export type PatientOperationalStatus = "preliminary" | "ready_to_start" | "active_treatment";
+import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 
 export interface PatientListItemReadModel {
   id: string;

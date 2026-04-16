@@ -33,7 +33,7 @@ export function mapPatientToDetailReadModel(patient: Patient): PatientDetailRead
     patientNotes: undefined,
     mainContact: undefined,
     initialContext: undefined,
-    activeEpisode: null,
+    activeEpisode: undefined,
     operationalStatus: "preliminary",
     createdAt: "",
     updatedAt: "",
