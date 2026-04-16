@@ -76,6 +76,8 @@ Valores usados en superficies actuales:
 - Footer: WhatsApp + teléfono.
 - ScrollDepthTracker global en layout.
 
+Nota documental: `/evaluar` está instrumentada como superficie activa aunque hoy no figure en navegación global ni en el sitemap.
+
 ## Límites
 
 - No hay GTM en el repo.

@@ -11,6 +11,11 @@ Proyecto hoy: landing de **kinesiología a domicilio en Neuquén** orientada a p
 - Flujos principales implementados:
   - Home (`/`) con hero y CTA.
   - Página de servicios (`/services`) con listado y CTA a WhatsApp.
+  - Ruta pública `/evaluar` con contenido propio y CTA de contacto.
+- Estado actual de `/evaluar` dentro del producto:
+  - Sí está implementada e instrumentada en analytics.
+  - No está en la navegación global principal (header/footer).
+  - No figura en el sitemap actual.
 - No asumir procesos de producto “maduros” que hoy no existen.
 
 ## 3) Stack y estructura real
@@ -35,6 +40,14 @@ Rutas/archivos clave:
 - Priorizar simplicidad: resolver con lo que ya existe antes de sumar nuevas capas.
 - Evitar dependencias pesadas salvo justificación clara.
 - Si se modifica contenido técnico o funcional, actualizar documentación relacionada para evitar drift.
+- Tratar la landing pública actual y una futura app clínica como **dominios distintos**, aunque convivan en el mismo repo.
+- No asumir por defecto como siguiente paso: agenda, pagos, turnero/self-booking, auth compleja o multiusuario.
+- Si se proponen evoluciones funcionales, priorizar conceptualmente:
+  - patient intake;
+  - contacto principal;
+  - tratamiento activo;
+  - visitas.
+- Cualquier cambio que altere este encuadre debe mantener alineada `docs/fuente-de-verdad-operativa.md`.
 
 ## 5) Convenciones de implementación
 - Respetar App Router y organización actual de carpetas.
