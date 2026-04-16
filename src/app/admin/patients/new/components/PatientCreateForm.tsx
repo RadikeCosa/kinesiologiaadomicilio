@@ -39,48 +39,48 @@ export function PatientCreateForm() {
   }
 
   return (
-    <section className="mt-6 rounded border border-gray-200 p-4">
+    <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <h2 className="text-lg font-medium">Alta mínima de paciente</h2>
       <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
         <div>
           <label className="block text-sm font-medium" htmlFor="firstName">
             Nombre *
           </label>
-          <input className="mt-1 w-full rounded border p-2" id="firstName" name="firstName" required />
+          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="firstName" name="firstName" required />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="lastName">
             Apellido *
           </label>
-          <input className="mt-1 w-full rounded border p-2" id="lastName" name="lastName" required />
+          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="lastName" name="lastName" required />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="dni">
             DNI
           </label>
-          <input className="mt-1 w-full rounded border p-2" id="dni" name="dni" />
+          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="dni" name="dni" />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="phone">
             Teléfono
           </label>
-          <input className="mt-1 w-full rounded border p-2" id="phone" name="phone" />
+          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="phone" name="phone" />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="notes">
             Notas generales del paciente
           </label>
-          <textarea className="mt-1 w-full rounded border p-2" id="notes" name="notes" rows={3} />
+          <textarea className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="notes" name="notes" rows={3} />
         </div>
 
         {message ? <p className="text-sm text-red-600">{message}</p> : null}
 
         <button
-          className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
           disabled={isPending}
           type="submit"
         >

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import { PatientDetailView } from "@/app/admin/patients/[id]/components/PatientDetailView";
 import { PatientEditForm } from "@/app/admin/patients/[id]/components/PatientEditForm";
@@ -12,9 +14,13 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
   const patient = await loadPatientDetail(id);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="text-2xl font-semibold">Paciente</h1>
-      <p className="mt-2 text-sm text-gray-700">
+    <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+      <Link className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline" href="/admin/patients">
+        ← Volver al listado
+      </Link>
+
+      <h2 className="mt-3 text-xl font-semibold text-slate-900">Paciente</h2>
+      <p className="mt-2 text-sm text-slate-600">
         Flujo mínimo usable: detalle, edición incremental e inicio de tratamiento por separado.
       </p>
 
@@ -26,6 +32,6 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
           <StartEpisodeOfCareForm patient={patient} />
         </>
       ) : null}
-    </main>
+    </section>
   );
 }

@@ -19,18 +19,18 @@ function resolveOperationalSignal(patient: PatientDetailReadModel): string {
 export function PatientDetailView({ patient }: PatientDetailViewProps) {
   if (!patient) {
     return (
-      <section className="mt-6 rounded border border-dashed border-gray-300 p-4">
+      <section className="mt-6 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
         <h2 className="text-lg font-medium">Detalle de paciente</h2>
-        <p className="mt-2 text-sm text-gray-700">No se encontró el paciente solicitado.</p>
+        <p className="mt-2 text-sm text-slate-700">No se encontró el paciente solicitado.</p>
       </section>
     );
   }
 
   return (
-    <section className="mt-6 rounded border border-gray-200 p-4">
+    <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <h2 className="text-lg font-medium">Detalle de paciente</h2>
 
-      <dl className="mt-3 space-y-2 text-sm text-gray-800">
+      <dl className="mt-3 space-y-2 text-sm text-slate-800">
         <div>
           <dt className="font-medium">Nombre completo</dt>
           <dd>{patient.fullName}</dd>
