@@ -1,41 +1,57 @@
+import { getPatientOperationalStatus } from "@/domain/patient/patient.rules";
+import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
 import type { Patient } from "@/domain/patient/patient.types";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import type { PatientListItemReadModel } from "@/features/patients/read-models/patient-list-item.read-model";
 
-export function mapPatientToListItemReadModel(patient: Patient): PatientListItemReadModel {
-  // TODO(slice-1/fase-2): definir mapeo real de listado desde infraestructura.
-  void patient;
+function buildFullName(patient: Pick<Patient, "firstName" | "lastName">): string {
+  return `${patient.firstName} ${patient.lastName}`.trim();
+}
+
+export function mapPatientToListItemReadModel(
+  patient: Patient,
+  options?: { activeEpisode: EpisodeOfCare | null },
+): PatientListItemReadModel {
+  const hasActiveEpisode = Boolean(options?.activeEpisode);
 
   return {
-    id: "",
-    fullName: "",
-    dni: undefined,
-    phone: undefined,
-    operationalStatus: "preliminary",
-    createdAt: "",
-    updatedAt: "",
+    id: patient.id,
+    fullName: buildFullName(patient),
+    dni: patient.dni,
+    phone: patient.phone,
+    operationalStatus: getPatientOperationalStatus({
+      patient,
+      hasActiveEpisode,
+    }),
+    createdAt: patient.createdAt,
+    updatedAt: patient.updatedAt,
   };
 }
 
-export function mapPatientToDetailReadModel(patient: Patient): PatientDetailReadModel {
-  // TODO(slice-1/fase-2): definir mapeo real de detalle desde infraestructura.
-  void patient;
+export function mapPatientToDetailReadModel(
+  patient: Patient,
+  options?: { activeEpisode: EpisodeOfCare | null },
+): PatientDetailReadModel {
+  const activeEpisode = options?.activeEpisode ?? null;
 
   return {
-    id: "",
-    firstName: "",
-    lastName: "",
-    fullName: "",
-    dni: undefined,
-    phone: undefined,
-    birthDate: undefined,
-    address: undefined,
-    patientNotes: undefined,
-    mainContact: undefined,
-    initialContext: undefined,
-    activeEpisode: undefined,
-    operationalStatus: "preliminary",
-    createdAt: "",
-    updatedAt: "",
+    id: patient.id,
+    firstName: patient.firstName,
+    lastName: patient.lastName,
+    fullName: buildFullName(patient),
+    dni: patient.dni,
+    phone: patient.phone,
+    birthDate: patient.birthDate,
+    address: patient.address,
+    patientNotes: patient.notes,
+    mainContact: patient.mainContact,
+    initialContext: patient.initialContext,
+    activeEpisode,
+    operationalStatus: getPatientOperationalStatus({
+      patient,
+      hasActiveEpisode: Boolean(activeEpisode),
+    }),
+    createdAt: patient.createdAt,
+    updatedAt: patient.updatedAt,
   };
 }

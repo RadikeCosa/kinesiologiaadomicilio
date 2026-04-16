@@ -1,14 +1,11 @@
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
 
-export function mapEpisodeOfCareRead(resource: unknown): EpisodeOfCare {
-  // TODO(slice-1/fase-2): mapear recurso real de infraestructura a dominio.
-  void resource;
-
+export function mapEpisodeOfCareRead(resource: EpisodeOfCare): EpisodeOfCare {
   return {
-    id: "",
-    patientId: "",
-    status: "active",
-    startDate: "",
-    description: undefined,
+    id: resource.id,
+    patientId: resource.patientId,
+    status: resource.status,
+    startDate: resource.startDate,
+    description: resource.description,
   };
 }
