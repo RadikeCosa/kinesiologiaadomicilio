@@ -1,34 +1,40 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-15 (UTC)
+> Última actualización: 2026-04-16 (UTC)
 
 ## 1) Resumen ejecutivo
 
-El repositorio implementa una **landing de captación local** para kinesiología a domicilio en Neuquén.
-No hay sistema de turnos, login, panel administrativo ni backend de negocio.
+El repositorio mantiene como superficie principal una **landing pública de captación local** para kinesiología a domicilio en Neuquén.
+
+En paralelo, ahora existe una **superficie privada mínima transicional** para flujo clínico inicial bajo `/admin/patients`.
 
 ## 1.1) Dirección evolutiva del proyecto (decisión de encuadre)
 
-- **Estado actual**: este repo sigue siendo una landing pública de captación local.
-- **Dirección aceptada**: existe intención de evolucionar a futuro hacia una **app clínica conviviente en el mismo repositorio**.
-- **Límite explícito**: esa evolución futura **todavía no está implementada** en código.
-- **Foco funcional inicial previsto** (solo dirección, no estado implementado):
-  - alta de paciente;
-  - contacto principal / quién escribe;
-  - dirección y contexto inicial;
-  - tratamiento activo (EpisodeOfCare);
-  - visitas / encuentros.
-- **Fuera de alcance inicial previsto**:
-  - agenda;
-  - pagos;
-  - autogestión de turnos (self-booking);
-  - multiusuario / auth compleja;
-  - panel administrativo completo.
+- **Estado actual**:
+  - la landing pública sigue activa y central en el repo;
+  - existe una primera implementación de superficie privada clínica mínima.
+- **Dirección aceptada**: evolucionar de forma incremental hacia una app clínica privada conviviente en el mismo repositorio.
+- **Límite explícito del estado actual**: la superficie privada implementada hoy es **transicional (in-memory), no productiva**.
+- **Foco funcional efectivamente implementado en Slice 1**:
+  - alta mínima de paciente;
+  - edición incremental;
+  - inicio de tratamiento como acción separada;
+  - validación de DNI para iniciar tratamiento;
+  - bloqueo simple por duplicado de DNI al iniciar tratamiento;
+  - lectura mínima de listado y detalle;
+  - tests iniciales del slice.
+- **Fuera de alcance vigente**:
+  - FHIR real;
+  - auth;
+  - encounters / visitas;
+  - historial longitudinal;
+  - persistencia productiva;
+  - agenda, pagos, self-booking, `/portal`, panel administrativo amplio.
 
 ### Aclaración de límites documentales
 
 - No documentar capacidades futuras como si existieran hoy.
-- No reinterpretar el repo actual como si ya fuera una app clínica.
+- No reinterpretar el repo como si ya fuera una app clínica madura.
 
 ## 2) Estado actual confirmado en código
 
@@ -37,21 +43,36 @@ No hay sistema de turnos, login, panel administrativo ni backend de negocio.
 - `/services`
 - `/evaluar`
 
+### Rutas privadas mínimas (transicionales)
+- `/admin/patients`
+- `/admin/patients/new`
+- `/admin/patients/[id]`
+
 ### Capacidades actuales
-- Navegación global en header/footer.
-- Catálogo de servicios con cards + CTA.
-- Flujo de orientación en `/evaluar` (selección de situación, resultado y CTA de consulta).
-- Contacto por WhatsApp y teléfono.
-- SEO técnico base:
-  - Metadata global + metadata por ruta.
-  - Open Graph/Twitter.
-  - JSON-LD `MedicalBusiness`.
-  - `robots.txt` y `sitemap.xml`.
-- Analítica con GA4 directo (sin GTM):
-  - `generate_lead`
-  - `phone_click`
-  - `scroll_50`
-  - `scroll_90`
+- **Landing pública**:
+  - navegación global en header/footer;
+  - catálogo de servicios con cards + CTA;
+  - flujo de orientación en `/evaluar` (selección de situación, resultado y CTA de consulta);
+  - contacto por WhatsApp y teléfono;
+  - SEO técnico base:
+    - metadata global + metadata por ruta;
+    - Open Graph/Twitter;
+    - JSON-LD `MedicalBusiness`;
+    - `robots.txt` y `sitemap.xml`;
+  - analítica con GA4 directo (sin GTM):
+    - `generate_lead`
+    - `phone_click`
+    - `scroll_50`
+    - `scroll_90`
+- **Superficie privada mínima**:
+  - listado mínimo de pacientes;
+  - alta mínima de paciente;
+  - detalle de paciente;
+  - edición incremental de datos;
+  - inicio de tratamiento en acción separada (no automática en alta);
+  - validación de DNI requerida para iniciar tratamiento;
+  - bloqueo simple por duplicado de DNI para iniciar tratamiento;
+  - cobertura inicial con tests de dominio e integración del slice.
 
 ## 3) Fuentes de verdad activas
 
@@ -65,13 +86,15 @@ No hay sistema de turnos, login, panel administrativo ni backend de negocio.
 | Home “Cómo funciona” | `src/app/home/howItWorksContent.ts` |
 | Flujo `/evaluar` | `src/app/evaluar/evaluar-content.ts` |
 | Tracking GA4 | `src/lib/analytics.ts` |
+| Slice 1 privado (rutas/admin pacientes) | `src/app/admin/patients/**` |
+| Reglas y validaciones slice clínico mínimo | `src/domain/patient/**`, `src/domain/episode-of-care/**` |
 
 ## 4) Observaciones técnicas relevantes
 
 1. `/evaluar` está implementada y enlazada desde Home.
 2. `sitemap.ts` actualmente publica solo `/` y `/services` (no incluye `/evaluar`).
 3. Header/Footer comparten `NAV_LINKS`; `/evaluar` no figura en esa navegación global (acceso principal desde CTA de Home).
-4. La ausencia de `/evaluar` en sitemap se registra como **punto abierto a revisar** (no hay evidencia documental/código para afirmar deuda priorizada ni decisión definitiva).
+4. La superficie privada `/admin/patients/*` existe para uso transicional local y no debe presentarse como operación clínica productiva.
 
 ## 5) Mantenimiento recomendado
 
@@ -81,6 +104,9 @@ No hay sistema de turnos, login, panel administrativo ni backend de negocio.
   - Hero: `heroContent.ts`
   - Home: `homeContent.ts` / `howItWorksContent.ts`
   - Evaluar: `evaluar-content.ts`
+- Si evoluciona la superficie privada clínica:
+  - mantener alineadas `docs/slice-1/slice-1.md`, `docs/slice-1/backlog-tecnico-slice1.md` y este documento;
+  - declarar explícitamente qué sigue siendo transicional y qué ya es productivo cuando ocurra.
 
 ## 6) Estado de validación local
 
