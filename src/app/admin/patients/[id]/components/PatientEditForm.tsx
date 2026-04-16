@@ -44,14 +44,14 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
   }
 
   return (
-    <section className="mt-6 rounded border border-gray-200 p-4">
+    <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <h2 className="text-lg font-medium">Editar datos del paciente</h2>
       <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
         <div>
           <label className="block text-sm font-medium" htmlFor="dni">
             DNI
           </label>
-          <input className="mt-1 w-full rounded border p-2" defaultValue={patient.dni ?? ""} id="dni" name="dni" />
+          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" defaultValue={patient.dni ?? ""} id="dni" name="dni" />
         </div>
 
         <div>
@@ -59,7 +59,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
             Teléfono
           </label>
           <input
-            className="mt-1 w-full rounded border p-2"
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
             defaultValue={patient.phone ?? ""}
             id="phone"
             name="phone"
@@ -71,7 +71,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
             Notas generales del paciente
           </label>
           <textarea
-            className="mt-1 w-full rounded border p-2"
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
             defaultValue={patient.patientNotes ?? ""}
             id="notes"
             name="notes"
@@ -82,8 +82,8 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
         <details>
           <summary className="cursor-pointer text-sm font-medium">Contacto principal y contexto inicial (básico)</summary>
           <div className="mt-3 space-y-4">
-            <fieldset className="space-y-4 rounded border border-gray-200 p-3">
-              <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-gray-600">
+            <fieldset className="space-y-4 rounded border border-slate-200 p-3">
+              <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
                 Contacto principal
               </legend>
               <div>
@@ -91,7 +91,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
                   Nombre
                 </label>
                 <input
-                  className="mt-1 w-full rounded border p-2"
+                  className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
                   defaultValue={patient.mainContact?.name ?? ""}
                   id="mainContactName"
                   name="mainContactName"
@@ -102,7 +102,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
                   Vínculo
                 </label>
                 <input
-                  className="mt-1 w-full rounded border p-2"
+                  className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
                   defaultValue={patient.mainContact?.relationship ?? ""}
                   id="mainContactRelationship"
                   name="mainContactRelationship"
@@ -113,7 +113,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
                   Teléfono
                 </label>
                 <input
-                  className="mt-1 w-full rounded border p-2"
+                  className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
                   defaultValue={patient.mainContact?.phone ?? ""}
                   id="mainContactPhone"
                   name="mainContactPhone"
@@ -121,8 +121,8 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
               </div>
             </fieldset>
 
-            <fieldset className="space-y-4 rounded border border-gray-200 p-3">
-              <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-gray-600">
+            <fieldset className="space-y-4 rounded border border-slate-200 p-3">
+              <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
                 Contexto inicial
               </legend>
               <div>
@@ -130,7 +130,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
                   Motivo o contexto inicial del caso
                 </label>
                 <textarea
-                  className="mt-1 w-full rounded border p-2"
+                  className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
                   defaultValue={patient.initialContext?.reasonForConsultation ?? ""}
                   id="initialReason"
                   name="initialReason"
@@ -141,10 +141,10 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
           </div>
         </details>
 
-        {message ? <p className="text-sm text-gray-700">{message}</p> : null}
+        {message ? <p className="text-sm text-slate-700">{message}</p> : null}
 
         <button
-          className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
           disabled={isPending}
           type="submit"
         >
