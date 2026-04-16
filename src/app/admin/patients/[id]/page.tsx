@@ -14,11 +14,18 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl font-semibold">Paciente</h1>
-      <p className="mt-2 text-sm text-gray-700">
-        Vista de detalle preparada para Slice 1 (Fase 1), todavía sin flujo clínico operativo.
-      </p>
+      <p className="mt-2 text-sm text-gray-700">Detalle cargado desde loader route-local (data.ts).</p>
 
       <PatientDetailView patient={patient} />
+
+      {patient ? (
+        <section className="mt-6 rounded border border-gray-200 p-4 text-sm text-gray-700">
+          <p>DNI: {patient.dni ?? "Sin DNI"}</p>
+          <p>Estado operativo: {patient.operationalStatus}</p>
+          <p>Episodio activo: {patient.activeEpisode ? "Sí" : "No"}</p>
+        </section>
+      ) : null}
+
       <PatientEditForm />
       <StartEpisodeOfCareForm />
     </main>

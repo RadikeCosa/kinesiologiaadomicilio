@@ -17,7 +17,7 @@ export interface PatientDetailReadModel {
   patientNotes?: string;
   mainContact?: MainContact;
   initialContext?: InitialContext;
-  activeEpisode?: EpisodeOfCare;
+  activeEpisode?: EpisodeOfCare | null;
   operationalStatus: PatientOperationalStatus;
   createdAt: string;
   updatedAt: string;
