@@ -10,6 +10,10 @@ interface PatientEditFormProps {
   patient: PatientDetailReadModel;
 }
 
+function hasSomeValue(values: Array<string | undefined>): boolean {
+  return values.some(Boolean);
+}
+
 export function PatientEditForm({ patient }: PatientEditFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -19,19 +23,28 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
+    const mainContactName = String(formData.get("mainContactName") ?? "") || undefined;
+    const mainContactRelationship = String(formData.get("mainContactRelationship") ?? "") || undefined;
+    const mainContactPhone = String(formData.get("mainContactPhone") ?? "") || undefined;
+    const initialReason = String(formData.get("initialReason") ?? "") || undefined;
+
     const input = {
       id: patient.id,
       dni: String(formData.get("dni") ?? "") || undefined,
       phone: String(formData.get("phone") ?? "") || undefined,
       notes: String(formData.get("notes") ?? "") || undefined,
-      mainContact: {
-        name: String(formData.get("mainContactName") ?? "") || undefined,
-        relationship: String(formData.get("mainContactRelationship") ?? "") || undefined,
-        phone: String(formData.get("mainContactPhone") ?? "") || undefined,
-      },
-      initialContext: {
-        reasonForConsultation: String(formData.get("initialReason") ?? "") || undefined,
-      },
+      mainContact: hasSomeValue([mainContactName, mainContactRelationship, mainContactPhone])
+        ? {
+            name: mainContactName,
+            relationship: mainContactRelationship,
+            phone: mainContactPhone,
+          }
+        : undefined,
+      initialContext: hasSomeValue([initialReason])
+        ? {
+            reasonForConsultation: initialReason,
+          }
+        : undefined,
     };
 
     startTransition(async () => {
