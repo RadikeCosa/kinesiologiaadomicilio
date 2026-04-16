@@ -33,6 +33,11 @@ export interface CreatePatientInput {
   lastName: string;
   dni?: string;
   phone?: string;
+  birthDate?: string;
+  address?: string;
+  notes?: string;
+  mainContact?: MainContact;
+  initialContext?: InitialContext;
 }
 
 export interface UpdatePatientInput {
