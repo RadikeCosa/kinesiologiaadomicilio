@@ -7,6 +7,29 @@
 El repositorio implementa una **landing de captación local** para kinesiología a domicilio en Neuquén.
 No hay sistema de turnos, login, panel administrativo ni backend de negocio.
 
+## 1.1) Dirección evolutiva del proyecto (decisión de encuadre)
+
+- **Estado actual**: este repo sigue siendo una landing pública de captación local.
+- **Dirección aceptada**: existe intención de evolucionar a futuro hacia una **app clínica conviviente en el mismo repositorio**.
+- **Límite explícito**: esa evolución futura **todavía no está implementada** en código.
+- **Foco funcional inicial previsto** (solo dirección, no estado implementado):
+  - alta de paciente;
+  - contacto principal / quién escribe;
+  - dirección y contexto inicial;
+  - tratamiento activo (EpisodeOfCare);
+  - visitas / encuentros.
+- **Fuera de alcance inicial previsto**:
+  - agenda;
+  - pagos;
+  - autogestión de turnos (self-booking);
+  - multiusuario / auth compleja;
+  - panel administrativo completo.
+
+### Aclaración de límites documentales
+
+- No documentar capacidades futuras como si existieran hoy.
+- No reinterpretar el repo actual como si ya fuera una app clínica.
+
 ## 2) Estado actual confirmado en código
 
 ### Rutas públicas
@@ -48,6 +71,7 @@ No hay sistema de turnos, login, panel administrativo ni backend de negocio.
 1. `/evaluar` está implementada y enlazada desde Home.
 2. `sitemap.ts` actualmente publica solo `/` y `/services` (no incluye `/evaluar`).
 3. Header/Footer comparten `NAV_LINKS`; `/evaluar` no figura en esa navegación global (acceso principal desde CTA de Home).
+4. La ausencia de `/evaluar` en sitemap se registra como **punto abierto a revisar** (no hay evidencia documental/código para afirmar deuda priorizada ni decisión definitiva).
 
 ## 5) Mantenimiento recomendado
 
