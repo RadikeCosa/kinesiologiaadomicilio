@@ -48,11 +48,6 @@ function compactSlice1InitialContext(
 export async function updatePatientAction(input: unknown): Promise<UpdatePatientActionResult> {
   try {
     const parsedInput = updatePatientSchema.parse(input);
-    const scopedInput: UpdatePatientInput = {
-      ...parsedInput,
-      mainContact: compactSlice1MainContact(parsedInput.mainContact),
-      initialContext: compactSlice1InitialContext(parsedInput.initialContext),
-    };
     const existingPatient = await getPatientById(parsedInput.id);
 
     if (!existingPatient) {
@@ -61,6 +56,14 @@ export async function updatePatientAction(input: unknown): Promise<UpdatePatient
         message: "No se encontró el paciente que intentás editar.",
       };
     }
+
+    const scopedInput: UpdatePatientInput = {
+      ...parsedInput,
+      firstName: parsedInput.firstName ?? existingPatient.firstName,
+      lastName: parsedInput.lastName ?? existingPatient.lastName,
+      mainContact: compactSlice1MainContact(parsedInput.mainContact),
+      initialContext: compactSlice1InitialContext(parsedInput.initialContext),
+    };
 
     await updatePatient(scopedInput);
 
