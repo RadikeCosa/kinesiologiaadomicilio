@@ -92,67 +92,62 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
           />
         </div>
 
-        <details>
-          <summary className="cursor-pointer text-sm font-medium">Contacto principal y contexto inicial (básico)</summary>
-          <div className="mt-3 space-y-4">
-            <fieldset className="space-y-4 rounded border border-slate-200 p-3">
-              <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                Contacto principal
-              </legend>
-              <div>
-                <label className="block text-sm font-medium" htmlFor="mainContactName">
-                  Nombre
-                </label>
-                <input
-                  className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
-                  defaultValue={patient.mainContact?.name ?? ""}
-                  id="mainContactName"
-                  name="mainContactName"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium" htmlFor="mainContactRelationship">
-                  Vínculo
-                </label>
-                <input
-                  className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
-                  defaultValue={patient.mainContact?.relationship ?? ""}
-                  id="mainContactRelationship"
-                  name="mainContactRelationship"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium" htmlFor="mainContactPhone">
-                  Teléfono
-                </label>
-                <input
-                  className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
-                  defaultValue={patient.mainContact?.phone ?? ""}
-                  id="mainContactPhone"
-                  name="mainContactPhone"
-                />
-              </div>
-            </fieldset>
-
-            <fieldset className="space-y-4 rounded border border-slate-200 p-3">
-              <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                Contexto inicial
-              </legend>
-              <div>
-                <label className="block text-sm font-medium" htmlFor="initialReason">
-                  Motivo o contexto inicial del caso
-                </label>
-                <textarea
-                  className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
-                  defaultValue={patient.initialContext?.reasonForConsultation ?? ""}
-                  id="initialReason"
-                  name="initialReason"
-                  rows={2}
-                />
-              </div>
-            </fieldset>
+        <fieldset className="space-y-4 rounded border border-slate-200 p-3">
+          <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+            Contacto principal (opcional)
+          </legend>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="mainContactName">
+              Nombre
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+              defaultValue={patient.mainContact?.name ?? ""}
+              id="mainContactName"
+              name="mainContactName"
+            />
           </div>
-        </details>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="mainContactRelationship">
+              Vínculo
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+              defaultValue={patient.mainContact?.relationship ?? ""}
+              id="mainContactRelationship"
+              name="mainContactRelationship"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="mainContactPhone">
+              Teléfono
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+              defaultValue={patient.mainContact?.phone ?? ""}
+              id="mainContactPhone"
+              name="mainContactPhone"
+            />
+          </div>
+        </fieldset>
+
+        <fieldset className="space-y-4 rounded border border-slate-200 p-3">
+          <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+            Contexto inicial del caso
+          </legend>
+          <div>
+            <label className="block text-sm font-medium" htmlFor="initialReason">
+              Motivo o contexto inicial
+            </label>
+            <textarea
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+              defaultValue={patient.initialContext?.reasonForConsultation ?? ""}
+              id="initialReason"
+              name="initialReason"
+              rows={2}
+            />
+          </div>
+        </fieldset>
 
         {message ? <p className="text-sm text-slate-700">{message}</p> : null}
 

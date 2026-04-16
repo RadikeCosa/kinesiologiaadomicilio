@@ -58,7 +58,7 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
         ) : null}
         {patient.initialContext?.reasonForConsultation ? (
           <div>
-            <dt className="font-medium">Motivo o contexto inicial del caso</dt>
+            <dt className="font-medium">Contexto inicial del caso</dt>
             <dd>{patient.initialContext.reasonForConsultation}</dd>
           </div>
         ) : null}
