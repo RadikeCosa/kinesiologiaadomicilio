@@ -47,8 +47,25 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
         ) : null}
         {patient.patientNotes ? (
           <div>
-            <dt className="font-medium">Notas</dt>
+            <dt className="font-medium">Notas generales del paciente</dt>
             <dd>{patient.patientNotes}</dd>
+          </div>
+        ) : null}
+        {patient.mainContact &&
+        (patient.mainContact.name || patient.mainContact.relationship || patient.mainContact.phone) ? (
+          <div>
+            <dt className="font-medium">Contacto principal</dt>
+            <dd className="space-y-1">
+              {patient.mainContact.name ? <p>Nombre: {patient.mainContact.name}</p> : null}
+              {patient.mainContact.relationship ? <p>Vínculo: {patient.mainContact.relationship}</p> : null}
+              {patient.mainContact.phone ? <p>Teléfono: {patient.mainContact.phone}</p> : null}
+            </dd>
+          </div>
+        ) : null}
+        {patient.initialContext?.reasonForConsultation ? (
+          <div>
+            <dt className="font-medium">Motivo o contexto inicial del caso</dt>
+            <dd>{patient.initialContext.reasonForConsultation}</dd>
           </div>
         ) : null}
         <div>
@@ -61,7 +78,9 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
         <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
           <p className="font-medium">Tratamiento activo</p>
           <p>Inicio: {patient.activeEpisode.startDate}</p>
-          {patient.activeEpisode.description ? <p>Descripción: {patient.activeEpisode.description}</p> : null}
+          {patient.activeEpisode.description ? (
+            <p>Descripción breve del episodio/tratamiento: {patient.activeEpisode.description}</p>
+          ) : null}
         </div>
       ) : null}
     </section>

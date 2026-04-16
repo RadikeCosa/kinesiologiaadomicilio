@@ -74,7 +74,7 @@ export function StartEpisodeOfCareForm({ patient }: StartEpisodeOfCareFormProps)
 
         <div>
           <label className="block text-sm font-medium" htmlFor="description">
-            Descripción
+            Descripción breve del episodio/tratamiento
           </label>
           <textarea className="mt-1 w-full rounded border p-2" id="description" name="description" rows={2} />
         </div>
