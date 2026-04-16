@@ -72,7 +72,7 @@ export function PatientCreateForm() {
 
         <div>
           <label className="block text-sm font-medium" htmlFor="notes">
-            Notas
+            Notas generales del paciente
           </label>
           <textarea className="mt-1 w-full rounded border p-2" id="notes" name="notes" rows={3} />
         </div>
