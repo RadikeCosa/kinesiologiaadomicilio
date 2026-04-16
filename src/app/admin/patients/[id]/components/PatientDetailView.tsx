@@ -24,49 +24,54 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
     <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <h2 className="text-lg font-medium">Detalle de paciente</h2>
 
-      <dl className="mt-3 space-y-2 text-sm text-slate-800">
-        <div>
-          <dt className="font-medium">Nombre completo</dt>
-          <dd>{patient.fullName}</dd>
+      <div className="mt-4 space-y-4 text-sm text-slate-800">
+        <div className="rounded-md border border-slate-200 bg-white p-3">
+          <h3 className="text-sm font-semibold text-slate-900">Identidad</h3>
+          <dl className="mt-2 space-y-2">
+            <div>
+              <dt className="font-medium">Nombre completo</dt>
+              <dd>{patient.fullName}</dd>
+            </div>
+            <div>
+              <dt className="font-medium">DNI</dt>
+              <dd>{patient.dni ?? "Sin DNI"}</dd>
+            </div>
+          </dl>
         </div>
-        <div>
-          <dt className="font-medium">DNI</dt>
-          <dd>{patient.dni ?? "Sin DNI"}</dd>
+
+        <div className="rounded-md border border-slate-200 bg-white p-3">
+          <h3 className="text-sm font-semibold text-slate-900">Contacto</h3>
+          <dl className="mt-2 space-y-2">
+            <div>
+              <dt className="font-medium">Teléfono del paciente</dt>
+              <dd>{patient.phone ?? "Sin teléfono"}</dd>
+            </div>
+            <div>
+              <dt className="font-medium">Contacto principal</dt>
+              <dd className="space-y-1">
+                <p>Nombre: {patient.mainContact?.name ?? "No informado"}</p>
+                <p>Vínculo: {patient.mainContact?.relationship ?? "No informado"}</p>
+                <p>Teléfono: {patient.mainContact?.phone ?? "No informado"}</p>
+              </dd>
+            </div>
+          </dl>
         </div>
-        {patient.phone ? (
-          <div>
-            <dt className="font-medium">Teléfono</dt>
-            <dd>{patient.phone}</dd>
-          </div>
-        ) : null}
-        {patient.patientNotes ? (
-          <div>
-            <dt className="font-medium">Notas generales del paciente</dt>
-            <dd>{patient.patientNotes}</dd>
-          </div>
-        ) : null}
-        {patient.mainContact &&
-        (patient.mainContact.name || patient.mainContact.relationship || patient.mainContact.phone) ? (
-          <div>
-            <dt className="font-medium">Contacto principal</dt>
-            <dd className="space-y-1">
-              {patient.mainContact.name ? <p>Nombre: {patient.mainContact.name}</p> : null}
-              {patient.mainContact.relationship ? <p>Vínculo: {patient.mainContact.relationship}</p> : null}
-              {patient.mainContact.phone ? <p>Teléfono: {patient.mainContact.phone}</p> : null}
-            </dd>
-          </div>
-        ) : null}
-        {patient.initialContext?.reasonForConsultation ? (
-          <div>
-            <dt className="font-medium">Contexto inicial del caso</dt>
-            <dd>{patient.initialContext.reasonForConsultation}</dd>
-          </div>
-        ) : null}
-        <div>
-          <dt className="font-medium">Estado operativo</dt>
-          <dd>{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</dd>
+
+        <div className="rounded-md border border-slate-200 bg-white p-3">
+          <h3 className="text-sm font-semibold text-slate-900">Contexto inicial</h3>
+          <p className="mt-2">{patient.initialContext?.reasonForConsultation ?? "Sin contexto inicial informado."}</p>
         </div>
-      </dl>
+
+        <div className="rounded-md border border-slate-200 bg-white p-3">
+          <h3 className="text-sm font-semibold text-slate-900">Notas generales</h3>
+          <p className="mt-2">{patient.patientNotes ?? "Sin notas generales."}</p>
+        </div>
+
+        <div className="rounded-md border border-slate-200 bg-white p-3">
+          <h3 className="text-sm font-semibold text-slate-900">Estado operativo</h3>
+          <p className="mt-2">{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</p>
+        </div>
+      </div>
 
       {patient.activeEpisode ? (
         <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
