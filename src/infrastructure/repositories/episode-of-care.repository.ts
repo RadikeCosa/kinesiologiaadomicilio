@@ -5,7 +5,7 @@ import type { EpisodeOfCare, StartEpisodeOfCareInput } from "@/domain/episode-of
  *
  * Nota: dataset mínimo en memoria, acotado a lectura para detalle de paciente.
  */
-const transitionalEpisodesOfCare: EpisodeOfCare[] = [
+const initialTransitionalEpisodesOfCare: EpisodeOfCare[] = [
   {
     id: "epi-001",
     patientId: "pat-003",
@@ -14,6 +14,19 @@ const transitionalEpisodesOfCare: EpisodeOfCare[] = [
     description: "Plan inicial de rehabilitación domiciliaria.",
   },
 ];
+
+const transitionalEpisodesOfCare: EpisodeOfCare[] = initialTransitionalEpisodesOfCare.map((episode) => ({
+  ...episode,
+}));
+
+export function __resetEpisodeOfCareRepositoryForTests(): void {
+  transitionalEpisodesOfCare.splice(0, transitionalEpisodesOfCare.length);
+  transitionalEpisodesOfCare.push(
+    ...initialTransitionalEpisodesOfCare.map((episode) => ({
+      ...episode,
+    })),
+  );
+}
 
 export async function getActiveEpisodeByPatientId(patientId: string): Promise<EpisodeOfCare | null> {
   const episode = transitionalEpisodesOfCare.find(
