@@ -96,3 +96,14 @@ export async function findPatientByDni(dni: string): Promise<Patient | null> {
 
   return patient ?? null;
 }
+
+export async function existsAnotherPatientWithDni(options: {
+  dni: string;
+  excludePatientId: string;
+}): Promise<boolean> {
+  const normalizedDni = options.dni.trim();
+
+  return transitionalPatients.some(
+    (item) => item.id !== options.excludePatientId && item.dni?.trim() === normalizedDni,
+  );
+}

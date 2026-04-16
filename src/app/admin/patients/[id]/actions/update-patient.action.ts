@@ -1,10 +1,37 @@
 "use server";
 
-import type { UpdatePatientInput } from "@/domain/patient/patient.types";
+import { updatePatientSchema } from "@/domain/patient/patient.schemas";
+import { getPatientById, updatePatient } from "@/infrastructure/repositories/patient.repository";
 
-export async function updatePatientAction(input: UpdatePatientInput): Promise<{ ok: boolean }> {
-  // TODO(slice-1/fase-2): validar y persistir edición de paciente.
-  void input;
+export interface UpdatePatientActionResult {
+  ok: boolean;
+  message?: string;
+}
 
-  return { ok: true };
+export async function updatePatientAction(input: unknown): Promise<UpdatePatientActionResult> {
+  try {
+    const parsedInput = updatePatientSchema.parse(input);
+    const existingPatient = await getPatientById(parsedInput.id);
+
+    if (!existingPatient) {
+      return {
+        ok: false,
+        message: "No se encontró el paciente que intentás editar.",
+      };
+    }
+
+    await updatePatient(parsedInput);
+
+    return {
+      ok: true,
+      message: "Paciente actualizado correctamente.",
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "No se pudo actualizar el paciente.";
+
+    return {
+      ok: false,
+      message,
+    };
+  }
 }
