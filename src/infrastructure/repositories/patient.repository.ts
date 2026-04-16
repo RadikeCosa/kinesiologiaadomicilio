@@ -7,7 +7,7 @@ import type { CreatePatientInput, Patient, UpdatePatientInput } from "@/domain/p
  * (repository -> mapper -> read model -> data.ts -> page.tsx)
  * mientras se integra persistencia real/FHIR.
  */
-const transitionalPatients: Patient[] = [
+const initialTransitionalPatients: Patient[] = [
   {
     id: "pat-001",
     firstName: "Ana",
@@ -48,6 +48,21 @@ const transitionalPatients: Patient[] = [
     updatedAt: "2026-04-14T10:20:00.000Z",
   },
 ];
+
+function clonePatient(patient: Patient): Patient {
+  return {
+    ...patient,
+    mainContact: patient.mainContact ? { ...patient.mainContact } : undefined,
+    initialContext: patient.initialContext ? { ...patient.initialContext } : undefined,
+  };
+}
+
+const transitionalPatients: Patient[] = initialTransitionalPatients.map(clonePatient);
+
+export function __resetPatientRepositoryForTests(): void {
+  transitionalPatients.splice(0, transitionalPatients.length);
+  transitionalPatients.push(...initialTransitionalPatients.map(clonePatient));
+}
 
 export async function createPatient(input: CreatePatientInput): Promise<Patient> {
   const nowIso = new Date().toISOString();
