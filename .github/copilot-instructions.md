@@ -3,15 +3,35 @@
 ## 1) Propósito de este archivo
 Esta guía define cómo colaborar en este repositorio **según su estado real actual**. Sirve para asistentes IA y personas que hagan cambios rápidos sin agregar complejidad innecesaria.
 
-Proyecto hoy: landing de **kinesiología a domicilio en Neuquén** orientada a presentación del servicio y captación por WhatsApp.
+Proyecto hoy: landing de **kinesiología a domicilio en Neuquén** como superficie principal, con una primera superficie privada clínica mínima transicional en `/admin/patients`.
 
 ## 2) Resumen real del proyecto
 - Etapa: **MVP / evolución temprana**.
-- Objetivo actual: comunicar propuesta de valor + facilitar contacto.
-- Flujos principales implementados:
+- Objetivo operativo actual:
+  - mantener la landing pública de captación;
+  - sostener una base clínica privada mínima para evolución incremental.
+- Flujos públicos implementados:
   - Home (`/`) con hero y CTA.
   - Página de servicios (`/services`) con listado y CTA a WhatsApp.
   - Ruta pública `/evaluar` con contenido propio y CTA de contacto.
+- Superficie privada mínima implementada (transicional / in-memory):
+  - `/admin/patients`
+  - `/admin/patients/new`
+  - `/admin/patients/[id]`
+- Capacidades privadas mínimas actuales:
+  - alta mínima de paciente;
+  - edición incremental;
+  - inicio de tratamiento separado;
+  - validación de DNI para iniciar tratamiento;
+  - bloqueo simple por duplicado de DNI al iniciar tratamiento;
+  - lectura mínima de listado y detalle;
+  - tests iniciales del slice.
+- Límites vigentes (no inventar):
+  - sin FHIR real;
+  - sin auth;
+  - sin encounters/visitas;
+  - sin historial longitudinal;
+  - sin persistencia productiva.
 - Estado actual de `/evaluar` dentro del producto:
   - Sí está implementada e instrumentada en analytics.
   - No está en la navegación global principal (header/footer).
@@ -30,6 +50,7 @@ Rutas/archivos clave:
 - `src/app/services/page.tsx`: página de servicios.
 - `src/app/sitemap.ts`: sitemap actual.
 - `src/lib/config.ts`: datos de negocio/contacto y helper de WhatsApp.
+- `src/app/admin/patients/**`: superficie privada mínima del slice clínico inicial.
 - `src/components/`: componentes compartidos.
 - `public/`: assets estáticos y `robots.txt`.
 
@@ -40,7 +61,8 @@ Rutas/archivos clave:
 - Priorizar simplicidad: resolver con lo que ya existe antes de sumar nuevas capas.
 - Evitar dependencias pesadas salvo justificación clara.
 - Si se modifica contenido técnico o funcional, actualizar documentación relacionada para evitar drift.
-- Tratar la landing pública actual y una futura app clínica como **dominios distintos**, aunque convivan en el mismo repo.
+- Tratar la landing pública actual y la superficie privada clínica como **dominios distintos**, aunque convivan en el mismo repo.
+- No presentar la parte clínica como madura/productiva mientras siga siendo transicional.
 - No asumir por defecto como siguiente paso: agenda, pagos, turnero/self-booking, auth compleja o multiusuario.
 - Si se proponen evoluciones funcionales, priorizar conceptualmente:
   - patient intake;
