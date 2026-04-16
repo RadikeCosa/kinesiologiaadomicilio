@@ -4,17 +4,11 @@ interface PatientDetailViewProps {
   patient: PatientDetailReadModel | null;
 }
 
-function resolveOperationalSignal(patient: PatientDetailReadModel): string {
-  if (patient.activeEpisode) {
-    return "Tratamiento activo";
-  }
-
-  if (patient.dni) {
-    return "Listo para iniciar tratamiento";
-  }
-
-  return "Identidad incompleta";
-}
+const OPERATIONAL_STATUS_LABELS: Record<PatientDetailReadModel["operationalStatus"], string> = {
+  preliminary: "Identidad incompleta",
+  ready_to_start: "Listo para iniciar tratamiento",
+  active_treatment: "Tratamiento activo",
+};
 
 export function PatientDetailView({ patient }: PatientDetailViewProps) {
   if (!patient) {
@@ -70,7 +64,7 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
         ) : null}
         <div>
           <dt className="font-medium">Estado operativo</dt>
-          <dd>{resolveOperationalSignal(patient)}</dd>
+          <dd>{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</dd>
         </div>
       </dl>
 
