@@ -29,7 +29,7 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
       {patient ? (
         <>
           <PatientEditForm patient={patient} />
-          <StartEpisodeOfCareForm patient={patient} />
+          {!patient.activeEpisode ? <StartEpisodeOfCareForm patient={patient} /> : null}
         </>
       ) : null}
     </section>
