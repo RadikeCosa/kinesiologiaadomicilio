@@ -14,6 +14,27 @@ const OPERATIONAL_STATUS_LABELS: Record<
   finished_treatment: "Tratamiento finalizado",
 };
 
+function getTreatmentBadge(patient: PatientDetailReadModel): { label: string; className: string } {
+  if (patient.activeEpisode) {
+    return {
+      label: "En tratamiento",
+      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    };
+  }
+
+  if (patient.latestEpisode?.status === "finished") {
+    return {
+      label: "Tratamiento finalizado",
+      className: "border-slate-300 bg-slate-100 text-slate-700",
+    };
+  }
+
+  return {
+    label: "Sin tratamiento activo",
+    className: "border-slate-300 bg-white text-slate-700",
+  };
+}
+
 export function PatientDetailView({ patient }: PatientDetailViewProps) {
   if (!patient) {
     return (
@@ -25,6 +46,8 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
       </section>
     );
   }
+
+  const treatmentBadge = getTreatmentBadge(patient);
 
   return (
     <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -83,13 +106,9 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
               {OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}
             </span>
             <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
-                patient.activeEpisode
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                  : "border-slate-300 bg-white text-slate-700"
-              }`}
+              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
             >
-              {patient.activeEpisode ? "En tratamiento" : "Sin tratamiento activo"}
+              {treatmentBadge.label}
             </span>
           </div>
         </div>

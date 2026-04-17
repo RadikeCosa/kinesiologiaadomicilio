@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { DNI_IDENTIFIER_SYSTEM } from "@/lib/fhir/identifiers";
-import { mapFhirPatientToDomain } from "@/infrastructure/mappers/patient/patient-read.mapper";
+import {
+  mapFhirPatientToDomain,
+  mapPatientToDetailReadModel,
+  mapPatientToListItemReadModel,
+} from "@/infrastructure/mappers/patient/patient-read.mapper";
 
 describe("patient-read.mapper", () => {
   it("maps FHIR Patient into domain Patient preserving contact and multi-note", () => {
@@ -41,5 +45,57 @@ describe("patient-read.mapper", () => {
       createdAt: "2026-04-17T12:00:00.000Z",
       updatedAt: "2026-04-17T12:00:00.000Z",
     });
+  });
+
+  it("maps list item status as finished_treatment when latest episode is finished", () => {
+    const mapped = mapPatientToListItemReadModel(
+      {
+        id: "pat-1",
+        firstName: "Ana",
+        lastName: "Pérez",
+        dni: "32123456",
+        phone: "+54 299 555 0101",
+        createdAt: "2026-04-17T12:00:00.000Z",
+        updatedAt: "2026-04-17T12:00:00.000Z",
+      },
+      {
+        activeEpisode: null,
+        latestEpisode: {
+          id: "epi-1",
+          patientId: "pat-1",
+          status: "finished",
+          startDate: "2026-03-01",
+          endDate: "2026-04-01",
+        },
+      },
+    );
+
+    expect(mapped.operationalStatus).toBe("finished_treatment");
+  });
+
+  it("maps detail status as finished_treatment when latest episode is finished", () => {
+    const mapped = mapPatientToDetailReadModel(
+      {
+        id: "pat-1",
+        firstName: "Ana",
+        lastName: "Pérez",
+        dni: "32123456",
+        phone: "+54 299 555 0101",
+        createdAt: "2026-04-17T12:00:00.000Z",
+        updatedAt: "2026-04-17T12:00:00.000Z",
+      },
+      {
+        activeEpisode: null,
+        latestEpisode: {
+          id: "epi-1",
+          patientId: "pat-1",
+          status: "finished",
+          startDate: "2026-03-01",
+          endDate: "2026-04-01",
+        },
+      },
+    );
+
+    expect(mapped.operationalStatus).toBe("finished_treatment");
   });
 });

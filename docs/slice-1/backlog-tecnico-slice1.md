@@ -1,7 +1,7 @@
 # Backlog técnico Slice 1 — estado de cierre
 
 > Estado del documento: backlog residual del Slice 1 (post-implementación)
-> Última actualización: 2026-04-16 (UTC)
+> Última actualización: 2026-04-17 (UTC)
 
 ## 1) Propósito
 
@@ -22,10 +22,10 @@ No es roadmap general del proyecto.
 | Fase 3 — reglas de negocio | Implementada | Reglas para alta mínima e inicio de tratamiento aplicadas. |
 | Fase 4 — schemas | Implementada | Schemas de create/update/start disponibles y usados por actions. |
 | Fase 5 — read models | Implementada | Read models de listado y detalle presentes. |
-| Fase 6 — repositorios/mappers | Implementada (transicional) | Repositorios y mappers activos con dataset in-memory. |
+| Fase 6 — repositorios/mappers | Implementada (FHIR real) | Repositorios y mappers activos sobre backend FHIR para `Patient` y `EpisodeOfCare`. |
 | Fase 7 — loaders | Implementada | `loadPatientsList` y `loadPatientDetail` operativos. |
-| Fase 8 — server actions | Implementada | `create`, `update`, `start episode` operativas. |
-| Fase 9 — UI mínima | Implementada | Listado, alta, detalle, edición e inicio de tratamiento. |
+| Fase 8 — server actions | Implementada | `create`, `update`, `start episode` y `finish episode` operativas. |
+| Fase 9 — UI mínima | Implementada | Listado, alta, detalle, edición, inicio y finalización de tratamiento. |
 | Fase 10 — tests | Implementada (inicial) | Cobertura inicial de unit + integration del slice. |
 | Fase 11 — documentación de cierre | Implementada | Documentación del slice y fuente operativa alineadas. |
 
@@ -39,6 +39,7 @@ No es roadmap general del proyecto.
   - `create-patient.action.ts`
   - `update-patient.action.ts`
   - `start-episode-of-care.action.ts`
+  - `finish-episode-of-care.action.ts`
 - lectura implementada:
   - `src/app/admin/patients/data.ts`
   - `src/app/admin/patients/[id]/data.ts`
@@ -46,21 +47,22 @@ No es roadmap general del proyecto.
   - alta mínima por nombre + apellido;
   - DNI obligatorio para iniciar tratamiento;
   - bloqueo simple por DNI duplicado;
-  - bloqueo si hay episodio activo.
+  - bloqueo si hay episodio activo;
+  - finalización permitida solo con episodio activo.
+- estado operativo visible implementado:
+  - listado y detalle distinguen episodio activo, tratamiento finalizado y ausencia de tratamiento.
 - tests iniciales implementados:
   - unit tests de dominio/schemas;
   - integration tests para actions/loaders del slice.
 
 ## 4) Backlog residual real del Slice 1
 
-El remanente del slice no es funcional nuevo, sino deuda técnica de transición:
+El remanente del slice no es funcional nuevo, sino deuda técnica de estabilización:
 
-1. **Persistencia real**
-   - reemplazar repositorios in-memory por persistencia estable.
-2. **Integración FHIR real**
-   - mantener frontera repository/mapper, conectando con backend FHIR real cuando corresponda.
-3. **Endurecimiento pre-producción**
-   - robustecer manejo de errores/observabilidad al migrar fuera de in-memory.
+1. **Endurecimiento pre-producción**
+   - robustecer manejo de errores/observabilidad sobre repositorios FHIR actuales.
+2. **Concurrencia y consistencia**
+   - evaluar `If-Match`/versionado en updates (`Patient`, `EpisodeOfCare`) cuando el contexto lo requiera.
 
 ## 5) Fuera de alcance confirmado (no remanente de Slice 1)
 
@@ -77,12 +79,11 @@ No deben volver a listarse como “pendiente de Slice 1”:
 
 ## 6) Límites vigentes (deben mantenerse explícitos)
 
-- implementación actual transicional/in-memory;
-- sin FHIR real;
+- FHIR real acotado a `Patient` y `EpisodeOfCare`, sin Encounter;
 - sin auth;
 - sin encounters;
 - sin historial longitudinal;
-- sin persistencia productiva.
+- sin cobertura de operación clínica completa.
 
 ## 7) Nota editorial
 

@@ -1,13 +1,13 @@
 # Slice 1 — alta flexible de paciente + identidad mínima para iniciar tratamiento
 
 > Estado del documento: cierre de Slice 1 alineado a implementación real
-> Última actualización: 2026-04-16 (UTC)
+> Última actualización: 2026-04-17 (UTC)
 
 ## 1) Encadre del slice
 
 Este slice implementa una **primera superficie privada mínima** bajo `/admin/patients` sin cambiar el rol principal de la landing pública.
 
-El objetivo fue habilitar un flujo clínico inicial útil y chico, con implementación **transicional/in-memory**.
+El objetivo fue habilitar un flujo clínico inicial útil y chico, con alcance acotado pre-Encounter.
 
 ## 2) Objetivo funcional (intención original)
 
@@ -16,6 +16,7 @@ Permitir que el profesional pueda:
 - crear ficha preliminar de paciente con fricción mínima;
 - completar datos más adelante;
 - separar “crear paciente” de “iniciar tratamiento”;
+- separar también la finalización de tratamiento como acción explícita;
 - exigir identidad mínima (DNI) al iniciar tratamiento;
 - bloquear inicio de tratamiento si hay duplicado simple por DNI.
 
@@ -34,16 +35,18 @@ Permitir que el profesional pueda:
 - detalle de paciente;
 - edición incremental de ficha;
 - inicio de tratamiento como acción separada;
+- finalización de tratamiento cerrando el episodio activo;
 - validación de DNI para iniciar tratamiento;
 - bloqueo simple por duplicado de DNI al iniciar tratamiento;
+- consistencia de estado operativo entre listado y detalle para tratamiento activo/finalizado/sin tratamiento;
 - loaders mínimos de listado y detalle;
 - tests iniciales de dominio e integración del slice.
 
 ### 3.3 Estado técnico de implementación
 
-- Implementación transicional en memoria para pacientes y episodios.
-- Sin persistencia productiva.
-- Sin integración FHIR real.
+- `Patient` persiste y lee desde FHIR real vía repository + mapper.
+- `EpisodeOfCare` persiste y lee desde FHIR real vía repository + mapper.
+- El slice mantiene alcance mínimo operativo (no es aún flujo clínico completo).
 
 ## 4) Reglas de negocio aplicadas
 
@@ -79,6 +82,7 @@ Se admiten fichas incompletas sin forzar completitud total temprana.
 - `create-patient.action.ts`
 - `update-patient.action.ts`
 - `start-episode-of-care.action.ts`
+- `finish-episode-of-care.action.ts`
 
 ### 5.2 Lectura (loaders)
 
@@ -91,6 +95,7 @@ Se admiten fichas incompletas sin forzar completitud total temprana.
 - `PatientDetailView`
 - `PatientEditForm`
 - `StartEpisodeOfCareForm`
+- `FinishEpisodeOfCareForm`
 
 ### 5.4 Dominio y validación
 
@@ -122,18 +127,14 @@ El Slice 1 se considera **cerrado a nivel transicional** porque:
 - historial longitudinal;
 - auth;
 - persistencia productiva;
-- FHIR real;
 - agenda;
 - pagos;
 - `/portal`;
 - multiusuario;
 - deduplicación avanzada;
-- cierre formal de tratamiento.
 
 ## 8) Remanente real post-Slice 1 (sin inflar roadmap)
 
-- migrar de repositorios in-memory a persistencia real;
-- integrar capa real FHIR detrás de repositorios/mappers;
 - endurecer comportamiento para contexto productivo (incluyendo auth cuando corresponda);
 - recién después, evaluar slices que incorporen encounters e historial longitudinal.
 
