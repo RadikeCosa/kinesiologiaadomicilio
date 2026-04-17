@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-16 (UTC)
+> Última actualización: 2026-04-17 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -79,7 +79,7 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
 | Dominio | Fuente primaria |
 | --- | --- |
 | Datos del negocio/contacto/base URL | `src/lib/config.ts` |
-| Catálogo de servicios | `src/app/services/data/servicesData.ts` |
+| Catálogo de servicios | `src/lib/servicesData.ts` |
 | Navegación global | `src/lib/navLinks.ts` |
 | Hero (copy editorial) | `src/app/hero/heroContent.ts` |
 | Home (copy editorial) | `src/app/home/homeContent.ts` |
@@ -93,13 +93,14 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
 
 1. `/evaluar` está implementada y enlazada desde Home.
 2. `sitemap.ts` actualmente publica solo `/` y `/services` (no incluye `/evaluar`).
-3. Header/Footer comparten `NAV_LINKS`; `/evaluar` no figura en esa navegación global (acceso principal desde CTA de Home).
+3. Header/Footer de la superficie pública comparten `NAV_LINKS`; `/evaluar` no figura en esa navegación global (acceso principal desde CTA de Home).
 4. La superficie privada `/admin/patients/*` existe para uso transicional local y no debe presentarse como operación clínica productiva.
+5. El root layout (`src/app/layout.tsx`) no inyecta header/footer; la shell pública vive en `src/app/(public)/layout.tsx` y la shell privada en `src/app/admin/layout.tsx`.
 
 ## 5) Mantenimiento recomendado
 
 - Si cambia contacto, URL base o ubicación: editar `src/lib/config.ts` y revisar `layout.tsx`, `robots.ts`, `sitemap.ts`.
-- Si cambia catálogo de servicios: editar `servicesData.ts` y revisar consumidores (`ServicesGrid`, footer, hero, JSON-LD).
+- Si cambia catálogo de servicios: editar `src/lib/servicesData.ts` y revisar consumidores (`ServicesGrid`, footer, hero, JSON-LD del layout público).
 - Si cambia copy editorial:
   - Hero: `heroContent.ts`
   - Home: `homeContent.ts` / `howItWorksContent.ts`
@@ -112,3 +113,9 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
 
 - `npm run lint`: pasa.
 - `npm run build`: pasa.
+
+
+## 7) Reorganización de layouts y navegación público/privada
+
+- Documento técnico específico: `docs/reorganizacion-layouts-publico-privado.md`.
+- Mantener este documento como fuente operativa global, y el documento específico como detalle de arquitectura implementada de shell/layouts.
