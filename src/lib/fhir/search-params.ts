@@ -35,3 +35,11 @@ export function buildActiveEpisodeOfCareByPatientQuery(patientId: string): strin
 
   return params.toString();
 }
+
+export function buildEncounterByPatientQuery(patientId: string): string {
+  const params = new URLSearchParams({
+    subject: buildPatientReference(patientId),
+  });
+
+  return params.toString();
+}
