@@ -2,11 +2,19 @@ import Link from "next/link";
 
 import { loadPatientsList } from "@/app/admin/patients/data";
 
-const STATUS_LABELS = {
-  preliminary: "Ficha preliminar",
-  ready_to_start: "Listo para iniciar tratamiento",
-  active_treatment: "Tratamiento activo",
-} as const;
+function getTreatmentBadge(patientStatus: "preliminary" | "ready_to_start" | "active_treatment") {
+  if (patientStatus === "active_treatment") {
+    return {
+      label: "En tratamiento",
+      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    };
+  }
+
+  return {
+    label: "Sin tratamiento activo",
+    className: "border-slate-300 bg-white text-slate-700",
+  };
+}
 
 export default async function AdminPatientsPage() {
   const patients = await loadPatientsList();
@@ -35,18 +43,28 @@ export default async function AdminPatientsPage() {
             No hay pacientes para mostrar.
           </p>
         ) : (
-          patients.map((patient) => (
-            <article key={patient.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-base font-semibold text-slate-900">
-                <Link className="hover:underline" href={`/admin/patients/${patient.id}`}>
-                  {patient.fullName}
-                </Link>
-              </h3>
-              <p className="mt-1 text-sm text-slate-700">Estado: {STATUS_LABELS[patient.operationalStatus]}</p>
-              <p className="text-sm text-slate-700">DNI: {patient.dni ?? "Sin DNI"}</p>
-              <p className="text-sm text-slate-700">Teléfono: {patient.phone ?? "Sin teléfono"}</p>
-            </article>
-          ))
+          patients.map((patient) => {
+            const treatmentBadge = getTreatmentBadge(patient.operationalStatus);
+
+            return (
+              <article key={patient.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="text-base font-semibold text-slate-900">
+                    <Link className="hover:underline" href={`/admin/patients/${patient.id}`}>
+                      {patient.fullName}
+                    </Link>
+                  </h3>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
+                  >
+                    {treatmentBadge.label}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-slate-700">DNI: {patient.dni ?? "Sin DNI"}</p>
+                <p className="text-sm text-slate-700">Teléfono: {patient.phone ?? "Sin teléfono"}</p>
+              </article>
+            );
+          })
         )}
       </section>
     </section>

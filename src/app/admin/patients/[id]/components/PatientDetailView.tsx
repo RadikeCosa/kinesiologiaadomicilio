@@ -77,9 +77,20 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
           <h3 className="text-sm font-semibold text-slate-900">
             Estado operativo
           </h3>
-          <p className="mt-2">
-            {OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}
-          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="text-sm">
+              {OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}
+            </span>
+            <span
+              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
+                patient.activeEpisode
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                  : "border-slate-300 bg-white text-slate-700"
+              }`}
+            >
+              {patient.activeEpisode ? "En tratamiento" : "Sin tratamiento activo"}
+            </span>
+          </div>
         </div>
       </div>
 

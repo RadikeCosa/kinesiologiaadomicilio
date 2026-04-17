@@ -63,9 +63,14 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
   }
 
   return (
-    <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4" id="patient-edit-form">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-lg font-medium">Edición de datos</h2>
+        <div>
+          <h2 className="text-lg font-medium">Datos administrativos</h2>
+          <p className="mt-1 text-xs text-slate-600">
+            Acción secundaria: actualizá identidad y contacto sin tocar el bloque clínico.
+          </p>
+        </div>
         <button
           className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-100"
           onClick={() => {
@@ -80,8 +85,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
 
       {!isEditing ? (
         <p className="mt-3 text-sm text-slate-700">
-          La edición está oculta. Activá “Editar datos” para modificar la
-          información.
+          Formulario oculto. Usá “Editar datos” para actualizar la información administrativa.
         </p>
       ) : null}
 
