@@ -1,4 +1,5 @@
 import React from "react";
+import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 
 interface PatientDetailViewProps {
@@ -16,6 +17,9 @@ const OPERATIONAL_STATUS_LABELS: Record<
 };
 
 function getTreatmentBadge(patient: PatientDetailReadModel): { label: string; className: string } {
+  const latestEpisode = (patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null })
+    .latestEpisode;
+
   if (patient.activeEpisode) {
     return {
       label: "En tratamiento",
@@ -23,7 +27,7 @@ function getTreatmentBadge(patient: PatientDetailReadModel): { label: string; cl
     };
   }
 
-  if (patient.latestEpisode?.status === "finished") {
+  if (latestEpisode?.status === "finished") {
     return {
       label: "Tratamiento finalizado",
       className: "border-slate-300 bg-slate-100 text-slate-700",
@@ -49,6 +53,8 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
   }
 
   const treatmentBadge = getTreatmentBadge(patient);
+  const latestEpisode = (patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null })
+    .latestEpisode;
 
   return (
     <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -132,11 +138,11 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
         </div>
       ) : null}
 
-      {!patient.activeEpisode && patient.latestEpisode?.status === "finished" ? (
+      {!patient.activeEpisode && latestEpisode?.status === "finished" ? (
         <div className="mt-4 rounded border border-slate-300 bg-white p-3 text-sm text-slate-800">
           <p className="font-medium">Tratamiento finalizado</p>
-          <p>Inicio: {patient.latestEpisode.startDate}</p>
-          <p>Finalización: {patient.latestEpisode.endDate ?? "No informada"}</p>
+          <p>Inicio: {latestEpisode.startDate}</p>
+          <p>Finalización: {latestEpisode.endDate ?? "No informada"}</p>
         </div>
       ) : null}
     </section>
