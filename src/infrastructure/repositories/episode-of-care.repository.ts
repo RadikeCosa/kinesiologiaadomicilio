@@ -1,50 +1,36 @@
 import type { EpisodeOfCare, StartEpisodeOfCareInput } from "@/domain/episode-of-care/episode-of-care.types";
+import { extractSingleResource } from "@/lib/fhir/bundle-utils";
+import { fhirClient } from "@/lib/fhir/client";
+import { buildActiveEpisodeOfCareByPatientQuery } from "@/lib/fhir/search-params";
+import type { FhirBundle } from "@/lib/fhir/types";
 
-/**
- * Implementación transicional del Slice 1.
- *
- * Nota: dataset mínimo en memoria, acotado a lectura para detalle de paciente.
- */
-const initialTransitionalEpisodesOfCare: EpisodeOfCare[] = [
-  {
-    id: "epi-001",
-    patientId: "pat-003",
-    status: "active",
-    startDate: "2026-04-12",
-    description: "Plan inicial de rehabilitación domiciliaria.",
-  },
-];
+import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care/episode-of-care-fhir.types";
+import { mapFhirEpisodeOfCareToDomain } from "@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper";
+import { mapStartEpisodeOfCareInputToFhir } from "@/infrastructure/mappers/episode-of-care/episode-of-care-write.mapper";
 
-const transitionalEpisodesOfCare: EpisodeOfCare[] = initialTransitionalEpisodesOfCare.map((episode) => ({
-  ...episode,
-}));
-
-export function __resetEpisodeOfCareRepositoryForTests(): void {
-  transitionalEpisodesOfCare.splice(0, transitionalEpisodesOfCare.length);
-  transitionalEpisodesOfCare.push(
-    ...initialTransitionalEpisodesOfCare.map((episode) => ({
-      ...episode,
-    })),
-  );
+function buildSearchPath(resourceType: string, query: string): string {
+  return query ? `${resourceType}?${query}` : resourceType;
 }
 
 export async function getActiveEpisodeByPatientId(patientId: string): Promise<EpisodeOfCare | null> {
-  const episode = transitionalEpisodesOfCare.find(
-    (item) => item.patientId === patientId && item.status === "active",
-  );
+  if (!patientId.trim()) {
+    return null;
+  }
 
-  return episode ?? null;
+  // Convención vigente (pre-Encounter):
+  // query simple por paciente + status activo, sin paginación/orden sofisticados.
+  const query = buildActiveEpisodeOfCareByPatientQuery(patientId);
+  const bundle = await fhirClient.get<FhirBundle<FhirEpisodeOfCare>>(buildSearchPath("EpisodeOfCare", query));
+  const episode = extractSingleResource<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
+
+  return episode ? mapFhirEpisodeOfCareToDomain(episode) : null;
 }
 
 export async function createEpisodeOfCare(input: StartEpisodeOfCareInput): Promise<EpisodeOfCare> {
-  const createdEpisode: EpisodeOfCare = {
-    id: `epi-${Date.now()}`,
-    patientId: input.patientId,
-    status: "active",
-    startDate: input.startDate,
-    description: input.description,
-  };
+  // Convención vigente: alta directa de EpisodeOfCare activo.
+  // Aún sin concurrencia optimista ni semánticas avanzadas de cierre/historización.
+  const payload = mapStartEpisodeOfCareInputToFhir(input);
+  const created = await fhirClient.post<FhirEpisodeOfCare>("EpisodeOfCare", payload);
 
-  transitionalEpisodesOfCare.unshift(createdEpisode);
-  return createdEpisode;
+  return mapFhirEpisodeOfCareToDomain(created);
 }
