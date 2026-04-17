@@ -45,7 +45,6 @@ export function mapPatientToDetailReadModel(
     address: patient.address,
     patientNotes: patient.notes,
     mainContact: patient.mainContact,
-    initialContext: patient.initialContext,
     activeEpisode,
     operationalStatus: getPatientOperationalStatus({
       patient,

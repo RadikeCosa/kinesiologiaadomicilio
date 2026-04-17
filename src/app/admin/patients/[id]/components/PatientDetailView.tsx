@@ -4,7 +4,10 @@ interface PatientDetailViewProps {
   patient: PatientDetailReadModel | null;
 }
 
-const OPERATIONAL_STATUS_LABELS: Record<PatientDetailReadModel["operationalStatus"], string> = {
+const OPERATIONAL_STATUS_LABELS: Record<
+  PatientDetailReadModel["operationalStatus"],
+  string
+> = {
   preliminary: "Identidad incompleta",
   ready_to_start: "Listo para iniciar tratamiento",
   active_treatment: "Tratamiento activo",
@@ -15,7 +18,9 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
     return (
       <section className="mt-6 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
         <h2 className="text-lg font-medium">Detalle de paciente</h2>
-        <p className="mt-2 text-sm text-slate-700">No se encontró el paciente solicitado.</p>
+        <p className="mt-2 text-sm text-slate-700">
+          No se encontró el paciente solicitado.
+        </p>
       </section>
     );
   }
@@ -50,7 +55,9 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
               <dt className="font-medium">Contacto principal</dt>
               <dd className="space-y-1">
                 <p>Nombre: {patient.mainContact?.name ?? "No informado"}</p>
-                <p>Vínculo: {patient.mainContact?.relationship ?? "No informado"}</p>
+                <p>
+                  Vínculo: {patient.mainContact?.relationship ?? "No informado"}
+                </p>
                 <p>Teléfono: {patient.mainContact?.phone ?? "No informado"}</p>
               </dd>
             </div>
@@ -58,18 +65,21 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
-          <h3 className="text-sm font-semibold text-slate-900">Contexto inicial</h3>
-          <p className="mt-2">{patient.initialContext?.reasonForConsultation ?? "Sin contexto inicial informado."}</p>
+          <h3 className="text-sm font-semibold text-slate-900">
+            Notas generales del paciente
+          </h3>
+          <p className="mt-2">
+            {patient.patientNotes ?? "Sin notas generales informadas."}
+          </p>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
-          <h3 className="text-sm font-semibold text-slate-900">Notas generales</h3>
-          <p className="mt-2">{patient.patientNotes ?? "Sin notas generales."}</p>
-        </div>
-
-        <div className="rounded-md border border-slate-200 bg-white p-3">
-          <h3 className="text-sm font-semibold text-slate-900">Estado operativo</h3>
-          <p className="mt-2">{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</p>
+          <h3 className="text-sm font-semibold text-slate-900">
+            Estado operativo
+          </h3>
+          <p className="mt-2">
+            {OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}
+          </p>
         </div>
       </div>
 
@@ -78,7 +88,10 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
           <p className="font-medium">Tratamiento activo</p>
           <p>Inicio: {patient.activeEpisode.startDate}</p>
           {patient.activeEpisode.description ? (
-            <p>Descripción breve del episodio/tratamiento: {patient.activeEpisode.description}</p>
+            <p>
+              Descripción breve del episodio/tratamiento:{" "}
+              {patient.activeEpisode.description}
+            </p>
           ) : null}
         </div>
       ) : null}

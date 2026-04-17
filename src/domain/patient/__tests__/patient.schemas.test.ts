@@ -20,9 +20,6 @@ describe("patient.schemas", () => {
         relationship: " Madre ",
         phone: " 555 ",
       },
-      initialContext: {
-        reasonForConsultation: "  dolor lumbar ",
-      },
     });
 
     expect(result).toMatchObject({
@@ -35,9 +32,6 @@ describe("patient.schemas", () => {
         name: "Marta",
         relationship: "Madre",
         phone: "555",
-      },
-      initialContext: {
-        reasonForConsultation: "dolor lumbar",
       },
     });
   });
@@ -66,7 +60,6 @@ describe("patient.schemas", () => {
         phone: undefined,
         notes: undefined,
       },
-      initialContext: undefined,
     });
   });
 });

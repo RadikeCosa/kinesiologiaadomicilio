@@ -28,10 +28,7 @@ const initialTransitionalPatients: Patient[] = [
       relationship: "Madre",
       phone: "+54 299 555 0199",
     },
-    initialContext: {
-      reasonForConsultation: "Rehabilitación post esguince de tobillo.",
-      requestedBy: "Traumatología",
-    },
+    notes: "Rehabilitación post esguince de tobillo. Derivación de traumatología.",
     createdAt: "2026-04-11T12:30:00.000Z",
     updatedAt: "2026-04-13T08:15:00.000Z",
   },
@@ -53,7 +50,6 @@ function clonePatient(patient: Patient): Patient {
   return {
     ...patient,
     mainContact: patient.mainContact ? { ...patient.mainContact } : undefined,
-    initialContext: patient.initialContext ? { ...patient.initialContext } : undefined,
   };
 }
 

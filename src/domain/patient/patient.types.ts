@@ -7,12 +7,6 @@ export interface MainContact {
   notes?: string;
 }
 
-export interface InitialContext {
-  reasonForConsultation?: string;
-  requestedBy?: string;
-  initialNotes?: string;
-}
-
 export interface Patient {
   id: string;
   firstName: string;
@@ -23,7 +17,6 @@ export interface Patient {
   address?: string;
   notes?: string;
   mainContact?: MainContact;
-  initialContext?: InitialContext;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,7 +30,6 @@ export interface CreatePatientInput {
   address?: string;
   notes?: string;
   mainContact?: MainContact;
-  initialContext?: InitialContext;
 }
 
 export interface UpdatePatientInput {
@@ -50,5 +42,4 @@ export interface UpdatePatientInput {
   address?: string;
   notes?: string;
   mainContact?: MainContact;
-  initialContext?: InitialContext;
 }

@@ -1,9 +1,4 @@
-import type {
-  CreatePatientInput,
-  InitialContext,
-  MainContact,
-  UpdatePatientInput,
-} from "@/domain/patient/patient.types";
+import type { CreatePatientInput, MainContact, UpdatePatientInput } from "@/domain/patient/patient.types";
 
 function assertObject(input: unknown, schemaName: string): Record<string, unknown> {
   if (typeof input !== "object" || input === null) {
@@ -55,23 +50,6 @@ function normalizeMainContact(value: unknown): MainContact | undefined {
   };
 }
 
-function normalizeInitialContext(value: unknown): InitialContext | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  const record = assertObject(value, "initialContext");
-
-  return {
-    reasonForConsultation: normalizeOptionalString(
-      record.reasonForConsultation,
-      "initialContext.reasonForConsultation",
-    ),
-    requestedBy: normalizeOptionalString(record.requestedBy, "initialContext.requestedBy"),
-    initialNotes: normalizeOptionalString(record.initialNotes, "initialContext.initialNotes"),
-  };
-}
-
 export const createPatientSchema = {
   parse(input: unknown): CreatePatientInput {
     const record = assertObject(input, "createPatientSchema");
@@ -85,7 +63,6 @@ export const createPatientSchema = {
       address: normalizeOptionalString(record.address, "address"),
       notes: normalizeOptionalString(record.notes, "notes"),
       mainContact: normalizeMainContact(record.mainContact),
-      initialContext: normalizeInitialContext(record.initialContext),
     };
   },
 };
@@ -104,7 +81,6 @@ export const updatePatientSchema = {
       address: normalizeOptionalString(record.address, "address"),
       notes: normalizeOptionalString(record.notes, "notes"),
       mainContact: normalizeMainContact(record.mainContact),
-      initialContext: normalizeInitialContext(record.initialContext),
     };
   },
 };

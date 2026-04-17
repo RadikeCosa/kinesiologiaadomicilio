@@ -24,33 +24,37 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const mainContactName = String(formData.get("mainContactName") ?? "") || undefined;
-    const mainContactRelationship = String(formData.get("mainContactRelationship") ?? "") || undefined;
-    const mainContactPhone = String(formData.get("mainContactPhone") ?? "") || undefined;
-    const initialReason = String(formData.get("initialReason") ?? "") || undefined;
+    const mainContactName =
+      String(formData.get("mainContactName") ?? "") || undefined;
+    const mainContactRelationship =
+      String(formData.get("mainContactRelationship") ?? "") || undefined;
+    const mainContactPhone =
+      String(formData.get("mainContactPhone") ?? "") || undefined;
 
     const input = {
       id: patient.id,
       dni: String(formData.get("dni") ?? "") || undefined,
       phone: String(formData.get("phone") ?? "") || undefined,
       notes: String(formData.get("notes") ?? "") || undefined,
-      mainContact: hasSomeValue([mainContactName, mainContactRelationship, mainContactPhone])
+      mainContact: hasSomeValue([
+        mainContactName,
+        mainContactRelationship,
+        mainContactPhone,
+      ])
         ? {
             name: mainContactName,
             relationship: mainContactRelationship,
             phone: mainContactPhone,
           }
         : undefined,
-      initialContext: hasSomeValue([initialReason])
-        ? {
-            reasonForConsultation: initialReason,
-          }
-        : undefined,
     };
 
     startTransition(async () => {
       const result = await updatePatientAction(input);
-      setMessage(result.message ?? (result.ok ? "Paciente actualizado correctamente." : "Error."));
+      setMessage(
+        result.message ??
+          (result.ok ? "Paciente actualizado correctamente." : "Error."),
+      );
       if (result.ok) {
         setIsEditing(false);
         router.refresh();
@@ -75,7 +79,10 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
       </div>
 
       {!isEditing ? (
-        <p className="mt-3 text-sm text-slate-700">La edición está oculta. Activá “Editar datos” para modificar la información.</p>
+        <p className="mt-3 text-sm text-slate-700">
+          La edición está oculta. Activá “Editar datos” para modificar la
+          información.
+        </p>
       ) : null}
 
       {isEditing ? (
@@ -84,7 +91,12 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
             <label className="block text-sm font-medium" htmlFor="dni">
               DNI
             </label>
-            <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" defaultValue={patient.dni ?? ""} id="dni" name="dni" />
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+              defaultValue={patient.dni ?? ""}
+              id="dni"
+              name="dni"
+            />
           </div>
 
           <div>
@@ -103,6 +115,9 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
             <label className="block text-sm font-medium" htmlFor="notes">
               Notas generales del paciente
             </label>
+            <p className="mt-1 text-xs text-slate-600">
+              Usá este campo para el contexto libre del caso cuando haga falta.
+            </p>
             <textarea
               className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
               defaultValue={patient.patientNotes ?? ""}
@@ -117,7 +132,10 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
               Contacto principal (opcional)
             </legend>
             <div>
-              <label className="block text-sm font-medium" htmlFor="mainContactName">
+              <label
+                className="block text-sm font-medium"
+                htmlFor="mainContactName"
+              >
                 Nombre
               </label>
               <input
@@ -128,7 +146,10 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium" htmlFor="mainContactRelationship">
+              <label
+                className="block text-sm font-medium"
+                htmlFor="mainContactRelationship"
+              >
                 Vínculo
               </label>
               <input
@@ -139,7 +160,10 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium" htmlFor="mainContactPhone">
+              <label
+                className="block text-sm font-medium"
+                htmlFor="mainContactPhone"
+              >
                 Teléfono
               </label>
               <input
@@ -147,24 +171,6 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
                 defaultValue={patient.mainContact?.phone ?? ""}
                 id="mainContactPhone"
                 name="mainContactPhone"
-              />
-            </div>
-          </fieldset>
-
-          <fieldset className="space-y-4 rounded border border-slate-200 p-3">
-            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              Contexto inicial del caso
-            </legend>
-            <div>
-              <label className="block text-sm font-medium" htmlFor="initialReason">
-                Motivo o contexto inicial
-              </label>
-              <textarea
-                className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
-                defaultValue={patient.initialContext?.reasonForConsultation ?? ""}
-                id="initialReason"
-                name="initialReason"
-                rows={2}
               />
             </div>
           </fieldset>

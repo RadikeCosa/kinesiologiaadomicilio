@@ -27,24 +27,6 @@ function compactSlice1MainContact(input: UpdatePatientInput["mainContact"]): Upd
   return slice1MainContact;
 }
 
-function compactSlice1InitialContext(
-  input: UpdatePatientInput["initialContext"],
-): UpdatePatientInput["initialContext"] {
-  if (!input) {
-    return undefined;
-  }
-
-  const slice1InitialContext = {
-    reasonForConsultation: input.reasonForConsultation,
-  };
-
-  if (!slice1InitialContext.reasonForConsultation) {
-    return undefined;
-  }
-
-  return slice1InitialContext;
-}
-
 export async function updatePatientAction(input: unknown): Promise<UpdatePatientActionResult> {
   try {
     const parsedInput = updatePatientSchema.parse(input);
@@ -62,7 +44,6 @@ export async function updatePatientAction(input: unknown): Promise<UpdatePatient
       firstName: parsedInput.firstName ?? existingPatient.firstName,
       lastName: parsedInput.lastName ?? existingPatient.lastName,
       mainContact: compactSlice1MainContact(parsedInput.mainContact),
-      initialContext: compactSlice1InitialContext(parsedInput.initialContext),
     };
 
     await updatePatient(scopedInput);
