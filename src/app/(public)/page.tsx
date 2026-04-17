@@ -1,4 +1,4 @@
-import HeroSection from "./hero/hero";
+import HeroSection from "@/app/hero/hero";
 import { AboutSection } from "@/app/home/components/AboutSection";
 import { ServiceContextBanner } from "@/app/home/components/ServiceContextBanner";
 import { HowItWorksSection } from "@/app/home/components/HowItWorksSection";

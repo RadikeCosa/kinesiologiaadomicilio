@@ -1,4 +1,9 @@
-import type { Service } from "../types/Service";
+export interface Service {
+  title: string;
+  shortTitle?: string;
+  description: string;
+  whatsappMessage: string;
+}
 
 export const servicesData: Service[] = [
   {

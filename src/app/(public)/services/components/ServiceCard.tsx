@@ -1,5 +1,5 @@
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import type { Service } from "../types/Service";
+import type { Service } from "@/lib/servicesData";
 
 interface ServiceCardProps {
   service: Service;

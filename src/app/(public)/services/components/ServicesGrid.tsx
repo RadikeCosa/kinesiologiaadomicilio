@@ -1,5 +1,5 @@
 import { ServiceCard } from "./ServiceCard";
-import { servicesData } from "../data/servicesData";
+import { servicesData } from "@/lib/servicesData";
 
 export function ServicesGrid() {
   return (

@@ -3,7 +3,7 @@ import { WhatsAppButton } from "./WhatsAppButton";
 import { BUSINESS_CONFIG } from "@/lib/config";
 import { NAV_LINKS } from "@/lib/navLinks";
 import { PhoneLink } from "./PhoneLink";
-import { servicesData } from "@/app/services/data/servicesData";
+import { servicesData } from "@/lib/servicesData";
 import { Container } from "./ui/Container";
 
 export function Footer() {

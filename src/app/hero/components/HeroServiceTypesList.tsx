@@ -1,4 +1,4 @@
-import { servicesData } from "@/app/services/data/servicesData";
+import { servicesData } from "@/lib/servicesData";
 
 interface HeroServiceTypesListProps {
   align?: "auto" | "left"; // auto centra bajo los botones; left lo alinea al contenedor
