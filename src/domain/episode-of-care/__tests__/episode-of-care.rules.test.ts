@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { canStartEpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.rules";
+import { canFinishEpisodeOfCare, canStartEpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.rules";
 
 describe("episode-of-care.rules", () => {
   it("fails when patient has no DNI", () => {
@@ -35,6 +35,18 @@ describe("episode-of-care.rules", () => {
       { dni: "32123456" },
       { hasActiveEpisode: false, duplicatePatientByDni: false },
     );
+
+    expect(result).toEqual({ ok: true });
+  });
+
+  it("fails finish when there is no active episode", () => {
+    const result = canFinishEpisodeOfCare({ hasActiveEpisode: false });
+
+    expect(result).toMatchObject({ ok: false, reason: "missing_active_episode" });
+  });
+
+  it("passes finish when there is an active episode", () => {
+    const result = canFinishEpisodeOfCare({ hasActiveEpisode: true });
 
     expect(result).toEqual({ ok: true });
   });

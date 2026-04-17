@@ -11,6 +11,7 @@ const OPERATIONAL_STATUS_LABELS: Record<
   preliminary: "Identidad incompleta",
   ready_to_start: "Listo para iniciar tratamiento",
   active_treatment: "Tratamiento activo",
+  finished_treatment: "Tratamiento finalizado",
 };
 
 export function PatientDetailView({ patient }: PatientDetailViewProps) {
@@ -104,6 +105,14 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
               {patient.activeEpisode.description}
             </p>
           ) : null}
+        </div>
+      ) : null}
+
+      {!patient.activeEpisode && patient.latestEpisode?.status === "finished" ? (
+        <div className="mt-4 rounded border border-slate-300 bg-white p-3 text-sm text-slate-800">
+          <p className="font-medium">Tratamiento finalizado</p>
+          <p>Inicio: {patient.latestEpisode.startDate}</p>
+          <p>Finalización: {patient.latestEpisode.endDate ?? "No informada"}</p>
         </div>
       ) : null}
     </section>

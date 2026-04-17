@@ -1,15 +1,38 @@
-import type { EpisodeOfCare, StartEpisodeOfCareInput } from "@/domain/episode-of-care/episode-of-care.types";
-import { extractSingleResource } from "@/lib/fhir/bundle-utils";
+import type {
+  EpisodeOfCare,
+  FinishEpisodeOfCareInput,
+  StartEpisodeOfCareInput,
+} from "@/domain/episode-of-care/episode-of-care.types";
+import { extractResourcesByType, extractSingleResource } from "@/lib/fhir/bundle-utils";
 import { fhirClient } from "@/lib/fhir/client";
-import { buildActiveEpisodeOfCareByPatientQuery } from "@/lib/fhir/search-params";
+import {
+  buildActiveEpisodeOfCareByPatientQuery,
+  buildEpisodeOfCareByPatientQuery,
+} from "@/lib/fhir/search-params";
 import type { FhirBundle } from "@/lib/fhir/types";
 
 import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care/episode-of-care-fhir.types";
 import { mapFhirEpisodeOfCareToDomain } from "@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper";
-import { mapStartEpisodeOfCareInputToFhir } from "@/infrastructure/mappers/episode-of-care/episode-of-care-write.mapper";
+import {
+  applyFinishEpisodeOfCareToFhir,
+  mapStartEpisodeOfCareInputToFhir,
+} from "@/infrastructure/mappers/episode-of-care/episode-of-care-write.mapper";
 
 function buildSearchPath(resourceType: string, query: string): string {
   return query ? `${resourceType}?${query}` : resourceType;
+}
+
+function getMostRecentEpisode(episodes: FhirEpisodeOfCare[]): FhirEpisodeOfCare | null {
+  if (!episodes.length) {
+    return null;
+  }
+
+  return episodes.reduce((latest, current) => {
+    const latestStart = latest.period?.start ?? "";
+    const currentStart = current.period?.start ?? "";
+
+    return currentStart > latestStart ? current : latest;
+  });
 }
 
 export async function getActiveEpisodeByPatientId(patientId: string): Promise<EpisodeOfCare | null> {
@@ -17,8 +40,6 @@ export async function getActiveEpisodeByPatientId(patientId: string): Promise<Ep
     return null;
   }
 
-  // Convención vigente (pre-Encounter):
-  // query simple por paciente + status activo, sin paginación/orden sofisticados.
   const query = buildActiveEpisodeOfCareByPatientQuery(patientId);
   const bundle = await fhirClient.get<FhirBundle<FhirEpisodeOfCare>>(buildSearchPath("EpisodeOfCare", query));
   const episode = extractSingleResource<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
@@ -26,11 +47,38 @@ export async function getActiveEpisodeByPatientId(patientId: string): Promise<Ep
   return episode ? mapFhirEpisodeOfCareToDomain(episode) : null;
 }
 
+export async function getMostRecentEpisodeByPatientId(patientId: string): Promise<EpisodeOfCare | null> {
+  if (!patientId.trim()) {
+    return null;
+  }
+
+  const query = buildEpisodeOfCareByPatientQuery(patientId);
+  const bundle = await fhirClient.get<FhirBundle<FhirEpisodeOfCare>>(buildSearchPath("EpisodeOfCare", query));
+  const episodes = extractResourcesByType<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
+  const mostRecent = getMostRecentEpisode(episodes);
+
+  return mostRecent ? mapFhirEpisodeOfCareToDomain(mostRecent) : null;
+}
+
 export async function createEpisodeOfCare(input: StartEpisodeOfCareInput): Promise<EpisodeOfCare> {
-  // Convención vigente: alta directa de EpisodeOfCare activo.
-  // Aún sin concurrencia optimista ni semánticas avanzadas de cierre/historización.
   const payload = mapStartEpisodeOfCareInputToFhir(input);
   const created = await fhirClient.post<FhirEpisodeOfCare>("EpisodeOfCare", payload);
 
   return mapFhirEpisodeOfCareToDomain(created);
+}
+
+export async function finishActiveEpisodeOfCare(input: FinishEpisodeOfCareInput): Promise<EpisodeOfCare | null> {
+  const activeEpisode = await getActiveEpisodeByPatientId(input.patientId);
+
+  if (!activeEpisode?.id) {
+    return null;
+  }
+
+  const existing = await fhirClient.get<FhirEpisodeOfCare>(`EpisodeOfCare/${activeEpisode.id}`);
+  const payload = applyFinishEpisodeOfCareToFhir(existing, {
+    endDate: input.endDate,
+  });
+  const updated = await fhirClient.put<FhirEpisodeOfCare>(`EpisodeOfCare/${activeEpisode.id}`, payload);
+
+  return mapFhirEpisodeOfCareToDomain(updated);
 }

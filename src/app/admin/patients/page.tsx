@@ -1,12 +1,20 @@
 import Link from "next/link";
 
 import { loadPatientsList } from "@/app/admin/patients/data";
+import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 
-function getTreatmentBadge(patientStatus: "preliminary" | "ready_to_start" | "active_treatment") {
+function getTreatmentBadge(patientStatus: PatientOperationalStatus) {
   if (patientStatus === "active_treatment") {
     return {
       label: "En tratamiento",
       className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    };
+  }
+
+  if (patientStatus === "finished_treatment") {
+    return {
+      label: "Tratamiento finalizado",
+      className: "border-slate-300 bg-slate-100 text-slate-700",
     };
   }
 
