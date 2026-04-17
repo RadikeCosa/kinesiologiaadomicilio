@@ -1,42 +1,56 @@
 import Link from "next/link";
 
+import { Container } from "@/components/ui/Container";
+import { AdminNavLink } from "@/app/admin/components/AdminNavLink";
+
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <section className="flex-1 bg-slate-50 text-slate-900">
-      <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-10">
-        <header className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Superficie privada</p>
-          <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-900">Administración</h1>
-          <p className="mt-2 text-sm text-slate-600">Flujo operativo mínimo para gestionar pacientes.</p>
-
-          <nav aria-label="Navegación privada" className="mt-4 flex flex-wrap gap-2">
+    <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-900">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+        <Container className="max-w-4xl">
+          <div className="flex h-16 items-center justify-between gap-4">
             <Link
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href="/admin"
-            >
-              Inicio admin
-            </Link>
-            <Link
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
               href="/admin/patients"
+              className="group flex min-w-0 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2"
             >
-              Pacientes
-            </Link>
-            <Link
-              className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href="/admin/patients/new"
-            >
-              Nuevo paciente
-            </Link>
-          </nav>
-        </header>
+              <span
+                aria-hidden="true"
+                className="h-2.5 w-2.5 rounded-full bg-sky-500 shadow-sm shadow-sky-500/30"
+              />
 
-        <div className="mt-6">{children}</div>
-      </div>
-    </section>
+              <div className="min-w-0 leading-none">
+                <span className="block truncate text-sm font-semibold tracking-[0.01em] text-slate-900 transition-colors group-hover:text-sky-700 sm:text-base">
+                  Administración de pacientes
+                </span>
+                <span className="hidden text-xs font-medium text-slate-500 sm:block">Superficie privada</span>
+              </div>
+            </Link>
+
+            <nav aria-label="Navegación principal de admin">
+              <ul className="flex items-center gap-1 sm:gap-3">
+                <li>
+                  <AdminNavLink href="/admin/patients" match="branch">
+                    Pacientes
+                  </AdminNavLink>
+                </li>
+                <li>
+                  <AdminNavLink href="/admin/patients/new">
+                    Nuevo paciente
+                  </AdminNavLink>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </Container>
+      </header>
+
+      <main id="contenido" className="flex-1 py-8 sm:py-10">
+        <Container className="max-w-4xl">{children}</Container>
+      </main>
+    </div>
   );
 }
