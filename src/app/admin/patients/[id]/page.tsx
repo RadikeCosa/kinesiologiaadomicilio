@@ -4,6 +4,7 @@ import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import { PatientDetailView } from "@/app/admin/patients/[id]/components/PatientDetailView";
 import { PatientEditForm } from "@/app/admin/patients/[id]/components/PatientEditForm";
 import { StartEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/StartEpisodeOfCareForm";
+import { FinishEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm";
 
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
@@ -38,6 +39,7 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
 
       {patient ? (
         <>
+          {patient.activeEpisode ? <FinishEpisodeOfCareForm patient={patient} /> : null}
           {!patient.activeEpisode ? <StartEpisodeOfCareForm patient={patient} /> : null}
           <PatientEditForm patient={patient} />
         </>

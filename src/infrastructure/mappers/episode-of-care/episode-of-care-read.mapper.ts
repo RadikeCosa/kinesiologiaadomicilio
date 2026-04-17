@@ -10,6 +10,7 @@ export function mapEpisodeOfCareRead(resource: EpisodeOfCare): EpisodeOfCare {
     patientId: resource.patientId,
     status: resource.status,
     startDate: resource.startDate,
+    endDate: resource.endDate,
     description: resource.description,
   };
 }
@@ -18,8 +19,9 @@ export function mapFhirEpisodeOfCareToDomain(resource: FhirEpisodeOfCare): Episo
   return {
     id: resource.id ?? "",
     patientId: extractIdFromReference(resource.patient?.reference) ?? "",
-    status: "active",
+    status: resource.status,
     startDate: resource.period?.start ?? "",
+    endDate: resource.period?.end,
     description: extractEpisodeDescriptionFromNotes(resource.note),
   };
 }

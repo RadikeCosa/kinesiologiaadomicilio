@@ -1,4 +1,7 @@
-import type { StartEpisodeOfCareInput } from "@/domain/episode-of-care/episode-of-care.types";
+import type {
+  FinishEpisodeOfCareInput,
+  StartEpisodeOfCareInput,
+} from "@/domain/episode-of-care/episode-of-care.types";
 
 function assertObject(input: unknown, schemaName: string): Record<string, unknown> {
   if (typeof input !== "object" || input === null) {
@@ -43,6 +46,17 @@ export const startEpisodeOfCareSchema = {
       patientId: normalizeRequiredString(record.patientId, "patientId"),
       startDate: normalizeRequiredString(record.startDate, "startDate"),
       description: normalizeOptionalString(record.description, "description"),
+    };
+  },
+};
+
+export const finishEpisodeOfCareSchema = {
+  parse(input: unknown): FinishEpisodeOfCareInput {
+    const record = assertObject(input, "finishEpisodeOfCareSchema");
+
+    return {
+      patientId: normalizeRequiredString(record.patientId, "patientId"),
+      endDate: normalizeRequiredString(record.endDate, "endDate"),
     };
   },
 };

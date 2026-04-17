@@ -1,4 +1,7 @@
-import type { StartEpisodeOfCareInput } from "@/domain/episode-of-care/episode-of-care.types";
+import type {
+  FinishEpisodeOfCareInput,
+  StartEpisodeOfCareInput,
+} from "@/domain/episode-of-care/episode-of-care.types";
 import { buildPatientReference } from "@/lib/fhir/references";
 
 import { upsertEpisodeDescriptionInNotes } from "@/infrastructure/mappers/episode-of-care/episode-of-care-note.helpers";
@@ -17,5 +20,19 @@ export function mapStartEpisodeOfCareInputToFhir(input: StartEpisodeOfCareInput)
     note: upsertEpisodeDescriptionInNotes({
       description: input.description,
     }),
+  };
+}
+
+export function applyFinishEpisodeOfCareToFhir(
+  existing: FhirEpisodeOfCare,
+  input: Pick<FinishEpisodeOfCareInput, "endDate">,
+): FhirEpisodeOfCare {
+  return {
+    ...existing,
+    status: "finished",
+    period: {
+      ...existing.period,
+      end: input.endDate,
+    },
   };
 }

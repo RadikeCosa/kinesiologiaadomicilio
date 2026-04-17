@@ -50,3 +50,23 @@ export function canStartEpisodeOfCare(
 
   return { ok: true };
 }
+
+export type FinishEpisodeOfCareResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason: "missing_active_episode";
+      message: string;
+    };
+
+export function canFinishEpisodeOfCare(options: { hasActiveEpisode: boolean }): FinishEpisodeOfCareResult {
+  if (!options.hasActiveEpisode) {
+    return {
+      ok: false,
+      reason: "missing_active_episode",
+      message: "No hay un episodio activo para finalizar.",
+    };
+  }
+
+  return { ok: true };
+}

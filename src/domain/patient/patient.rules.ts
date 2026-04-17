@@ -51,9 +51,14 @@ export function hasRequiredIdentityForEpisode(patient: Pick<Patient, "dni">): Pa
 export function getPatientOperationalStatus(options: {
   patient: Pick<Patient, "dni">;
   hasActiveEpisode: boolean;
+  hasFinishedEpisode?: boolean;
 }): PatientOperationalStatus {
   if (options.hasActiveEpisode) {
     return PATIENT_OPERATIONAL_STATUSES.ACTIVE_TREATMENT;
+  }
+
+  if (options.hasFinishedEpisode) {
+    return PATIENT_OPERATIONAL_STATUSES.FINISHED_TREATMENT;
   }
 
   if (options.patient.dni?.trim()) {

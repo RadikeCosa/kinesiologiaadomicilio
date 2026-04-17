@@ -47,6 +47,17 @@ describe("patient.rules", () => {
     expect(status).toBe("ready_to_start");
   });
 
+
+  it("resolves operational status as finished_treatment", () => {
+    const status = getPatientOperationalStatus({
+      patient: { dni: "32123456" },
+      hasActiveEpisode: false,
+      hasFinishedEpisode: true,
+    });
+
+    expect(status).toBe("finished_treatment");
+  });
+
   it("resolves operational status as active_treatment", () => {
     const status = getPatientOperationalStatus({
       patient: { dni: "32123456" },

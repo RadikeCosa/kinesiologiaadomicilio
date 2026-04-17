@@ -1,4 +1,8 @@
-export type PatientOperationalStatus = "preliminary" | "ready_to_start" | "active_treatment";
+export type PatientOperationalStatus =
+  | "preliminary"
+  | "ready_to_start"
+  | "active_treatment"
+  | "finished_treatment";
 
 export interface MainContact {
   name?: string;

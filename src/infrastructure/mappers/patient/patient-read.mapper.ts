@@ -36,9 +36,6 @@ function extractPatientNotes(note?: FhirPatient["note"]): string | undefined {
     return undefined;
   }
 
-  // Convención vigente del slice: las notas generales se leen desde `Patient.note[*].text`
-  // y se consolidan en un único string de dominio.
-  // No dependemos de `note[0]` como contrato rígido.
   const noteLines = note
     .map((item) => item.text?.trim())
     .filter((text): text is string => Boolean(text));
@@ -51,9 +48,6 @@ function extractPatientNotes(note?: FhirPatient["note"]): string | undefined {
 }
 
 function resolveSlice1Timestamps(meta?: FhirPatient["meta"]): Pick<Patient, "createdAt" | "updatedAt"> {
-  // Convención vigente (Bloque B):
-  // - createdAt y updatedAt se derivan de meta.lastUpdated.
-  // - Esta decisión es suficiente para etapa actual, pero no modela semántica histórica completa.
   const lastUpdated = meta?.lastUpdated ?? new Date(0).toISOString();
 
   return {
@@ -106,9 +100,10 @@ export function mapPatientToListItemReadModel(
 
 export function mapPatientToDetailReadModel(
   patient: Patient,
-  options?: { activeEpisode: EpisodeOfCare | null },
+  options?: { activeEpisode: EpisodeOfCare | null; latestEpisode?: EpisodeOfCare | null },
 ): PatientDetailReadModel {
   const activeEpisode = options?.activeEpisode ?? null;
+  const latestEpisode = options?.latestEpisode ?? activeEpisode;
 
   return {
     id: patient.id,
@@ -122,9 +117,11 @@ export function mapPatientToDetailReadModel(
     patientNotes: patient.notes,
     mainContact: patient.mainContact,
     activeEpisode,
+    latestEpisode,
     operationalStatus: getPatientOperationalStatus({
       patient,
       hasActiveEpisode: Boolean(activeEpisode),
+      hasFinishedEpisode: latestEpisode?.status === "finished",
     }),
     createdAt: patient.createdAt,
     updatedAt: patient.updatedAt,

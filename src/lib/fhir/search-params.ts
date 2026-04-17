@@ -19,6 +19,14 @@ export function buildPatientListQuery(params?: { count?: number }): string {
   return searchParams.toString();
 }
 
+export function buildEpisodeOfCareByPatientQuery(patientId: string): string {
+  const params = new URLSearchParams({
+    patient: buildPatientReference(patientId),
+  });
+
+  return params.toString();
+}
+
 export function buildActiveEpisodeOfCareByPatientQuery(patientId: string): string {
   const params = new URLSearchParams({
     patient: buildPatientReference(patientId),

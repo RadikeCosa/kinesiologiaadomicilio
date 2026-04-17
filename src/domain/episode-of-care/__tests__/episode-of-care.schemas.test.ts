@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { startEpisodeOfCareSchema } from "@/domain/episode-of-care/episode-of-care.schemas";
+import {
+  finishEpisodeOfCareSchema,
+  startEpisodeOfCareSchema,
+} from "@/domain/episode-of-care/episode-of-care.schemas";
 
 describe("episode-of-care.schemas", () => {
   it("requires patientId and startDate", () => {
@@ -23,6 +26,18 @@ describe("episode-of-care.schemas", () => {
       patientId: "pat-001",
       startDate: "2026-04-16",
       description: "inicio",
+    });
+  });
+
+  it("parses finish input", () => {
+    const parsed = finishEpisodeOfCareSchema.parse({
+      patientId: " pat-001 ",
+      endDate: " 2026-04-20 ",
+    });
+
+    expect(parsed).toEqual({
+      patientId: "pat-001",
+      endDate: "2026-04-20",
     });
   });
 
