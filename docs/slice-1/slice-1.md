@@ -123,7 +123,7 @@ El Slice 1 se considera **cerrado a nivel transicional** porque:
 
 ## 7) Fuera de alcance (se mantiene vigente)
 
-- encounters / visitas;
+- encounters / visitas (nota: Encounter base se abrió luego en Slice 2; este punto refleja alcance de Slice 1);
 - historial longitudinal;
 - auth;
 - persistencia productiva;
@@ -145,4 +145,5 @@ Este documento conserva el encuadre y decisiones del Slice 1, pero prioriza el *
 Para estado global del repo (landing + superficie privada mínima), usar junto con:
 
 - `docs/fuente-de-verdad-operativa.md`
+- `docs/slice-2/slice-2-encounter-base-cierre.md`
 - `.github/copilot-instructions.md`

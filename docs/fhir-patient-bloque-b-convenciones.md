@@ -26,7 +26,7 @@ Este documento registra decisiones **ya implementadas** para cerrar Bloque B (mi
 - `updatePatient` mantiene estrategia `GET -> merge controlado -> PUT`.
 - No hay concurrencia optimista todavía (`If-Match`/versionado).
 
-## Deuda explícita aceptada (vigente pre-Encounter)
+## Deuda explícita aceptada (vigente post-Encounter base)
 
 - Definir semántica histórica de timestamps si el producto la necesita.
 - Definir estrategia de paginación/orden cuando el volumen lo requiera.

@@ -26,12 +26,20 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
       </p>
       {patient ? (
         <div className="mt-3">
-          <a
-            className="inline-flex rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            href="#patient-edit-form"
-          >
-            Editar datos administrativos
-          </a>
+          <div className="flex flex-wrap gap-2">
+            <a
+              className="inline-flex rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              href="#patient-edit-form"
+            >
+              Editar datos administrativos
+            </a>
+            <Link
+              className="inline-flex rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              href={`/admin/patients/${patient.id}/encounters`}
+            >
+              Ver visitas
+            </Link>
+          </div>
         </div>
       ) : null}
 

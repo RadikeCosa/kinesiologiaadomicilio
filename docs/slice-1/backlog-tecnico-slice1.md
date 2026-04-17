@@ -68,7 +68,7 @@ El remanente del slice no es funcional nuevo, sino deuda técnica de estabilizac
 
 No deben volver a listarse como “pendiente de Slice 1”:
 
-- encounters / visitas;
+- encounters / visitas (nota: Encounter base se abrió luego en Slice 2; no forma parte del remanente de Slice 1);
 - historial longitudinal;
 - auth;
 - agenda;
@@ -79,9 +79,9 @@ No deben volver a listarse como “pendiente de Slice 1”:
 
 ## 6) Límites vigentes (deben mantenerse explícitos)
 
-- FHIR real acotado a `Patient` y `EpisodeOfCare`, sin Encounter;
+- FHIR real acotado a `Patient` y `EpisodeOfCare` dentro del alcance de Slice 1;
 - sin auth;
-- sin encounters;
+- sin encounters dentro del alcance de Slice 1;
 - sin historial longitudinal;
 - sin cobertura de operación clínica completa.
 
@@ -90,3 +90,10 @@ No deben volver a listarse como “pendiente de Slice 1”:
 Este backlog reemplaza el enfoque anterior de “plan futuro por fases” para evitar confundir tareas ya implementadas con pendientes.
 
 Si el siguiente slice abre nuevo alcance funcional, se recomienda crear backlog nuevo por slice y dejar este archivo congelado como cierre técnico del Slice 1.
+
+
+## 8) Nota de continuidad posterior
+
+Post-cierre de Slice 1 se implementó Encounter base en Slice 2.
+
+Ver: `docs/slice-2/slice-2-encounter-base-cierre.md`.

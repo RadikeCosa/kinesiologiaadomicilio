@@ -25,16 +25,16 @@ Documento de cierre técnico acotado para la migración actual de `EpisodeOfCare
 - No hay concurrencia optimista (`If-Match`/versionado) en este bloque.
 - No hay historización avanzada ni manejo complejo de múltiples episodios activos.
 
-## 4) Lectura operativa visible (pre-Encounter)
+## 4) Lectura operativa visible (con Encounter base implementado)
 
 - Detalle de paciente:
   - prioriza episodio activo;
   - si no hay activo, usa el último episodio para mostrar tratamiento finalizado cuando corresponde.
 - Listado de pacientes:
   - distingue estado operativo entre episodio activo, tratamiento finalizado y ausencia de tratamiento.
-- Esta consistencia de estado queda acotada al alcance actual sin abrir Encounter.
+- Esta consistencia de estado se mantiene en el alcance actual y convive con Encounter base sin abrir longitudinal complejo.
 
-## Deuda explícita antes de Encounter
+## Deuda explícita vigente post-Encounter base
 
 - Definir estrategia de cierre/historial de episodios cuando producto la requiera.
 - Definir política de concurrencia optimista si aparece edición concurrente real.

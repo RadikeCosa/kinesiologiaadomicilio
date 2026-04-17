@@ -2,6 +2,10 @@ export function buildPatientReference(patientId: string): string {
   return `Patient/${patientId}`;
 }
 
+export function buildEpisodeOfCareReference(episodeOfCareId: string): string {
+  return `EpisodeOfCare/${episodeOfCareId}`;
+}
+
 export function extractIdFromReference(reference?: string): string | undefined {
   if (!reference) {
     return undefined;
