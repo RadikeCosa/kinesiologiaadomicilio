@@ -2,6 +2,8 @@
 
 Este documento registra decisiones **ya implementadas** para cerrar Bloque B (migración de Patient a FHIR) sin abrir alcance nuevo.
 
+> Última actualización: 2026-04-17 (UTC)
+
 ## 1) Notas generales (`Patient.note`)
 
 - Lectura actual: se toman `Patient.note[*].text`, se limpian valores vacíos y se consolidan en un único `string` de dominio con separación `"\n\n"`.
@@ -24,7 +26,7 @@ Este documento registra decisiones **ya implementadas** para cerrar Bloque B (mi
 - `updatePatient` mantiene estrategia `GET -> merge controlado -> PUT`.
 - No hay concurrencia optimista todavía (`If-Match`/versionado).
 
-## Deuda explícita aceptada antes de EpisodeOfCare
+## Deuda explícita aceptada (vigente pre-Encounter)
 
 - Definir semántica histórica de timestamps si el producto la necesita.
 - Definir estrategia de paginación/orden cuando el volumen lo requiera.

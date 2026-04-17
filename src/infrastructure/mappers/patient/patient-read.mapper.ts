@@ -80,9 +80,10 @@ export function mapFhirPatientToDomain(patient: FhirPatient): Patient {
 
 export function mapPatientToListItemReadModel(
   patient: Patient,
-  options?: { activeEpisode: EpisodeOfCare | null },
+  options?: { activeEpisode: EpisodeOfCare | null; latestEpisode?: EpisodeOfCare | null },
 ): PatientListItemReadModel {
-  const hasActiveEpisode = Boolean(options?.activeEpisode);
+  const activeEpisode = options?.activeEpisode ?? null;
+  const latestEpisode = options?.latestEpisode ?? activeEpisode;
 
   return {
     id: patient.id,
@@ -91,7 +92,8 @@ export function mapPatientToListItemReadModel(
     phone: patient.phone,
     operationalStatus: getPatientOperationalStatus({
       patient,
-      hasActiveEpisode,
+      hasActiveEpisode: Boolean(activeEpisode),
+      hasFinishedEpisode: latestEpisode?.status === "finished",
     }),
     createdAt: patient.createdAt,
     updatedAt: patient.updatedAt,

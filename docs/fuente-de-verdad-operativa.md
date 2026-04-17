@@ -14,7 +14,7 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
   - la landing pública sigue activa y central en el repo;
   - existe una primera implementación de superficie privada clínica mínima.
 - **Dirección aceptada**: evolucionar de forma incremental hacia una app clínica privada conviviente en el mismo repositorio.
-- **Límite explícito del estado actual**: la superficie privada implementada hoy es **transicional (in-memory), no productiva**.
+- **Límite explícito del estado actual**: la superficie privada implementada hoy es mínima y aún no cubre Encounter ni flujo longitudinal completo.
 - **Foco funcional efectivamente implementado en Slice 1**:
   - alta mínima de paciente;
   - edición incremental;
@@ -24,11 +24,9 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
   - lectura mínima de listado y detalle;
   - tests iniciales del slice.
 - **Fuera de alcance vigente**:
-  - FHIR real;
   - auth;
   - encounters / visitas;
   - historial longitudinal;
-  - persistencia productiva;
   - agenda, pagos, self-booking, `/portal`, panel administrativo amplio.
 
 ### Aclaración de límites documentales
@@ -43,7 +41,7 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
 - `/services`
 - `/evaluar`
 
-### Rutas privadas mínimas (transicionales)
+### Rutas privadas mínimas
 - `/admin/patients`
 - `/admin/patients/new`
 - `/admin/patients/[id]`
@@ -70,8 +68,14 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
   - detalle de paciente;
   - edición incremental de datos;
   - inicio de tratamiento en acción separada (no automática en alta);
+  - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
   - validación de DNI requerida para iniciar tratamiento;
   - bloqueo simple por duplicado de DNI para iniciar tratamiento;
+  - estado operativo consistente entre listado y detalle para:
+    - episodio activo;
+    - tratamiento finalizado;
+    - ausencia de tratamiento;
+  - persistencia/lectura FHIR real para `Patient` y `EpisodeOfCare`;
   - cobertura inicial con tests de dominio e integración del slice.
 
 ## 3) Fuentes de verdad activas
@@ -94,7 +98,7 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
 1. `/evaluar` está implementada y enlazada desde Home.
 2. `sitemap.ts` actualmente publica solo `/` y `/services` (no incluye `/evaluar`).
 3. Header/Footer de la superficie pública comparten `NAV_LINKS`; `/evaluar` no figura en esa navegación global (acceso principal desde CTA de Home).
-4. La superficie privada `/admin/patients/*` existe para uso transicional local y no debe presentarse como operación clínica productiva.
+4. La superficie privada `/admin/patients/*` usa FHIR real para `Patient` y `EpisodeOfCare`, pero sigue siendo una base clínica mínima pre-Encounter y no debe presentarse como operación clínica completa.
 5. El root layout (`src/app/layout.tsx`) no inyecta header/footer; la shell pública vive en `src/app/(public)/layout.tsx` y la shell privada en `src/app/admin/layout.tsx`.
 
 ## 5) Mantenimiento recomendado
