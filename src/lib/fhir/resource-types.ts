@@ -1,1 +1,1 @@
-export type FhirResourceType = "Patient" | "EpisodeOfCare";
+export type FhirResourceType = "Patient" | "EpisodeOfCare" | "Encounter";
