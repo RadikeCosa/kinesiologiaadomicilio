@@ -1,11 +1,87 @@
 import { getPatientOperationalStatus } from "@/domain/patient/patient.rules";
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
-import type { Patient } from "@/domain/patient/patient.types";
+import type { MainContact, Patient } from "@/domain/patient/patient.types";
+import { DNI_IDENTIFIER_SYSTEM } from "@/lib/fhir/identifiers";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import type { PatientListItemReadModel } from "@/features/patients/read-models/patient-list-item.read-model";
 
+import { type FhirPatient } from "@/infrastructure/mappers/patient/patient-fhir.types";
+
 function buildFullName(patient: Pick<Patient, "firstName" | "lastName">): string {
   return `${patient.firstName} ${patient.lastName}`.trim();
+}
+
+function extractMainContact(contact?: FhirPatient["contact"]): MainContact | undefined {
+  const primaryContact = contact?.[0];
+
+  if (!primaryContact) {
+    return undefined;
+  }
+
+  const mappedContact: MainContact = {
+    name: primaryContact.name?.text?.trim() || undefined,
+    relationship: primaryContact.relationship?.[0]?.text?.trim() || undefined,
+    phone: primaryContact.telecom?.find((telecom) => telecom.system === "phone")?.value?.trim() || undefined,
+  };
+
+  if (!mappedContact.name && !mappedContact.relationship && !mappedContact.phone) {
+    return undefined;
+  }
+
+  return mappedContact;
+}
+
+function extractPatientNotes(note?: FhirPatient["note"]): string | undefined {
+  if (!note?.length) {
+    return undefined;
+  }
+
+  // Convención vigente del slice: las notas generales se leen desde `Patient.note[*].text`
+  // y se consolidan en un único string de dominio.
+  // No dependemos de `note[0]` como contrato rígido.
+  const noteLines = note
+    .map((item) => item.text?.trim())
+    .filter((text): text is string => Boolean(text));
+
+  if (!noteLines.length) {
+    return undefined;
+  }
+
+  return noteLines.join("\n\n");
+}
+
+function resolveSlice1Timestamps(meta?: FhirPatient["meta"]): Pick<Patient, "createdAt" | "updatedAt"> {
+  // Convención vigente (Bloque B):
+  // - createdAt y updatedAt se derivan de meta.lastUpdated.
+  // - Esta decisión es suficiente para etapa actual, pero no modela semántica histórica completa.
+  const lastUpdated = meta?.lastUpdated ?? new Date(0).toISOString();
+
+  return {
+    createdAt: lastUpdated,
+    updatedAt: lastUpdated,
+  };
+}
+
+export function mapFhirPatientToDomain(patient: FhirPatient): Patient {
+  const firstName = patient.name?.[0]?.given?.[0]?.trim() ?? "";
+  const lastName = patient.name?.[0]?.family?.trim() ?? "";
+  const timestamps = resolveSlice1Timestamps(patient.meta);
+
+  return {
+    id: patient.id ?? "",
+    firstName,
+    lastName,
+    dni:
+      patient.identifier?.find((identifier) => identifier.system === DNI_IDENTIFIER_SYSTEM)?.value?.trim() ||
+      undefined,
+    phone: patient.telecom?.find((telecom) => telecom.system === "phone")?.value?.trim() || undefined,
+    birthDate: patient.birthDate,
+    address: patient.address?.[0]?.text?.trim() || undefined,
+    notes: extractPatientNotes(patient.note),
+    mainContact: extractMainContact(patient.contact),
+    createdAt: timestamps.createdAt,
+    updatedAt: timestamps.updatedAt,
+  };
 }
 
 export function mapPatientToListItemReadModel(

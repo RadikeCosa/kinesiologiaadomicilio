@@ -1,16 +1,21 @@
 import type { StartEpisodeOfCareInput } from "@/domain/episode-of-care/episode-of-care.types";
+import { buildPatientReference } from "@/lib/fhir/references";
 
-export type EpisodeOfCareWritePayload = {
-  // TODO(slice-1/fase-2): definir payload real al integrar FHIR.
-  placeholder: true;
-  input: StartEpisodeOfCareInput;
-};
+import { upsertEpisodeDescriptionInNotes } from "@/infrastructure/mappers/episode-of-care/episode-of-care-note.helpers";
+import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care/episode-of-care-fhir.types";
 
-export function mapEpisodeOfCareInputToWritePayload(
-  input: StartEpisodeOfCareInput,
-): EpisodeOfCareWritePayload {
+export function mapStartEpisodeOfCareInputToFhir(input: StartEpisodeOfCareInput): FhirEpisodeOfCare {
   return {
-    placeholder: true,
-    input,
+    resourceType: "EpisodeOfCare",
+    status: "active",
+    patient: {
+      reference: buildPatientReference(input.patientId),
+    },
+    period: {
+      start: input.startDate,
+    },
+    note: upsertEpisodeDescriptionInNotes({
+      description: input.description,
+    }),
   };
 }
