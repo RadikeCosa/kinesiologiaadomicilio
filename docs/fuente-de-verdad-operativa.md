@@ -17,6 +17,7 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
 - **Límite explícito del estado actual**: la superficie privada implementada hoy es mínima y aún no cubre Encounter ni flujo longitudinal completo.
 - **Foco funcional efectivamente implementado en Slice 1**:
   - alta mínima de paciente;
+  - dirección operativa del paciente integrada en flujo actual (carga en alta, edición y visualización en detalle);
   - edición incremental;
   - inicio de tratamiento como acción separada;
   - validación de DNI para iniciar tratamiento;
@@ -64,9 +65,9 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
     - `scroll_90`
 - **Superficie privada mínima**:
   - listado mínimo de pacientes;
-  - alta mínima de paciente;
-  - detalle de paciente;
-  - edición incremental de datos;
+  - alta mínima de paciente (incluye dirección como campo operativo opcional);
+  - detalle de paciente (incluye visualización de dirección);
+  - edición incremental de datos (incluye edición de dirección);
   - inicio de tratamiento en acción separada (no automática en alta);
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
   - validación de DNI requerida para iniciar tratamiento;
@@ -77,6 +78,7 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
     - ausencia de tratamiento;
   - persistencia/lectura FHIR real para `Patient` y `EpisodeOfCare`;
   - cobertura inicial con tests de dominio e integración del slice.
+  - dirección persistida como `Patient.address` simple (`text`) sin modelado postal rico.
 
 ## 3) Fuentes de verdad activas
 
@@ -100,6 +102,7 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
 3. Header/Footer de la superficie pública comparten `NAV_LINKS`; `/evaluar` no figura en esa navegación global (acceso principal desde CTA de Home).
 4. La superficie privada `/admin/patients/*` usa FHIR real para `Patient` y `EpisodeOfCare`, pero sigue siendo una base clínica mínima pre-Encounter y no debe presentarse como operación clínica completa.
 5. El root layout (`src/app/layout.tsx`) no inyecta header/footer; la shell pública vive en `src/app/(public)/layout.tsx` y la shell privada en `src/app/admin/layout.tsx`.
+6. No se endurecieron reglas de negocio por dirección (por ejemplo, no se exige dirección para iniciar tratamiento en esta etapa).
 
 ## 5) Mantenimiento recomendado
 

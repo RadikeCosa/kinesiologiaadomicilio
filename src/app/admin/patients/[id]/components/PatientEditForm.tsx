@@ -35,6 +35,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
       id: patient.id,
       dni: String(formData.get("dni") ?? "") || undefined,
       phone: String(formData.get("phone") ?? "") || undefined,
+      address: String(formData.get("address") ?? "") || undefined,
       notes: String(formData.get("notes") ?? "") || undefined,
       mainContact: hasSomeValue([
         mainContactName,
@@ -112,6 +113,18 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
               defaultValue={patient.phone ?? ""}
               id="phone"
               name="phone"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium" htmlFor="address">
+              Dirección
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+              defaultValue={patient.address ?? ""}
+              id="address"
+              name="address"
             />
           </div>
 

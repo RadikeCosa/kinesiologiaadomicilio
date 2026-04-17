@@ -31,9 +31,9 @@ Permitir que el profesional pueda:
 ### 3.2 Capacidades implementadas
 
 - listado mínimo de pacientes;
-- alta mínima de paciente;
-- detalle de paciente;
-- edición incremental de ficha;
+- alta mínima de paciente (con dirección operativa opcional);
+- detalle de paciente (con dirección visible);
+- edición incremental de ficha (con dirección editable);
 - inicio de tratamiento como acción separada;
 - finalización de tratamiento cerrando el episodio activo;
 - validación de DNI para iniciar tratamiento;
@@ -46,6 +46,7 @@ Permitir que el profesional pueda:
 
 - `Patient` persiste y lee desde FHIR real vía repository + mapper.
 - `EpisodeOfCare` persiste y lee desde FHIR real vía repository + mapper.
+- La dirección de paciente usa `Patient.address` simple (`text`) y no modelado postal rico.
 - El slice mantiene alcance mínimo operativo (no es aún flujo clínico completo).
 
 ## 4) Reglas de negocio aplicadas
@@ -74,6 +75,10 @@ Crear paciente **no** inicia tratamiento automáticamente.
 ### Regla D — tolerancia a ficha preliminar
 
 Se admiten fichas incompletas sin forzar completitud total temprana.
+
+### Regla E — dirección sin hard-gate clínico
+
+La dirección forma parte operativa del flujo de ficha (alta/edición/detalle), pero en esta etapa no bloquea inicio de tratamiento ni agrega reglas clínicas nuevas.
 
 ## 5) Componentes técnicos realmente presentes en el slice
 
@@ -113,6 +118,7 @@ El Slice 1 se considera **cerrado a nivel transicional** porque:
 
 - existen las tres rutas privadas mínimas;
 - alta mínima funciona con nombre + apellido;
+- la dirección se puede cargar en alta, editar después y ver en detalle;
 - edición incremental está disponible;
 - inicio de tratamiento está separado del alta;
 - se exige DNI para iniciar tratamiento;

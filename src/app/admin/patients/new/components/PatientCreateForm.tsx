@@ -19,6 +19,7 @@ export function PatientCreateForm() {
       lastName: String(formData.get("lastName") ?? ""),
       dni: String(formData.get("dni") ?? "") || undefined,
       phone: String(formData.get("phone") ?? "") || undefined,
+      address: String(formData.get("address") ?? "") || undefined,
       notes: String(formData.get("notes") ?? "") || undefined,
     };
 
@@ -68,6 +69,13 @@ export function PatientCreateForm() {
             Teléfono
           </label>
           <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="phone" name="phone" />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium" htmlFor="address">
+            Dirección
+          </label>
+          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="address" name="address" />
         </div>
 
         <div>
