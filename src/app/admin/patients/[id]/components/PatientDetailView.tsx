@@ -1,3 +1,4 @@
+import React from "react";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 
 interface PatientDetailViewProps {
@@ -74,6 +75,10 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
             <div>
               <dt className="font-medium">Teléfono del paciente</dt>
               <dd>{patient.phone ?? "Sin teléfono"}</dd>
+            </div>
+            <div>
+              <dt className="font-medium">Dirección</dt>
+              <dd>{patient.address ?? "Sin dirección"}</dd>
             </div>
             <div>
               <dt className="font-medium">Contacto principal</dt>

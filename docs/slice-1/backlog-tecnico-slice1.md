@@ -49,6 +49,11 @@ No es roadmap general del proyecto.
   - bloqueo simple por DNI duplicado;
   - bloqueo si hay episodio activo;
   - finalización permitida solo con episodio activo.
+- dirección operativa implementada en flujo actual:
+  - carga en alta;
+  - edición de ficha;
+  - visualización en detalle;
+  - persistencia en `Patient.address` simple (`text`).
 - estado operativo visible implementado:
   - listado y detalle distinguen episodio activo, tratamiento finalizado y ausencia de tratamiento.
 - tests iniciales implementados:
@@ -80,6 +85,8 @@ No deben volver a listarse como “pendiente de Slice 1”:
 ## 6) Límites vigentes (deben mantenerse explícitos)
 
 - FHIR real acotado a `Patient` y `EpisodeOfCare`, sin Encounter;
+- dirección mantenida como string simple (sin modelo postal rico);
+- sin hard-gate por dirección para inicio de tratamiento en esta etapa;
 - sin auth;
 - sin encounters;
 - sin historial longitudinal;
