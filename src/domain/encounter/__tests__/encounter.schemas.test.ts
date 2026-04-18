@@ -17,11 +17,23 @@ describe("encounter.schemas", () => {
     );
   });
 
-  it("trims valid input", () => {
+  it("normalizes datetime-local input to FHIR dateTime with seconds and offset", () => {
     const parsed = createEncounterSchema.parse({
       patientId: " pat-1 ",
       episodeOfCareId: " epi-1 ",
-      occurrenceDate: " 2026-04-17T10:30:00Z ",
+      occurrenceDate: " 2026-04-17T10:30 ",
+    });
+
+    expect(parsed.patientId).toBe("pat-1");
+    expect(parsed.episodeOfCareId).toBe("epi-1");
+    expect(parsed.occurrenceDate).toMatch(/^2026-04-17T10:30:00(?:Z|[+-]\d{2}:\d{2})$/);
+  });
+
+  it("keeps a valid FHIR dateTime unchanged", () => {
+    const parsed = createEncounterSchema.parse({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      occurrenceDate: "2026-04-17T10:30:00Z",
     });
 
     expect(parsed).toEqual({
@@ -29,6 +41,16 @@ describe("encounter.schemas", () => {
       episodeOfCareId: "epi-1",
       occurrenceDate: "2026-04-17T10:30:00Z",
     });
+  });
+
+  it("fails with invalid occurrenceDate format", () => {
+    expect(() =>
+      createEncounterSchema.parse({
+        patientId: "pat-1",
+        episodeOfCareId: "epi-1",
+        occurrenceDate: "2026-04-17",
+      }),
+    ).toThrow("occurrenceDate: formato dateTime inválido.");
   });
 
   it("fails with invalid shape", () => {

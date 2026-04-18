@@ -1,3 +1,5 @@
+import { normalizeToFhirDateTime } from "@/lib/fhir/date-time";
+
 import type { CreateEncounterInput } from "@/domain/encounter/encounter.types";
 
 function assertObject(input: unknown, schemaName: string): Record<string, unknown> {
@@ -29,7 +31,10 @@ export const createEncounterSchema = {
     return {
       patientId: normalizeRequiredString(record.patientId, "patientId"),
       episodeOfCareId: normalizeRequiredString(record.episodeOfCareId, "episodeOfCareId"),
-      occurrenceDate: normalizeRequiredString(record.occurrenceDate, "occurrenceDate"),
+      occurrenceDate: normalizeToFhirDateTime(
+        normalizeRequiredString(record.occurrenceDate, "occurrenceDate"),
+        "occurrenceDate",
+      ),
     };
   },
 };

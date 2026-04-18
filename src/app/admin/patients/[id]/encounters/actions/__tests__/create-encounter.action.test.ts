@@ -20,7 +20,7 @@ describe("createEncounterAction", () => {
     const result = await createEncounterAction({
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
-      occurrenceDate: "2026-04-17T10:30:00Z",
+      occurrenceDate: "2026-04-17T10:30",
     });
 
     expect(result).toEqual({
@@ -68,13 +68,13 @@ describe("createEncounterAction", () => {
     const result = await createEncounterAction({
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
-      occurrenceDate: "2026-04-17T10:30:00Z",
+      occurrenceDate: "2026-04-17T10:30",
     });
 
     expect(createEncounter).toHaveBeenCalledWith({
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
-      occurrenceDate: "2026-04-17T10:30:00Z",
+      occurrenceDate: expect.stringMatching(/^2026-04-17T10:30:00(?:Z|[+-]\d{2}:\d{2})$/),
     });
 
     expect(result).toEqual({
