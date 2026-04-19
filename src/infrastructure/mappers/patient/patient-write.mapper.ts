@@ -77,11 +77,17 @@ export function mapUpdatePatientInputToFhir(options: {
   existing: FhirPatient;
   update: UpdatePatientInput;
 }): FhirPatient {
+  const mappedUpdate = mapInputToPatientShape(options.update);
+
   const merged: FhirPatient = {
     ...options.existing,
     resourceType: "Patient",
-    ...mapInputToPatientShape(options.update),
+    ...mappedUpdate,
   };
+
+  if (options.update.notes === undefined) {
+    merged.note = options.existing.note;
+  }
 
   merged.identifier = normalizeIdentifiers(merged.identifier);
 

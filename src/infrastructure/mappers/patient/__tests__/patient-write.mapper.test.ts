@@ -63,7 +63,26 @@ describe("patient-write.mapper", () => {
     expect(mapped.id).toBe("pat-1");
     expect(mapped.name?.[0]).toEqual({ family: "Pérez", given: ["Ana María"] });
     expect(mapped.identifier).toBeUndefined();
-    expect(mapped.note).toBeUndefined();
+    expect(mapped.note).toEqual([{ text: "Nota anterior" }]);
     expect(mapped.meta).toEqual({ lastUpdated: "2026-04-17T00:00:00.000Z" });
+  });
+
+  it("overwrites note when update includes notes with content", () => {
+    const mapped = mapUpdatePatientInputToFhir({
+      existing: {
+        resourceType: "Patient",
+        id: "pat-1",
+        name: [{ family: "Pérez", given: ["Ana"] }],
+        note: [{ text: "Nota anterior" }],
+      },
+      update: {
+        id: "pat-1",
+        firstName: "Ana",
+        lastName: "Pérez",
+        notes: "Nota nueva",
+      },
+    });
+
+    expect(mapped.note).toEqual([{ text: "Nota nueva" }]);
   });
 });

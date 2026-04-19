@@ -92,7 +92,7 @@ describe("patient.repository (FHIR)", () => {
         resourceType: "Patient",
         id: "pat-1",
         identifier: undefined,
-        note: undefined,
+        note: [{ text: "Nota original" }],
       }),
     );
     expect(updated.firstName).toBe("Ana María");
