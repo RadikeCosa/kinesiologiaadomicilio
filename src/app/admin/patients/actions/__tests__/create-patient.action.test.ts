@@ -36,4 +36,33 @@ describe("createPatientAction", () => {
       }),
     );
   });
+
+  it("accepts and forwards patient notes", async () => {
+    vi.mocked(createPatient).mockResolvedValue({
+      id: "pat-456",
+      firstName: "Carla",
+      lastName: "López",
+      notes: "Antecedente relevante",
+      createdAt: "2026-04-17T00:00:00.000Z",
+      updatedAt: "2026-04-17T00:00:00.000Z",
+    });
+
+    const result = await createPatientAction({
+      firstName: "Carla",
+      lastName: "López",
+      notes: "  Antecedente relevante  ",
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      patientId: "pat-456",
+      message: "Paciente creado correctamente.",
+    });
+
+    expect(createPatient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notes: "Antecedente relevante",
+      }),
+    );
+  });
 });
