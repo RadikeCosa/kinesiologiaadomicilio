@@ -19,10 +19,19 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
         ← Volver al listado
       </Link>
 
-      <h2 className="mt-3 text-xl font-semibold text-slate-900">Paciente</h2>
-      <p className="mt-2 text-sm text-slate-600">
-        Flujo mínimo usable: detalle, edición incremental y acciones operativas de tratamiento.
-      </p>
+      <header className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold text-slate-900">
+          {patient?.fullName ?? "Paciente no encontrado"}
+        </h1>
+        {patient ? (
+          <Link
+            className="inline-flex rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            href={`/admin/patients/${patient.id}/encounters`}
+          >
+            Ver visitas
+          </Link>
+        ) : null}
+      </header>
 
       {patient ? <PatientManagementPanel patient={patient} /> : null}
 
