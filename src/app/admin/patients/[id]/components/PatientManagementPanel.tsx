@@ -10,17 +10,22 @@ interface PatientManagementPanelProps {
   patient: PatientDetailReadModel;
 }
 
-export function PatientManagementPanel({ patient }: PatientManagementPanelProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+export function PatientManagementPanel({
+  patient,
+}: PatientManagementPanelProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   return (
     <section className="mt-3 space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-lg font-medium text-slate-900">Gestión del paciente</h2>
+          <h2 className="text-lg font-medium text-slate-900">
+            Gestión del paciente
+          </h2>
           <p className="mt-1 text-xs text-slate-600">
-            Acciones administrativas y de tratamiento activo en un único contexto de trabajo.
+            Acciones administrativas y de tratamiento activo en un único
+            contexto de trabajo.
           </p>
         </div>
         <button
@@ -40,7 +45,9 @@ export function PatientManagementPanel({ patient }: PatientManagementPanelProps)
             onClick={() => setIsEditing((currentValue) => !currentValue)}
             type="button"
           >
-            {isEditing ? "Ocultar edición administrativa" : "Editar datos administrativos"}
+            {isEditing
+              ? "Ocultar edición administrativa"
+              : "Editar datos administrativos"}
           </button>
 
           {isEditing ? (
@@ -55,7 +62,9 @@ export function PatientManagementPanel({ patient }: PatientManagementPanelProps)
 
           {patient.activeEpisode ? (
             <div className="border-t border-slate-200 pt-4">
-              <h3 className="text-sm font-semibold text-slate-900">Tratamiento activo</h3>
+              <h3 className="text-sm font-semibold text-slate-900">
+                Tratamiento activo
+              </h3>
               <p className="mt-1 text-xs text-slate-600">
                 Acción operativa separada del formulario administrativo.
               </p>
