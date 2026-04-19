@@ -8,17 +8,18 @@ import type { PatientDetailReadModel } from "@/features/patients/read-models/pat
 
 interface PatientEditFormProps {
   patient: PatientDetailReadModel;
+  isEditing: boolean;
+  onEditingChange: (nextValue: boolean) => void;
 }
 
 function hasSomeValue(values: Array<string | undefined>): boolean {
   return values.some(Boolean);
 }
 
-export function PatientEditForm({ patient }: PatientEditFormProps) {
+export function PatientEditForm({ patient, isEditing, onEditingChange }: PatientEditFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,36 +58,24 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
           (result.ok ? "Paciente actualizado correctamente." : "Error."),
       );
       if (result.ok) {
-        setIsEditing(false);
+        onEditingChange(false);
         router.refresh();
       }
     });
   }
 
   return (
-    <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4" id="patient-edit-form">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-medium">Datos administrativos</h2>
-          <p className="mt-1 text-xs text-slate-600">
-            Acción secundaria: actualizá identidad y contacto sin tocar el bloque clínico.
-          </p>
-        </div>
-        <button
-          className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-100"
-          onClick={() => {
-            setMessage(null);
-            setIsEditing((value) => !value);
-          }}
-          type="button"
-        >
-          {isEditing ? "Ocultar edición" : "Editar datos"}
-        </button>
+    <section className="rounded-lg border border-slate-200 bg-slate-50 p-4" id="patient-edit-form">
+      <div>
+        <h2 className="text-lg font-medium">Datos administrativos</h2>
+        <p className="mt-1 text-xs text-slate-600">
+          Actualizá identidad y contacto sin tocar el bloque clínico.
+        </p>
       </div>
 
       {!isEditing ? (
         <p className="mt-3 text-sm text-slate-700">
-          Formulario oculto. Usá “Editar datos” para actualizar la información administrativa.
+          Formulario oculto. Usá “Editar datos administrativos” para actualizar la información.
         </p>
       ) : null}
 
@@ -204,7 +193,7 @@ export function PatientEditForm({ patient }: PatientEditFormProps) {
 
           <button
             className="ml-2 rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            onClick={() => setIsEditing(false)}
+            onClick={() => onEditingChange(false)}
             type="button"
           >
             Cancelar

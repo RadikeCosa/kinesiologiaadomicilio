@@ -2,9 +2,8 @@ import Link from "next/link";
 
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import { PatientDetailView } from "@/app/admin/patients/[id]/components/PatientDetailView";
-import { PatientEditForm } from "@/app/admin/patients/[id]/components/PatientEditForm";
 import { StartEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/StartEpisodeOfCareForm";
-import { FinishEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm";
+import { PatientManagementPanel } from "@/app/admin/patients/[id]/components/PatientManagementPanel";
 
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
@@ -22,36 +21,14 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
 
       <h2 className="mt-3 text-xl font-semibold text-slate-900">Paciente</h2>
       <p className="mt-2 text-sm text-slate-600">
-        Flujo mínimo usable: detalle, edición incremental e inicio de tratamiento por separado.
+        Flujo mínimo usable: detalle, edición incremental y acciones operativas de tratamiento.
       </p>
-      {patient ? (
-        <div className="mt-3">
-          <div className="flex flex-wrap gap-2">
-            <a
-              className="inline-flex rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href="#patient-edit-form"
-            >
-              Editar datos administrativos
-            </a>
-            <Link
-              className="inline-flex rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href={`/admin/patients/${patient.id}/encounters`}
-            >
-              Ver visitas
-            </Link>
-          </div>
-        </div>
-      ) : null}
+
+      {patient ? <PatientManagementPanel patient={patient} /> : null}
 
       <PatientDetailView patient={patient} />
 
-      {patient ? (
-        <>
-          {patient.activeEpisode ? <FinishEpisodeOfCareForm patient={patient} /> : null}
-          {!patient.activeEpisode ? <StartEpisodeOfCareForm patient={patient} /> : null}
-          <PatientEditForm patient={patient} />
-        </>
-      ) : null}
+      {patient && !patient.activeEpisode ? <StartEpisodeOfCareForm patient={patient} /> : null}
     </section>
   );
 }
