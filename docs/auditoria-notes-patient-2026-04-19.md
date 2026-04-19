@@ -57,6 +57,7 @@ Alcance: superficie privada clínica, flujo `Patient.note` / `notes`.
 - Mapeo write create a `Patient.note` existe y está testeado unitariamente.
 - Mapeo update preserva nota existente cuando `notes` no viaja y sobrescribe cuando sí viaja.
 - Read mapper toma `Patient.note` y lo lleva al detail read model.
+- Verificación runtime real sobre HAPI local confirma que el request de create **sí envía** `Patient.note` en el body.
 
 ### Sospechoso
 - Falta evidencia de integración real contra servidor FHIR para confirmar persistencia de `Patient.note` tras POST/PUT y luego GET.
@@ -66,6 +67,8 @@ Alcance: superficie privada clínica, flujo `Patient.note` / `notes`.
 ### Claramente roto
 - Los tests de integración `tests/integration/admin-patients/*` fallan por dependencia a funciones `__reset...ForTests` inexistentes.
 - Esto elimina una fuente clave de evidencia de comportamiento e2e interno en test-suite actual.
+- La verificación runtime real contra HAPI local muestra que el servidor responde y permite crear/actualizar `Patient`, pero devuelve `Patient.note` como `undefined` tanto en POST/PUT como en el GET posterior.
+- Además, se detectó un riesgo local en el merge de update: campos opcionales omitidos podían perderse al hacer PUT completo. Ese comportamiento ya fue corregido para preservar los valores existentes cuando el update no los informa.
 
 ## C) Hipótesis ordenadas por probabilidad
 

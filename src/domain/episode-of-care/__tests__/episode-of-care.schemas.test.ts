@@ -15,17 +15,15 @@ describe("episode-of-care.schemas", () => {
     );
   });
 
-  it("accepts optional description", () => {
+  it("parses start input", () => {
     const parsed = startEpisodeOfCareSchema.parse({
       patientId: " pat-001 ",
       startDate: " 2026-04-16 ",
-      description: " inicio ",
     });
 
     expect(parsed).toEqual({
       patientId: "pat-001",
       startDate: "2026-04-16",
-      description: "inicio",
     });
   });
 

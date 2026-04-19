@@ -11,7 +11,6 @@ describe("updatePatientAction", () => {
       id: "pat-001",
       dni: "30111222",
       phone: "555-0100",
-      notes: "Nota de actualización",
     });
 
     expect(result).toEqual({
@@ -24,7 +23,6 @@ describe("updatePatientAction", () => {
       id: "pat-001",
       dni: "30111222",
       phone: "555-0100",
-      notes: "Nota de actualización",
     });
   });
 

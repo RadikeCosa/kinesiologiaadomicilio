@@ -10,18 +10,26 @@ interface StartEpisodeOfCareFormProps {
   patient: PatientDetailReadModel;
 }
 
-export function StartEpisodeOfCareForm({ patient }: StartEpisodeOfCareFormProps) {
+export function StartEpisodeOfCareForm({
+  patient,
+}: StartEpisodeOfCareFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
 
   const availability = useMemo(() => {
     if (!patient.dni) {
-      return { enabled: false, reason: "Identidad incompleta: cargá DNI para iniciar tratamiento." };
+      return {
+        enabled: false,
+        reason: "Identidad incompleta: cargá DNI para iniciar tratamiento.",
+      };
     }
 
     if (patient.activeEpisode) {
-      return { enabled: false, reason: "Este paciente ya tiene un tratamiento activo." };
+      return {
+        enabled: false,
+        reason: "Este paciente ya tiene un tratamiento activo.",
+      };
     }
 
     return { enabled: true, reason: null as string | null };
@@ -37,13 +45,15 @@ export function StartEpisodeOfCareForm({ patient }: StartEpisodeOfCareFormProps)
     const input = {
       patientId: patient.id,
       startDate: String(formData.get("startDate") ?? ""),
-      description: String(formData.get("description") ?? "") || undefined,
     };
 
     startTransition(async () => {
       const result = await startEpisodeOfCareAction(input);
       setMessage(
-        result.message ?? (result.ok ? "Tratamiento iniciado correctamente." : "No se pudo iniciar."),
+        result.message ??
+          (result.ok
+            ? "Tratamiento iniciado correctamente."
+            : "No se pudo iniciar."),
       );
       if (result.ok) {
         router.refresh();
@@ -55,7 +65,9 @@ export function StartEpisodeOfCareForm({ patient }: StartEpisodeOfCareFormProps)
     <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <h2 className="text-lg font-medium">Iniciar tratamiento activo</h2>
 
-      {availability.reason ? <p className="mt-2 text-sm text-slate-700">{availability.reason}</p> : null}
+      {availability.reason ? (
+        <p className="mt-2 text-sm text-slate-700">{availability.reason}</p>
+      ) : null}
 
       <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
         <div>
@@ -70,13 +82,6 @@ export function StartEpisodeOfCareForm({ patient }: StartEpisodeOfCareFormProps)
             required
             type="date"
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium" htmlFor="description">
-            Descripción breve del episodio/tratamiento
-          </label>
-          <textarea className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="description" name="description" rows={2} />
         </div>
 
         {message ? <p className="text-sm text-slate-700">{message}</p> : null}

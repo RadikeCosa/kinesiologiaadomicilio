@@ -10,7 +10,6 @@ export interface PatientDetailReadModel {
   phone?: string;
   birthDate?: string;
   address?: string;
-  patientNotes?: string;
   mainContact?: MainContact;
   activeEpisode?: EpisodeOfCare | null;
   latestEpisode?: EpisodeOfCare | null;

@@ -19,13 +19,11 @@ describe("episode-of-care.repository (FHIR)", () => {
       status: "active",
       patient: { reference: "Patient/pat-1" },
       period: { start: "2026-04-17" },
-      note: [{ text: "Plan inicial" }],
     });
 
     const created = await createEpisodeOfCare({
       patientId: "pat-1",
       startDate: "2026-04-17",
-      description: "Plan inicial",
     });
 
     expect(postSpy).toHaveBeenCalledWith(
@@ -50,7 +48,6 @@ describe("episode-of-care.repository (FHIR)", () => {
             status: "active",
             patient: { reference: "Patient/pat-1" },
             period: { start: "2026-04-17" },
-            note: [{ text: "Plan" }],
           },
         },
       ],

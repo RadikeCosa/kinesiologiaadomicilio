@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
-  },
+    "test:watch": "vitest"},
   "dependencies": {
     "@next/third-parties": "^16.2.3",
     "next": "^15.5.15",

@@ -22,24 +22,19 @@ function mapMainContactToFhirContact(mainContact?: MainContact): FhirPatientCont
       relationship: contactRelationship ? [{ text: contactRelationship }] : undefined,
       telecom: contactPhone
         ? [
-            {
-              system: "phone",
-              value: contactPhone,
-            },
-          ]
+          {
+            system: "phone",
+            value: contactPhone,
+          },
+        ]
         : undefined,
     },
   ];
 }
 
-function buildNotes(noteText?: string): Array<{ text: string }> | undefined {
-  const normalizedNote = noteText?.trim();
-  return normalizedNote ? [{ text: normalizedNote }] : undefined;
-}
-
 function mapInputToPatientShape(input: CreatePatientInput | UpdatePatientInput): Pick<
   FhirPatient,
-  "identifier" | "name" | "telecom" | "birthDate" | "address" | "note" | "contact"
+  "identifier" | "name" | "telecom" | "birthDate" | "address" | "contact"
 > {
   const dni = input.dni?.trim();
   const phone = input.phone?.trim();
@@ -53,7 +48,6 @@ function mapInputToPatientShape(input: CreatePatientInput | UpdatePatientInput):
     telecom: phone ? [{ system: "phone", value: phone }] : undefined,
     birthDate: input.birthDate,
     address: addressText ? [{ text: addressText }] : undefined,
-    note: buildNotes(input.notes),
     contact: mapMainContactToFhirContact(input.mainContact),
   };
 }
@@ -64,6 +58,10 @@ function normalizeIdentifiers(identifier?: FhirPatient["identifier"]): FhirPatie
   }
 
   return identifier.filter((item) => item.system !== DNI_IDENTIFIER_SYSTEM || Boolean(item.value));
+}
+
+function preferDefined<T>(nextValue: T | undefined, existingValue: T | undefined): T | undefined {
+  return nextValue === undefined ? existingValue : nextValue;
 }
 
 export function mapCreatePatientInputToFhir(input: CreatePatientInput): FhirPatient {
@@ -82,12 +80,13 @@ export function mapUpdatePatientInputToFhir(options: {
   const merged: FhirPatient = {
     ...options.existing,
     resourceType: "Patient",
-    ...mappedUpdate,
+    identifier: preferDefined(mappedUpdate.identifier, options.existing.identifier),
+    name: preferDefined(mappedUpdate.name, options.existing.name),
+    telecom: preferDefined(mappedUpdate.telecom, options.existing.telecom),
+    birthDate: preferDefined(mappedUpdate.birthDate, options.existing.birthDate),
+    address: preferDefined(mappedUpdate.address, options.existing.address),
+    contact: preferDefined(mappedUpdate.contact, options.existing.contact),
   };
-
-  if (options.update.notes === undefined) {
-    merged.note = options.existing.note;
-  }
 
   merged.identifier = normalizeIdentifiers(merged.identifier);
 

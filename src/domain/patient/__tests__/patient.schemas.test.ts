@@ -14,7 +14,6 @@ describe("patient.schemas", () => {
       lastName: " Pérez  ",
       dni: " 32123456 ",
       phone: " 123 ",
-      notes: "  nota ",
       mainContact: {
         name: "  Marta ",
         relationship: " Madre ",
@@ -27,7 +26,6 @@ describe("patient.schemas", () => {
       lastName: "Pérez",
       dni: "32123456",
       phone: "123",
-      notes: "nota",
       mainContact: {
         name: "Marta",
         relationship: "Madre",
@@ -53,12 +51,10 @@ describe("patient.schemas", () => {
       phone: "123",
       birthDate: undefined,
       address: undefined,
-      notes: undefined,
       mainContact: {
         name: "Marta",
         relationship: undefined,
         phone: undefined,
-        notes: undefined,
       },
     });
   });

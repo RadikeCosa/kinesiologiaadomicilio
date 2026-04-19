@@ -20,7 +20,6 @@ export function PatientCreateForm() {
       dni: String(formData.get("dni") ?? "") || undefined,
       phone: String(formData.get("phone") ?? "") || undefined,
       address: String(formData.get("address") ?? "") || undefined,
-      notes: String(formData.get("notes") ?? "") || undefined,
     };
 
     startTransition(async () => {
@@ -47,42 +46,57 @@ export function PatientCreateForm() {
           <label className="block text-sm font-medium" htmlFor="firstName">
             Nombre *
           </label>
-          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="firstName" name="firstName" required />
+          <input
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+            id="firstName"
+            name="firstName"
+            required
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="lastName">
             Apellido *
           </label>
-          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="lastName" name="lastName" required />
+          <input
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+            id="lastName"
+            name="lastName"
+            required
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="dni">
             DNI
           </label>
-          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="dni" name="dni" />
+          <input
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+            id="dni"
+            name="dni"
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="phone">
             Teléfono
           </label>
-          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="phone" name="phone" />
+          <input
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+            id="phone"
+            name="phone"
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="address">
             Dirección
           </label>
-          <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="address" name="address" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium" htmlFor="notes">
-            Notas generales del paciente
-          </label>
-          <textarea className="mt-1 w-full rounded border border-slate-300 bg-white p-2" id="notes" name="notes" rows={3} />
+          <input
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+            id="address"
+            name="address"
+          />
         </div>
 
         {message ? <p className="text-sm text-red-600">{message}</p> : null}

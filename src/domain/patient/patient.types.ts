@@ -8,7 +8,6 @@ export interface MainContact {
   name?: string;
   relationship?: string;
   phone?: string;
-  notes?: string;
 }
 
 export interface Patient {
@@ -19,7 +18,6 @@ export interface Patient {
   phone?: string;
   birthDate?: string;
   address?: string;
-  notes?: string;
   mainContact?: MainContact;
   createdAt: string;
   updatedAt: string;
@@ -32,7 +30,6 @@ export interface CreatePatientInput {
   phone?: string;
   birthDate?: string;
   address?: string;
-  notes?: string;
   mainContact?: MainContact;
 }
 
@@ -44,6 +41,5 @@ export interface UpdatePatientInput {
   phone?: string;
   birthDate?: string;
   address?: string;
-  notes?: string;
   mainContact?: MainContact;
 }

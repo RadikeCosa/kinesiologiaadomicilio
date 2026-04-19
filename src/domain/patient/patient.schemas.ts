@@ -46,7 +46,6 @@ function normalizeMainContact(value: unknown): MainContact | undefined {
     name: normalizeOptionalString(record.name, "mainContact.name"),
     relationship: normalizeOptionalString(record.relationship, "mainContact.relationship"),
     phone: normalizeOptionalString(record.phone, "mainContact.phone"),
-    notes: normalizeOptionalString(record.notes, "mainContact.notes"),
   };
 }
 
@@ -61,7 +60,6 @@ export const createPatientSchema = {
       phone: normalizeOptionalString(record.phone, "phone"),
       birthDate: normalizeOptionalString(record.birthDate, "birthDate"),
       address: normalizeOptionalString(record.address, "address"),
-      notes: normalizeOptionalString(record.notes, "notes"),
       mainContact: normalizeMainContact(record.mainContact),
     };
   },
@@ -79,7 +77,6 @@ export const updatePatientSchema = {
       phone: normalizeOptionalString(record.phone, "phone"),
       birthDate: normalizeOptionalString(record.birthDate, "birthDate"),
       address: normalizeOptionalString(record.address, "address"),
-      notes: normalizeOptionalString(record.notes, "notes"),
       mainContact: normalizeMainContact(record.mainContact),
     };
   },

@@ -70,7 +70,6 @@ describe("startEpisodeOfCareAction", () => {
     const result = await startEpisodeOfCareAction({
       patientId: created.id,
       startDate: "2026-04-16",
-      description: "Plan inicial",
     });
 
     expect(result).toEqual({

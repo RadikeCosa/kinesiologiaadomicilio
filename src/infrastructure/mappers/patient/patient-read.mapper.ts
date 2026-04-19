@@ -31,22 +31,6 @@ function extractMainContact(contact?: FhirPatient["contact"]): MainContact | und
   return mappedContact;
 }
 
-function extractPatientNotes(note?: FhirPatient["note"]): string | undefined {
-  if (!note?.length) {
-    return undefined;
-  }
-
-  const noteLines = note
-    .map((item) => item.text?.trim())
-    .filter((text): text is string => Boolean(text));
-
-  if (!noteLines.length) {
-    return undefined;
-  }
-
-  return noteLines.join("\n\n");
-}
-
 function resolveSlice1Timestamps(meta?: FhirPatient["meta"]): Pick<Patient, "createdAt" | "updatedAt"> {
   const lastUpdated = meta?.lastUpdated ?? new Date(0).toISOString();
 
@@ -71,7 +55,6 @@ export function mapFhirPatientToDomain(patient: FhirPatient): Patient {
     phone: patient.telecom?.find((telecom) => telecom.system === "phone")?.value?.trim() || undefined,
     birthDate: patient.birthDate,
     address: patient.address?.[0]?.text?.trim() || undefined,
-    notes: extractPatientNotes(patient.note),
     mainContact: extractMainContact(patient.contact),
     createdAt: timestamps.createdAt,
     updatedAt: timestamps.updatedAt,
@@ -116,7 +99,6 @@ export function mapPatientToDetailReadModel(
     phone: patient.phone,
     birthDate: patient.birthDate,
     address: patient.address,
-    patientNotes: patient.notes,
     mainContact: patient.mainContact,
     activeEpisode,
     latestEpisode,

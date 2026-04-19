@@ -67,7 +67,6 @@ describe("patient.repository (FHIR)", () => {
       id: "pat-1",
       name: [{ family: "Pérez", given: ["Ana"] }],
       identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }],
-      note: [{ text: "Nota original" }],
     });
 
     const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
@@ -82,7 +81,6 @@ describe("patient.repository (FHIR)", () => {
       firstName: "Ana María",
       lastName: "Pérez",
       dni: undefined,
-      notes: undefined,
     });
 
     expect(getSpy).toHaveBeenCalledWith("Patient/pat-1");
@@ -91,8 +89,7 @@ describe("patient.repository (FHIR)", () => {
       expect.objectContaining({
         resourceType: "Patient",
         id: "pat-1",
-        identifier: undefined,
-        note: [{ text: "Nota original" }],
+        identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }],
       }),
     );
     expect(updated.firstName).toBe("Ana María");

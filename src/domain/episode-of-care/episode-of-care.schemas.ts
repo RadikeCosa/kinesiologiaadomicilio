@@ -25,19 +25,6 @@ function normalizeRequiredString(value: unknown, field: string): string {
   return normalized;
 }
 
-function normalizeOptionalString(value: unknown, field: string): string | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  if (typeof value !== "string") {
-    throw new Error(`${field}: debe ser un string.`);
-  }
-
-  const normalized = value.trim();
-  return normalized || undefined;
-}
-
 export const startEpisodeOfCareSchema = {
   parse(input: unknown): StartEpisodeOfCareInput {
     const record = assertObject(input, "startEpisodeOfCareSchema");
@@ -45,11 +32,9 @@ export const startEpisodeOfCareSchema = {
     return {
       patientId: normalizeRequiredString(record.patientId, "patientId"),
       startDate: normalizeRequiredString(record.startDate, "startDate"),
-      description: normalizeOptionalString(record.description, "description"),
     };
   },
 };
-
 export const finishEpisodeOfCareSchema = {
   parse(input: unknown): FinishEpisodeOfCareInput {
     const record = assertObject(input, "finishEpisodeOfCareSchema");

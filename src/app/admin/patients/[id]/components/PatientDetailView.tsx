@@ -16,9 +16,13 @@ const OPERATIONAL_STATUS_LABELS: Record<
   finished_treatment: "Tratamiento finalizado",
 };
 
-function getTreatmentBadge(patient: PatientDetailReadModel): { label: string; className: string } {
-  const latestEpisode = (patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null })
-    .latestEpisode;
+function getTreatmentBadge(patient: PatientDetailReadModel): {
+  label: string;
+  className: string;
+} {
+  const latestEpisode = (
+    patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null }
+  ).latestEpisode;
 
   if (patient.activeEpisode) {
     return {
@@ -53,8 +57,9 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
   }
 
   const treatmentBadge = getTreatmentBadge(patient);
-  const latestEpisode = (patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null })
-    .latestEpisode;
+  const latestEpisode = (
+    patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null }
+  ).latestEpisode;
 
   return (
     <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -101,15 +106,6 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <h3 className="text-sm font-semibold text-slate-900">
-            Notas generales del paciente
-          </h3>
-          <p className="mt-2">
-            {patient.patientNotes ?? "Sin notas generales informadas."}
-          </p>
-        </div>
-
-        <div className="rounded-md border border-slate-200 bg-white p-3">
-          <h3 className="text-sm font-semibold text-slate-900">
             Estado operativo
           </h3>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -129,12 +125,6 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
         <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
           <p className="font-medium">Tratamiento activo</p>
           <p>Inicio: {patient.activeEpisode.startDate}</p>
-          {patient.activeEpisode.description ? (
-            <p>
-              Descripción breve del episodio/tratamiento:{" "}
-              {patient.activeEpisode.description}
-            </p>
-          ) : null}
         </div>
       ) : null}
 

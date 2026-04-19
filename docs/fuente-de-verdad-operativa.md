@@ -12,7 +12,8 @@ En paralelo, ahora existe una **superficie privada mínima transicional** para f
 
 - **Estado actual**:
   - la landing pública sigue activa y central en el repo;
-  - existe una primera implementación de superficie privada clínica mínima.
+  - existe una primera implementación de superficie privada clínica mínima;
+  - las notas libres de paciente y de inicio de tratamiento están temporalmente fuera de alcance en la UI actual mientras se redefine su modelado FHIR.
 - **Dirección aceptada**: evolucionar de forma incremental hacia una app clínica privada conviviente en el mismo repositorio.
 - **Límite explícito del estado actual**: la superficie privada implementada hoy es mínima y aún no cubre Encounter ni flujo longitudinal completo.
 - **Foco funcional efectivamente implementado en Slice 1**:

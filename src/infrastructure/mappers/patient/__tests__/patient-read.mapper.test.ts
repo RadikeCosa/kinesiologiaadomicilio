@@ -8,7 +8,7 @@ import {
 } from "@/infrastructure/mappers/patient/patient-read.mapper";
 
 describe("patient-read.mapper", () => {
-  it("maps FHIR Patient into domain Patient preserving contact and multi-note", () => {
+  it("maps FHIR Patient into domain Patient preserving contact data", () => {
     const mapped = mapFhirPatientToDomain({
       resourceType: "Patient",
       id: "pat-1",
@@ -18,7 +18,6 @@ describe("patient-read.mapper", () => {
       telecom: [{ system: "phone", value: "+54 299 555 0101" }],
       birthDate: "1988-01-10",
       address: [{ text: "Neuquén" }],
-      note: [{ text: "Nota 1" }, { text: "Nota 2" }],
       contact: [
         {
           name: { text: "María Pérez" },
@@ -36,7 +35,6 @@ describe("patient-read.mapper", () => {
       phone: "+54 299 555 0101",
       birthDate: "1988-01-10",
       address: "Neuquén",
-      notes: "Nota 1\n\nNota 2",
       mainContact: {
         name: "María Pérez",
         relationship: "Madre",

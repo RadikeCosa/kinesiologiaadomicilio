@@ -11,7 +11,6 @@ describe("episode-of-care mappers", () => {
     const mapped = mapStartEpisodeOfCareInputToFhir({
       patientId: "pat-1",
       startDate: "2026-04-17",
-      description: "Plan inicial",
     });
 
     expect(mapped).toEqual({
@@ -19,7 +18,6 @@ describe("episode-of-care mappers", () => {
       status: "active",
       patient: { reference: "Patient/pat-1" },
       period: { start: "2026-04-17" },
-      note: [{ text: "Plan inicial" }],
     });
   });
 
@@ -51,7 +49,6 @@ describe("episode-of-care mappers", () => {
       status: "finished",
       patient: { reference: "Patient/pat-1" },
       period: { start: "2026-04-17", end: "2026-04-29" },
-      note: [{ text: "Plan inicial" }, { text: "Objetivo" }],
     });
 
     expect(mapped).toEqual({
@@ -60,7 +57,6 @@ describe("episode-of-care mappers", () => {
       status: "finished",
       startDate: "2026-04-17",
       endDate: "2026-04-29",
-      description: "Plan inicial\n\nObjetivo",
     });
   });
 });

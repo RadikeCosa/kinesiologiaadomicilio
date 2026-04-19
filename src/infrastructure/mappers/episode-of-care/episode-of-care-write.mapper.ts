@@ -4,7 +4,6 @@ import type {
 } from "@/domain/episode-of-care/episode-of-care.types";
 import { buildPatientReference } from "@/lib/fhir/references";
 
-import { upsertEpisodeDescriptionInNotes } from "@/infrastructure/mappers/episode-of-care/episode-of-care-note.helpers";
 import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care/episode-of-care-fhir.types";
 
 export function mapStartEpisodeOfCareInputToFhir(input: StartEpisodeOfCareInput): FhirEpisodeOfCare {
@@ -17,9 +16,6 @@ export function mapStartEpisodeOfCareInputToFhir(input: StartEpisodeOfCareInput)
     period: {
       start: input.startDate,
     },
-    note: upsertEpisodeDescriptionInNotes({
-      description: input.description,
-    }),
   };
 }
 
