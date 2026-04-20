@@ -3,6 +3,8 @@
 > Estado del documento: backlog residual del Slice 1 (post-implementación)
 > Última actualización: 2026-04-17 (UTC)
 
+> Nota de contexto (2026-04-20): este backlog describe únicamente remanente de Slice 1; Encounter base ya fue implementado en Slice 2 y no forma parte de este cierre histórico.
+
 ## 1) Propósito
 
 Este archivo deja trazado qué partes del plan técnico del Slice 1:

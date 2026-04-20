@@ -3,6 +3,8 @@
 > Estado del documento: cierre de Slice 1 alineado a implementación real
 > Última actualización: 2026-04-17 (UTC)
 
+> Nota de contexto (2026-04-20): este documento conserva el cierre histórico del Slice 1. El repo ya avanzó con Encounter base en Slice 2.
+
 ## 1) Encadre del slice
 
 Este slice implementa una **primera superficie privada mínima** bajo `/admin/patients` sin cambiar el rol principal de la landing pública.
