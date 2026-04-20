@@ -129,9 +129,11 @@ El Slice 1 se considera **cerrado a nivel transicional** porque:
 - hay tests iniciales del slice;
 - documentación operativa global y de slice quedó alineada al estado real.
 
-## 7) Fuera de alcance (se mantiene vigente)
+## 7) Fuera de alcance del Slice 1 (histórico)
 
-- encounters / visitas;
+Para el alcance original del Slice 1 quedaron fuera:
+
+- encounters / visitas (resuelto posteriormente en Slice 2);
 - historial longitudinal;
 - auth;
 - persistencia productiva;
@@ -144,7 +146,7 @@ El Slice 1 se considera **cerrado a nivel transicional** porque:
 ## 8) Remanente real post-Slice 1 (sin inflar roadmap)
 
 - endurecer comportamiento para contexto productivo (incluyendo auth cuando corresponda);
-- recién después, evaluar slices que incorporen encounters e historial longitudinal.
+- mantener este documento congelado como cierre histórico del slice.
 
 ## 9) Nota de uso documental
 

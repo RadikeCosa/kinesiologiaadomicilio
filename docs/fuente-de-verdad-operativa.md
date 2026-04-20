@@ -67,6 +67,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - registro de visita realizada (`Encounter`) con gate de tratamiento activo;
 - listado de visitas del paciente ordenadas por fecha más reciente;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
+- no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
 
 ## 3) Fuentes de verdad activas
 
@@ -88,6 +89,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - auth productiva;
 - historial longitudinal rico;
 - detalle clínico profundo por encuentro;
+- notas clínicas longitudinales / notas generales persistidas en UI;
 - `Observation` / `Procedure`;
 - agenda;
 - pagos;
@@ -113,6 +115,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
   - Evaluar: `src/app/(public)/evaluar/evaluar-content.ts`
 - Si evoluciona la superficie privada clínica:
   - mantener alineadas `docs/slice-1/slice-1.md`, `docs/slice-1/backlog-tecnico-slice1.md`, `docs/slice-2/encounter-base-pre-implementacion.md` y este documento;
+  - ejecutar `docs/checklist-sincronizacion-doc-codigo.md` como requisito de merge;
   - declarar explícitamente qué sigue siendo transicional y qué ya es productivo cuando ocurra.
 
 ## 7) Estado de validación local

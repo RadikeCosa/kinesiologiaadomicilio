@@ -84,15 +84,14 @@ No deben volver a listarse como “pendiente de Slice 1”:
 - multiusuario;
 - deduplicación avanzada.
 
-## 6) Límites vigentes (deben mantenerse explícitos)
+## 6) Límites técnicos del cierre de Slice 1 (histórico)
 
-- FHIR real acotado a `Patient` y `EpisodeOfCare`, sin Encounter;
-- dirección mantenida como string simple (sin modelo postal rico);
-- sin hard-gate por dirección para inicio de tratamiento en esta etapa;
-- sin auth;
-- sin encounters;
-- sin historial longitudinal;
-- sin cobertura de operación clínica completa.
+- En el cierre original de Slice 1, el alcance técnico estaba acotado a `Patient` y `EpisodeOfCare`.
+- En el estado global actual del repositorio, `Encounter` base ya está implementado (Slice 2).
+- La dirección se mantiene como string simple (sin modelo postal rico).
+- Sin hard-gate por dirección para inicio de tratamiento en esta etapa.
+- Sin auth productiva.
+- Sin historial longitudinal rico.
 
 ## 7) Nota editorial
 
