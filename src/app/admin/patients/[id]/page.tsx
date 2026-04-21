@@ -17,7 +17,9 @@ interface AdminPatientDetailPageProps {
 function getTreatmentSummary(
   patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>,
 ) {
-  const treatmentBadge = getTreatmentBadgePresentation(patient.operationalStatus);
+  const treatmentBadge = getTreatmentBadgePresentation(
+    patient.operationalStatus,
+  );
 
   if (patient.activeEpisode) {
     return {
@@ -95,13 +97,13 @@ export default async function AdminPatientDetailPage({
                   className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                   href={`/admin/patients/${patient.id}/encounters`}
                 >
-                  Ver visitas
+                  Gestión Clínica
                 </Link>
                 <Link
                   className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                   href={`/admin/patients/${patient.id}/administrative`}
                 >
-                  Editar datos administrativos
+                  Gestión Administrativa
                 </Link>
               </div>
             </header>

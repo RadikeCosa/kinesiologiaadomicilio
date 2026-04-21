@@ -26,14 +26,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <span className="block truncate text-sm font-semibold tracking-[0.01em] text-slate-900 transition-colors group-hover:text-sky-700 sm:text-base">
                   Administración de pacientes
                 </span>
-                <span className="hidden text-xs font-medium text-slate-500 sm:block">Superficie privada</span>
+                <span className="hidden text-xs font-medium text-slate-500 sm:block">
+                  Superficie privada
+                </span>
               </div>
             </Link>
 
             <nav aria-label="Navegación principal de admin">
               <ul className="flex items-center gap-1 sm:gap-3">
                 <li>
-                  <AdminNavLink href="/admin/patients" match="branch">
+                  <AdminNavLink href="/admin/" match="branch">
                     Pacientes
                   </AdminNavLink>
                 </li>
