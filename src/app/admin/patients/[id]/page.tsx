@@ -8,18 +8,13 @@ import {
   formatPhoneDisplay,
 } from "@/lib/patient-contact-links";
 
-const OPERATIONAL_STATUS_LABELS = {
-  preliminary: "Identidad incompleta",
-  ready_to_start: "Listo para iniciar tratamiento",
-  active_treatment: "Tratamiento activo",
-  finished_treatment: "Tratamiento finalizado",
-} as const;
-
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-function getTreatmentSummary(patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>) {
+function getTreatmentSummary(
+  patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>,
+) {
   if (patient.activeEpisode) {
     return {
       badgeLabel: "En tratamiento",
@@ -32,7 +27,7 @@ function getTreatmentSummary(patient: NonNullable<Awaited<ReturnType<typeof load
     return {
       badgeLabel: "Tratamiento finalizado",
       badgeClassName: "border-slate-300 bg-slate-100 text-slate-700",
-      detail: `Inicio: ${patient.latestEpisode.startDate} · Fin: ${patient.latestEpisode.endDate ?? "No informada"}`,
+      detail: `Fin: ${patient.latestEpisode.endDate ?? "No informada"}`,
     };
   }
 
@@ -43,7 +38,9 @@ function getTreatmentSummary(patient: NonNullable<Awaited<ReturnType<typeof load
   };
 }
 
-export default async function AdminPatientDetailPage({ params }: AdminPatientDetailPageProps) {
+export default async function AdminPatientDetailPage({
+  params,
+}: AdminPatientDetailPageProps) {
   const { id } = await params;
   const patient = await loadPatientDetail(id);
 
@@ -55,17 +52,22 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
-      <Link className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline" href="/admin/patients">
+      <Link
+        className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline"
+        href="/admin/patients"
+      >
         ← Volver al listado
       </Link>
 
       {patient ? (
         <div className="mt-3">
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div className="min-w-0 space-y-3">
+            <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-2xl font-semibold text-slate-900">{patient.fullName}</h1>
+                  <h1 className="text-2xl font-semibold text-slate-900">
+                    {patient.fullName}
+                  </h1>
                   <span
                     className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentSummary?.badgeClassName}`}
                   >
@@ -73,101 +75,106 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
                   </span>
                 </div>
 
-                <p className="text-sm text-slate-700">{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</p>
+                <p className="text-sm font-medium text-slate-700">
+                  DNI: {patient.dni ?? "Sin DNI"}
+                </p>
 
                 {treatmentSummary?.detail ? (
-                  <p className="text-sm text-slate-700">{treatmentSummary.detail}</p>
+                  <p className="text-xs text-slate-500">
+                    {treatmentSummary.detail}
+                  </p>
                 ) : null}
-
-                <div className="grid gap-3 text-sm text-slate-800 sm:grid-cols-2">
-                  <section className="rounded-md border border-slate-200 bg-white p-3">
-                    <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-700">Identidad</h2>
-                    <dl className="mt-2 space-y-1">
-                      <div>
-                        <dt className="font-medium">DNI</dt>
-                        <dd>{patient.dni ?? "Sin DNI"}</dd>
-                      </div>
-                    </dl>
-                  </section>
-
-                  <section className="rounded-md border border-slate-200 bg-white p-3">
-                    <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-700">Contacto</h2>
-                    <dl className="mt-2 space-y-2">
-                      <div>
-                        <dt className="font-medium">Teléfono</dt>
-                        <dd>
-                          {!whatsappHref ? (
-                            phoneLabel
-                          ) : (
-                            <a
-                              className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                              href={whatsappHref}
-                              rel="noopener noreferrer"
-                              target="_blank"
-                            >
-                              {phoneLabel}
-                            </a>
-                          )}
-                        </dd>
-                      </div>
-
-                      <div>
-                        <dt className="font-medium">Dirección</dt>
-                        <dd>
-                          {!mapsHref ? (
-                            addressLabel
-                          ) : (
-                            <a
-                              className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                              href={mapsHref}
-                              rel="noopener noreferrer"
-                              target="_blank"
-                            >
-                              {addressLabel}
-                            </a>
-                          )}
-                        </dd>
-                      </div>
-
-                      {patient.mainContact ? (
-                        <div>
-                          <dt className="font-medium">Contacto principal</dt>
-                          <dd className="space-y-1">
-                            <p>Nombre: {patient.mainContact.name ?? "No informado"}</p>
-                            <p>Vínculo: {patient.mainContact.relationship ?? "No informado"}</p>
-                            <p>Teléfono: {patient.mainContact.phone ?? "No informado"}</p>
-                          </dd>
-                        </div>
-                      ) : null}
-                    </dl>
-                  </section>
-                </div>
               </div>
 
-              <section className="rounded-lg border border-slate-200 bg-white p-4 md:w-auto md:min-w-[18rem]">
-                <h2 className="text-sm font-semibold text-slate-900">Acciones contextuales</h2>
-                <div className="mt-3 space-y-2">
-                  <Link
-                    className="inline-flex w-full justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                    href={`/admin/patients/${patient.id}/encounters`}
-                  >
-                    Ver visitas
-                  </Link>
-                  <Link
-                    className="inline-flex w-full justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                    href={`/admin/patients/${patient.id}/administrative`}
-                  >
-                    Editar datos administrativos
-                  </Link>
-                </div>
-              </section>
+              <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-start">
+                <Link
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  href={`/admin/patients/${patient.id}/encounters`}
+                >
+                  Ver visitas
+                </Link>
+                <Link
+                  className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  href={`/admin/patients/${patient.id}/administrative`}
+                >
+                  Editar datos administrativos
+                </Link>
+              </div>
             </header>
+
+            <div className="mt-4 text-sm text-slate-800">
+              <section className="rounded-md border border-slate-200 bg-white p-3">
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+                  Contacto
+                </h2>
+                <dl className="mt-2 space-y-2">
+                  <div>
+                    <dt className="font-medium">Teléfono</dt>
+                    <dd>
+                      {!whatsappHref ? (
+                        phoneLabel
+                      ) : (
+                        <a
+                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                          href={whatsappHref}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {phoneLabel}
+                        </a>
+                      )}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium">Dirección</dt>
+                    <dd>
+                      {!mapsHref ? (
+                        addressLabel
+                      ) : (
+                        <a
+                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                          href={mapsHref}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {addressLabel}
+                        </a>
+                      )}
+                    </dd>
+                  </div>
+
+                  {patient.mainContact ? (
+                    <div>
+                      <dt className="font-medium">Contacto principal</dt>
+                      <dd className="space-y-1">
+                        <p>
+                          Nombre: {patient.mainContact.name ?? "No informado"}
+                        </p>
+                        <p>
+                          Vínculo:{" "}
+                          {patient.mainContact.relationship ?? "No informado"}
+                        </p>
+                        <p>
+                          Teléfono:{" "}
+                          {patient.mainContact.phone ?? "No informado"}
+                        </p>
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
+              </section>
+            </div>
           </section>
         </div>
       ) : (
         <div className="mt-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
-          <h1 className="text-xl font-semibold text-slate-900">Paciente no encontrado</h1>
-          <p className="mt-2 text-sm text-slate-700">No se encontró el paciente solicitado.</p>
+          <h1 className="text-xl font-semibold text-slate-900">
+            Paciente no encontrado
+          </h1>
+          <p className="mt-2 text-sm text-slate-700">
+            No se encontró el paciente solicitado.
+          </p>
         </div>
       )}
     </section>
