@@ -25,50 +25,47 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
       </Link>
 
       {patient ? (
-        <div className="mt-3 grid items-start gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-3 space-y-4">
+          <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <h1 className="text-xl font-semibold text-slate-900">{patient.fullName}</h1>
+              <section className="rounded-lg border border-slate-200 bg-white p-4 md:w-auto md:min-w-[18rem]">
+                <h2 className="text-sm font-semibold text-slate-900">Acciones contextuales</h2>
+                <div className="mt-3 space-y-2">
+                  <Link
+                    className="inline-flex w-full justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    href={`/admin/patients/${patient.id}/encounters`}
+                  >
+                    Ver visitas
+                  </Link>
+                  <Link
+                    className="inline-flex w-full justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    href={`/admin/patients/${patient.id}/administrative`}
+                  >
+                    Editar datos administrativos
+                  </Link>
+                </div>
+              </section>
             </header>
+          </section>
 
-            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Estado actual</h2>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className="text-sm text-slate-800">{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</span>
-                <span
-                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
-                    patient.activeEpisode
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border-slate-300 bg-white text-slate-700"
-                  }`}
-                >
-                  {patient.activeEpisode ? "En tratamiento" : "Sin tratamiento activo"}
-                </span>
-              </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Estado actual</h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-slate-800">{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</span>
+              <span
+                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
+                  patient.activeEpisode
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : "border-slate-300 bg-white text-slate-700"
+                }`}
+              >
+                {patient.activeEpisode ? "En tratamiento" : "Sin tratamiento activo"}
+              </span>
             </div>
-
-            <PatientDetailView patient={patient} />
           </div>
 
-          <aside className="space-y-4">
-            <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h2 className="text-sm font-semibold text-slate-900">Acciones contextuales</h2>
-              <div className="mt-3 space-y-2">
-                <Link
-                  className="inline-flex w-full justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                  href={`/admin/patients/${patient.id}/encounters`}
-                >
-                  Ver visitas
-                </Link>
-                <Link
-                  className="inline-flex w-full justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                  href={`/admin/patients/${patient.id}/administrative`}
-                >
-                  Editar datos administrativos
-                </Link>
-              </div>
-            </section>
-          </aside>
+          <PatientDetailView patient={patient} />
         </div>
       ) : (
         <div className="mt-3">
