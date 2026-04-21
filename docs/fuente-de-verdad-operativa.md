@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-20 (UTC)
+> Última actualización: 2026-04-21 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -33,6 +33,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `/admin/patients`
 - `/admin/patients/new`
 - `/admin/patients/[id]`
+- `/admin/patients/[id]/administrative`
 - `/admin/patients/[id]/encounters`
 
 ### Capacidades actuales
@@ -56,8 +57,8 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 #### Superficie privada clínica mínima
 - listado de pacientes;
 - alta mínima de paciente (incluye dirección operativa opcional);
-- detalle de paciente (incluye visualización de dirección);
-- edición incremental de datos (incluye edición de dirección);
+- ficha consolidada de paciente en `/admin/patients/[id]` (incluye visualización de dirección y acciones contextuales mínimas);
+- edición administrativa acotada en `/admin/patients/[id]/administrative` (incluye edición de dirección);
 - inicio de tratamiento en acción separada;
 - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
 - validación de DNI requerida para iniciar tratamiento;

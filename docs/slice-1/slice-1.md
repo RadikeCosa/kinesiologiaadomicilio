@@ -1,7 +1,7 @@
 # Slice 1 — alta flexible de paciente + identidad mínima para iniciar tratamiento
 
 > Estado del documento: cierre de Slice 1 alineado a implementación real
-> Última actualización: 2026-04-17 (UTC)
+> Última actualización: 2026-04-21 (UTC)
 
 > Nota de contexto (2026-04-20): este documento conserva el cierre histórico del Slice 1. El repo ya avanzó con Encounter base en Slice 2.
 
@@ -29,13 +29,14 @@ Permitir que el profesional pueda:
 - `/admin/patients`
 - `/admin/patients/new`
 - `/admin/patients/[id]`
+- `/admin/patients/[id]/administrative` (separación posterior para edición administrativa)
 
 ### 3.2 Capacidades implementadas
 
 - listado mínimo de pacientes;
 - alta mínima de paciente (con dirección operativa opcional);
-- detalle de paciente (con dirección visible);
-- edición incremental de ficha (con dirección editable);
+- detalle de paciente como ficha consolidada de lectura (con dirección visible);
+- edición administrativa de ficha en ruta dedicada (con dirección editable);
 - inicio de tratamiento como acción separada;
 - finalización de tratamiento cerrando el episodio activo;
 - validación de DNI para iniciar tratamiento;

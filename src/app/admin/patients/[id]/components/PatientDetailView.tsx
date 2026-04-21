@@ -1,6 +1,12 @@
 import React from "react";
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
+import {
+  buildGoogleMapsSearchHref,
+  buildWhatsAppHref,
+  formatAddressDisplay,
+  formatPhoneDisplay,
+} from "@/lib/patient-contact-links";
 
 interface PatientDetailViewProps {
   patient: PatientDetailReadModel | null;
@@ -60,6 +66,10 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
   const latestEpisode = (
     patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null }
   ).latestEpisode;
+  const whatsappHref = buildWhatsAppHref(patient.phone);
+  const phoneLabel = formatPhoneDisplay(patient.phone);
+  const mapsHref = buildGoogleMapsSearchHref(patient.address);
+  const addressLabel = formatAddressDisplay(patient.address);
 
   return (
     <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -85,11 +95,37 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
           <dl className="mt-2 space-y-2">
             <div>
               <dt className="font-medium">Teléfono del paciente</dt>
-              <dd>{patient.phone ?? "Sin teléfono"}</dd>
+              <dd>
+                {!whatsappHref ? (
+                  phoneLabel
+                ) : (
+                  <a
+                    className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                    href={whatsappHref}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {phoneLabel}
+                  </a>
+                )}
+              </dd>
             </div>
             <div>
               <dt className="font-medium">Dirección</dt>
-              <dd>{patient.address ?? "Sin dirección"}</dd>
+              <dd>
+                {!mapsHref ? (
+                  addressLabel
+                ) : (
+                  <a
+                    className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                    href={mapsHref}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {addressLabel}
+                  </a>
+                )}
+              </dd>
             </div>
             <div>
               <dt className="font-medium">Contacto principal</dt>
