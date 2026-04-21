@@ -115,7 +115,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
   - Home: `homeContent.ts` / `howItWorksContent.ts`
   - Evaluar: `src/app/(public)/evaluar/evaluar-content.ts`
 - Si evoluciona la superficie privada clínica:
-  - mantener alineadas `docs/slice-1/slice-1.md`, `docs/slice-1/backlog-tecnico-slice1.md`, `docs/slice-2/encounter-base-pre-implementacion.md` y este documento;
+  - mantener este documento como fuente de verdad principal;
   - ejecutar `docs/checklist-sincronizacion-doc-codigo.md` como requisito de merge;
   - declarar explícitamente qué sigue siendo transicional y qué ya es productivo cuando ocurra.
 
