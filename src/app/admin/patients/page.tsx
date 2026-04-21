@@ -2,6 +2,12 @@ import Link from "next/link";
 
 import { loadPatientsList } from "@/app/admin/patients/data";
 import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
+import {
+  buildGoogleMapsSearchHref,
+  buildWhatsAppHref,
+  formatAddressDisplay,
+  formatPhoneDisplay,
+} from "@/lib/patient-contact-links";
 
 function getTreatmentBadge(patientStatus: PatientOperationalStatus) {
   if (patientStatus === "active_treatment") {
@@ -53,6 +59,10 @@ export default async function AdminPatientsPage() {
         ) : (
           patients.map((patient) => {
             const treatmentBadge = getTreatmentBadge(patient.operationalStatus);
+            const whatsappHref = buildWhatsAppHref(patient.phone);
+            const phoneLabel = formatPhoneDisplay(patient.phone);
+            const mapsHref = buildGoogleMapsSearchHref(patient.address);
+            const addressLabel = formatAddressDisplay(patient.address);
 
             return (
               <article key={patient.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -69,7 +79,36 @@ export default async function AdminPatientsPage() {
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-slate-700">DNI: {patient.dni ?? "Sin DNI"}</p>
-                <p className="text-sm text-slate-700">Teléfono: {patient.phone ?? "Sin teléfono"}</p>
+                <p className="text-sm text-slate-700">
+                  Teléfono:{" "}
+                  {!whatsappHref ? (
+                    phoneLabel
+                  ) : (
+                    <a
+                      className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                      href={whatsappHref}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      {phoneLabel}
+                    </a>
+                  )}
+                </p>
+                <p className="text-sm text-slate-700">
+                  Dirección:{" "}
+                  {!mapsHref ? (
+                    addressLabel
+                  ) : (
+                    <a
+                      className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                      href={mapsHref}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      {addressLabel}
+                    </a>
+                  )}
+                </p>
               </article>
             );
           })

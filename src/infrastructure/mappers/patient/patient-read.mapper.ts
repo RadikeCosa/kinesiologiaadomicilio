@@ -73,6 +73,7 @@ export function mapPatientToListItemReadModel(
     fullName: buildFullName(patient),
     dni: patient.dni,
     phone: patient.phone,
+    address: patient.address,
     operationalStatus: getPatientOperationalStatus({
       patient,
       hasActiveEpisode: Boolean(activeEpisode),
