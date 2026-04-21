@@ -1,7 +1,12 @@
 import Link from "next/link";
 
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
-import { PatientDetailView } from "@/app/admin/patients/[id]/components/PatientDetailView";
+import {
+  buildGoogleMapsSearchHref,
+  buildWhatsAppHref,
+  formatAddressDisplay,
+  formatPhoneDisplay,
+} from "@/lib/patient-contact-links";
 
 const OPERATIONAL_STATUS_LABELS = {
   preliminary: "Identidad incompleta",
@@ -14,9 +19,39 @@ interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+function getTreatmentSummary(patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>) {
+  if (patient.activeEpisode) {
+    return {
+      badgeLabel: "En tratamiento",
+      badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      detail: `Inicio: ${patient.activeEpisode.startDate}`,
+    };
+  }
+
+  if (patient.latestEpisode?.status === "finished") {
+    return {
+      badgeLabel: "Tratamiento finalizado",
+      badgeClassName: "border-slate-300 bg-slate-100 text-slate-700",
+      detail: `Inicio: ${patient.latestEpisode.startDate} · Fin: ${patient.latestEpisode.endDate ?? "No informada"}`,
+    };
+  }
+
+  return {
+    badgeLabel: "Sin tratamiento activo",
+    badgeClassName: "border-slate-300 bg-white text-slate-700",
+    detail: null,
+  };
+}
+
 export default async function AdminPatientDetailPage({ params }: AdminPatientDetailPageProps) {
   const { id } = await params;
   const patient = await loadPatientDetail(id);
+
+  const treatmentSummary = patient ? getTreatmentSummary(patient) : null;
+  const whatsappHref = patient ? buildWhatsAppHref(patient.phone) : null;
+  const phoneLabel = patient ? formatPhoneDisplay(patient.phone) : null;
+  const mapsHref = patient ? buildGoogleMapsSearchHref(patient.address) : null;
+  const addressLabel = patient ? formatAddressDisplay(patient.address) : null;
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -25,10 +60,90 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
       </Link>
 
       {patient ? (
-        <div className="mt-3 space-y-4">
+        <div className="mt-3">
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <h1 className="text-xl font-semibold text-slate-900">{patient.fullName}</h1>
+              <div className="min-w-0 space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-2xl font-semibold text-slate-900">{patient.fullName}</h1>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentSummary?.badgeClassName}`}
+                  >
+                    {treatmentSummary?.badgeLabel}
+                  </span>
+                </div>
+
+                <p className="text-sm text-slate-700">{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</p>
+
+                {treatmentSummary?.detail ? (
+                  <p className="text-sm text-slate-700">{treatmentSummary.detail}</p>
+                ) : null}
+
+                <div className="grid gap-3 text-sm text-slate-800 sm:grid-cols-2">
+                  <section className="rounded-md border border-slate-200 bg-white p-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-700">Identidad</h2>
+                    <dl className="mt-2 space-y-1">
+                      <div>
+                        <dt className="font-medium">DNI</dt>
+                        <dd>{patient.dni ?? "Sin DNI"}</dd>
+                      </div>
+                    </dl>
+                  </section>
+
+                  <section className="rounded-md border border-slate-200 bg-white p-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-700">Contacto</h2>
+                    <dl className="mt-2 space-y-2">
+                      <div>
+                        <dt className="font-medium">Teléfono</dt>
+                        <dd>
+                          {!whatsappHref ? (
+                            phoneLabel
+                          ) : (
+                            <a
+                              className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                              href={whatsappHref}
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              {phoneLabel}
+                            </a>
+                          )}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt className="font-medium">Dirección</dt>
+                        <dd>
+                          {!mapsHref ? (
+                            addressLabel
+                          ) : (
+                            <a
+                              className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                              href={mapsHref}
+                              rel="noopener noreferrer"
+                              target="_blank"
+                            >
+                              {addressLabel}
+                            </a>
+                          )}
+                        </dd>
+                      </div>
+
+                      {patient.mainContact ? (
+                        <div>
+                          <dt className="font-medium">Contacto principal</dt>
+                          <dd className="space-y-1">
+                            <p>Nombre: {patient.mainContact.name ?? "No informado"}</p>
+                            <p>Vínculo: {patient.mainContact.relationship ?? "No informado"}</p>
+                            <p>Teléfono: {patient.mainContact.phone ?? "No informado"}</p>
+                          </dd>
+                        </div>
+                      ) : null}
+                    </dl>
+                  </section>
+                </div>
+              </div>
+
               <section className="rounded-lg border border-slate-200 bg-white p-4 md:w-auto md:min-w-[18rem]">
                 <h2 className="text-sm font-semibold text-slate-900">Acciones contextuales</h2>
                 <div className="mt-3 space-y-2">
@@ -48,31 +163,11 @@ export default async function AdminPatientDetailPage({ params }: AdminPatientDet
               </section>
             </header>
           </section>
-
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Estado actual</h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-slate-800">{OPERATIONAL_STATUS_LABELS[patient.operationalStatus]}</span>
-              <span
-                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${
-                  patient.activeEpisode
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-slate-300 bg-white text-slate-700"
-                }`}
-              >
-                {patient.activeEpisode ? "En tratamiento" : "Sin tratamiento activo"}
-              </span>
-            </div>
-          </div>
-
-          <PatientDetailView patient={patient} />
         </div>
       ) : (
-        <div className="mt-3">
-          <header className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-xl font-semibold text-slate-900">Paciente no encontrado</h1>
-          </header>
-          <PatientDetailView patient={patient} />
+        <div className="mt-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
+          <h1 className="text-xl font-semibold text-slate-900">Paciente no encontrado</h1>
+          <p className="mt-2 text-sm text-slate-700">No se encontró el paciente solicitado.</p>
         </div>
       )}
     </section>
