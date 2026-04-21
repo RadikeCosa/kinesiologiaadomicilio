@@ -74,7 +74,9 @@ export function PatientEditForm({
   return (
     <section className="space-y-4" id="patient-edit-form">
       <div>
-        <h2 className="text-lg font-medium">Datos administrativos</h2>
+        <h3 className="text-base font-semibold text-slate-900">
+          Editar datos del paciente
+        </h3>
         <p className="mt-1 text-xs text-slate-600">
           Actualizá identidad y contacto sin tocar el bloque clínico.
         </p>
