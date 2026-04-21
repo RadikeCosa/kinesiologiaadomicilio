@@ -66,50 +66,53 @@ export default async function AdminPatientsPage() {
 
             return (
               <article key={patient.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
-                  <h3 className="min-w-0 text-base font-semibold text-slate-900">
-                    <Link className="hover:underline" href={`/admin/patients/${patient.id}`}>
-                      {patient.fullName}
-                    </Link>
-                  </h3>
-                  <p className="shrink-0 text-xs font-normal text-slate-500">DNI: {patient.dni ?? "Sin DNI"}</p>
-                </div>
-                <p className="mt-2 text-sm text-slate-700">
-                  Teléfono:{" "}
-                  {!whatsappHref ? (
-                    phoneLabel
-                  ) : (
-                    <a
-                      className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                      href={whatsappHref}
-                      rel="noopener noreferrer"
-                      target="_blank"
+                <div className="grid gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-4 sm:gap-y-0">
+                  <div className="min-w-0">
+                    <h3 className="text-base font-semibold text-slate-900">
+                      <Link className="hover:underline" href={`/admin/patients/${patient.id}`}>
+                        {patient.fullName}
+                      </Link>
+                    </h3>
+                    <p className="mt-2 text-sm text-slate-700">
+                      Teléfono:{" "}
+                      {!whatsappHref ? (
+                        phoneLabel
+                      ) : (
+                        <a
+                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                          href={whatsappHref}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {phoneLabel}
+                        </a>
+                      )}
+                    </p>
+                    <p className="text-sm text-slate-700">
+                      Dirección:{" "}
+                      {!mapsHref ? (
+                        addressLabel
+                      ) : (
+                        <a
+                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                          href={mapsHref}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {addressLabel}
+                        </a>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col items-start gap-2 sm:items-end">
+                    <p className="shrink-0 text-xs font-normal text-slate-500">DNI: {patient.dni ?? "Sin DNI"}</p>
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
                     >
-                      {phoneLabel}
-                    </a>
-                  )}
-                </p>
-                <p className="text-sm text-slate-700">
-                  Dirección:{" "}
-                  {!mapsHref ? (
-                    addressLabel
-                  ) : (
-                    <a
-                      className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                      href={mapsHref}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      {addressLabel}
-                    </a>
-                  )}
-                </p>
-                <div className="mt-2">
-                  <span
-                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
-                  >
-                    {treatmentBadge.label}
-                  </span>
+                      {treatmentBadge.label}
+                    </span>
+                  </div>
                 </div>
               </article>
             );
