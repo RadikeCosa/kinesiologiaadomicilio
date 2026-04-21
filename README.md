@@ -19,6 +19,7 @@ El proyecto está en etapa **híbrida transicional**:
 - `/admin/patients`
 - `/admin/patients/new`
 - `/admin/patients/[id]`
+- `/admin/patients/[id]/administrative`
 - `/admin/patients/[id]/encounters`
 
 ### Funcionalidad disponible
@@ -33,7 +34,9 @@ El proyecto está en etapa **híbrida transicional**:
 - GA4 integrado de forma directa (sin GTM) con eventos custom.
 
 #### Privado clínico mínimo
-- Listado, alta, detalle y edición administrativa de pacientes.
+- Listado y alta de pacientes.
+- Ficha consolidada de lectura del paciente en `/admin/patients/[id]`.
+- Edición administrativa del paciente en `/admin/patients/[id]/administrative`.
 - Inicio y finalización de tratamiento (`EpisodeOfCare`).
 - Gate operativo por DNI para iniciar tratamiento.
 - Registro y listado de visitas realizadas (`Encounter` base) por paciente.
