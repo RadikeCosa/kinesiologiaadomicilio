@@ -62,7 +62,7 @@ export function StartEpisodeOfCareForm({
   }
 
   return (
-    <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <section className="rounded-lg border border-slate-200 bg-white p-4">
       <h2 className="text-lg font-medium">Iniciar tratamiento activo</h2>
 
       {availability.reason ? (
