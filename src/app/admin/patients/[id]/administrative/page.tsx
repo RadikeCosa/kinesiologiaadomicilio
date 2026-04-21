@@ -2,8 +2,6 @@ import Link from "next/link";
 
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import { PatientAdministrativeEditor } from "@/app/admin/patients/[id]/components/PatientAdministrativeEditor";
-import { FinishEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm";
-import { StartEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/StartEpisodeOfCareForm";
 
 interface AdminPatientAdministrativePageProps {
   params: Promise<{ id: string }>;
@@ -23,27 +21,14 @@ export default async function AdminPatientAdministrativePage({
         </h1>
         {patient ? (
           <p className="mt-1 text-sm text-slate-600">
-            Gestión operativa y actualización de identidad/contacto de{" "}
+            Gestión administrativa y actualización de identidad/contacto de{" "}
             {patient.fullName}
           </p>
         ) : null}
       </header>
 
       {patient ? (
-        <div className="mt-5 space-y-5">
-          <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Gestión del tratamiento
-            </h2>
-            <div className="mt-3">
-              {patient.activeEpisode ? (
-                <FinishEpisodeOfCareForm patient={patient} />
-              ) : (
-                <StartEpisodeOfCareForm patient={patient} />
-              )}
-            </div>
-          </section>
-
+        <div className="mt-5">
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
               Datos de identidad y contacto

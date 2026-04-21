@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
+import { FinishEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm";
+import { StartEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/StartEpisodeOfCareForm";
 import { EncounterCreateForm } from "@/app/admin/patients/[id]/encounters/components/EncounterCreateForm";
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 import { loadPatientEncountersPageData } from "@/app/admin/patients/[id]/encounters/data";
@@ -10,7 +13,10 @@ interface AdminPatientEncountersPageProps {
 
 export default async function AdminPatientEncountersPage({ params }: AdminPatientEncountersPageProps) {
   const { id } = await params;
-  const pageData = await loadPatientEncountersPageData(id);
+  const [pageData, patientDetail] = await Promise.all([
+    loadPatientEncountersPageData(id),
+    loadPatientDetail(id),
+  ]);
 
   if (!pageData) {
     return (
@@ -19,7 +25,7 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
           ← Volver al listado
         </Link>
 
-        <h2 className="mt-3 text-xl font-semibold text-slate-900">Visitas del paciente</h2>
+        <h2 className="mt-3 text-xl font-semibold text-slate-900">Gestión clínica</h2>
 
         <p className="mt-4 rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
           No se encontró el paciente solicitado.
@@ -38,10 +44,27 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
           >
             ← Volver al paciente
           </Link>
-          <h2 className="mt-3 text-xl font-semibold text-slate-900">Visitas del paciente</h2>
+          <h2 className="mt-3 text-xl font-semibold text-slate-900">Gestión clínica</h2>
           <p className="mt-2 text-sm text-slate-600">Paciente: {pageData.patient.fullName}</p>
         </div>
       </div>
+
+      <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+          Gestión del tratamiento
+        </h3>
+        <div className="mt-3">
+          {patientDetail ? (
+            patientDetail.activeEpisode ? (
+              <FinishEpisodeOfCareForm patient={patientDetail} />
+            ) : (
+              <StartEpisodeOfCareForm patient={patientDetail} />
+            )
+          ) : null}
+        </div>
+      </section>
+
+      <h3 className="mt-6 text-lg font-semibold text-slate-900">Visitas del paciente</h3>
 
       {pageData.activeEpisode ? (
         <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
