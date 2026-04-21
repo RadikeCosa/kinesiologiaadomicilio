@@ -7,7 +7,7 @@ Landing pública + superficie privada clínica mínima desarrollada con Next.js 
 El proyecto está en etapa **híbrida transicional**:
 
 - **sitio de captación público** activo;
-- **app clínica privada mínima** en `/admin/patients` con integración FHIR para flujo base.
+- **app clínica privada mínima** en `/admin` con integración FHIR para flujo base de pacientes.
 
 ### Rutas públicas implementadas
 - `/` (home)
@@ -34,11 +34,13 @@ El proyecto está en etapa **híbrida transicional**:
 - GA4 integrado de forma directa (sin GTM) con eventos custom.
 
 #### Privado clínico mínimo
+- `/admin` como puerta de entrada de la superficie privada.
 - Listado y alta de pacientes.
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]`.
-- Edición administrativa del paciente en `/admin/patients/[id]/administrative`.
+- Edición administrativa del paciente concentrada en `/admin/patients/[id]/administrative`.
 - Inicio y finalización de tratamiento (`EpisodeOfCare`).
 - Gate operativo por DNI para iniciar tratamiento.
+- Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
 - Registro y listado de visitas realizadas (`Encounter` base) por paciente.
 - Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 

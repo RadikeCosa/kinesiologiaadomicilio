@@ -6,7 +6,7 @@
 
 El repositorio mantiene como superficie principal una **landing pública de captación local** para kinesiología a domicilio en Neuquén.
 
-En paralelo, existe una **superficie privada clínica mínima transicional** bajo `/admin/patients`, con soporte para:
+En paralelo, existe una **superficie privada clínica mínima transicional** bajo `/admin`, con soporte para:
 
 - gestión base de pacientes;
 - ciclo básico de tratamiento (`EpisodeOfCare`);
@@ -36,6 +36,12 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `/admin/patients/[id]/administrative`
 - `/admin/patients/[id]/encounters`
 
+#### Responsabilidad actual por ruta (superficie de pacientes)
+- `/admin`: puerta de entrada operativa de la superficie privada.
+- `/admin/patients`: listado operativo de pacientes.
+- `/admin/patients/[id]`: ficha consolidada de lectura del paciente.
+- `/admin/patients/[id]/administrative`: edición administrativa del paciente (incluye gestión administrativa y de tratamiento).
+
 ### Capacidades actuales
 
 #### Landing pública
@@ -64,6 +70,8 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - validación de DNI requerida para iniciar tratamiento;
 - bloqueo simple por duplicado de DNI para iniciar tratamiento;
 - estado operativo consistente entre listado y detalle para episodio activo/finalizado/sin tratamiento;
+- representación visual del badge de tratamiento centralizada en helper compartido (`src/app/admin/patients/treatment-badge.ts`), separada de la lógica de estado operativo de dominio;
+- `finished_treatment` se representa con badge amarillo en la UI privada de pacientes;
 - pantalla de visitas por paciente (`/admin/patients/[id]/encounters`);
 - registro de visita realizada (`Encounter`) con gate de tratamiento activo;
 - listado de visitas del paciente ordenadas por fecha más reciente;
