@@ -66,20 +66,15 @@ export default async function AdminPatientsPage() {
 
             return (
               <article key={patient.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <h3 className="text-base font-semibold text-slate-900">
+                <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                  <h3 className="min-w-0 text-base font-semibold text-slate-900">
                     <Link className="hover:underline" href={`/admin/patients/${patient.id}`}>
                       {patient.fullName}
                     </Link>
                   </h3>
-                  <span
-                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
-                  >
-                    {treatmentBadge.label}
-                  </span>
+                  <p className="shrink-0 text-xs font-normal text-slate-500">DNI: {patient.dni ?? "Sin DNI"}</p>
                 </div>
-                <p className="mt-2 text-sm text-slate-700">DNI: {patient.dni ?? "Sin DNI"}</p>
-                <p className="text-sm text-slate-700">
+                <p className="mt-2 text-sm text-slate-700">
                   Teléfono:{" "}
                   {!whatsappHref ? (
                     phoneLabel
@@ -109,6 +104,13 @@ export default async function AdminPatientsPage() {
                     </a>
                   )}
                 </p>
+                <div className="mt-2">
+                  <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
+                  >
+                    {treatmentBadge.label}
+                  </span>
+                </div>
               </article>
             );
           })
