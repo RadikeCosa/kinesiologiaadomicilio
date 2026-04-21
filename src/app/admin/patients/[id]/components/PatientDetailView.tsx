@@ -1,5 +1,6 @@
 import React from "react";
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
+import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import {
   buildGoogleMapsSearchHref,
@@ -22,33 +23,6 @@ const OPERATIONAL_STATUS_LABELS: Record<
   finished_treatment: "Tratamiento finalizado",
 };
 
-function getTreatmentBadge(patient: PatientDetailReadModel): {
-  label: string;
-  className: string;
-} {
-  const latestEpisode = (
-    patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null }
-  ).latestEpisode;
-
-  if (patient.activeEpisode) {
-    return {
-      label: "En tratamiento",
-      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    };
-  }
-
-  if (latestEpisode?.status === "finished") {
-    return {
-      label: "Tratamiento finalizado",
-      className: "border-slate-300 bg-slate-100 text-slate-700",
-    };
-  }
-
-  return {
-    label: "Sin tratamiento activo",
-    className: "border-slate-300 bg-white text-slate-700",
-  };
-}
 
 export function PatientDetailView({ patient }: PatientDetailViewProps) {
   if (!patient) {
@@ -62,7 +36,7 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
     );
   }
 
-  const treatmentBadge = getTreatmentBadge(patient);
+  const treatmentBadge = getTreatmentBadgePresentation(patient.operationalStatus);
   const latestEpisode = (
     patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null }
   ).latestEpisode;

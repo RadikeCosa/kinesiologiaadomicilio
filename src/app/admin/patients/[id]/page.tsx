@@ -8,6 +8,8 @@ import {
   formatPhoneDisplay,
 } from "@/lib/patient-contact-links";
 
+import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
+
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
 }
@@ -15,25 +17,27 @@ interface AdminPatientDetailPageProps {
 function getTreatmentSummary(
   patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>,
 ) {
+  const treatmentBadge = getTreatmentBadgePresentation(patient.operationalStatus);
+
   if (patient.activeEpisode) {
     return {
-      badgeLabel: "En tratamiento",
-      badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-800",
+      badgeLabel: treatmentBadge.label,
+      badgeClassName: treatmentBadge.className,
       detail: `Inicio: ${patient.activeEpisode.startDate}`,
     };
   }
 
   if (patient.latestEpisode?.status === "finished") {
     return {
-      badgeLabel: "Tratamiento finalizado",
-      badgeClassName: "border-slate-300 bg-slate-100 text-slate-700",
+      badgeLabel: treatmentBadge.label,
+      badgeClassName: treatmentBadge.className,
       detail: `Fin: ${patient.latestEpisode.endDate ?? "No informada"}`,
     };
   }
 
   return {
-    badgeLabel: "Sin tratamiento activo",
-    badgeClassName: "border-slate-300 bg-white text-slate-700",
+    badgeLabel: treatmentBadge.label,
+    badgeClassName: treatmentBadge.className,
     detail: null,
   };
 }

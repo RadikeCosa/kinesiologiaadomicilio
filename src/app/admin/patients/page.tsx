@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { loadPatientsList } from "@/app/admin/patients/data";
-import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 import {
   buildGoogleMapsSearchHref,
   buildWhatsAppHref,
@@ -9,26 +8,7 @@ import {
   formatPhoneDisplay,
 } from "@/lib/patient-contact-links";
 
-function getTreatmentBadge(patientStatus: PatientOperationalStatus) {
-  if (patientStatus === "active_treatment") {
-    return {
-      label: "En tratamiento",
-      className: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    };
-  }
-
-  if (patientStatus === "finished_treatment") {
-    return {
-      label: "Tratamiento finalizado",
-      className: "border-slate-300 bg-slate-100 text-slate-700",
-    };
-  }
-
-  return {
-    label: "Sin tratamiento activo",
-    className: "border-slate-300 bg-white text-slate-700",
-  };
-}
+import { getTreatmentBadgePresentation } from "./treatment-badge";
 
 export default async function AdminPatientsPage() {
   const patients = await loadPatientsList();
@@ -59,7 +39,7 @@ export default async function AdminPatientsPage() {
           </p>
         ) : (
           patients.map((patient) => {
-            const treatmentBadge = getTreatmentBadge(patient.operationalStatus);
+            const treatmentBadge = getTreatmentBadgePresentation(patient.operationalStatus);
             const whatsappHref = buildWhatsAppHref(patient.phone);
             const phoneLabel = formatPhoneDisplay(patient.phone);
             const mapsHref = buildGoogleMapsSearchHref(patient.address);
