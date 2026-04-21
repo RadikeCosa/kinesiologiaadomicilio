@@ -39,7 +39,8 @@ export default async function AdminPatientsPage() {
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Pacientes</h2>
           <p className="mt-2 text-sm text-slate-600">
-            Lectura mínima del Slice 1 conectada vía repository + mapper + data loader.
+            Haz clic en un paciente para ver más detalles o gestionar su
+            información.
           </p>
         </div>
 
@@ -65,11 +66,17 @@ export default async function AdminPatientsPage() {
             const addressLabel = formatAddressDisplay(patient.address);
 
             return (
-              <article key={patient.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <article
+                key={patient.id}
+                className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+              >
                 <div className="grid gap-y-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-4 sm:gap-y-0">
                   <div className="min-w-0">
                     <h3 className="text-base font-semibold text-slate-900">
-                      <Link className="hover:underline" href={`/admin/patients/${patient.id}`}>
+                      <Link
+                        className="hover:underline"
+                        href={`/admin/patients/${patient.id}`}
+                      >
                         {patient.fullName}
                       </Link>
                     </h3>
@@ -106,7 +113,9 @@ export default async function AdminPatientsPage() {
                   </div>
 
                   <div className="flex flex-col items-start gap-2 sm:items-end">
-                    <p className="shrink-0 text-xs font-normal text-slate-500">DNI: {patient.dni ?? "Sin DNI"}</p>
+                    <p className="shrink-0 text-xs font-normal text-slate-500">
+                      DNI: {patient.dni ?? "Sin DNI"}
+                    </p>
                     <span
                       className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
                     >
