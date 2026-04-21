@@ -62,8 +62,10 @@ export function StartEpisodeOfCareForm({
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4">
-      <h2 className="text-lg font-medium">Iniciar tratamiento activo</h2>
+    <section>
+      <h3 className="text-base font-semibold text-slate-900">
+        Iniciar tratamiento activo
+      </h3>
 
       {availability.reason ? (
         <p className="mt-2 text-sm text-slate-700">{availability.reason}</p>
