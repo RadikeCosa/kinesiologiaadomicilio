@@ -1,30 +1,98 @@
-# Plan de remediación FHIR — Patient
+# Plan de remediación técnica FHIR — `Patient`
 
-## Estado por ticket
+> Estado: vigente
+> Última actualización: 2026-04-22 (UTC)
 
-| Ticket | Objetivo | Estado |
-| --- | --- | --- |
-| FHIR-002 | Contrato dominio `Patient`: agregar `gender` | ✅ Cerrado |
-| FHIR-003 | Schemas `Patient`: validar `gender` + `birthDate` | ✅ Cerrado |
-| FHIR-004 | Mapper/tipo FHIR `Patient`: soporte `gender` | ✅ Cerrado |
-| FHIR-005 | UI alta `Patient`: capturar `gender` | ✅ Cerrado |
-| FHIR-006 | UI edición/detalle `Patient`: `gender` | ✅ Cerrado |
-| FHIR-007 | UI alta `Patient`: habilitar `birthDate` | ✅ Cerrado |
-| FHIR-008 | UI edición/detalle `Patient`: `birthDate` | ✅ Cerrado |
-| FHIR-009 | Consolidación de tests Fase 1 | ✅ Cerrado |
-| FHIR-010 | Documentación Fase 1 | ✅ Cerrado |
+## Objetivo
 
-## Resultado de Fase 1
+Mejorar el modelado FHIR de `Patient` de forma incremental, sin rediseño total, priorizando brechas semánticas que hoy ya limitan crecimiento o generan incoherencia entre contrato, persistencia y UI.
 
-Fase 1 queda cerrada con soporte real de `gender` y `birthDate` en:
+## Criterio de priorización
 
-- contrato interno y read models;
-- schemas de entrada;
-- mappers/tipos FHIR;
-- UI privada de alta/edición/detalle;
-- tests de regresión relevantes.
+1. brecha semántica alta;
+2. inconsistencia end-to-end ya existente;
+3. bajo riesgo de rollout incremental;
+4. capacidad de validar el cambio por tests + UI + docs.
 
-## Límites vigentes (no incluidos en Fase 1)
+## Prioridades
 
-- Fase 2: `Identifier.type`.
-- Fase 3: `telecom`, `contact.relationship`, `name`, `address` (modelado más rico).
+### Cambios urgentes
+
+- `Patient.gender` end-to-end.
+- `Patient.birthDate` end-to-end en flujo real.
+- alineación documental del contrato vigente.
+
+### Cambios importantes pero no urgentes
+
+- enriquecer `Patient.identifier` con `Identifier.type`;
+- estabilizar semántica mínima de `telecom` y `contact.relationship`.
+
+### Deuda controlada
+
+- `Patient.name` más expresivo;
+- evolución de `Patient.address` desde `text` a modelo estructurado.
+
+## Fases
+
+### Fase 1 — Contrato administrativo mínimo coherente
+
+**Incluye**
+- incorporar `gender` end-to-end;
+- cerrar `birthDate` end-to-end;
+- actualizar documentación.
+
+**Impacto**
+- dominio;
+- schemas;
+- mappers read/write;
+- formularios de alta/edición;
+- detalle del paciente;
+- tests;
+- docs.
+
+### Fase 2 — Semántica mínima de identidad
+
+**Incluye**
+- mantener la regla operativa de DNI;
+- agregar `Identifier.type`;
+- actualizar fixtures/tests de identidad.
+
+**Impacto**
+- tipos FHIR locales;
+- helpers de identificadores;
+- mappers;
+- tests;
+- documentación de identidad.
+
+### Fase 3 — Mejoras semánticas no bloqueantes
+
+**Incluye**
+- contrato transicional de `telecom`;
+- contrato transicional de `Patient.contact.relationship`;
+- mejora incremental de `Patient.name`;
+- deuda explícita y trigger de evolución de `Patient.address`.
+
+## Riesgos de no hacer nada
+
+### Alto
+
+- seguir escalando sin `gender` perpetúa un `Patient` administrativamente incompleto.
+- mantener identidad semánticamente pobre sube costo de interoperabilidad futura.
+
+### Medio-alto
+
+- `birthDate` parcial erosiona confianza en el contrato técnico.
+
+### Medio
+
+- `telecom` y `contact` en texto libre aumentan heterogeneidad operativa.
+- desalineación doc-código multiplica retrabajo.
+
+## Regla de implementación
+
+Cada fase debe cerrar con:
+
+1. tests actualizados;
+2. docs alineadas;
+3. PR chico y trazable;
+4. límites vigentes explícitos.

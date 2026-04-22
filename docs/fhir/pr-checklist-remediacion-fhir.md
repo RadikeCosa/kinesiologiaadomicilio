@@ -1,15 +1,46 @@
-# PR checklist — remediación FHIR
+# PR Checklist — remediación FHIR
 
-## Checklist de cierre Fase 1 (estado actual)
+> Uso obligatorio en PRs del backlog FHIR
 
-- [x] `gender` y `birthDate` presentes en contrato interno `Patient`.
-- [x] Schemas validan catálogo de `gender` y formato de `birthDate` (`YYYY-MM-DD`).
-- [x] Mappers/tipos FHIR propagan `gender` y `birthDate` de forma consistente.
-- [x] UI privada captura/renderiza `gender` y `birthDate` (alta/edición/detalle).
-- [x] Tests de schemas/mappers/actions/vistas cubren casos válidos, inválidos y legacy.
-- [x] Sin claims fuera de alcance (Fase 2/Fase 3 siguen pendientes).
+## 1. Trazabilidad
 
-## Checklist para próximas fases
+- [ ] El PR referencia ticket FHIR-xxx.
+- [ ] El alcance coincide con el ticket.
+- [ ] No mezcla tickets sin justificación explícita.
 
-- [ ] Fase 2 (`Identifier.type`) definida y validada end-to-end.
-- [ ] Fase 3 (`telecom`, `contact.relationship`, `name`, `address`) planificada e implementada incrementalmente.
+## 2. Contrato y dominio
+
+- [ ] El cambio actualiza contrato de dominio si corresponde.
+- [ ] No introduce naming ambiguo.
+- [ ] Mantiene backward compatibility cuando fue requerida.
+
+## 3. Capa FHIR
+
+- [ ] Los mappers read/write quedaron alineados.
+- [ ] No se inventa semántica no soportada por producto.
+- [ ] Cualquier simplificación nueva quedó explícitamente documentada.
+
+## 4. UI / actions
+
+- [ ] La UI refleja el contrato nuevo.
+- [ ] Actions y validación quedaron consistentes.
+- [ ] No quedaron campos “a medias” entre UI y persistencia.
+
+## 5. Tests
+
+- [ ] Hay cobertura de schema si aplica.
+- [ ] Hay cobertura de mapper si aplica.
+- [ ] Hay cobertura de integración si aplica.
+- [ ] No se rompieron reglas operativas existentes sin decisión explícita.
+
+## 6. Documentación
+
+- [ ] Se actualizó `README.md` si corresponde.
+- [ ] Se actualizó `docs/fuente-de-verdad-operativa.md` si corresponde.
+- [ ] Se actualizó `docs/fhir/*` si el contrato o plan cambió.
+
+## 7. Cierre del ticket
+
+- [ ] El criterio de aceptación del ticket quedó cumplido.
+- [ ] El criterio de no alcance se respetó.
+- [ ] La deuda remanente quedó explicitada.
