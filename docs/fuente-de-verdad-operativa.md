@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-21 (UTC)
+> Última actualización: 2026-04-22 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -35,13 +35,15 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `/admin/patients/[id]`
 - `/admin/patients/[id]/administrative`
 - `/admin/patients/[id]/encounters`
+- `/admin/patients/[id]/treatment`
 
 #### Responsabilidad actual por ruta (superficie de pacientes)
 - `/admin`: puerta de entrada operativa de la superficie privada.
 - `/admin/patients`: listado operativo de pacientes.
 - `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica).
 - `/admin/patients/[id]/administrative`: edición administrativa no clínica (identidad, contacto y datos operativos).
-- `/admin/patients/[id]/encounters`: superficie clínica actual del paciente (gestión del tratamiento + visitas).
+- `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (contexto clínico + visitas).
+- `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
 
 ### Capacidades actuales
 
@@ -66,15 +68,16 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - alta mínima de paciente (incluye dirección operativa opcional);
 - ficha consolidada de paciente en `/admin/patients/[id]` como hub (incluye visualización de dirección y navegación a gestión clínica/administrativa);
 - edición administrativa acotada en `/admin/patients/[id]/administrative` (incluye edición de dirección y datos no clínicos);
-- gestión del tratamiento en superficie clínica (`/admin/patients/[id]/encounters`):
-  - inicio de tratamiento en acción separada;
+- gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
+  - inicio de tratamiento;
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
+- la gestión de tratamiento no vive inline en `/admin/patients/[id]/encounters`;
 - validación de DNI requerida para iniciar tratamiento;
 - bloqueo simple por duplicado de DNI para iniciar tratamiento;
 - estado operativo consistente entre listado y detalle para episodio activo/finalizado/sin tratamiento;
 - representación visual del badge de tratamiento centralizada en helper compartido (`src/app/admin/patients/treatment-badge.ts`), separada de la lógica de estado operativo de dominio;
 - `finished_treatment` se representa con badge amarillo en la UI privada de pacientes;
-- pantalla de gestión clínica por paciente (`/admin/patients/[id]/encounters`);
+- pantalla de gestión clínica operativa por paciente (`/admin/patients/[id]/encounters`);
 - registro de visita realizada (`Encounter`) con gate de tratamiento activo;
 - listado de visitas del paciente ordenadas por fecha más reciente (dentro de la superficie clínica);
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
