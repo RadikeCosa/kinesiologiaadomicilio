@@ -1,5 +1,7 @@
 import { type FhirResource } from "@/lib/fhir/types";
 
+export type FhirAdministrativeGender = "male" | "female" | "other" | "unknown";
+
 export interface FhirPatientContact {
   name?: {
     text?: string;
@@ -33,6 +35,7 @@ export interface FhirPatient extends FhirResource {
     value?: string;
     use?: string;
   }>;
+  gender?: FhirAdministrativeGender;
   birthDate?: string;
   address?: Array<{
     text?: string;

@@ -1,5 +1,5 @@
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
-import type { MainContact, PatientOperationalStatus } from "@/domain/patient/patient.types";
+import type { MainContact, PatientGender, PatientOperationalStatus } from "@/domain/patient/patient.types";
 
 export interface PatientDetailReadModel {
   id: string;
@@ -8,6 +8,7 @@ export interface PatientDetailReadModel {
   fullName: string;
   dni?: string;
   phone?: string;
+  gender?: PatientGender;
   birthDate?: string;
   address?: string;
   mainContact?: MainContact;

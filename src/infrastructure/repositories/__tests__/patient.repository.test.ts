@@ -24,12 +24,16 @@ describe("patient.repository (FHIR)", () => {
       meta: { lastUpdated: "2026-04-17T12:00:00.000Z" },
       name: [{ family: "Pérez", given: ["Ana"] }],
       identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }],
+      gender: "female",
+      birthDate: "1988-01-10",
     });
 
-    const patient = await createPatient({ firstName: "Ana", lastName: "Pérez", dni: "32123456" });
+    const patient = await createPatient({ firstName: "Ana", lastName: "Pérez", dni: "32123456", gender: "female" });
 
     expect(patient.id).toBe("pat-1");
     expect(patient.dni).toBe("32123456");
+    expect(patient.gender).toBe("female");
+    expect(patient.birthDate).toBe("1988-01-10");
   });
 
   it("gets list and find by dni from search bundles", async () => {
@@ -67,6 +71,8 @@ describe("patient.repository (FHIR)", () => {
       id: "pat-1",
       name: [{ family: "Pérez", given: ["Ana"] }],
       identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }],
+      gender: "female",
+      birthDate: "1988-01-10",
     });
 
     const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
@@ -90,6 +96,8 @@ describe("patient.repository (FHIR)", () => {
         resourceType: "Patient",
         id: "pat-1",
         identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }],
+        gender: "female",
+        birthDate: "1988-01-10",
       }),
     );
     expect(updated.firstName).toBe("Ana María");

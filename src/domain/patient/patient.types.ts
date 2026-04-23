@@ -4,6 +4,8 @@ export type PatientOperationalStatus =
   | "active_treatment"
   | "finished_treatment";
 
+export type PatientGender = "male" | "female" | "other" | "unknown";
+
 export interface MainContact {
   name?: string;
   relationship?: string;
@@ -16,6 +18,7 @@ export interface Patient {
   lastName: string;
   dni?: string;
   phone?: string;
+  gender?: PatientGender;
   birthDate?: string;
   address?: string;
   mainContact?: MainContact;
@@ -28,6 +31,7 @@ export interface CreatePatientInput {
   lastName: string;
   dni?: string;
   phone?: string;
+  gender?: PatientGender;
   birthDate?: string;
   address?: string;
   mainContact?: MainContact;
@@ -39,6 +43,7 @@ export interface UpdatePatientInput {
   lastName?: string;
   dni?: string;
   phone?: string;
+  gender?: PatientGender;
   birthDate?: string;
   address?: string;
   mainContact?: MainContact;

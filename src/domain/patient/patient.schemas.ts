@@ -1,4 +1,6 @@
-import type { CreatePatientInput, MainContact, UpdatePatientInput } from "@/domain/patient/patient.types";
+import type { CreatePatientInput, MainContact, PatientGender, UpdatePatientInput } from "@/domain/patient/patient.types";
+
+const VALID_PATIENT_GENDERS: PatientGender[] = ["male", "female", "other", "unknown"];
 
 function assertObject(input: unknown, schemaName: string): Record<string, unknown> {
   if (typeof input !== "object" || input === null) {
@@ -49,6 +51,54 @@ function normalizeMainContact(value: unknown): MainContact | undefined {
   };
 }
 
+function normalizeOptionalPatientGender(value: unknown, field: string): PatientGender | undefined {
+  const normalized = normalizeOptionalString(value, field);
+
+  if (normalized === undefined) {
+    return undefined;
+  }
+
+  if (!VALID_PATIENT_GENDERS.includes(normalized as PatientGender)) {
+    throw new Error(`${field}: valor inválido.`);
+  }
+
+  return normalized as PatientGender;
+}
+
+function isValidIsoDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+
+  if (!match) {
+    return false;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return (
+    date.getUTCFullYear() === year
+    && date.getUTCMonth() === month - 1
+    && date.getUTCDate() === day
+  );
+}
+
+function normalizeOptionalBirthDate(value: unknown, field: string): string | undefined {
+  const normalized = normalizeOptionalString(value, field);
+
+  if (normalized === undefined) {
+    return undefined;
+  }
+
+  if (!isValidIsoDate(normalized)) {
+    throw new Error(`${field}: formato inválido (YYYY-MM-DD).`);
+  }
+
+  return normalized;
+}
+
 export const createPatientSchema = {
   parse(input: unknown): CreatePatientInput {
     const record = assertObject(input, "createPatientSchema");
@@ -58,7 +108,8 @@ export const createPatientSchema = {
       lastName: normalizeRequiredString(record.lastName, "lastName"),
       dni: normalizeOptionalString(record.dni, "dni"),
       phone: normalizeOptionalString(record.phone, "phone"),
-      birthDate: normalizeOptionalString(record.birthDate, "birthDate"),
+      gender: normalizeOptionalPatientGender(record.gender, "gender"),
+      birthDate: normalizeOptionalBirthDate(record.birthDate, "birthDate"),
       address: normalizeOptionalString(record.address, "address"),
       mainContact: normalizeMainContact(record.mainContact),
     };
@@ -75,7 +126,8 @@ export const updatePatientSchema = {
       lastName: normalizeOptionalString(record.lastName, "lastName"),
       dni: normalizeOptionalString(record.dni, "dni"),
       phone: normalizeOptionalString(record.phone, "phone"),
-      birthDate: normalizeOptionalString(record.birthDate, "birthDate"),
+      gender: normalizeOptionalPatientGender(record.gender, "gender"),
+      birthDate: normalizeOptionalBirthDate(record.birthDate, "birthDate"),
       address: normalizeOptionalString(record.address, "address"),
       mainContact: normalizeMainContact(record.mainContact),
     };

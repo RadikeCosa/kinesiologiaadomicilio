@@ -73,9 +73,9 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 
 #### Superficie privada clínica mínima
 - listado de pacientes;
-- alta mínima de paciente (incluye dirección operativa opcional);
-- ficha consolidada de paciente en `/admin/patients/[id]` como hub (incluye visualización de dirección y navegación a gestión clínica/administrativa);
-- edición administrativa acotada en `/admin/patients/[id]/administrative` (incluye edición de dirección y datos no clínicos);
+- alta mínima de paciente (incluye dirección operativa opcional, `gender` y `birthDate` opcionales);
+- ficha consolidada de paciente en `/admin/patients/[id]` como hub (incluye visualización de dirección, `gender`, `birthDate` y navegación a gestión clínica/administrativa);
+- edición administrativa acotada en `/admin/patients/[id]/administrative` (incluye edición de dirección, `gender`, `birthDate` y datos no clínicos);
 - gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
   - inicio de tratamiento;
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
@@ -93,6 +93,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
+- en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`; quedan pendientes Fase 2 (`Identifier.type`) y Fase 3 (`telecom`, `contact.relationship`, `name`, `address`).
 
 ## 3) Fuentes de verdad activas
 

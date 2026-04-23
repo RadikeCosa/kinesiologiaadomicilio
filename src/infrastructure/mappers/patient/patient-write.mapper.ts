@@ -1,4 +1,4 @@
-import type { CreatePatientInput, MainContact, UpdatePatientInput } from "@/domain/patient/patient.types";
+import type { CreatePatientInput, MainContact, PatientGender, UpdatePatientInput } from "@/domain/patient/patient.types";
 import { DNI_IDENTIFIER_SYSTEM, buildDniIdentifier } from "@/lib/fhir/identifiers";
 
 import { type FhirPatient, type FhirPatientContact } from "@/infrastructure/mappers/patient/patient-fhir.types";
@@ -34,19 +34,22 @@ function mapMainContactToFhirContact(mainContact?: MainContact): FhirPatientCont
 
 function mapInputToPatientShape(input: CreatePatientInput | UpdatePatientInput): Pick<
   FhirPatient,
-  "identifier" | "name" | "telecom" | "birthDate" | "address" | "contact"
+  "identifier" | "name" | "telecom" | "gender" | "birthDate" | "address" | "contact"
 > {
   const dni = input.dni?.trim();
   const phone = input.phone?.trim();
   const firstName = input.firstName?.trim();
   const lastName = input.lastName?.trim();
+  const gender = input.gender?.trim() as PatientGender | undefined;
+  const birthDate = input.birthDate?.trim();
   const addressText = input.address?.trim();
 
   return {
     identifier: dni ? [buildDniIdentifier(dni)] : undefined,
     name: firstName || lastName ? [{ family: lastName, given: firstName ? [firstName] : undefined }] : undefined,
     telecom: phone ? [{ system: "phone", value: phone }] : undefined,
-    birthDate: input.birthDate,
+    gender: gender || undefined,
+    birthDate: birthDate || undefined,
     address: addressText ? [{ text: addressText }] : undefined,
     contact: mapMainContactToFhirContact(input.mainContact),
   };
@@ -83,6 +86,7 @@ export function mapUpdatePatientInputToFhir(options: {
     identifier: preferDefined(mappedUpdate.identifier, options.existing.identifier),
     name: preferDefined(mappedUpdate.name, options.existing.name),
     telecom: preferDefined(mappedUpdate.telecom, options.existing.telecom),
+    gender: preferDefined(mappedUpdate.gender, options.existing.gender),
     birthDate: preferDefined(mappedUpdate.birthDate, options.existing.birthDate),
     address: preferDefined(mappedUpdate.address, options.existing.address),
     contact: preferDefined(mappedUpdate.contact, options.existing.contact),

@@ -43,6 +43,8 @@ export function PatientEditForm({
     const input = {
       id: patient.id,
       dni: String(formData.get("dni") ?? "") || undefined,
+      gender: String(formData.get("gender") ?? "") || undefined,
+      birthDate: String(formData.get("birthDate") ?? "") || undefined,
       phone: String(formData.get("phone") ?? "") || undefined,
       address: String(formData.get("address") ?? "") || undefined,
       mainContact: hasSomeValue([
@@ -104,6 +106,37 @@ export function PatientEditForm({
             defaultValue={patient.phone ?? ""}
             id="phone"
             name="phone"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium" htmlFor="gender">
+            Gender
+          </label>
+          <select
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+            defaultValue={patient.gender ?? ""}
+            id="gender"
+            name="gender"
+          >
+            <option value="">Sin especificar</option>
+            <option value="male">male</option>
+            <option value="female">female</option>
+            <option value="other">other</option>
+            <option value="unknown">unknown</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium" htmlFor="birthDate">
+            Fecha de nacimiento
+          </label>
+          <input
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+            defaultValue={patient.birthDate ?? ""}
+            id="birthDate"
+            name="birthDate"
+            type="date"
           />
         </div>
 
