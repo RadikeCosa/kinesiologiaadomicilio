@@ -61,6 +61,14 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
               <dt className="font-medium">DNI</dt>
               <dd>{patient.dni ?? "Sin DNI"}</dd>
             </div>
+            <div>
+              <dt className="font-medium">Gender</dt>
+              <dd>{patient.gender ?? "No informado"}</dd>
+            </div>
+            <div>
+              <dt className="font-medium">Fecha de nacimiento</dt>
+              <dd>{patient.birthDate ?? "No informada"}</dd>
+            </div>
           </dl>
         </div>
 

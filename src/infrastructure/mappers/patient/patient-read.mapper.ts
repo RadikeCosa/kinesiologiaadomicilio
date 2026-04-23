@@ -53,7 +53,8 @@ export function mapFhirPatientToDomain(patient: FhirPatient): Patient {
       patient.identifier?.find((identifier) => identifier.system === DNI_IDENTIFIER_SYSTEM)?.value?.trim() ||
       undefined,
     phone: patient.telecom?.find((telecom) => telecom.system === "phone")?.value?.trim() || undefined,
-    birthDate: patient.birthDate,
+    gender: patient.gender,
+    birthDate: patient.birthDate?.trim() || undefined,
     address: patient.address?.[0]?.text?.trim() || undefined,
     mainContact: extractMainContact(patient.contact),
     createdAt: timestamps.createdAt,
@@ -73,6 +74,7 @@ export function mapPatientToListItemReadModel(
     fullName: buildFullName(patient),
     dni: patient.dni,
     phone: patient.phone,
+    gender: patient.gender,
     address: patient.address,
     operationalStatus: getPatientOperationalStatus({
       patient,
@@ -98,6 +100,7 @@ export function mapPatientToDetailReadModel(
     fullName: buildFullName(patient),
     dni: patient.dni,
     phone: patient.phone,
+    gender: patient.gender,
     birthDate: patient.birthDate,
     address: patient.address,
     mainContact: patient.mainContact,

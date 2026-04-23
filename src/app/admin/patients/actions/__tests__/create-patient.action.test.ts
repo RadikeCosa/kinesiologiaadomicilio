@@ -37,6 +37,64 @@ describe("createPatientAction", () => {
     );
   });
 
+  it("accepts and forwards patient gender when present", async () => {
+    vi.mocked(createPatient).mockResolvedValue({
+      id: "pat-789",
+      firstName: "Ana",
+      lastName: "Pérez",
+      gender: "female",
+      createdAt: "2026-04-17T00:00:00.000Z",
+      updatedAt: "2026-04-17T00:00:00.000Z",
+    });
+
+    const result = await createPatientAction({
+      firstName: "Ana",
+      lastName: "Pérez",
+      gender: "female",
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      patientId: "pat-789",
+      message: "Paciente creado correctamente.",
+    });
+
+    expect(createPatient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        gender: "female",
+      }),
+    );
+  });
+
+  it("accepts and forwards patient birthDate when present", async () => {
+    vi.mocked(createPatient).mockResolvedValue({
+      id: "pat-790",
+      firstName: "Ana",
+      lastName: "Pérez",
+      birthDate: "1990-10-03",
+      createdAt: "2026-04-17T00:00:00.000Z",
+      updatedAt: "2026-04-17T00:00:00.000Z",
+    });
+
+    const result = await createPatientAction({
+      firstName: "Ana",
+      lastName: "Pérez",
+      birthDate: "1990-10-03",
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      patientId: "pat-790",
+      message: "Paciente creado correctamente.",
+    });
+
+    expect(createPatient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        birthDate: "1990-10-03",
+      }),
+    );
+  });
+
   it("accepts minimal valid input", async () => {
     vi.mocked(createPatient).mockResolvedValue({
       id: "pat-456",

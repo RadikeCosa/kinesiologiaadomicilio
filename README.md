@@ -45,7 +45,14 @@ El proyecto está en etapa **híbrida transicional**:
 - Gate operativo por DNI para iniciar tratamiento.
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
 - Registro y listado de visitas realizadas (`Encounter` base) dentro de la superficie clínica operativa.
+- Captura y visualización administrativa de `gender` y `birthDate` en pacientes (alta, edición y detalle).
 - Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
+
+### Estado del frente FHIR Patient
+
+- **Fase 1 cerrada**: `gender` + `birthDate` soportados end-to-end (contrato, schemas, mappers, UI privada y tests).
+- **Fase 2 pendiente**: `Identifier.type`.
+- **Fase 3 pendiente**: `telecom`, `contact.relationship`, `name`, `address`.
 
 ## Fuentes de verdad principales
 - `src/lib/config.ts`: datos del negocio/contacto/base URL.

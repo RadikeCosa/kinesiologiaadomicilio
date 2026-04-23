@@ -16,6 +16,7 @@ describe("patient-read.mapper", () => {
       identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }],
       name: [{ family: "Pérez", given: ["Ana"] }],
       telecom: [{ system: "phone", value: "+54 299 555 0101" }],
+      gender: "female",
       birthDate: "1988-01-10",
       address: [{ text: "Neuquén" }],
       contact: [
@@ -33,6 +34,7 @@ describe("patient-read.mapper", () => {
       lastName: "Pérez",
       dni: "32123456",
       phone: "+54 299 555 0101",
+      gender: "female",
       birthDate: "1988-01-10",
       address: "Neuquén",
       mainContact: {
@@ -45,6 +47,21 @@ describe("patient-read.mapper", () => {
     });
   });
 
+  it("maps legacy FHIR Patient without gender and birthDate", () => {
+    const mapped = mapFhirPatientToDomain({
+      resourceType: "Patient",
+      id: "pat-legacy",
+      name: [{ family: "Gómez", given: ["Bruno"] }],
+      identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "30111222" }],
+    });
+
+    expect(mapped.id).toBe("pat-legacy");
+    expect(mapped.firstName).toBe("Bruno");
+    expect(mapped.lastName).toBe("Gómez");
+    expect(mapped.gender).toBeUndefined();
+    expect(mapped.birthDate).toBeUndefined();
+  });
+
   it("maps list item status as finished_treatment when latest episode is finished", () => {
     const mapped = mapPatientToListItemReadModel(
       {
@@ -53,6 +70,7 @@ describe("patient-read.mapper", () => {
         lastName: "Pérez",
         dni: "32123456",
         phone: "+54 299 555 0101",
+        gender: "female",
         createdAt: "2026-04-17T12:00:00.000Z",
         updatedAt: "2026-04-17T12:00:00.000Z",
       },
@@ -69,6 +87,7 @@ describe("patient-read.mapper", () => {
     );
 
     expect(mapped.operationalStatus).toBe("finished_treatment");
+    expect(mapped.gender).toBe("female");
   });
 
   it("maps detail status as finished_treatment when latest episode is finished", () => {
@@ -79,6 +98,7 @@ describe("patient-read.mapper", () => {
         lastName: "Pérez",
         dni: "32123456",
         phone: "+54 299 555 0101",
+        gender: "female",
         createdAt: "2026-04-17T12:00:00.000Z",
         updatedAt: "2026-04-17T12:00:00.000Z",
       },
@@ -95,5 +115,6 @@ describe("patient-read.mapper", () => {
     );
 
     expect(mapped.operationalStatus).toBe("finished_treatment");
+    expect(mapped.gender).toBe("female");
   });
 });
