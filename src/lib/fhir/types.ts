@@ -33,4 +33,12 @@ export interface FhirOperationOutcome extends FhirResource {
 export interface FhirIdentifier {
   system: string;
   value: string;
+  type?: {
+    coding?: Array<{
+      system?: string;
+      code?: string;
+      display?: string;
+    }>;
+    text?: string;
+  };
 }

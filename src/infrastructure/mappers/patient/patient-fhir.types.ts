@@ -24,6 +24,14 @@ export interface FhirPatient extends FhirResource {
   identifier?: Array<{
     system?: string;
     value?: string;
+    type?: {
+      coding?: Array<{
+        system?: string;
+        code?: string;
+        display?: string;
+      }>;
+      text?: string;
+    };
   }>;
   name?: Array<{
     family?: string;

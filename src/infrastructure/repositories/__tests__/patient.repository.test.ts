@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { DNI_IDENTIFIER_SYSTEM } from "@/lib/fhir/identifiers";
+import {
+  DNI_IDENTIFIER_SYSTEM,
+  DNI_IDENTIFIER_TYPE_CODING_CODE,
+  DNI_IDENTIFIER_TYPE_CODING_SYSTEM,
+  DNI_IDENTIFIER_TYPE_TEXT,
+} from "@/lib/fhir/identifiers";
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
 import {
@@ -118,6 +123,42 @@ describe("patient.repository (FHIR)", () => {
     });
 
     expect(result).toBe(true);
+  });
+
+  it("finds patient by DNI when identifier includes type", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "Patient",
+            id: "pat-typed",
+            name: [{ family: "Typed", given: ["Paciente"] }],
+            identifier: [
+              {
+                system: DNI_IDENTIFIER_SYSTEM,
+                value: "30999111",
+                type: {
+                  coding: [
+                    {
+                      system: DNI_IDENTIFIER_TYPE_CODING_SYSTEM,
+                      code: DNI_IDENTIFIER_TYPE_CODING_CODE,
+                      display: DNI_IDENTIFIER_TYPE_TEXT,
+                    },
+                  ],
+                  text: DNI_IDENTIFIER_TYPE_TEXT,
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    const found = await findPatientByDni("30999111");
+
+    expect(found?.id).toBe("pat-typed");
+    expect(found?.dni).toBe("30999111");
   });
 
   it("returns null on get by id not found", async () => {

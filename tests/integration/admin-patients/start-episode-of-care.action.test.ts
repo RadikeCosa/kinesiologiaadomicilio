@@ -48,6 +48,30 @@ describe("startEpisodeOfCareAction", () => {
     });
   });
 
+  it("fails when duplicate DNI exists and current patient identifier has type", async () => {
+    const current = await createPatient({
+      firstName: "Paciente",
+      lastName: "ConType",
+      dni: "30555111",
+    });
+
+    await createPatient({
+      firstName: "Paciente",
+      lastName: "DuplicadoConType",
+      dni: "30555111",
+    });
+
+    const result = await startEpisodeOfCareAction({
+      patientId: current.id,
+      startDate: "2026-04-16",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      message: "Ya existe otro paciente con ese DNI.",
+    });
+  });
+
   it("fails when patient already has an active episode", async () => {
     const result = await startEpisodeOfCareAction({
       patientId: "pat-003",
