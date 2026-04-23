@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-22 (UTC)
+> Última actualización: 2026-04-23 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -45,6 +45,14 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (contexto clínico + visitas).
 - `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
 
+#### Criterio vigente de presentación UI entre `encounters` y `treatment`
+- En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (registro y listado).
+- El acceso desde `/encounters` hacia `/treatment` es secundario y compacto (navegación de apoyo, no CTA principal).
+- En `/admin/patients/[id]/treatment` domina la gestión de tratamiento (inicio o finalización según estado).
+- El lenguaje visible al usuario prioriza términos operativos de producto (“tratamiento”, “visitas”).
+- Los tecnicismos (`EpisodeOfCare`, `Encounter`) se reservan para soporte/aclaración cuando aportan contexto.
+- En `/encounters` se evita duplicar estados visuales de tratamiento; se conserva señal impeditiva real cuando bloquea registrar visitas.
+
 ### Capacidades actuales
 
 #### Landing pública
@@ -80,6 +88,9 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - pantalla de gestión clínica operativa por paciente (`/admin/patients/[id]/encounters`);
 - registro de visita realizada (`Encounter`) con gate de tratamiento activo;
 - listado de visitas del paciente ordenadas por fecha más reciente (dentro de la superficie clínica);
+- en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto, sin co-protagonismo visual con visitas;
+- en `/encounters`, se removió redundancia de estados positivos de tratamiento para priorizar la señal impeditiva real del registro de visitas;
+- en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
 

@@ -64,7 +64,7 @@ export function StartEpisodeOfCareForm({
   return (
     <section>
       <h3 className="text-base font-semibold text-slate-900">
-        Iniciar tratamiento activo
+        Iniciar tratamiento
       </h3>
 
       {availability.reason ? (

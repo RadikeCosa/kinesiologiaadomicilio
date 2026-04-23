@@ -19,7 +19,7 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
           ← Volver al listado
         </Link>
 
-        <h2 className="mt-3 text-xl font-semibold text-slate-900">Gestión clínica · Tratamiento</h2>
+        <h2 className="mt-3 text-xl font-semibold text-slate-900">Gestión de tratamiento</h2>
 
         <p className="mt-4 rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
           No se encontró el paciente solicitado.
@@ -35,10 +35,10 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
           className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline"
           href={`/admin/patients/${patient.id}/encounters`}
         >
-          ← Volver a gestión clínica
+          ← Volver a visitas
         </Link>
         <h1 className="mt-3 text-2xl font-semibold text-slate-900">{patient.fullName}</h1>
-        <p className="mt-2 text-sm text-slate-600">Gestión clínica · Tratamiento</p>
+        <p className="mt-2 text-sm text-slate-600">Inicio y cierre del tratamiento del paciente</p>
       </div>
 
       <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -58,7 +58,7 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
               Sin tratamiento activo
             </h2>
             <p className="mt-3 text-sm text-slate-700">
-              Iniciá un EpisodeOfCare para habilitar el registro de visitas en gestión clínica.
+              Iniciá un tratamiento para habilitar el registro de visitas.
             </p>
             <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
               <StartEpisodeOfCareForm patient={patient} />

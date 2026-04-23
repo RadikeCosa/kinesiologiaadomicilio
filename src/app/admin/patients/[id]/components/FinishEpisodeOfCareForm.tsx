@@ -46,7 +46,7 @@ export function FinishEpisodeOfCareForm({ patient }: FinishEpisodeOfCareFormProp
         Finalizar tratamiento activo
       </h3>
       <p className="mt-2 text-sm text-amber-900">
-        Esta acción cierra formalmente el EpisodeOfCare activo del paciente.
+        Esta acción cierra formalmente el tratamiento activo del paciente.
       </p>
 
       <form className="mt-4" onSubmit={handleSubmit}>
