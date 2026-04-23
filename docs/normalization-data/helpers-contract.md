@@ -141,3 +141,18 @@ Requisito:
 
 * Ningún componente debe formatear directamente
 * Todo pasa por helpers
+  
+## Regla de normalización obligatoria
+
+Todo valor administrativo debe cumplir:
+
+input → validación → normalización → persistencia
+
+Y:
+
+persistencia → lectura → display
+
+Prohibido:
+- usar valores sin normalizar para búsquedas
+- formatear directamente en componentes
+- aplicar display sobre valores no normalizados
