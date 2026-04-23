@@ -51,8 +51,8 @@ El proyecto está en etapa **híbrida transicional**:
 ### Estado del frente FHIR Patient
 
 - **Fase 1 cerrada**: `gender` + `birthDate` soportados end-to-end (contrato, schemas, mappers, UI privada y tests).
-- **Fase 2 pendiente**: `Identifier.type`.
-- **Fase 3 pendiente**: `telecom`, `contact.relationship`, `name`, `address`.
+- **Fase 2 cerrada**: `Identifier.type` + tests/fixtures de identidad.
+- **Fase 3 cerrada**: `telecom`, `contact.relationship`, `name`, `address` (con `telecom`, `contact.relationship` y `name` ya resueltos incrementalmente, y deuda/trigger de `address` documentados en FHIR-018).
 
 ## Fuentes de verdad principales
 - `src/lib/config.ts`: datos del negocio/contacto/base URL.

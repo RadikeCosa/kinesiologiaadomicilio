@@ -54,7 +54,7 @@ describe("patient-write.mapper", () => {
       contact: [
         {
           name: { text: "María Pérez" },
-          relationship: [{ text: "Madre" }],
+          relationship: [{ text: "parent" }],
           telecom: [{ system: "phone", value: "+54 299 555 0102" }],
         },
       ],
@@ -84,7 +84,7 @@ describe("patient-write.mapper", () => {
     });
 
     expect(mapped.id).toBe("pat-1");
-    expect(mapped.name?.[0]).toEqual({ family: "Pérez", given: ["Ana María"] });
+    expect(mapped.name?.[0]).toEqual({ family: "Pérez", given: ["Ana", "María"], text: "Ana María Pérez" });
     expect(mapped.identifier).toEqual([{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }]);
     expect(mapped.telecom).toEqual([{ system: "phone", value: "+54 299 555 0101" }]);
     expect(mapped.gender).toBe("female");
@@ -129,5 +129,49 @@ describe("patient-write.mapper", () => {
     });
 
     expect(mapped.identifier).toEqual([{ system: DNI_IDENTIFIER_SYSTEM, value: "30111222" }]);
+  });
+
+  it("normalizes update telecom to a single primary phone without use", () => {
+    const mapped = mapUpdatePatientInputToFhir({
+      existing: {
+        resourceType: "Patient",
+        id: "pat-telecom",
+        telecom: [
+          { system: "email", value: "ana@example.com" },
+          { system: "phone", value: " +54 299 555 0101 ", use: "home" },
+          { system: "phone", value: "+54 299 555 0109", use: "mobile" },
+        ],
+      },
+      update: {
+        id: "pat-telecom",
+        firstName: "Ana",
+        lastName: "Pérez",
+      },
+    });
+
+    expect(mapped.telecom).toEqual([{ system: "phone", value: "+54 299 555 0101" }]);
+    expect(mapped.telecom?.[0]).not.toHaveProperty("use");
+  });
+
+  it("maps legacy free text relationship into transitional relationship catalog", () => {
+    const mapped = mapCreatePatientInputToFhir({
+      firstName: "Ana",
+      lastName: "Pérez",
+      mainContact: {
+        name: "Marta",
+        relationship: "Vecina",
+      },
+    });
+
+    expect(mapped.contact?.[0]?.relationship?.[0]?.text).toBe("other");
+  });
+
+  it("splits firstName into given names and sets name.text", () => {
+    const mapped = mapCreatePatientInputToFhir({
+      firstName: "Ana María",
+      lastName: "Pérez",
+    });
+
+    expect(mapped.name).toEqual([{ family: "Pérez", given: ["Ana", "María"], text: "Ana María Pérez" }]);
   });
 });

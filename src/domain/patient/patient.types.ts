@@ -1,3 +1,5 @@
+import type { MainContactRelationship } from "@/domain/patient/contact-relationship";
+
 export type PatientOperationalStatus =
   | "preliminary"
   | "ready_to_start"
@@ -8,7 +10,7 @@ export type PatientGender = "male" | "female" | "other" | "unknown";
 
 export interface MainContact {
   name?: string;
-  relationship?: string;
+  relationship?: MainContactRelationship;
   phone?: string;
 }
 

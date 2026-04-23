@@ -1,7 +1,42 @@
 import type { CreatePatientInput, MainContact, PatientGender, UpdatePatientInput } from "@/domain/patient/patient.types";
+import { normalizeMainContactRelationship } from "@/domain/patient/contact-relationship";
 import { DNI_IDENTIFIER_SYSTEM, buildDniIdentifier } from "@/lib/fhir/identifiers";
 
 import { type FhirPatient, type FhirPatientContact } from "@/infrastructure/mappers/patient/patient-fhir.types";
+
+function extractPrimaryPhoneValue(telecom?: FhirPatient["telecom"]): string | undefined {
+  return telecom?.find((entry) => entry.system === "phone")?.value?.trim() || undefined;
+}
+
+function buildSinglePhoneTelecom(phone?: string): FhirPatient["telecom"] {
+  const normalizedPhone = phone?.trim();
+
+  if (!normalizedPhone) {
+    return undefined;
+  }
+
+  return [{ system: "phone", value: normalizedPhone }];
+}
+
+function buildSimpleHumanName(firstName?: string, lastName?: string): FhirPatient["name"] {
+  const normalizedFirstName = firstName?.trim();
+  const normalizedLastName = lastName?.trim();
+
+  if (!normalizedFirstName && !normalizedLastName) {
+    return undefined;
+  }
+
+  const given = normalizedFirstName?.split(/\s+/).filter(Boolean);
+  const text = [normalizedFirstName, normalizedLastName].filter(Boolean).join(" ");
+
+  return [
+    {
+      family: normalizedLastName || undefined,
+      given: given?.length ? given : undefined,
+      text: text || undefined,
+    },
+  ];
+}
 
 function mapMainContactToFhirContact(mainContact?: MainContact): FhirPatientContact[] | undefined {
   if (!mainContact) {
@@ -9,7 +44,7 @@ function mapMainContactToFhirContact(mainContact?: MainContact): FhirPatientCont
   }
 
   const contactName = mainContact.name?.trim();
-  const contactRelationship = mainContact.relationship?.trim();
+  const contactRelationship = normalizeMainContactRelationship(mainContact.relationship?.trim());
   const contactPhone = mainContact.phone?.trim();
 
   if (!contactName && !contactRelationship && !contactPhone) {
@@ -46,8 +81,8 @@ function mapInputToPatientShape(input: CreatePatientInput | UpdatePatientInput):
 
   return {
     identifier: dni ? [buildDniIdentifier(dni)] : undefined,
-    name: firstName || lastName ? [{ family: lastName, given: firstName ? [firstName] : undefined }] : undefined,
-    telecom: phone ? [{ system: "phone", value: phone }] : undefined,
+    name: buildSimpleHumanName(firstName, lastName),
+    telecom: buildSinglePhoneTelecom(phone),
     gender: gender || undefined,
     birthDate: birthDate || undefined,
     address: addressText ? [{ text: addressText }] : undefined,
@@ -79,13 +114,14 @@ export function mapUpdatePatientInputToFhir(options: {
   update: UpdatePatientInput;
 }): FhirPatient {
   const mappedUpdate = mapInputToPatientShape(options.update);
+  const nextPhone = extractPrimaryPhoneValue(mappedUpdate.telecom) ?? extractPrimaryPhoneValue(options.existing.telecom);
 
   const merged: FhirPatient = {
     ...options.existing,
     resourceType: "Patient",
     identifier: preferDefined(mappedUpdate.identifier, options.existing.identifier),
     name: preferDefined(mappedUpdate.name, options.existing.name),
-    telecom: preferDefined(mappedUpdate.telecom, options.existing.telecom),
+    telecom: buildSinglePhoneTelecom(nextPhone),
     gender: preferDefined(mappedUpdate.gender, options.existing.gender),
     birthDate: preferDefined(mappedUpdate.birthDate, options.existing.birthDate),
     address: preferDefined(mappedUpdate.address, options.existing.address),

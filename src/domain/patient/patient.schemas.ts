@@ -1,4 +1,5 @@
 import type { CreatePatientInput, MainContact, PatientGender, UpdatePatientInput } from "@/domain/patient/patient.types";
+import { normalizeMainContactRelationship } from "@/domain/patient/contact-relationship";
 
 const VALID_PATIENT_GENDERS: PatientGender[] = ["male", "female", "other", "unknown"];
 
@@ -46,7 +47,7 @@ function normalizeMainContact(value: unknown): MainContact | undefined {
 
   return {
     name: normalizeOptionalString(record.name, "mainContact.name"),
-    relationship: normalizeOptionalString(record.relationship, "mainContact.relationship"),
+    relationship: normalizeMainContactRelationship(normalizeOptionalString(record.relationship, "mainContact.relationship")),
     phone: normalizeOptionalString(record.phone, "mainContact.phone"),
   };
 }

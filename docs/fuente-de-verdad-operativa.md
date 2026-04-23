@@ -93,7 +93,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
-- en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`; quedan pendientes Fase 2 (`Identifier.type`) y Fase 3 (`telecom`, `contact.relationship`, `name`, `address`).
+- en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`, Fase 2 para `Identifier.type` + tests/fixtures de identidad y Fase 3 queda cerrada con `telecom`, `contact.relationship` y `name` resueltos incrementalmente, más deuda/trigger explícitos de `address` documentados en FHIR-018.
 
 ## 3) Fuentes de verdad activas
 
