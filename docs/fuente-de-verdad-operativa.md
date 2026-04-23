@@ -149,3 +149,11 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `npm run lint`: pasa.
 - `npm run test`: pasa.
 - `npm run build`: falla en entorno sin `FHIR_BASE_URL` para prerender de `/admin/patients`.
+
+## Convenciones de datos administrativos (UI privada)
+
+- Gender se muestra traducido en UI, manteniendo códigos FHIR internos.
+- DNI se almacena como solo dígitos y se usa así para duplicados.
+- Teléfono se normaliza antes de persistir y se reutiliza para links.
+- Fechas se muestran en formato local consistente.
+- Horas se muestran en formato 24h.
