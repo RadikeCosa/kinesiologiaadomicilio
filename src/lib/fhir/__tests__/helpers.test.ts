@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { DNI_IDENTIFIER_SYSTEM, buildDniIdentifier, formatIdentifierSearchValue } from "@/lib/fhir/identifiers";
+import {
+  DNI_IDENTIFIER_SYSTEM,
+  DNI_IDENTIFIER_TYPE_CODING_CODE,
+  DNI_IDENTIFIER_TYPE_CODING_SYSTEM,
+  DNI_IDENTIFIER_TYPE_TEXT,
+  buildDniIdentifier,
+  formatIdentifierSearchValue,
+} from "@/lib/fhir/identifiers";
 import { buildPatientReference, extractIdFromReference } from "@/lib/fhir/references";
 import {
   buildActiveEpisodeOfCareByPatientQuery,
@@ -13,6 +20,16 @@ describe("fhir helpers", () => {
     expect(buildDniIdentifier(" 32123456 ")).toEqual({
       system: DNI_IDENTIFIER_SYSTEM,
       value: "32123456",
+      type: {
+        coding: [
+          {
+            system: DNI_IDENTIFIER_TYPE_CODING_SYSTEM,
+            code: DNI_IDENTIFIER_TYPE_CODING_CODE,
+            display: DNI_IDENTIFIER_TYPE_TEXT,
+          },
+        ],
+        text: DNI_IDENTIFIER_TYPE_TEXT,
+      },
     });
   });
 
