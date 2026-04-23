@@ -39,7 +39,7 @@ describe("patient-read.mapper", () => {
       address: "Neuquén",
       mainContact: {
         name: "María Pérez",
-        relationship: "Madre",
+        relationship: "parent",
         phone: "+54 299 555 0102",
       },
       createdAt: "2026-04-17T12:00:00.000Z",
@@ -60,6 +60,59 @@ describe("patient-read.mapper", () => {
     expect(mapped.lastName).toBe("Gómez");
     expect(mapped.gender).toBeUndefined();
     expect(mapped.birthDate).toBeUndefined();
+  });
+
+  it("joins multiple given values into firstName", () => {
+    const mapped = mapFhirPatientToDomain({
+      resourceType: "Patient",
+      id: "pat-given",
+      name: [{ family: "Pérez", given: ["Ana", "María"] }],
+    });
+
+    expect(mapped.firstName).toBe("Ana María");
+    expect(mapped.lastName).toBe("Pérez");
+  });
+
+  it("falls back to name.text when given/family are missing", () => {
+    const mapped = mapFhirPatientToDomain({
+      resourceType: "Patient",
+      id: "pat-text",
+      name: [{ text: "Paciente Legacy" }],
+    });
+
+    expect(mapped.firstName).toBe("Paciente Legacy");
+    expect(mapped.lastName).toBe("");
+  });
+
+  it("maps phone from primary telecom with system phone and trims value", () => {
+    const mapped = mapFhirPatientToDomain({
+      resourceType: "Patient",
+      id: "pat-telecom",
+      name: [{ family: "Pérez", given: ["Ana"] }],
+      telecom: [
+        { system: "email", value: "ana@example.com" },
+        { system: "phone", value: " +54 299 555 0101 " },
+        { system: "phone", value: "+54 299 555 0109" },
+      ],
+    });
+
+    expect(mapped.phone).toBe("+54 299 555 0101");
+  });
+
+  it("normalizes legacy relationship text into transitional relationship catalog on read", () => {
+    const mapped = mapFhirPatientToDomain({
+      resourceType: "Patient",
+      id: "pat-contact",
+      name: [{ family: "Pérez", given: ["Ana"] }],
+      contact: [
+        {
+          name: { text: "Marta" },
+          relationship: [{ text: "Vecina" }],
+        },
+      ],
+    });
+
+    expect(mapped.mainContact?.relationship).toBe("other");
   });
 
   it("maps list item status as finished_treatment when latest episode is finished", () => {

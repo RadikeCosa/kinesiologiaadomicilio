@@ -1,7 +1,7 @@
 # Documentación FHIR
 
 > Estado: vigente
-> Última actualización: 2026-04-22 (UTC)
+> Última actualización: 2026-04-23 (UTC)
 
 ## Objetivo
 
@@ -37,6 +37,21 @@ Centralizar la documentación de trabajo para la remediación técnica del model
    - contrato mínimo recomendado por elemento FHIR;
    - qué se considera correcto, transicional y fuera de alcance hoy.
 
+7. `fhir-013-contrato-transicional-telecom.md`
+   - convención transicional mínima de `Patient.telecom`;
+   - decisión operativa para teléfono principal y caso WhatsApp;
+   - límites explícitos para no mezclar alcance con FHIR-014.
+
+8. `fhir-015-contrato-transicional-contact-relationship.md`
+   - convención transicional mínima de `Patient.contact.relationship`;
+   - catálogo mínimo de relación para contacto principal;
+   - límites explícitos para no mezclar alcance con FHIR-016.
+
+9. `fhir-018-deuda-address-trigger-evolucion.md`
+   - deuda explícita de `Patient.address` manteniendo `address.text`;
+   - triggers operativos para evolución futura a modelo estructurado;
+   - límites de alcance mientras no aparezcan esos triggers.
+
 ## Flujo recomendado de trabajo
 
 1. Leer la ADR antes de tocar identidad, DNI o semántica de `Identifier`.
@@ -64,13 +79,13 @@ Ningún PR de este frente debería mezclar más de uno de estos grupos salvo que
 
 ## Frente de remediación FHIR (Patient)
 
-> Estado: **Fase 1 cerrada** (tickets FHIR-002 a FHIR-009 implementados en código/tests; FHIR-010 documenta el cierre).
+> Estado: **Fase 1 cerrada** (FHIR-002 a FHIR-010) + **Fase 2 cerrada** (FHIR-011 y FHIR-012).
 
 ## Alcance por fases
 
 - **Fase 1 (cerrada):** `gender` + `birthDate` en contrato, schemas, mappers FHIR, UI privada (alta/edición/detalle) y cobertura de tests.
-- **Fase 2 (pendiente):** `Identifier.type`.
-- **Fase 3 (pendiente):** `telecom`, `contact.relationship`, `name`, `address` (modelado más rico).
+- **Fase 2 (cerrada):** `Identifier.type` + tests/fixtures de identidad.
+- **Fase 3 (cerrada):** `telecom`, `contact.relationship`, `name`, `address` (remediación incremental completada; deuda de `address` documentada).
 
 ## Evidencia de Fase 1
 
@@ -86,3 +101,6 @@ Ningún PR de este frente debería mezclar más de uno de estos grupos salvo que
 - `docs/fhir/referencia-patient-modelado-minimo.md`
 - `docs/fhir/pr-checklist-remediacion-fhir.md`
 - `docs/fhir/adr-001-identidad-operativa-patient.md`
+- `docs/fhir/fhir-013-contrato-transicional-telecom.md`
+- `docs/fhir/fhir-015-contrato-transicional-contact-relationship.md`
+- `docs/fhir/fhir-018-deuda-address-trigger-evolucion.md`

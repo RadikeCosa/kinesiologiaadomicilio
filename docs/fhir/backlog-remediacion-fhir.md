@@ -1,7 +1,7 @@
 # Backlog de implementación FHIR
 
 > Estado: vigente
-> Última actualización: 2026-04-22 (UTC)
+> Última actualización: 2026-04-23 (UTC)
 
 ## Orden recomendado de ejecución
 
@@ -101,21 +101,23 @@
 **Objetivo:** fijar semántica mínima de canal.
 **Dependencias:** ninguna.
 **Criterio de aceptación:** convención clara y aprobada.
+**Entregable documental:** `docs/fhir/fhir-013-contrato-transicional-telecom.md`.
 
 ### FHIR-014 — Implementación mínima de `telecom`
 **Objetivo:** reducir sobrecarga semántica del teléfono.
 **Dependencias:** FHIR-013.
-**Criterio de aceptación:** persistencia y UI reflejan la convención.
+**Criterio de aceptación:** persistencia y UI reflejan la convención transicional (`system: "phone"`, único telecom principal, sin `use`).
 
 ### FHIR-015 — Contrato transicional de `contact.relationship`
 **Objetivo:** reducir texto libre no controlado.
 **Dependencias:** ninguna.
 **Criterio de aceptación:** catálogo mínimo publicado.
+**Entregable documental:** `docs/fhir/fhir-015-contrato-transicional-contact-relationship.md`.
 
 ### FHIR-016 — Implementación mínima de `Patient.contact`
 **Objetivo:** hacer consistente la relación de contacto.
 **Dependencias:** FHIR-015.
-**Criterio de aceptación:** relationship consistente en write/read/UI.
+**Criterio de aceptación:** relationship consistente en write/read/UI para contacto principal único con catálogo mínimo (`parent`, `spouse`, `child`, `sibling`, `caregiver`, `other`).
 
 ### FHIR-017 — Mejora incremental de `Patient.name`
 **Objetivo:** ampliar expresividad mínima sin rediseño total.
@@ -126,3 +128,4 @@
 **Objetivo:** documentar trigger de evolución desde `address.text`.
 **Dependencias:** ninguna.
 **Criterio de aceptación:** criterio de salida documentado.
+**Entregable documental:** `docs/fhir/fhir-018-deuda-address-trigger-evolucion.md`.

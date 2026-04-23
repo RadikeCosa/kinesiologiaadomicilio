@@ -32,7 +32,7 @@ describe("patient.schemas", () => {
       birthDate: "1990-10-03",
       mainContact: {
         name: "Marta",
-        relationship: "Madre",
+        relationship: "parent",
         phone: "555",
       },
     });
@@ -99,5 +99,16 @@ describe("patient.schemas", () => {
     expect(() => updatePatientSchema.parse({ id: "pat-001", birthDate: "2026-13-01" })).toThrow(
       "birthDate: formato inválido (YYYY-MM-DD)."
     );
+  });
+
+  it("normalizes legacy relationship text into transitional catalog", () => {
+    const result = updatePatientSchema.parse({
+      id: "pat-001",
+      mainContact: {
+        relationship: "Vecina",
+      },
+    });
+
+    expect(result.mainContact?.relationship).toBe("other");
   });
 });

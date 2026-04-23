@@ -1,6 +1,7 @@
 import { getPatientOperationalStatus } from "@/domain/patient/patient.rules";
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
 import type { MainContact, Patient } from "@/domain/patient/patient.types";
+import { normalizeMainContactRelationship } from "@/domain/patient/contact-relationship";
 import { DNI_IDENTIFIER_SYSTEM } from "@/lib/fhir/identifiers";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import type { PatientListItemReadModel } from "@/features/patients/read-models/patient-list-item.read-model";
@@ -20,7 +21,7 @@ function extractMainContact(contact?: FhirPatient["contact"]): MainContact | und
 
   const mappedContact: MainContact = {
     name: primaryContact.name?.text?.trim() || undefined,
-    relationship: primaryContact.relationship?.[0]?.text?.trim() || undefined,
+    relationship: normalizeMainContactRelationship(primaryContact.relationship?.[0]?.text),
     phone: primaryContact.telecom?.find((telecom) => telecom.system === "phone")?.value?.trim() || undefined,
   };
 
@@ -40,15 +41,40 @@ function resolveSlice1Timestamps(meta?: FhirPatient["meta"]): Pick<Patient, "cre
   };
 }
 
+function extractPatientNames(name?: FhirPatient["name"]): Pick<Patient, "firstName" | "lastName"> {
+  const primaryName = name?.[0];
+  const givenName = primaryName?.given?.map((item) => item.trim()).filter(Boolean).join(" ") || undefined;
+  const familyName = primaryName?.family?.trim() || undefined;
+  const textName = primaryName?.text?.trim() || undefined;
+
+  if (givenName || familyName) {
+    return {
+      firstName: givenName ?? "",
+      lastName: familyName ?? "",
+    };
+  }
+
+  if (textName) {
+    return {
+      firstName: textName,
+      lastName: "",
+    };
+  }
+
+  return {
+    firstName: "",
+    lastName: "",
+  };
+}
+
 export function mapFhirPatientToDomain(patient: FhirPatient): Patient {
-  const firstName = patient.name?.[0]?.given?.[0]?.trim() ?? "";
-  const lastName = patient.name?.[0]?.family?.trim() ?? "";
+  const names = extractPatientNames(patient.name);
   const timestamps = resolveSlice1Timestamps(patient.meta);
 
   return {
     id: patient.id ?? "",
-    firstName,
-    lastName,
+    firstName: names.firstName,
+    lastName: names.lastName,
     dni:
       patient.identifier?.find((identifier) => identifier.system === DNI_IDENTIFIER_SYSTEM)?.value?.trim() ||
       undefined,
