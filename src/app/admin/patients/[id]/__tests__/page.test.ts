@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import React, { createElement } from "react";
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -34,6 +34,10 @@ function buildPatient(
 }
 
 describe("/admin/patients/[id] page", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("renders the contacto section with patient contact, address and main contact in order", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(
       buildPatient({
@@ -109,6 +113,39 @@ describe("/admin/patients/[id] page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Inicio: 17/04/2026");
+  });
+
+  it("renders patient age in header when birthDate is available", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-24T12:00:00Z"));
+
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        birthDate: "1958-04-24",
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Edad: 68 años");
+  });
+
+  it("does not render patient age when birthDate is missing", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        birthDate: undefined,
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).not.toContain("Edad:");
   });
 
   it("renders not found state when patient does not exist", async () => {

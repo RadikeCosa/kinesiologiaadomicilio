@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  calculateAgeFromBirthDate,
   buildTelHref,
   buildWhatsAppHref,
   CONTACT_RELATIONSHIP_OPTIONS,
@@ -106,6 +107,25 @@ describe("patient-admin-display", () => {
     expect(formatted).toContain("17/04/2026");
     expect(formatted).toMatch(/\d{2}:\d{2}/);
     expect(formatDateTimeDisplay(undefined)).toBe("No informado");
+  });
+
+  it("calculates age before birthday", () => {
+    expect(calculateAgeFromBirthDate("1958-07-10", new Date("2026-07-09T12:00:00Z"))).toBe(67);
+  });
+
+  it("calculates age on birthday", () => {
+    expect(calculateAgeFromBirthDate("1958-07-10", new Date("2026-07-10T12:00:00Z"))).toBe(68);
+  });
+
+  it("calculates age after birthday", () => {
+    expect(calculateAgeFromBirthDate("1958-07-10", new Date("2026-07-11T12:00:00Z"))).toBe(68);
+  });
+
+  it("returns null for missing or invalid birth date", () => {
+    expect(calculateAgeFromBirthDate(undefined)).toBeNull();
+    expect(calculateAgeFromBirthDate("")).toBeNull();
+    expect(calculateAgeFromBirthDate("invalid-date")).toBeNull();
+    expect(calculateAgeFromBirthDate("2026-02-31")).toBeNull();
   });
 
   it("formats encounter statuses to human-friendly labels", () => {
