@@ -47,7 +47,7 @@ describe("PatientDetailView", () => {
     );
 
     expect(html).toContain("Tratamiento activo");
-    expect(html).toContain("2026-04-17");
+    expect(html).toContain("17/04/2026");
   });
 
   it("shows patient gender when present", () => {
@@ -66,8 +66,28 @@ describe("PatientDetailView", () => {
       }),
     );
 
-    expect(html).toContain("Gender");
-    expect(html).toContain("female");
+    expect(html).toContain("Género");
+    expect(html).toContain("Mujer");
+  });
+
+  it("formats dni for display", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientDetailView, {
+        patient: {
+          id: "pat-1",
+          firstName: "Ana",
+          lastName: "Pérez",
+          fullName: "Ana Pérez",
+          dni: "12345678",
+          operationalStatus: "preliminary",
+          createdAt: "2026-04-17T00:00:00.000Z",
+          updatedAt: "2026-04-17T00:00:00.000Z",
+        },
+      }),
+    );
+
+    expect(html).toContain("DNI");
+    expect(html).toContain("12.345.678");
   });
 
   it("shows fallback text when gender is missing", () => {
@@ -85,7 +105,7 @@ describe("PatientDetailView", () => {
       }),
     );
 
-    expect(html).toContain("Gender");
+    expect(html).toContain("Género");
     expect(html).toContain("No informado");
   });
 
@@ -106,7 +126,7 @@ describe("PatientDetailView", () => {
     );
 
     expect(html).toContain("Fecha de nacimiento");
-    expect(html).toContain("1990-10-03");
+    expect(html).toContain("03/10/1990");
   });
 
   it("shows fallback text when birthDate is missing", () => {
@@ -125,6 +145,6 @@ describe("PatientDetailView", () => {
     );
 
     expect(html).toContain("Fecha de nacimiento");
-    expect(html).toContain("No informada");
+    expect(html).toContain("No informado");
   });
 });

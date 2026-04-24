@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FinishEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm";
 import { StartEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/StartEpisodeOfCareForm";
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
+import { formatDateDisplay } from "@/lib/patient-admin-display";
 
 interface AdminPatientTreatmentPageProps {
   params: Promise<{ id: string }>;
@@ -47,7 +48,7 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
               Tratamiento activo
             </h2>
-            <p className="mt-3 text-sm text-slate-700">Inicio: {patient.activeEpisode.startDate}</p>
+            <p className="mt-3 text-sm text-slate-700">Inicio: {formatDateDisplay(patient.activeEpisode.startDate)}</p>
             <div className="mt-4">
               <FinishEpisodeOfCareForm patient={patient} />
             </div>

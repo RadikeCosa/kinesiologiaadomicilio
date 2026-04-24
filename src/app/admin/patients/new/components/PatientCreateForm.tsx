@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
 
 import { createPatientAction } from "@/app/admin/patients/actions/create-patient.action";
+import { formatGenderLabel } from "@/lib/patient-admin-display";
 
 export function PatientCreateForm() {
   const router = useRouter();
@@ -86,13 +87,15 @@ export function PatientCreateForm() {
           <input
             className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
             id="phone"
+            inputMode="tel"
             name="phone"
+            type="tel"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="gender">
-            Gender
+            Género
           </label>
           <select
             className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
@@ -101,10 +104,10 @@ export function PatientCreateForm() {
             name="gender"
           >
             <option value="">Sin especificar</option>
-            <option value="male">male</option>
-            <option value="female">female</option>
-            <option value="other">other</option>
-            <option value="unknown">unknown</option>
+            <option value="male">{formatGenderLabel("male")}</option>
+            <option value="female">{formatGenderLabel("female")}</option>
+            <option value="other">{formatGenderLabel("other")}</option>
+            <option value="unknown">{formatGenderLabel("unknown")}</option>
           </select>
         </div>
 

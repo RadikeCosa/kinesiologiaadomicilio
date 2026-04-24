@@ -1,3 +1,9 @@
+import {
+  buildTelHref as buildTelHrefFromAdminDisplay,
+  buildWhatsAppHref as buildWhatsAppHrefFromAdminDisplay,
+  formatPhoneDisplay as formatPhoneDisplayFromAdminDisplay,
+} from "@/lib/patient-admin-display";
+
 function cleanText(value?: string): string | undefined {
   const trimmed = value?.trim();
 
@@ -9,23 +15,15 @@ function cleanText(value?: string): string | undefined {
 }
 
 export function formatPhoneDisplay(phone?: string): string {
-  return cleanText(phone) ?? "Sin teléfono";
+  return formatPhoneDisplayFromAdminDisplay(phone);
 }
 
 export function buildWhatsAppHref(phone?: string): string | null {
-  const normalizedPhone = cleanText(phone)?.replace(/[^\d+]/g, "");
+  return buildWhatsAppHrefFromAdminDisplay(phone);
+}
 
-  if (!normalizedPhone) {
-    return null;
-  }
-
-  const phoneForWa = normalizedPhone.startsWith("+") ? normalizedPhone.slice(1) : normalizedPhone;
-
-  if (!phoneForWa || !/^\d+$/.test(phoneForWa)) {
-    return null;
-  }
-
-  return `https://wa.me/${phoneForWa}`;
+export function buildTelHref(phone?: string): string | null {
+  return buildTelHrefFromAdminDisplay(phone);
 }
 
 export function formatAddressDisplay(address?: string): string {

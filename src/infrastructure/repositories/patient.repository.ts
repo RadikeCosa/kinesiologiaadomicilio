@@ -4,6 +4,7 @@ import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
 import { buildPatientListQuery, buildPatientSearchByDniQuery } from "@/lib/fhir/search-params";
 import type { FhirBundle } from "@/lib/fhir/types";
+import { normalizeDni } from "@/lib/patient-admin-display";
 
 import { type FhirPatient } from "@/infrastructure/mappers/patient/patient-fhir.types";
 import { mapFhirPatientToDomain } from "@/infrastructure/mappers/patient/patient-read.mapper";
@@ -55,11 +56,13 @@ export async function updatePatient(input: UpdatePatientInput): Promise<Patient>
 }
 
 export async function findPatientByDni(dni: string): Promise<Patient | null> {
-  if (!dni.trim()) {
+  const normalizedDni = normalizeDni(dni);
+
+  if (!normalizedDni) {
     return null;
   }
 
-  const query = buildPatientSearchByDniQuery(dni);
+  const query = buildPatientSearchByDniQuery(normalizedDni);
   const bundle = await fhirClient.get<FhirBundle<FhirPatient>>(buildSearchPath("Patient", query));
   const patient = extractSingleResource<FhirPatient>(bundle, "Patient");
 
@@ -70,11 +73,13 @@ export async function existsAnotherPatientWithDni(options: {
   dni: string;
   excludePatientId: string;
 }): Promise<boolean> {
-  if (!options.dni.trim()) {
+  const normalizedDni = normalizeDni(options.dni);
+
+  if (!normalizedDni) {
     return false;
   }
 
-  const query = buildPatientSearchByDniQuery(options.dni);
+  const query = buildPatientSearchByDniQuery(normalizedDni);
   const bundle = await fhirClient.get<FhirBundle<FhirPatient>>(buildSearchPath("Patient", query));
   const matches = extractResourcesByType<FhirPatient>(bundle, "Patient");
 

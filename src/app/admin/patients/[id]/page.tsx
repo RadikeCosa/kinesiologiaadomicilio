@@ -3,10 +3,15 @@ import Link from "next/link";
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import {
   buildGoogleMapsSearchHref,
-  buildWhatsAppHref,
   formatAddressDisplay,
-  formatPhoneDisplay,
 } from "@/lib/patient-contact-links";
+import {
+  buildTelHref,
+  buildWhatsAppHref,
+  formatDateDisplay,
+  formatDniDisplay,
+  formatPhoneDisplay,
+} from "@/lib/patient-admin-display";
 
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 
@@ -25,7 +30,7 @@ function getTreatmentSummary(
     return {
       badgeLabel: treatmentBadge.label,
       badgeClassName: treatmentBadge.className,
-      detail: `Inicio: ${patient.activeEpisode.startDate}`,
+      detail: `Inicio: ${formatDateDisplay(patient.activeEpisode.startDate)}`,
     };
   }
 
@@ -33,7 +38,7 @@ function getTreatmentSummary(
     return {
       badgeLabel: treatmentBadge.label,
       badgeClassName: treatmentBadge.className,
-      detail: `Fin: ${patient.latestEpisode.endDate ?? "No informada"}`,
+      detail: `Fin: ${formatDateDisplay(patient.latestEpisode.endDate)}`,
     };
   }
 
@@ -52,6 +57,7 @@ export default async function AdminPatientDetailPage({
 
   const treatmentSummary = patient ? getTreatmentSummary(patient) : null;
   const whatsappHref = patient ? buildWhatsAppHref(patient.phone) : null;
+  const telHref = patient ? buildTelHref(patient.phone) : null;
   const phoneLabel = patient ? formatPhoneDisplay(patient.phone) : null;
   const mapsHref = patient ? buildGoogleMapsSearchHref(patient.address) : null;
   const addressLabel = patient ? formatAddressDisplay(patient.address) : null;
@@ -82,7 +88,7 @@ export default async function AdminPatientDetailPage({
                 </div>
 
                 <p className="text-sm font-medium text-slate-700">
-                  DNI: {patient.dni ?? "Sin DNI"}
+                  DNI: {formatDniDisplay(patient.dni)}
                 </p>
 
                 {treatmentSummary?.detail ? (
@@ -117,12 +123,19 @@ export default async function AdminPatientDetailPage({
                   <div>
                     <dt className="font-medium">Teléfono</dt>
                     <dd>
-                      {!whatsappHref ? (
+                      {!whatsappHref && !telHref ? (
                         phoneLabel
+                      ) : telHref && !whatsappHref ? (
+                        <a
+                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                          href={telHref ?? undefined}
+                        >
+                          {phoneLabel}
+                        </a>
                       ) : (
                         <a
                           className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                          href={whatsappHref}
+                          href={whatsappHref ?? undefined}
                           rel="noopener noreferrer"
                           target="_blank"
                         >

@@ -1,5 +1,6 @@
 import type { CreatePatientInput, MainContact, PatientGender, UpdatePatientInput } from "@/domain/patient/patient.types";
 import { normalizeMainContactRelationship } from "@/domain/patient/contact-relationship";
+import { normalizeDni, normalizePhone } from "@/lib/patient-admin-display";
 
 const VALID_PATIENT_GENDERS: PatientGender[] = ["male", "female", "other", "unknown"];
 
@@ -66,6 +67,47 @@ function normalizeOptionalPatientGender(value: unknown, field: string): PatientG
   return normalized as PatientGender;
 }
 
+function normalizeOptionalDni(value: unknown, field: string): string | undefined {
+  const normalizedInput = normalizeOptionalString(value, field);
+
+  if (normalizedInput === undefined) {
+    return undefined;
+  }
+
+  const normalizedDni = normalizeDni(normalizedInput);
+
+  if (!normalizedDni) {
+    throw new Error(`${field}: formato inválido.`);
+  }
+
+  if (normalizedDni.length < 7 || normalizedDni.length > 8) {
+    throw new Error(`${field}: longitud inválida (7 u 8 dígitos).`);
+  }
+
+  return normalizedDni;
+}
+
+function normalizeOptionalPhone(value: unknown, field: string): string | undefined {
+  const normalizedInput = normalizeOptionalString(value, field);
+
+  if (normalizedInput === undefined) {
+    return undefined;
+  }
+
+  const normalizedPhone = normalizePhone(normalizedInput);
+  const digits = normalizedPhone.replace(/\D+/g, "");
+
+  if (!digits) {
+    throw new Error(`${field}: formato inválido.`);
+  }
+
+  if (digits.length < 10 || digits.length > 15) {
+    throw new Error(`${field}: longitud inválida (10 a 15 dígitos).`);
+  }
+
+  return normalizedPhone;
+}
+
 function isValidIsoDate(value: string): boolean {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
 
@@ -107,8 +149,8 @@ export const createPatientSchema = {
     return {
       firstName: normalizeRequiredString(record.firstName, "firstName"),
       lastName: normalizeRequiredString(record.lastName, "lastName"),
-      dni: normalizeOptionalString(record.dni, "dni"),
-      phone: normalizeOptionalString(record.phone, "phone"),
+      dni: normalizeOptionalDni(record.dni, "dni"),
+      phone: normalizeOptionalPhone(record.phone, "phone"),
       gender: normalizeOptionalPatientGender(record.gender, "gender"),
       birthDate: normalizeOptionalBirthDate(record.birthDate, "birthDate"),
       address: normalizeOptionalString(record.address, "address"),
@@ -125,8 +167,8 @@ export const updatePatientSchema = {
       id: normalizeRequiredString(record.id, "id"),
       firstName: normalizeOptionalString(record.firstName, "firstName"),
       lastName: normalizeOptionalString(record.lastName, "lastName"),
-      dni: normalizeOptionalString(record.dni, "dni"),
-      phone: normalizeOptionalString(record.phone, "phone"),
+      dni: normalizeOptionalDni(record.dni, "dni"),
+      phone: normalizeOptionalPhone(record.phone, "phone"),
       gender: normalizeOptionalPatientGender(record.gender, "gender"),
       birthDate: normalizeOptionalBirthDate(record.birthDate, "birthDate"),
       address: normalizeOptionalString(record.address, "address"),

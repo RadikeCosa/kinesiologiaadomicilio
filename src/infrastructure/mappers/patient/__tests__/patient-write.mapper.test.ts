@@ -47,7 +47,7 @@ describe("patient-write.mapper", () => {
         },
       ],
       name: [{ family: "Pérez", given: ["Ana"] }],
-      telecom: [{ system: "phone", value: "+54 299 555 0101" }],
+      telecom: [{ system: "phone", value: "+542995550101" }],
       gender: "female",
       birthDate: "1988-01-10",
       address: [{ text: "Neuquén" }],
@@ -59,6 +59,21 @@ describe("patient-write.mapper", () => {
         },
       ],
     });
+  });
+
+  it("normalizes dni to digits only before persisting identifier", () => {
+    const mapped = mapCreatePatientInputToFhir({
+      firstName: "Ana",
+      lastName: "Pérez",
+      dni: "12.345.678",
+    });
+
+    expect(mapped.identifier).toEqual([
+      expect.objectContaining({
+        system: DNI_IDENTIFIER_SYSTEM,
+        value: "12345678",
+      }),
+    ]);
   });
 
   it("builds update payload via controlled merge over existing resource", () => {
@@ -86,7 +101,7 @@ describe("patient-write.mapper", () => {
     expect(mapped.id).toBe("pat-1");
     expect(mapped.name?.[0]).toEqual({ family: "Pérez", given: ["Ana", "María"], text: "Ana María Pérez" });
     expect(mapped.identifier).toEqual([{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }]);
-    expect(mapped.telecom).toEqual([{ system: "phone", value: "+54 299 555 0101" }]);
+    expect(mapped.telecom).toEqual([{ system: "phone", value: "+542995550101" }]);
     expect(mapped.gender).toBe("female");
     expect(mapped.birthDate).toBe("1988-01-10");
     expect(mapped.address).toEqual([{ text: "Neuquén" }]);
@@ -149,7 +164,7 @@ describe("patient-write.mapper", () => {
       },
     });
 
-    expect(mapped.telecom).toEqual([{ system: "phone", value: "+54 299 555 0101" }]);
+    expect(mapped.telecom).toEqual([{ system: "phone", value: "+542995550101" }]);
     expect(mapped.telecom?.[0]).not.toHaveProperty("use");
   });
 
