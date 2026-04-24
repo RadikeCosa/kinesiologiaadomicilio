@@ -124,55 +124,61 @@ export default async function AdminPatientDetailPage({
               </div>
             </header>
 
-            <div className="mt-4 grid gap-3 text-sm text-slate-800">
-              {patient.mainContact ? (
-                <section className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
-                  <h2 className="text-xs font-semibold uppercase tracking-wide text-emerald-900">
-                    Contacto principal
-                  </h2>
-                  <dl className="mt-2 space-y-1.5">
-                    <div>
-                      <dt className="font-medium">Nombre</dt>
-                      <dd>{patient.mainContact.name ?? "No informado"}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-medium">Vínculo</dt>
-                      <dd>{formatContactRelationshipLabel(patient.mainContact.relationship)}</dd>
-                    </div>
-                  </dl>
+            <section className="mt-4 rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-800">
+              <h2 className="text-sm font-semibold text-slate-900">Contacto</h2>
+
+              <div className="mt-3 grid gap-3">
+                <section className="rounded-md border border-slate-300 bg-white p-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-900">
+                    Contacto del paciente
+                  </h3>
                   <div className="mt-2">
-                    <PhoneContactBlock
-                      phone={patient.mainContact.phone}
-                      phoneLabel="Teléfono de contacto principal"
-                    />
+                    <PhoneContactBlock phone={patient.phone} phoneLabel="Teléfono" />
                   </div>
                 </section>
-              ) : null}
 
-              <section className="rounded-md border border-slate-200 bg-white p-3">
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
-                  Contacto del paciente
-                </h2>
-                <div className="mt-2 space-y-2">
-                  <PhoneContactBlock phone={patient.phone} phoneLabel="Teléfono" />
-                  <p className="text-sm text-slate-700">
-                    <span className="font-medium">Dirección:</span>{" "}
-                    {!mapsHref ? (
-                      addressLabel
-                    ) : (
-                      <a
-                        className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                        href={mapsHref}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        {addressLabel}
-                      </a>
-                    )}
-                  </p>
-                </div>
-              </section>
-            </div>
+                <section className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+                    Dirección
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-700">{addressLabel}</p>
+                  {mapsHref ? (
+                    <a
+                      className="mt-2 inline-flex text-xs font-medium text-sky-700 underline-offset-2 hover:underline"
+                      href={mapsHref}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      Abrir en Maps
+                    </a>
+                  ) : null}
+                </section>
+
+                {patient.mainContact ? (
+                  <section className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+                      Contacto principal
+                    </h3>
+                    <dl className="mt-2 space-y-1.5">
+                      <div>
+                        <dt className="font-medium">Nombre</dt>
+                        <dd>{patient.mainContact.name ?? "No informado"}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium">Vínculo</dt>
+                        <dd>{formatContactRelationshipLabel(patient.mainContact.relationship)}</dd>
+                      </div>
+                    </dl>
+                    <div className="mt-2">
+                      <PhoneContactBlock
+                        phone={patient.mainContact.phone}
+                        phoneLabel="Teléfono de contacto principal"
+                      />
+                    </div>
+                  </section>
+                ) : null}
+              </div>
+            </section>
           </section>
         </div>
       ) : (
