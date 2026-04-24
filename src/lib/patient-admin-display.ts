@@ -1,6 +1,12 @@
 import type { MainContactRelationship } from "@/domain/patient/contact-relationship";
 import type { PatientGender } from "@/domain/patient/patient.types";
 
+const ENCOUNTER_STATUS_LABELS = {
+  finished: "Registrada",
+  "in-progress": "En curso",
+  planned: "Planificada",
+} as const;
+
 const GENDER_LABELS: Record<PatientGender, string> = {
   male: "Hombre",
   female: "Mujer",
@@ -189,6 +195,14 @@ export function formatDateTimeDisplay(dateTime: string | Date | null | undefined
   });
 
   return formatter.format(parsed.date);
+}
+
+export function formatEncounterStatusLabel(status: string | null | undefined): string {
+  if (!status) {
+    return "No informado";
+  }
+
+  return ENCOUNTER_STATUS_LABELS[status as keyof typeof ENCOUNTER_STATUS_LABELS] ?? "No informado";
 }
 
 export function formatPhoneDisplay(phone: string | null | undefined): string {
