@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useState, useTransition } from "react";
+import { FormEvent, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { finishEpisodeOfCareAction } from "@/app/admin/patients/[id]/actions/finish-episode-of-care.action";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import { formatLocalDateInputValue } from "@/lib/date-input";
@@ -14,10 +15,7 @@ interface FinishEpisodeOfCareFormProps {
 export function FinishEpisodeOfCareForm({ patient }: FinishEpisodeOfCareFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<{
-    text: string;
-    tone: "success" | "error";
-  } | null>(null);
+  const { message, setMessage } = useFormFeedback();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

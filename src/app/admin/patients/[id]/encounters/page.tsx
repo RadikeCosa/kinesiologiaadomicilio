@@ -142,7 +142,11 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
       </section>
 
       <EncounterCreateForm patientId={pageData.patient.id} activeEpisodeId={pageData.activeEpisode?.id ?? null} />
-      <EncountersList encounters={pageData.encounters} hasActiveTreatment={Boolean(pageData.activeEpisode)} />
+      <EncountersList
+        encounters={pageData.encounters}
+        hasActiveTreatment={Boolean(pageData.activeEpisode)}
+        patientId={pageData.patient.id}
+      />
     </section>
   );
 }

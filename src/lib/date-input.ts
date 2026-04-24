@@ -13,3 +13,23 @@ export function formatLocalDateInputValue(date: Date = new Date()): string {
 
   return `${year}-${month}-${day}`;
 }
+
+export function formatLocalDateTimeInputValue(dateTime: string | Date | null | undefined): string {
+  if (!dateTime) {
+    return "";
+  }
+
+  const parsed = dateTime instanceof Date ? dateTime : new Date(dateTime);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "";
+  }
+
+  const year = parsed.getFullYear();
+  const month = padDateInputSegment(parsed.getMonth() + 1);
+  const day = padDateInputSegment(parsed.getDate());
+  const hours = padDateInputSegment(parsed.getHours());
+  const minutes = padDateInputSegment(parsed.getMinutes());
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}

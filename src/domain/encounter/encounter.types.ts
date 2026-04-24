@@ -13,3 +13,9 @@ export interface CreateEncounterInput {
   episodeOfCareId: string;
   occurrenceDate: string;
 }
+
+export interface UpdateEncounterOccurrenceInput {
+  encounterId: string;
+  patientId: string;
+  occurrenceDate: string;
+}

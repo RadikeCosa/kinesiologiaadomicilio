@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createEncounterSchema } from "@/domain/encounter/encounter.schemas";
+import { createEncounterSchema, updateEncounterOccurrenceSchema } from "@/domain/encounter/encounter.schemas";
 
 describe("encounter.schemas", () => {
   it("requires patientId, episodeOfCareId and occurrenceDate", () => {
@@ -26,6 +26,18 @@ describe("encounter.schemas", () => {
 
     expect(parsed.patientId).toBe("pat-1");
     expect(parsed.episodeOfCareId).toBe("epi-1");
+    expect(parsed.occurrenceDate).toMatch(/^2026-04-17T10:30:00(?:Z|[+-]\d{2}:\d{2})$/);
+  });
+
+  it("validates update occurrence payload", () => {
+    const parsed = updateEncounterOccurrenceSchema.parse({
+      encounterId: " enc-1 ",
+      patientId: " pat-1 ",
+      occurrenceDate: " 2026-04-17T10:30 ",
+    });
+
+    expect(parsed.encounterId).toBe("enc-1");
+    expect(parsed.patientId).toBe("pat-1");
     expect(parsed.occurrenceDate).toMatch(/^2026-04-17T10:30:00(?:Z|[+-]\d{2}:\d{2})$/);
   });
 

@@ -21,3 +21,14 @@ export function mapCreateEncounterInputToFhir(input: CreateEncounterInput): Fhir
     },
   };
 }
+
+export function mapEncounterOccurrenceDateTimeUpdate(existing: FhirEncounter, occurrenceDate: string): FhirEncounter {
+  return {
+    ...existing,
+    period: {
+      ...existing.period,
+      start: occurrenceDate,
+      end: occurrenceDate,
+    },
+  };
+}
