@@ -162,6 +162,54 @@ export function formatDateDisplay(date: string | Date | null | undefined): strin
   return formatter.format(parsed.date);
 }
 
+export function calculateAgeFromBirthDate(
+  birthDate: string | null | undefined,
+  referenceDate: Date = new Date(),
+): number | null {
+  if (!birthDate) {
+    return null;
+  }
+
+  const birthDateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate.trim());
+
+  if (!birthDateMatch) {
+    return null;
+  }
+
+  const birthYear = Number(birthDateMatch[1]);
+  const birthMonth = Number(birthDateMatch[2]);
+  const birthDay = Number(birthDateMatch[3]);
+
+  const parsedBirthDate = new Date(Date.UTC(birthYear, birthMonth - 1, birthDay));
+
+  if (
+    parsedBirthDate.getUTCFullYear() !== birthYear
+    || parsedBirthDate.getUTCMonth() !== birthMonth - 1
+    || parsedBirthDate.getUTCDate() !== birthDay
+  ) {
+    return null;
+  }
+
+  if (Number.isNaN(referenceDate.getTime())) {
+    return null;
+  }
+
+  const referenceYear = referenceDate.getUTCFullYear();
+  const referenceMonth = referenceDate.getUTCMonth() + 1;
+  const referenceDay = referenceDate.getUTCDate();
+
+  let age = referenceYear - birthYear;
+  const hadBirthdayThisYear =
+    referenceMonth > birthMonth
+    || (referenceMonth === birthMonth && referenceDay >= birthDay);
+
+  if (!hadBirthdayThisYear) {
+    age -= 1;
+  }
+
+  return age >= 0 ? age : null;
+}
+
 export function formatTimeDisplay(dateTime: string | Date | null | undefined): string {
   const parsed = parseDateValue(dateTime);
 

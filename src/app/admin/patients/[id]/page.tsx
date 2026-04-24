@@ -7,6 +7,7 @@ import {
   formatAddressDisplay,
 } from "@/lib/patient-contact-links";
 import {
+  calculateAgeFromBirthDate,
   formatContactRelationshipLabel,
   formatDateDisplay,
   formatDniDisplay,
@@ -67,6 +68,7 @@ export default async function AdminPatientDetailPage({
   const isClinicalPrimary = primaryAction === "clinical";
   const mapsHref = patient ? buildGoogleMapsSearchHref(patient.address) : null;
   const addressLabel = patient ? formatAddressDisplay(patient.address) : null;
+  const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -96,6 +98,9 @@ export default async function AdminPatientDetailPage({
                 <p className="text-sm font-medium text-slate-700">
                   DNI: {formatDniDisplay(patient.dni)}
                 </p>
+                {patientAge !== null ? (
+                  <p className="text-xs text-slate-500">Edad: {patientAge} años</p>
+                ) : null}
 
                 {treatmentSummary?.detail ? (
                   <p className="text-xs text-slate-500">
