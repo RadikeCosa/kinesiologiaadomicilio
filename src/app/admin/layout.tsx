@@ -14,7 +14,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <Container className="max-w-4xl">
           <div className="flex h-16 items-center justify-between gap-4">
             <Link
-              href="/admin/patients"
+              href="/admin/"
               className="group flex min-w-0 items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2"
             >
               <span
