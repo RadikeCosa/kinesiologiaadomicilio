@@ -121,6 +121,10 @@ describe("patient-admin-display", () => {
     expect(calculateAgeFromBirthDate("1958-07-10", new Date("2026-07-11T12:00:00Z"))).toBe(68);
   });
 
+  it("calculates age when birthDate arrives with ISO timestamp suffix", () => {
+    expect(calculateAgeFromBirthDate("1958-07-10T00:00:00Z", new Date("2026-07-11T12:00:00Z"))).toBe(68);
+  });
+
   it("returns null for missing or invalid birth date", () => {
     expect(calculateAgeFromBirthDate(undefined)).toBeNull();
     expect(calculateAgeFromBirthDate("")).toBeNull();

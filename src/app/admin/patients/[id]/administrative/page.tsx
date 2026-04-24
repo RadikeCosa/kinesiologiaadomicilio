@@ -16,7 +16,13 @@ export default async function AdminPatientAdministrativePage({
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
       <header>
-        <h1 className="text-xl font-semibold text-slate-900">
+        <Link
+          className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline"
+          href={`/admin/patients/${id}`}
+        >
+          ← Volver al paciente
+        </Link>
+        <h1 className="mt-3 text-xl font-semibold text-slate-900">
           Administración del paciente
         </h1>
         {patient ? (
@@ -43,15 +49,6 @@ export default async function AdminPatientAdministrativePage({
           No se encontró el paciente solicitado.
         </p>
       )}
-
-      <div className="mt-5 border-t border-slate-200 pt-4">
-        <Link
-          className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline"
-          href={`/admin/patients/${id}`}
-        >
-          ← Volver al paciente
-        </Link>
-      </div>
     </section>
   );
 }
