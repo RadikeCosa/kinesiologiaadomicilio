@@ -48,7 +48,6 @@ function getTreatmentSummary(
   };
 }
 
-
 function getPrimaryPatientAction(
   patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>,
 ): "clinical" | "administrative" {
@@ -106,17 +105,21 @@ export default async function AdminPatientDetailPage({
 
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-start">
                 <Link
-                  className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${isClinicalPrimary
-                    ? "bg-slate-900 text-white hover:bg-slate-700"
-                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"}`}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
+                    isClinicalPrimary
+                      ? "bg-slate-900 text-white hover:bg-slate-700"
+                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                  }`}
                   href={`/admin/patients/${patient.id}/encounters`}
                 >
                   Gestión Clínica
                 </Link>
                 <Link
-                  className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${!isClinicalPrimary
-                    ? "bg-slate-900 text-white hover:bg-slate-700"
-                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"}`}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
+                    !isClinicalPrimary
+                      ? "bg-slate-900 text-white hover:bg-slate-700"
+                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                  }`}
                   href={`/admin/patients/${patient.id}/administrative`}
                 >
                   Gestión Administrativa
@@ -133,7 +136,10 @@ export default async function AdminPatientDetailPage({
                     Contacto del paciente
                   </h3>
                   <div className="mt-2">
-                    <PhoneContactBlock phone={patient.phone} phoneLabel="Teléfono" />
+                    <PhoneContactBlock
+                      phone={patient.phone}
+                      phoneLabel="Teléfono"
+                    />
                   </div>
                 </section>
 
@@ -166,13 +172,17 @@ export default async function AdminPatientDetailPage({
                       </div>
                       <div>
                         <dt className="font-medium">Vínculo</dt>
-                        <dd>{formatContactRelationshipLabel(patient.mainContact.relationship)}</dd>
+                        <dd>
+                          {formatContactRelationshipLabel(
+                            patient.mainContact.relationship,
+                          )}
+                        </dd>
                       </div>
                     </dl>
                     <div className="mt-2">
                       <PhoneContactBlock
                         phone={patient.mainContact.phone}
-                        phoneLabel="Teléfono de contacto principal"
+                        phoneLabel="Teléfono"
                       />
                     </div>
                   </section>
