@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-23 (UTC)
+> Última actualización: 2026-04-24 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -51,6 +51,11 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - En `/admin/patients/[id]/treatment` domina la gestión de tratamiento (inicio o finalización según estado).
 - El lenguaje visible al usuario prioriza términos operativos de producto (“tratamiento”, “visitas”).
 - Los tecnicismos (`EpisodeOfCare`, `Encounter`) se reservan para soporte/aclaración cuando aportan contexto.
+- En `/encounters` se permite contexto de tratamiento **compacto** (solo informativo), sin gestión inline.
+- En `/encounters` el contexto compacto distingue 3 estados semánticos:
+  - tratamiento activo (muestra fecha de inicio);
+  - tratamiento finalizado (muestra fecha de finalización);
+  - sin tratamiento iniciado (muestra mensaje específico).
 - En `/encounters` se evita duplicar estados visuales de tratamiento; se conserva señal impeditiva real cuando bloquea registrar visitas.
 
 ### Capacidades actuales
@@ -88,7 +93,9 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - pantalla de gestión clínica operativa por paciente (`/admin/patients/[id]/encounters`);
 - registro de visita realizada (`Encounter`) con gate de tratamiento activo;
 - listado de visitas del paciente ordenadas por fecha más reciente (dentro de la superficie clínica);
-- en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto, sin co-protagonismo visual con visitas;
+- en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), sin co-protagonismo visual con visitas;
+- en `/encounters`, el bloque de contexto de tratamiento fue reducido visualmente para no competir con la operación de visitas;
+- en `/encounters`, el loader diferencia tratamiento finalizado vs sin tratamiento iniciado usando `activeEpisode` + `mostRecentEpisode`;
 - en `/encounters`, se removió redundancia de estados positivos de tratamiento para priorizar la señal impeditiva real del registro de visitas;
 - en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
