@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
-import { EncounterCreateForm } from "@/app/admin/patients/[id]/encounters/components/EncounterCreateForm";
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 import { loadPatientEncountersPageData } from "@/app/admin/patients/[id]/encounters/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
@@ -141,7 +140,31 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
         </p>
       </section>
 
-      <EncounterCreateForm patientId={pageData.patient.id} activeEpisodeId={pageData.activeEpisode?.id ?? null} />
+      <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <h2 className="text-lg font-medium text-slate-900">Registrar visita</h2>
+        <p className="mt-2 text-sm text-slate-700">
+          {pageData.activeEpisode
+            ? "Registrá una nueva visita realizada."
+            : "Necesitás un tratamiento activo para registrar visitas."}
+        </p>
+        <div className="mt-4">
+          {pageData.activeEpisode ? (
+            <Link
+              className="inline-flex items-center justify-center rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+              href={`/admin/patients/${pageData.patient.id}/encounters/new`}
+            >
+              Registrar visita
+            </Link>
+          ) : (
+            <Link
+              className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              href={`/admin/patients/${pageData.patient.id}/treatment`}
+            >
+              Ir a gestión de tratamiento
+            </Link>
+          )}
+        </div>
+      </section>
       <EncountersList
         encounters={pageData.encounters}
         hasActiveTreatment={Boolean(pageData.activeEpisode)}

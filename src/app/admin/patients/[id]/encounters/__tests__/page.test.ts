@@ -22,16 +22,12 @@ vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadPatientDetail: loadPatientDetailMock,
 }));
 
-vi.mock("@/app/admin/patients/[id]/encounters/components/EncounterCreateForm", () => ({
-  EncounterCreateForm: () => createElement("div", null, "EncounterCreateForm"),
-}));
-
 vi.mock("@/app/admin/patients/[id]/encounters/components/EncountersList", () => ({
   EncountersList: () => createElement("div", null, "EncountersList"),
 }));
 
 describe("/admin/patients/[id]/encounters page", () => {
-  it("uses standardized back labels and renders compact patient metadata", async () => {
+  it("uses standardized back labels, renders compact metadata and CTA to new encounter", async () => {
     loadPatientEncountersPageDataMock.mockResolvedValueOnce(null);
 
     const notFoundElement = await AdminPatientEncountersPage({
@@ -44,7 +40,12 @@ describe("/admin/patients/[id]/encounters page", () => {
 
     loadPatientEncountersPageDataMock.mockResolvedValueOnce({
       patient: { id: "pat-1", fullName: "Ana Pérez" },
-      activeEpisode: null,
+      activeEpisode: {
+        id: "epi-1",
+        patientId: "pat-1",
+        status: "active",
+        startDate: "2026-04-01",
+      },
       mostRecentEpisode: null,
       encounters: [],
     });
@@ -70,6 +71,38 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("Registro y seguimiento de visitas del paciente.");
     expect(foundHtml).toContain("DNI: 30.111.222");
     expect(foundHtml).toContain("Tratamiento finalizado");
+    expect(foundHtml).toContain("href=\"/admin/patients/pat-1/encounters/new\"");
+    expect(foundHtml).toContain("Registrar visita");
+    expect(foundHtml).toContain("EncountersList");
     expect(foundHtml).not.toContain("Edad:");
+  });
+
+  it("shows treatment CTA when there is no active treatment", async () => {
+    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
+      patient: { id: "pat-1", fullName: "Ana Pérez" },
+      activeEpisode: null,
+      mostRecentEpisode: null,
+      encounters: [],
+    });
+    loadPatientDetailMock.mockResolvedValueOnce({
+      id: "pat-1",
+      fullName: "Ana Pérez",
+      firstName: "Ana",
+      lastName: "Pérez",
+      dni: "30111222",
+      operationalStatus: "finished_treatment",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    const foundElement = await AdminPatientEncountersPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const foundHtml = renderToStaticMarkup(foundElement);
+
+    expect(foundHtml).toContain("Necesitás un tratamiento activo para registrar visitas.");
+    expect(foundHtml).toContain("Ir a gestión de tratamiento");
+    expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
+    expect(foundHtml).not.toContain("href=\"/admin/patients/pat-1/encounters/new\"");
   });
 });

@@ -37,13 +37,13 @@ function getOccurrenceTimestamp(value: string | undefined): number {
 
 function sortByMostRecentEncounter(encounters: Encounter[]): Encounter[] {
   return [...encounters].sort((a, b) => {
-    const diff = getOccurrenceTimestamp(b.occurrenceDate) - getOccurrenceTimestamp(a.occurrenceDate);
+    const diff = getOccurrenceTimestamp(b.startedAt) - getOccurrenceTimestamp(a.startedAt);
 
     if (diff !== 0) {
       return diff;
     }
 
-    return b.occurrenceDate.localeCompare(a.occurrenceDate);
+    return b.startedAt.localeCompare(a.startedAt);
   });
 }
 

@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { canCreateEncounter } from "@/domain/encounter/encounter.rules";
 import { createEncounterSchema } from "@/domain/encounter/encounter.schemas";
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
@@ -33,6 +35,7 @@ export async function createEncounterAction(input: unknown): Promise<CreateEncou
     }
 
     await createEncounter(parsedInput);
+    revalidatePath(`/admin/patients/${parsedInput.patientId}/encounters`);
 
     return {
       ok: true,

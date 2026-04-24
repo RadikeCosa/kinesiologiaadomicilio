@@ -4,18 +4,24 @@ export interface Encounter {
   id: string;
   patientId: string;
   episodeOfCareId: string;
-  occurrenceDate: string;
+  startedAt: string;
+  endedAt?: string;
   status: EncounterStatus;
 }
 
 export interface CreateEncounterInput {
   patientId: string;
   episodeOfCareId: string;
-  occurrenceDate: string;
+  startedAt: string;
+  endedAt?: string;
+  /**
+   * @deprecated transitional alias while migrating from occurrenceDate to startedAt.
+   */
+  occurrenceDate?: string;
 }
 
-export interface UpdateEncounterOccurrenceInput {
+export interface UpdateEncounterStartInput {
   encounterId: string;
   patientId: string;
-  occurrenceDate: string;
+  startedAt: string;
 }
