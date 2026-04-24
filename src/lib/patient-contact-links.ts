@@ -14,6 +14,18 @@ function cleanText(value?: string): string | undefined {
   return trimmed;
 }
 
+function normalizeForSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
+function hasLocalContext(address: string): boolean {
+  const normalized = normalizeForSearch(address);
+  return normalized.includes("neuquen") || normalized.includes("argentina");
+}
+
 export function formatPhoneDisplay(phone?: string): string {
   return formatPhoneDisplayFromAdminDisplay(phone);
 }
@@ -37,5 +49,9 @@ export function buildGoogleMapsSearchHref(address?: string): string | null {
     return null;
   }
 
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(normalizedAddress)}`;
+  const query = hasLocalContext(normalizedAddress)
+    ? normalizedAddress
+    : `${normalizedAddress}, Neuquén, Argentina`;
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }

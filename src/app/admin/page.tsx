@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { loadPatientsList } from "@/app/admin/patients/data";
+
+export const metadata: Metadata = {
+  title: "Administración",
+};
 
 export default async function AdminHomePage() {
   const patients = await loadPatientsList();

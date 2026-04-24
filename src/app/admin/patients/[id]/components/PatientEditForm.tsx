@@ -29,7 +29,10 @@ export function PatientEditForm({
 }: PatientEditFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    tone: "success" | "error";
+  } | null>(null);
 
   if (!isEditing) {
     return null;
@@ -68,10 +71,12 @@ export function PatientEditForm({
 
     startTransition(async () => {
       const result = await updatePatientAction(input);
-      setMessage(
-        result.message ??
-          (result.ok ? "Paciente actualizado correctamente." : "Error."),
-      );
+      setMessage({
+        text: result.ok
+          ? result.message ?? "Datos administrativos actualizados correctamente."
+          : result.message ?? "No se pudieron guardar los cambios.",
+        tone: result.ok ? "success" : "error",
+      });
       if (result.ok) {
         onEditingChange(false);
         router.refresh();
@@ -217,7 +222,15 @@ export function PatientEditForm({
           </div>
         </fieldset>
 
-        {message ? <p className="text-sm text-slate-700">{message}</p> : null}
+        {message ? (
+          <p
+            className={`text-sm ${
+              message.tone === "success" ? "text-emerald-700" : "text-red-700"
+            }`}
+          >
+            {message.text}
+          </p>
+        ) : null}
 
         <button
           className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
@@ -232,7 +245,7 @@ export function PatientEditForm({
           onClick={() => onEditingChange(false)}
           type="button"
         >
-          Cancelar
+          Cancelar y volver al paciente
         </button>
       </form>
     </section>

@@ -170,3 +170,30 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - El listado de visitas ordena por timestamp real parseado (más recientes primero), no por comparación lexicográfica de strings.
 - Fechas se muestran en formato local consistente.
 - Horas se muestran en formato 24h.
+
+## Convenciones UX/UI privadas (pacientes)
+
+- **Convención de retorno**
+  - usar `← Volver a pacientes` cuando el destino es la colección/listado (`/admin/patients`);
+  - usar `← Volver al paciente` cuando el destino es el hub interno del paciente (`/admin/patients/[id]`).
+
+- **Convención de Maps**
+  - el texto visible de dirección no se altera por la desambiguación del link;
+  - el `href` de Google Maps se construye de forma centralizada en `buildGoogleMapsSearchHref` (`src/lib/patient-contact-links.ts`);
+  - si la dirección no incluye contexto suficiente, el query agrega `Neuquén, Argentina`.
+
+- **Títulos de pestaña (metadata privada)**
+  - las rutas privadas tienen títulos específicos;
+  - en rutas dinámicas se usa nombre real del paciente cuando está disponible, con fallback estático razonable.
+
+- **Encabezados internos de superficies de paciente**
+  - patrón común: link de retorno, `h1`, subtítulo contextual y metadata compacta;
+  - metadata compacta cuando aplica: DNI, edad (si `birthDate` permite cálculo) y badge de tratamiento.
+  - este criterio aplica a detalle, administrativa, visitas y tratamiento;
+  - no se modifica el header global de `src/app/admin/layout.tsx`.
+
+- **Feedback de formularios privados**
+  - éxito en verde;
+  - error en rojo;
+  - copy de resultado específico (evitar mensajes genéricos);
+  - cuando cancelar implica retorno, el copy debe explicitarlo (ej.: `Cancelar y volver al paciente`).
