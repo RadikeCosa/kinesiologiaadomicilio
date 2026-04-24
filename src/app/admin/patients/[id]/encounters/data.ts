@@ -1,7 +1,10 @@
 import type { Encounter } from "@/domain/encounter/encounter.types";
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
-import { getActiveEpisodeByPatientId } from "@/infrastructure/repositories/episode-of-care.repository";
+import {
+  getActiveEpisodeByPatientId,
+  getMostRecentEpisodeByPatientId,
+} from "@/infrastructure/repositories/episode-of-care.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
 
 export interface PatientEncountersPageData {
@@ -10,6 +13,7 @@ export interface PatientEncountersPageData {
     fullName: string;
   };
   activeEpisode: EpisodeOfCare | null;
+  mostRecentEpisode: EpisodeOfCare | null;
   encounters: Encounter[];
 }
 
@@ -28,8 +32,9 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     return null;
   }
 
-  const [activeEpisode, encounters] = await Promise.all([
+  const [activeEpisode, mostRecentEpisode, encounters] = await Promise.all([
     getActiveEpisodeByPatientId(patient.id),
+    getMostRecentEpisodeByPatientId(patient.id),
     listEncountersByPatientId(patient.id),
   ]);
 
@@ -39,6 +44,7 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
       fullName: buildFullName(patient),
     },
     activeEpisode,
+    mostRecentEpisode,
     encounters: sortByMostRecentEncounter(encounters),
   };
 }
