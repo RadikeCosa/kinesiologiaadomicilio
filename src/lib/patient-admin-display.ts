@@ -295,11 +295,3 @@ export function buildWhatsAppHref(phone: string | null | undefined): string | nu
 
   return `https://wa.me/${digits}`;
 }
-export const CONTACT_RELATIONSHIP_VALUES = [
-  'parent',
-  'spouse',
-  'child',
-  'sibling',
-  'caregiver',
-  'other',
-] as const;

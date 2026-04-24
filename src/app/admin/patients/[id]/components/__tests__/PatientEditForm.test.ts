@@ -41,5 +41,6 @@ describe("PatientEditForm", () => {
     expect(html).toContain('<option value="sibling" selected="">Hermano/a</option>');
     expect(html).toContain('<option value="caregiver">Cuidador/a</option>');
     expect(html).toContain('<option value="other">Otro</option>');
+    expect(html).toContain("Cancelar y volver al paciente");
   });
 });

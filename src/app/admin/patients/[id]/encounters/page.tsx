@@ -1,12 +1,30 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
+import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import { EncounterCreateForm } from "@/app/admin/patients/[id]/encounters/components/EncounterCreateForm";
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 import { loadPatientEncountersPageData } from "@/app/admin/patients/[id]/encounters/data";
-import { formatDateDisplay } from "@/lib/patient-admin-display";
+import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
+import {
+  calculateAgeFromBirthDate,
+  formatDateDisplay,
+  formatDniDisplay,
+} from "@/lib/patient-admin-display";
 
 interface AdminPatientEncountersPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: AdminPatientEncountersPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const patient = await loadPatientDetail(id);
+
+  return {
+    title: patient ? `Visitas — ${patient.fullName}` : "Visitas",
+  };
 }
 
 type TreatmentContext = {
@@ -46,12 +64,19 @@ function buildTreatmentContext(params: {
 export default async function AdminPatientEncountersPage({ params }: AdminPatientEncountersPageProps) {
   const { id } = await params;
   const pageData = await loadPatientEncountersPageData(id);
+  const patientDetail = pageData ? await loadPatientDetail(id) : null;
+  const patientAge = patientDetail
+    ? calculateAgeFromBirthDate(patientDetail.birthDate)
+    : null;
+  const treatmentBadge = patientDetail
+    ? getTreatmentBadgePresentation(patientDetail.operationalStatus)
+    : null;
 
   if (!pageData) {
     return (
       <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
         <Link className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline" href="/admin/patients">
-          ← Volver al listado
+          ← Volver a pacientes
         </Link>
 
         <h2 className="mt-3 text-xl font-semibold text-slate-900">Visitas del paciente</h2>
@@ -79,8 +104,25 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
           >
             ← Volver al paciente
           </Link>
-          <h1 className="mt-3 text-2xl font-semibold text-slate-900">{pageData.patient.fullName}</h1>
-          <p className="mt-2 text-sm text-slate-600">Registro y seguimiento de visitas</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-semibold text-slate-900">
+              {pageData.patient.fullName}
+            </h1>
+            {treatmentBadge ? (
+              <span
+                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
+              >
+                {treatmentBadge.label}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-2 text-sm text-slate-600">Registro y seguimiento de visitas del paciente.</p>
+          {patientDetail ? (
+            <p className="mt-1 text-xs text-slate-500">
+              DNI: {formatDniDisplay(patientDetail.dni)}
+              {patientAge !== null ? ` · Edad: ${patientAge} años` : ""}
+            </p>
+          ) : null}
         </div>
       </div>
 

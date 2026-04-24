@@ -15,7 +15,10 @@ export function StartEpisodeOfCareForm({
 }: StartEpisodeOfCareFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    tone: "success" | "error";
+  } | null>(null);
 
   const availability = useMemo(() => {
     if (!patient.dni) {
@@ -49,12 +52,12 @@ export function StartEpisodeOfCareForm({
 
     startTransition(async () => {
       const result = await startEpisodeOfCareAction(input);
-      setMessage(
-        result.message ??
-          (result.ok
-            ? "Tratamiento iniciado correctamente."
-            : "No se pudo iniciar."),
-      );
+      setMessage({
+        text: result.ok
+          ? result.message ?? "Tratamiento iniciado correctamente."
+          : result.message ?? "No se pudo iniciar el tratamiento.",
+        tone: result.ok ? "success" : "error",
+      });
       if (result.ok) {
         router.refresh();
       }
@@ -86,7 +89,15 @@ export function StartEpisodeOfCareForm({
           />
         </div>
 
-        {message ? <p className="text-sm text-slate-700">{message}</p> : null}
+        {message ? (
+          <p
+            className={`text-sm ${
+              message.tone === "success" ? "text-emerald-700" : "text-red-700"
+            }`}
+          >
+            {message.text}
+          </p>
+        ) : null}
 
         <button
           className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"

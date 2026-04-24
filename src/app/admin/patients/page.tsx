@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PhoneContactActions } from "@/app/admin/patients/components/PhoneContactBlock";
@@ -12,6 +13,10 @@ import {
 } from "@/lib/patient-admin-display";
 
 import { getTreatmentBadgePresentation } from "./treatment-badge";
+
+export const metadata: Metadata = {
+  title: "Pacientes",
+};
 
 export default async function AdminPatientsPage() {
   const patients = await loadPatientsList();

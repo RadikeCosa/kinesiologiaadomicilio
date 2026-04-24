@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PhoneContactBlock } from "@/app/admin/patients/components/PhoneContactBlock";
@@ -17,6 +18,17 @@ import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-ba
 
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: AdminPatientDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const patient = await loadPatientDetail(id);
+
+  return {
+    title: patient?.fullName ?? "Detalle de paciente",
+  };
 }
 
 function getTreatmentSummary(
@@ -75,7 +87,7 @@ export default async function AdminPatientDetailPage({
         className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline"
         href="/admin/patients"
       >
-        ← Volver al listado
+        ← Volver a pacientes
       </Link>
 
       {patient ? (
@@ -96,6 +108,9 @@ export default async function AdminPatientDetailPage({
 
                 <p className="text-sm font-medium text-slate-700">
                   DNI: {formatDniDisplay(patient.dni)}
+                </p>
+                <p className="text-sm text-slate-600">
+                  Resumen general del estado y contacto del paciente.
                 </p>
                 {patientAge !== null ? (
                   <p className="text-xs text-slate-500">Edad: {patientAge} años</p>
@@ -155,11 +170,28 @@ export default async function AdminPatientDetailPage({
                   <p className="mt-2 text-sm text-slate-700">{addressLabel}</p>
                   {mapsHref ? (
                     <a
-                      className="mt-2 inline-flex text-xs font-medium text-sky-700 underline-offset-2 hover:underline"
+                      aria-label="Abrir en Maps"
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-sky-700 underline-offset-2 hover:underline"
                       href={mapsHref}
                       rel="noopener noreferrer"
                       target="_blank"
                     >
+                      <svg
+                        aria-hidden="true"
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 21s6-5.6 6-11a6 6 0 1 0-12 0c0 5.4 6 11 6 11Z"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.8"
+                        />
+                        <circle cx="12" cy="10" fill="currentColor" r="2.2" />
+                      </svg>
                       Abrir en Maps
                     </a>
                   ) : null}

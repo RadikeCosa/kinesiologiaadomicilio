@@ -61,6 +61,7 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Contacto");
     expect(html).toContain("Dirección");
     expect(html).toContain("Abrir en Maps");
+    expect(html).toContain("aria-label=\"Abrir en Maps\"");
     expect(html).toContain("Contacto principal");
     expect(html).toContain("Contacto del paciente");
     expect(html).toContain("Belgrano 123");

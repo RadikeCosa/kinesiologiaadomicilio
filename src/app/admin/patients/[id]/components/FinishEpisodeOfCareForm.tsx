@@ -13,7 +13,10 @@ interface FinishEpisodeOfCareFormProps {
 export function FinishEpisodeOfCareForm({ patient }: FinishEpisodeOfCareFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    tone: "success" | "error";
+  } | null>(null);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,9 +33,12 @@ export function FinishEpisodeOfCareForm({ patient }: FinishEpisodeOfCareFormProp
         endDate: new Date().toISOString().slice(0, 10),
       });
 
-      setMessage(
-        result.message ?? (result.ok ? "Tratamiento finalizado correctamente." : "No se pudo finalizar."),
-      );
+      setMessage({
+        text: result.ok
+          ? result.message ?? "Tratamiento finalizado correctamente."
+          : result.message ?? "No se pudo finalizar el tratamiento.",
+        tone: result.ok ? "success" : "error",
+      });
 
       if (result.ok) {
         router.refresh();
@@ -50,7 +56,15 @@ export function FinishEpisodeOfCareForm({ patient }: FinishEpisodeOfCareFormProp
       </p>
 
       <form className="mt-4" onSubmit={handleSubmit}>
-        {message ? <p className="mb-3 text-sm text-amber-900">{message}</p> : null}
+        {message ? (
+          <p
+            className={`mb-3 text-sm ${
+              message.tone === "success" ? "text-emerald-700" : "text-red-700"
+            }`}
+          >
+            {message.text}
+          </p>
+        ) : null}
 
         <button
           className="rounded bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800 disabled:opacity-50"
