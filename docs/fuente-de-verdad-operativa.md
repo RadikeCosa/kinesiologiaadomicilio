@@ -162,5 +162,11 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - Gender se muestra traducido en UI, manteniendo códigos FHIR internos.
 - DNI se almacena como solo dígitos y se usa así para duplicados.
 - Teléfono se normaliza antes de persistir y se reutiliza para links.
+- `Patient.birthDate` se trata como fecha calendario administrativa (`YYYY-MM-DD`) en escritura; para lectura legacy de detalle se tolera `YYYY-MM-DDT...` solo para cálculo de edad en display.
+- La edad del paciente es **dato derivado de UI** (calculada desde `birthDate`) y **no se persiste**.
+- `EpisodeOfCare.startDate` / `endDate` se tratan como fechas calendario (`YYYY-MM-DD`) con validación de formato y calendario real.
+- En defaults/envíos de `<input type="date">` se usa fecha local de calendario; **no usar `toISOString().slice(0,10)`** porque introduce riesgo UTC off-by-one.
+- `Encounter.period.start` / `period.end` se manejan como FHIR `dateTime` con offset; valores `datetime-local` se normalizan antes de persistir.
+- El listado de visitas ordena por timestamp real parseado (más recientes primero), no por comparación lexicográfica de strings.
 - Fechas se muestran en formato local consistente.
 - Horas se muestran en formato 24h.

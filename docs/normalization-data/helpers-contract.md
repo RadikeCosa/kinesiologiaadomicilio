@@ -107,6 +107,22 @@ Output:
 
 ---
 
+### formatLocalDateInputValue
+
+Input:
+
+* `Date` opcional (usa `new Date()` por defecto)
+
+Output:
+
+* `YYYY-MM-DD` usando año/mes/día **locales**
+
+Regla:
+
+* no usar `toISOString().slice(0,10)` para defaults/envíos de `input[type="date"]`
+
+---
+
 ### formatDateTimeDisplay
 
 Input:
@@ -116,6 +132,27 @@ Input:
 Output:
 
 * fecha + hora
+
+Nota de ordenamiento de visitas:
+
+* para ordenar encounters, comparar timestamps reales parseados (`new Date(value).getTime()`)
+* no ordenar por `localeCompare` de strings dateTime
+
+---
+
+### calculateAgeFromBirthDate
+
+Input:
+
+* `birthDate` (`YYYY-MM-DD`; en lectura legacy se tolera `YYYY-MM-DDT...`)
+
+Output:
+
+* edad numérica para display o `null`
+
+Regla:
+
+* edad derivada solo en UI, no persistida
 
 ---
 

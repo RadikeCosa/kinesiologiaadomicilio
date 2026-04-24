@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { finishEpisodeOfCareAction } from "@/app/admin/patients/[id]/actions/finish-episode-of-care.action";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
+import { formatLocalDateInputValue } from "@/lib/date-input";
 
 interface FinishEpisodeOfCareFormProps {
   patient: PatientDetailReadModel;
@@ -27,7 +28,7 @@ export function FinishEpisodeOfCareForm({ patient }: FinishEpisodeOfCareFormProp
     startTransition(async () => {
       const result = await finishEpisodeOfCareAction({
         patientId: patient.id,
-        endDate: new Date().toISOString().slice(0, 10),
+        endDate: formatLocalDateInputValue(),
       });
 
       setMessage(

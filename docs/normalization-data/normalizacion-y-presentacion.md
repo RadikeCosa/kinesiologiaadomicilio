@@ -75,9 +75,18 @@ Display:
 
   * `YYYY-MM-DD` (fecha)
   * FHIR `dateTime` para encuentros
+* Convenciones vigentes:
+
+  * `birthDate` y `EpisodeOfCare.startDate/endDate` son fechas calendario (no dateTime)
+  * para defaults de `input[type="date"]` usar fecha local de calendario
+  * **no usar `toISOString().slice(0,10)`** para defaults/envíos de fecha
 * Display:
 
   * formato localizado consistente (ej. `dd/mm/aaaa`)
+* Edad:
+
+  * se calcula para display a partir de `birthDate`
+  * no se persiste como campo propio
 
 ---
 
@@ -130,6 +139,7 @@ Separación explícita:
 * duplicados de DNI correctamente detectados
 * UI legible y homogénea
 * sin introducir dependencias innecesarias
+* listado de visitas ordenado por tiempo real parseado (no string compare)
 
 ---
 

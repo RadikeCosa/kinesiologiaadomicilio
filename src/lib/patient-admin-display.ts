@@ -170,7 +170,8 @@ export function calculateAgeFromBirthDate(
     return null;
   }
 
-  const birthDateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate.trim());
+  const trimmedBirthDate = birthDate.trim();
+  const birthDateMatch = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(trimmedBirthDate);
 
   if (!birthDateMatch) {
     return null;
@@ -295,11 +296,3 @@ export function buildWhatsAppHref(phone: string | null | undefined): string | nu
 
   return `https://wa.me/${digits}`;
 }
-export const CONTACT_RELATIONSHIP_VALUES = [
-  'parent',
-  'spouse',
-  'child',
-  'sibling',
-  'caregiver',
-  'other',
-] as const;
