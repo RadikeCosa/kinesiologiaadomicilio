@@ -39,6 +39,45 @@ describe("episode-of-care.schemas", () => {
     });
   });
 
+  it("rejects invalid calendar and format values for startDate/endDate", () => {
+    expect(() =>
+      startEpisodeOfCareSchema.parse({
+        patientId: "pat-001",
+        startDate: "2026-13-01",
+      }),
+    ).toThrow("startDate: formato inválido (YYYY-MM-DD).");
+
+    expect(() =>
+      finishEpisodeOfCareSchema.parse({
+        patientId: "pat-001",
+        endDate: "2026-02-31",
+      }),
+    ).toThrow("endDate: formato inválido (YYYY-MM-DD).");
+
+    expect(() =>
+      startEpisodeOfCareSchema.parse({
+        patientId: "pat-001",
+        startDate: "17-04-2026",
+      }),
+    ).toThrow("startDate: formato inválido (YYYY-MM-DD).");
+  });
+
+  it("rejects empty startDate/endDate strings", () => {
+    expect(() =>
+      startEpisodeOfCareSchema.parse({
+        patientId: "pat-001",
+        startDate: "   ",
+      }),
+    ).toThrow("startDate: es obligatorio.");
+
+    expect(() =>
+      finishEpisodeOfCareSchema.parse({
+        patientId: "pat-001",
+        endDate: "",
+      }),
+    ).toThrow("endDate: es obligatorio.");
+  });
+
   it("fails with invalid shape", () => {
     expect(() => startEpisodeOfCareSchema.parse("invalid-shape")).toThrow(
       "startEpisodeOfCareSchema: se esperaba un objeto.",

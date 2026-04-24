@@ -21,8 +21,30 @@ function buildFullName(patient: { firstName: string; lastName: string }): string
   return `${patient.firstName} ${patient.lastName}`.trim();
 }
 
+function getOccurrenceTimestamp(value: string | undefined): number {
+  if (!value) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  const timestamp = new Date(value).getTime();
+
+  if (Number.isNaN(timestamp)) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  return timestamp;
+}
+
 function sortByMostRecentEncounter(encounters: Encounter[]): Encounter[] {
-  return [...encounters].sort((a, b) => b.occurrenceDate.localeCompare(a.occurrenceDate));
+  return [...encounters].sort((a, b) => {
+    const diff = getOccurrenceTimestamp(b.occurrenceDate) - getOccurrenceTimestamp(a.occurrenceDate);
+
+    if (diff !== 0) {
+      return diff;
+    }
+
+    return b.occurrenceDate.localeCompare(a.occurrenceDate);
+  });
 }
 
 export async function loadPatientEncountersPageData(patientId: string): Promise<PatientEncountersPageData | null> {

@@ -38,6 +38,24 @@ export default async function AdminPatientAdministrativePage({
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+      <header>
+        <Link
+          className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline"
+          href={`/admin/patients/${id}`}
+        >
+          ← Volver al paciente
+        </Link>
+        <h1 className="mt-3 text-xl font-semibold text-slate-900">
+          Administración del paciente
+        </h1>
+        {patient ? (
+          <p className="mt-1 text-sm text-slate-600">
+            Gestión administrativa y actualización de identidad/contacto de{" "}
+            {patient.fullName}
+          </p>
+        ) : null}
+      </header>
+
       {patient ? (
         <>
           <Link

@@ -170,7 +170,8 @@ export function calculateAgeFromBirthDate(
     return null;
   }
 
-  const birthDateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate.trim());
+  const trimmedBirthDate = birthDate.trim();
+  const birthDateMatch = /^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(trimmedBirthDate);
 
   if (!birthDateMatch) {
     return null;

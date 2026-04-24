@@ -134,6 +134,24 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Edad: 68 años");
   });
 
+  it("renders patient age when birthDate comes as ISO date-time string", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-24T12:00:00Z"));
+
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        birthDate: "1958-04-24T00:00:00Z",
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Edad: 68 años");
+  });
+
   it("does not render patient age when birthDate is missing", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(
       buildPatient({

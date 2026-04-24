@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { startEpisodeOfCareAction } from "@/app/admin/patients/[id]/actions/start-episode-of-care.action";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
+import { formatLocalDateInputValue } from "@/lib/date-input";
 
 interface StartEpisodeOfCareFormProps {
   patient: PatientDetailReadModel;
@@ -81,7 +82,7 @@ export function StartEpisodeOfCareForm({
           </label>
           <input
             className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
-            defaultValue={new Date().toISOString().slice(0, 10)}
+            defaultValue={formatLocalDateInputValue()}
             id="startDate"
             name="startDate"
             required
