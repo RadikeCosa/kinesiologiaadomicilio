@@ -1,3 +1,4 @@
+import type { MainContactRelationship } from "@/domain/patient/contact-relationship";
 import type { PatientGender } from "@/domain/patient/patient.types";
 
 const GENDER_LABELS: Record<PatientGender, string> = {
@@ -6,6 +7,37 @@ const GENDER_LABELS: Record<PatientGender, string> = {
   other: "Otro",
   unknown: "Desconocido",
 };
+
+const CONTACT_RELATIONSHIP_LABELS: Record<MainContactRelationship, string> = {
+  parent: "Madre/padre",
+  spouse: "Pareja/cónyuge",
+  child: "Hijo/a",
+  sibling: "Hermano/a",
+  caregiver: "Cuidador/a",
+  other: "Otro",
+};
+
+export const CONTACT_RELATIONSHIP_OPTIONS: ReadonlyArray<{
+  value: MainContactRelationship;
+  label: string;
+}> = [
+  { value: "parent", label: CONTACT_RELATIONSHIP_LABELS.parent },
+  { value: "spouse", label: CONTACT_RELATIONSHIP_LABELS.spouse },
+  { value: "child", label: CONTACT_RELATIONSHIP_LABELS.child },
+  { value: "sibling", label: CONTACT_RELATIONSHIP_LABELS.sibling },
+  { value: "caregiver", label: CONTACT_RELATIONSHIP_LABELS.caregiver },
+  { value: "other", label: CONTACT_RELATIONSHIP_LABELS.other },
+];
+
+export function formatContactRelationshipLabel(
+  value?: MainContactRelationship | null,
+): string {
+  if (!value) {
+    return "No informado";
+  }
+
+  return CONTACT_RELATIONSHIP_LABELS[value] ?? "Otro";
+}
 
 export function formatGenderLabel(gender?: PatientGender): string {
   if (!gender) {

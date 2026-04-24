@@ -1,11 +1,16 @@
 "use client";
 
+import React from "react";
 import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { updatePatientAction } from "@/app/admin/patients/[id]/actions/update-patient.action";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
-import { formatGenderLabel } from "@/lib/patient-admin-display";
+import {
+  CONTACT_RELATIONSHIP_OPTIONS,
+  formatContactRelationshipLabel,
+  formatGenderLabel,
+} from "@/lib/patient-admin-display";
 
 interface PatientEditFormProps {
   patient: PatientDetailReadModel;
@@ -180,12 +185,19 @@ export function PatientEditForm({
             >
               Vínculo
             </label>
-            <input
+            <select
               className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
               defaultValue={patient.mainContact?.relationship ?? ""}
               id="mainContactRelationship"
               name="mainContactRelationship"
-            />
+            >
+              <option value="">No informado</option>
+              {CONTACT_RELATIONSHIP_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {formatContactRelationshipLabel(option.value)}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label
