@@ -3,10 +3,9 @@ import Link from "next/link";
 import { loadPatientsList } from "@/app/admin/patients/data";
 import {
   buildGoogleMapsSearchHref,
-  buildWhatsAppHref,
   formatAddressDisplay,
-  formatPhoneDisplay,
 } from "@/lib/patient-contact-links";
+import { buildTelHref, buildWhatsAppHref, formatDniDisplay, formatPhoneDisplay } from "@/lib/patient-admin-display";
 
 import { getTreatmentBadgePresentation } from "./treatment-badge";
 
@@ -41,6 +40,7 @@ export default async function AdminPatientsPage() {
           patients.map((patient) => {
             const treatmentBadge = getTreatmentBadgePresentation(patient.operationalStatus);
             const whatsappHref = buildWhatsAppHref(patient.phone);
+            const telHref = buildTelHref(patient.phone);
             const phoneLabel = formatPhoneDisplay(patient.phone);
             const mapsHref = buildGoogleMapsSearchHref(patient.address);
             const addressLabel = formatAddressDisplay(patient.address);
@@ -62,12 +62,19 @@ export default async function AdminPatientsPage() {
                     </h3>
                     <p className="mt-2 text-sm text-slate-700">
                       Teléfono:{" "}
-                      {!whatsappHref ? (
+                      {!whatsappHref && !telHref ? (
                         phoneLabel
+                      ) : telHref && !whatsappHref ? (
+                        <a
+                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                          href={telHref ?? undefined}
+                        >
+                          {phoneLabel}
+                        </a>
                       ) : (
                         <a
                           className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                          href={whatsappHref}
+                          href={whatsappHref ?? undefined}
                           rel="noopener noreferrer"
                           target="_blank"
                         >
@@ -94,7 +101,7 @@ export default async function AdminPatientsPage() {
 
                   <div className="flex flex-col items-start gap-2 sm:items-end">
                     <p className="shrink-0 text-xs font-normal text-slate-500">
-                      DNI: {patient.dni ?? "Sin DNI"}
+                      DNI: {formatDniDisplay(patient.dni)}
                     </p>
                     <span
                       className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}

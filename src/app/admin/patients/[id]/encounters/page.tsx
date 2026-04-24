@@ -3,6 +3,7 @@ import Link from "next/link";
 import { EncounterCreateForm } from "@/app/admin/patients/[id]/encounters/components/EncounterCreateForm";
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 import { loadPatientEncountersPageData } from "@/app/admin/patients/[id]/encounters/data";
+import { formatDateDisplay } from "@/lib/patient-admin-display";
 
 interface AdminPatientEncountersPageProps {
   params: Promise<{ id: string }>;
@@ -48,7 +49,7 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
       <section className="mt-5 rounded border border-slate-200 bg-white p-3 text-sm text-slate-700">
         <p>
           {hasActiveEpisode
-            ? `Tratamiento activo desde ${pageData.activeEpisode?.startDate}.`
+            ? `Tratamiento activo desde ${formatDateDisplay(pageData.activeEpisode?.startDate)}.`
             : "Tratamiento no activo."}{" "}
           <Link
             className="font-medium text-slate-900 underline-offset-2 hover:underline"

@@ -10,7 +10,7 @@ describe("updatePatientAction", () => {
     const result = await updatePatientAction({
       id: "pat-001",
       dni: "30111222",
-      phone: "555-0100",
+      phone: "(299) 555-0100",
     });
 
     expect(result).toEqual({
@@ -22,14 +22,14 @@ describe("updatePatientAction", () => {
     expect(patient).toMatchObject({
       id: "pat-001",
       dni: "30111222",
-      phone: "555-0100",
+      phone: "2995550100",
     });
   });
 
   it("returns clear result when patient does not exist", async () => {
     const result = await updatePatientAction({
       id: "pat-999",
-      phone: "555",
+      phone: "(299) 555-0101",
     });
 
     expect(result).toEqual({

@@ -1,24 +1,13 @@
+import React from "react";
 import type { Encounter } from "@/domain/encounter/encounter.types";
+import { formatDateTimeDisplay } from "@/lib/patient-admin-display";
 
 interface EncountersListProps {
   encounters: Encounter[];
 }
 
 function formatOccurrenceDate(value: string): string {
-  if (!value.trim()) {
-    return "Sin fecha";
-  }
-
-  const parsed = new Date(value);
-
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return parsed.toLocaleString("es-AR", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
+  return formatDateTimeDisplay(value);
 }
 
 export function EncountersList({ encounters }: EncountersListProps) {

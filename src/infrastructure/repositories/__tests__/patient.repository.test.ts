@@ -109,7 +109,7 @@ describe("patient.repository (FHIR)", () => {
   });
 
   it("checks if another patient exists for a DNI", async () => {
-    vi.spyOn(fhirClient, "get").mockResolvedValue({
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "Bundle",
       entry: [
         { resource: { resourceType: "Patient", id: "pat-1" } },
@@ -118,15 +118,16 @@ describe("patient.repository (FHIR)", () => {
     });
 
     const result = await existsAnotherPatientWithDni({
-      dni: "32123456",
+      dni: "32.123.456",
       excludePatientId: "pat-1",
     });
 
     expect(result).toBe(true);
+    expect(getSpy).toHaveBeenCalledWith(expect.stringContaining("32123456"));
   });
 
   it("finds patient by DNI when identifier includes type", async () => {
-    vi.spyOn(fhirClient, "get").mockResolvedValue({
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "Bundle",
       entry: [
         {
@@ -155,10 +156,11 @@ describe("patient.repository (FHIR)", () => {
       ],
     });
 
-    const found = await findPatientByDni("30999111");
+    const found = await findPatientByDni("30.999.111");
 
     expect(found?.id).toBe("pat-typed");
     expect(found?.dni).toBe("30999111");
+    expect(getSpy).toHaveBeenCalledWith(expect.stringContaining("30999111"));
   });
 
   it("returns null on get by id not found", async () => {

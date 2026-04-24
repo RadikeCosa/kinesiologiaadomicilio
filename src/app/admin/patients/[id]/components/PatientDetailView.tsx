@@ -4,10 +4,16 @@ import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-ba
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import {
   buildGoogleMapsSearchHref,
-  buildWhatsAppHref,
   formatAddressDisplay,
-  formatPhoneDisplay,
 } from "@/lib/patient-contact-links";
+import {
+  buildTelHref,
+  buildWhatsAppHref,
+  formatDniDisplay,
+  formatDateDisplay,
+  formatGenderLabel,
+  formatPhoneDisplay,
+} from "@/lib/patient-admin-display";
 
 interface PatientDetailViewProps {
   patient: PatientDetailReadModel | null;
@@ -41,6 +47,7 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
     patient as PatientDetailReadModel & { latestEpisode?: EpisodeOfCare | null }
   ).latestEpisode;
   const whatsappHref = buildWhatsAppHref(patient.phone);
+  const telHref = buildTelHref(patient.phone);
   const phoneLabel = formatPhoneDisplay(patient.phone);
   const mapsHref = buildGoogleMapsSearchHref(patient.address);
   const addressLabel = formatAddressDisplay(patient.address);
@@ -59,15 +66,15 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
             </div>
             <div>
               <dt className="font-medium">DNI</dt>
-              <dd>{patient.dni ?? "Sin DNI"}</dd>
+              <dd>{formatDniDisplay(patient.dni)}</dd>
             </div>
             <div>
-              <dt className="font-medium">Gender</dt>
-              <dd>{patient.gender ?? "No informado"}</dd>
+              <dt className="font-medium">Género</dt>
+              <dd>{formatGenderLabel(patient.gender)}</dd>
             </div>
             <div>
               <dt className="font-medium">Fecha de nacimiento</dt>
-              <dd>{patient.birthDate ?? "No informada"}</dd>
+              <dd>{formatDateDisplay(patient.birthDate)}</dd>
             </div>
           </dl>
         </div>
@@ -78,12 +85,19 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
             <div>
               <dt className="font-medium">Teléfono del paciente</dt>
               <dd>
-                {!whatsappHref ? (
+                {!whatsappHref && !telHref ? (
                   phoneLabel
+                ) : telHref && !whatsappHref ? (
+                  <a
+                    className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                    href={telHref ?? undefined}
+                  >
+                    {phoneLabel}
+                  </a>
                 ) : (
                   <a
                     className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                    href={whatsappHref}
+                    href={whatsappHref ?? undefined}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
@@ -142,15 +156,15 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
       {patient.activeEpisode ? (
         <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
           <p className="font-medium">Tratamiento activo</p>
-          <p>Inicio: {patient.activeEpisode.startDate}</p>
+          <p>Inicio: {formatDateDisplay(patient.activeEpisode.startDate)}</p>
         </div>
       ) : null}
 
       {!patient.activeEpisode && latestEpisode?.status === "finished" ? (
         <div className="mt-4 rounded border border-slate-300 bg-white p-3 text-sm text-slate-800">
           <p className="font-medium">Tratamiento finalizado</p>
-          <p>Inicio: {latestEpisode.startDate}</p>
-          <p>Finalización: {latestEpisode.endDate ?? "No informada"}</p>
+          <p>Inicio: {formatDateDisplay(latestEpisode.startDate)}</p>
+          <p>Finalización: {formatDateDisplay(latestEpisode.endDate)}</p>
         </div>
       ) : null}
     </section>

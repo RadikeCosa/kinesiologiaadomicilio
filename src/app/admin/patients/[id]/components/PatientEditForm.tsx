@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { updatePatientAction } from "@/app/admin/patients/[id]/actions/update-patient.action";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
+import { formatGenderLabel } from "@/lib/patient-admin-display";
 
 interface PatientEditFormProps {
   patient: PatientDetailReadModel;
@@ -105,13 +106,15 @@ export function PatientEditForm({
             className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
             defaultValue={patient.phone ?? ""}
             id="phone"
+            inputMode="tel"
             name="phone"
+            type="tel"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium" htmlFor="gender">
-            Gender
+            Género
           </label>
           <select
             className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
@@ -120,10 +123,10 @@ export function PatientEditForm({
             name="gender"
           >
             <option value="">Sin especificar</option>
-            <option value="male">male</option>
-            <option value="female">female</option>
-            <option value="other">other</option>
-            <option value="unknown">unknown</option>
+            <option value="male">{formatGenderLabel("male")}</option>
+            <option value="female">{formatGenderLabel("female")}</option>
+            <option value="other">{formatGenderLabel("other")}</option>
+            <option value="unknown">{formatGenderLabel("unknown")}</option>
           </select>
         </div>
 
@@ -195,7 +198,9 @@ export function PatientEditForm({
               className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
               defaultValue={patient.mainContact?.phone ?? ""}
               id="mainContactPhone"
+              inputMode="tel"
               name="mainContactPhone"
+              type="tel"
             />
           </div>
         </fieldset>

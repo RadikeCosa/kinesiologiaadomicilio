@@ -1,6 +1,7 @@
 import type { CreatePatientInput, MainContact, PatientGender, UpdatePatientInput } from "@/domain/patient/patient.types";
 import { normalizeMainContactRelationship } from "@/domain/patient/contact-relationship";
 import { DNI_IDENTIFIER_SYSTEM, buildDniIdentifier } from "@/lib/fhir/identifiers";
+import { normalizeDni, normalizePhone } from "@/lib/patient-admin-display";
 
 import { type FhirPatient, type FhirPatientContact } from "@/infrastructure/mappers/patient/patient-fhir.types";
 
@@ -9,7 +10,7 @@ function extractPrimaryPhoneValue(telecom?: FhirPatient["telecom"]): string | un
 }
 
 function buildSinglePhoneTelecom(phone?: string): FhirPatient["telecom"] {
-  const normalizedPhone = phone?.trim();
+  const normalizedPhone = normalizePhone(phone);
 
   if (!normalizedPhone) {
     return undefined;
@@ -71,8 +72,8 @@ function mapInputToPatientShape(input: CreatePatientInput | UpdatePatientInput):
   FhirPatient,
   "identifier" | "name" | "telecom" | "gender" | "birthDate" | "address" | "contact"
 > {
-  const dni = input.dni?.trim();
-  const phone = input.phone?.trim();
+  const dni = normalizeDni(input.dni);
+  const phone = normalizePhone(input.phone);
   const firstName = input.firstName?.trim();
   const lastName = input.lastName?.trim();
   const gender = input.gender?.trim() as PatientGender | undefined;
