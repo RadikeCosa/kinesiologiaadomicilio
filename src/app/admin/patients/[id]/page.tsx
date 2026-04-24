@@ -8,6 +8,7 @@ import {
 import {
   buildTelHref,
   buildWhatsAppHref,
+  formatContactRelationshipLabel,
   formatDateDisplay,
   formatDniDisplay,
   formatPhoneDisplay,
@@ -172,7 +173,7 @@ export default async function AdminPatientDetailPage({
                         </p>
                         <p>
                           Vínculo:{" "}
-                          {patient.mainContact.relationship ?? "No informado"}
+                          {formatContactRelationshipLabel(patient.mainContact.relationship)}
                         </p>
                         <p>
                           Teléfono:{" "}

@@ -147,4 +147,28 @@ describe("PatientDetailView", () => {
     expect(html).toContain("Fecha de nacimiento");
     expect(html).toContain("No informado");
   });
+  it("shows main contact relationship with spanish label", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientDetailView, {
+        patient: {
+          id: "pat-1",
+          firstName: "Ana",
+          lastName: "Pérez",
+          fullName: "Ana Pérez",
+          mainContact: {
+            name: "Carlos Pérez",
+            relationship: "caregiver",
+            phone: "+542995550101",
+          },
+          operationalStatus: "preliminary",
+          createdAt: "2026-04-17T00:00:00.000Z",
+          updatedAt: "2026-04-17T00:00:00.000Z",
+        },
+      }),
+    );
+
+    expect(html).toContain("Contacto principal");
+    expect(html).toContain("Vínculo: Cuidador/a");
+  });
+
 });

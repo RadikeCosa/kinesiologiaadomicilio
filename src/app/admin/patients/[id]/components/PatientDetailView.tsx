@@ -10,6 +10,7 @@ import {
   buildTelHref,
   buildWhatsAppHref,
   formatDniDisplay,
+  formatContactRelationshipLabel,
   formatDateDisplay,
   formatGenderLabel,
   formatPhoneDisplay,
@@ -128,7 +129,7 @@ export function PatientDetailView({ patient }: PatientDetailViewProps) {
               <dd className="space-y-1">
                 <p>Nombre: {patient.mainContact?.name ?? "No informado"}</p>
                 <p>
-                  Vínculo: {patient.mainContact?.relationship ?? "No informado"}
+                  Vínculo: {formatContactRelationshipLabel(patient.mainContact?.relationship)}
                 </p>
                 <p>Teléfono: {patient.mainContact?.phone ?? "No informado"}</p>
               </dd>

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildTelHref,
   buildWhatsAppHref,
+  CONTACT_RELATIONSHIP_OPTIONS,
+  formatContactRelationshipLabel,
   formatDateDisplay,
   formatDateTimeDisplay,
   formatDniDisplay,
@@ -23,6 +25,31 @@ describe("patient-admin-display", () => {
 
   it("returns fallback when gender is missing", () => {
     expect(formatGenderLabel(undefined)).toBe("No informado");
+  });
+
+  it("formats supported contact relationship values to spanish labels", () => {
+    expect(formatContactRelationshipLabel("parent")).toBe("Madre/padre");
+    expect(formatContactRelationshipLabel("spouse")).toBe("Pareja/cónyuge");
+    expect(formatContactRelationshipLabel("child")).toBe("Hijo/a");
+    expect(formatContactRelationshipLabel("sibling")).toBe("Hermano/a");
+    expect(formatContactRelationshipLabel("caregiver")).toBe("Cuidador/a");
+    expect(formatContactRelationshipLabel("other")).toBe("Otro");
+  });
+
+  it("returns fallback when contact relationship is missing", () => {
+    expect(formatContactRelationshipLabel(undefined)).toBe("No informado");
+    expect(formatContactRelationshipLabel(null)).toBe("No informado");
+  });
+
+  it("exposes relationship options with stable internal values", () => {
+    expect(CONTACT_RELATIONSHIP_OPTIONS).toEqual([
+      { value: "parent", label: "Madre/padre" },
+      { value: "spouse", label: "Pareja/cónyuge" },
+      { value: "child", label: "Hijo/a" },
+      { value: "sibling", label: "Hermano/a" },
+      { value: "caregiver", label: "Cuidador/a" },
+      { value: "other", label: "Otro" },
+    ]);
   });
 
   it("normalizes dni values to digits only", () => {
