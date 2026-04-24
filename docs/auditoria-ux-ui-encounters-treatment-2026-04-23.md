@@ -115,3 +115,19 @@ Cambios chicos de alto impacto (sin refactor grande):
 
 - **Alineado** con la fuente de verdad operativa: `/encounters` mantiene foco primario en visitas y `/treatment` concentra inicio/cierre de tratamiento, con navegación secundaria compacta desde `encounters` hacia `treatment`.
 - **Alineado en copy funcional**: la UI prioriza términos de operación (“tratamiento”, “visitas”) y reduce tecnicismos visibles como `EpisodeOfCare` al plano de apoyo.
+
+## Actualización posterior (2026-04-24)
+
+Refinamiento aplicado en `/admin/patients/[id]/encounters` para consolidar el patrón de contexto secundario de tratamiento:
+
+- el bloque de tratamiento queda compacto y subordinado a la operación de visitas;
+- el acceso a `/admin/patients/[id]/treatment` se mantiene como navegación secundaria (link/CTA compacto);
+- el contexto de tratamiento distingue explícitamente tres estados:
+  1. **Tratamiento activo**: informa fecha de inicio.
+  2. **Tratamiento finalizado**: informa fecha de finalización.
+  3. **Sin tratamiento iniciado**: informa estado sin episodio iniciado.
+- el loader utiliza `activeEpisode` y `mostRecentEpisode` para separar correctamente “finalizado” vs “sin tratamiento iniciado”.
+
+Este ajuste mantiene la regla de arquitectura de superficie:
+- `/encounters` muestra contexto de tratamiento, pero **no lo gestiona inline**;
+- `/treatment` conserva la responsabilidad primaria de inicio/cierre de tratamiento.
