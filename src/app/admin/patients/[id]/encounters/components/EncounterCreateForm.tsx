@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useState, useTransition } from "react";
+import { FormEvent, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { createEncounterAction } from "@/app/admin/patients/[id]/encounters/actions/create-encounter.action";
 
 interface EncounterCreateFormProps {
@@ -19,7 +20,7 @@ function getNowDateTimeLocal(): string {
 export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCreateFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<{ text: string; tone: "success" | "error" } | null>(null);
+  const { message, setMessage } = useFormFeedback();
 
   const canCreateEncounter = Boolean(activeEpisodeId);
 

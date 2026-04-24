@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { FormEvent, useState, useTransition } from "react";
+import { FormEvent, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { updatePatientAction } from "@/app/admin/patients/[id]/actions/update-patient.action";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import {
@@ -29,10 +30,7 @@ export function PatientEditForm({
 }: PatientEditFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<{
-    text: string;
-    tone: "success" | "error";
-  } | null>(null);
+  const { message, setMessage } = useFormFeedback();
 
   if (!isEditing) {
     return null;

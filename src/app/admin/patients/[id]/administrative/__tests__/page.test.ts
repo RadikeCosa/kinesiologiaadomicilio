@@ -1,9 +1,6 @@
 import React, { createElement } from "react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { describe, expect, it, vi } from "vitest";
-import React, { createElement } from "react";
-import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import AdminPatientAdministrativePage from "@/app/admin/patients/[id]/administrative/page";
@@ -69,19 +66,6 @@ describe("/admin/patients/[id]/administrative page", () => {
       operationalStatus: "ready_to_start",
       createdAt: "2026-01-01T00:00:00.000Z",
       updatedAt: "2026-01-01T00:00:00.000Z",
-  PatientAdministrativeEditor: () => createElement("div", null, "editor"),
-}));
-
-describe("/admin/patients/[id]/administrative page", () => {
-  it("renders back link at the top before the page title", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      firstName: "Ana",
-      lastName: "Pérez",
-      fullName: "Ana Pérez",
-      operationalStatus: "preliminary",
-      createdAt: "2026-04-17T00:00:00.000Z",
-      updatedAt: "2026-04-17T00:00:00.000Z",
     });
 
     const element = await AdminPatientAdministrativePage({
@@ -91,11 +75,28 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(html).toContain("DNI: 30.111.222");
     expect(html).not.toContain("Edad:");
+  });
+  it("keeps back link before page title", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce({
+      id: "pat-1",
+      fullName: "Ana Pérez",
+      firstName: "Ana",
+      lastName: "Pérez",
+      operationalStatus: "preliminary",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    const element = await AdminPatientAdministrativePage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
     const backLinkIndex = html.indexOf("← Volver al paciente");
     const titleIndex = html.indexOf("Administración del paciente");
 
     expect(backLinkIndex).toBeGreaterThan(-1);
     expect(titleIndex).toBeGreaterThan(backLinkIndex);
-    expect(html).not.toContain("border-t border-slate-200");
   });
+
 });

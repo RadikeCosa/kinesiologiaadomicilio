@@ -92,7 +92,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `finished_treatment` se representa con badge amarillo en la UI privada de pacientes;
 - pantalla de gestión clínica operativa por paciente (`/admin/patients/[id]/encounters`);
 - registro de visita realizada (`Encounter`) con gate de tratamiento activo;
-- listado de visitas del paciente ordenadas por fecha más reciente (dentro de la superficie clínica);
+- listado de visitas del paciente ordenadas por fecha más reciente, con corrección inline acotada de fecha/hora de la visita, sin edición clínica completa del `Encounter`;
 - en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), sin co-protagonismo visual con visitas;
 - en `/encounters`, el bloque de contexto de tratamiento fue reducido visualmente para no competir con la operación de visitas;
 - en `/encounters`, el loader diferencia tratamiento finalizado vs sin tratamiento iniciado usando `activeEpisode` + `mostRecentEpisode`;

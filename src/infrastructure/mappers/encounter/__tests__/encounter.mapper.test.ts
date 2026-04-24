@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { mapFhirEncounterToDomain } from "@/infrastructure/mappers/encounter/encounter-read.mapper";
-import { mapCreateEncounterInputToFhir } from "@/infrastructure/mappers/encounter/encounter-write.mapper";
+import {
+  mapCreateEncounterInputToFhir,
+  mapEncounterOccurrenceDateTimeUpdate,
+} from "@/infrastructure/mappers/encounter/encounter-write.mapper";
 
 describe("encounter mappers", () => {
   it("maps create input to FHIR Encounter with period.start/end and finished status", () => {
@@ -20,6 +23,28 @@ describe("encounter mappers", () => {
         start: "2026-04-17T10:30:00Z",
         end: "2026-04-17T10:30:00Z",
       },
+    });
+  });
+
+  it("maps occurrence date-time update keeping base Encounter consistency", () => {
+    const mapped = mapEncounterOccurrenceDateTimeUpdate(
+      {
+        resourceType: "Encounter",
+        id: "enc-1",
+        status: "finished",
+        subject: { reference: "Patient/pat-1" },
+        episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
+        period: {
+          start: "2026-04-17T10:30:00Z",
+          end: "2026-04-17T10:30:00Z",
+        },
+      },
+      "2026-04-18T11:15:00Z",
+    );
+
+    expect(mapped.period).toEqual({
+      start: "2026-04-18T11:15:00Z",
+      end: "2026-04-18T11:15:00Z",
     });
   });
 

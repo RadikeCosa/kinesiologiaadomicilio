@@ -1,8 +1,9 @@
 "use client";
 
-import { FormEvent, useMemo, useState, useTransition } from "react";
+import { FormEvent, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { startEpisodeOfCareAction } from "@/app/admin/patients/[id]/actions/start-episode-of-care.action";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import { formatLocalDateInputValue } from "@/lib/date-input";
@@ -16,10 +17,7 @@ export function StartEpisodeOfCareForm({
 }: StartEpisodeOfCareFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<{
-    text: string;
-    tone: "success" | "error";
-  } | null>(null);
+  const { message, setMessage } = useFormFeedback();
 
   const availability = useMemo(() => {
     if (!patient.dni) {
