@@ -12,7 +12,7 @@ const encounter = {
   id: "enc-1",
   patientId: "pat-1",
   episodeOfCareId: "epi-1",
-  occurrenceDate: "2026-04-24T10:30:00Z",
+  startedAt: "2026-04-24T10:30:00Z",
   status: "finished" as const,
 };
 
@@ -21,33 +21,33 @@ describe("encounters-inline-edit state", () => {
     const state = startEncounterInlineEdit(encounter);
 
     expect(state.editingEncounterId).toBe("enc-1");
-    expect(state.draftOccurrenceDate).toMatch(/^2026-04-24T\d{2}:\d{2}$/);
+    expect(state.draftStartedAt).toMatch(/^2026-04-24T\d{2}:\d{2}$/);
   });
 
   it("updates draft while user edits datetime-local", () => {
     const initial = startEncounterInlineEdit(encounter);
     const updated = changeEncounterInlineDraft(initial, "2026-04-25T08:45");
 
-    expect(updated.draftOccurrenceDate).toBe("2026-04-25T08:45");
+    expect(updated.draftStartedAt).toBe("2026-04-25T08:45");
   });
 
   it("cancels edit and restores read mode with previous value", () => {
     const cancelled = cancelEncounterInlineEdit(encounter);
 
     expect(cancelled.editingEncounterId).toBeNull();
-    expect(cancelled.draftOccurrenceDate).toMatch(/^2026-04-24T\d{2}:\d{2}$/);
+    expect(cancelled.draftStartedAt).toMatch(/^2026-04-24T\d{2}:\d{2}$/);
   });
 
   it("disables save while pending or draft is empty", () => {
-    expect(canSubmitEncounterInlineEdit({ isPending: true, draftOccurrenceDate: "2026-04-25T08:45" })).toBe(false);
-    expect(canSubmitEncounterInlineEdit({ isPending: false, draftOccurrenceDate: "" })).toBe(false);
-    expect(canSubmitEncounterInlineEdit({ isPending: false, draftOccurrenceDate: "2026-04-25T08:45" })).toBe(true);
+    expect(canSubmitEncounterInlineEdit({ isPending: true, draftStartedAt: "2026-04-25T08:45" })).toBe(false);
+    expect(canSubmitEncounterInlineEdit({ isPending: false, draftStartedAt: "" })).toBe(false);
+    expect(canSubmitEncounterInlineEdit({ isPending: false, draftStartedAt: "2026-04-25T08:45" })).toBe(true);
   });
 
   it("creates empty initial state", () => {
     expect(createInitialEncountersInlineEditState()).toEqual({
       editingEncounterId: null,
-      draftOccurrenceDate: "",
+      draftStartedAt: "",
     });
   });
 });

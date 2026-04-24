@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
@@ -9,6 +10,8 @@ import { createEncounterAction } from "@/app/admin/patients/[id]/encounters/acti
 interface EncounterCreateFormProps {
   patientId: string;
   activeEpisodeId: string | null;
+  treatmentHref?: string;
+  successRedirectPath?: string;
 }
 
 function getNowDateTimeLocal(): string {
@@ -17,7 +20,12 @@ function getNowDateTimeLocal(): string {
   return local.toISOString().slice(0, 16);
 }
 
-export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCreateFormProps) {
+export function EncounterCreateForm({
+  patientId,
+  activeEpisodeId,
+  treatmentHref,
+  successRedirectPath,
+}: EncounterCreateFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { message, setMessage } = useFormFeedback();
@@ -35,7 +43,8 @@ export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCre
     const input = {
       patientId,
       episodeOfCareId: activeEpisodeId,
-      occurrenceDate: String(formData.get("occurrenceDate") ?? ""),
+      startedAt: String(formData.get("startedAt") ?? ""),
+      endedAt: String(formData.get("endedAt") ?? "") || undefined,
     };
 
     startTransition(async () => {
@@ -47,6 +56,11 @@ export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCre
       });
 
       if (result.ok) {
+        if (successRedirectPath) {
+          router.push(successRedirectPath);
+          return;
+        }
+
         router.refresh();
       }
     });
@@ -59,6 +73,13 @@ export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCre
         <p className="mt-2 text-sm text-amber-900">
           No se puede registrar una visita porque el paciente no tiene tratamiento activo.
         </p>
+        {treatmentHref ? (
+          <p className="mt-2 text-sm">
+            <Link className="font-medium text-amber-900 underline-offset-2 hover:underline" href={treatmentHref}>
+              Ir a gestión de tratamiento
+            </Link>
+          </p>
+        ) : null}
       </section>
     );
   }
@@ -70,15 +91,27 @@ export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCre
         <input name="episodeOfCareId" type="hidden" value={activeEpisodeId ?? ""} />
 
         <div>
-          <label className="block text-sm font-medium" htmlFor="occurrenceDate">
-            Fecha y hora de la visita *
+          <label className="block text-sm font-medium" htmlFor="startedAt">
+            Inicio de la visita *
           </label>
           <input
             className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
             defaultValue={getNowDateTimeLocal()}
-            id="occurrenceDate"
-            name="occurrenceDate"
+            id="startedAt"
+            name="startedAt"
             required
+            type="datetime-local"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium" htmlFor="endedAt">
+            Finalización de la visita (opcional)
+          </label>
+          <input
+            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+            id="endedAt"
+            name="endedAt"
             type="datetime-local"
           />
         </div>

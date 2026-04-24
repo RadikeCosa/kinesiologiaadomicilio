@@ -21,6 +21,7 @@ El proyecto está en etapa **híbrida transicional**:
 - `/admin/patients/[id]`
 - `/admin/patients/[id]/administrative`
 - `/admin/patients/[id]/encounters`
+- `/admin/patients/[id]/encounters/new`
 - `/admin/patients/[id]/treatment`
 
 ### Funcionalidad disponible
@@ -39,12 +40,15 @@ El proyecto está en etapa **híbrida transicional**:
 - Listado y alta de pacientes.
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación.
 - Edición administrativa no clínica del paciente en `/admin/patients/[id]/administrative` (identidad, contacto y datos operativos).
-- Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (contexto clínico + visitas).
+- Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (listado de visitas + corrección inline + CTA principal).
+- Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.
 - Gestión específica de tratamiento (`EpisodeOfCare`) en `/admin/patients/[id]/treatment` (inicio/finalización).
 - La gestión de tratamiento ya no vive inline en `/admin/patients/[id]/encounters`.
 - Gate operativo por DNI para iniciar tratamiento.
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
-- Registro y listado de visitas realizadas (`Encounter` base) dentro de la superficie clínica operativa.
+- Registro y listado de visitas realizadas (`Encounter` base): alta en `/encounters/new` y listado operativo en `/encounters`.
+- Contrato temporal vigente (Fase 1): `startedAt` obligatorio + `endedAt` opcional; compatibilidad legacy para encuentros históricos con instante único (`start === end`).
+- `occurrenceDate` queda limitado a compatibilidad transicional de entrada para payloads legacy.
 - Captura y visualización administrativa de `gender` y `birthDate` en pacientes (alta, edición y detalle).
 - Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 

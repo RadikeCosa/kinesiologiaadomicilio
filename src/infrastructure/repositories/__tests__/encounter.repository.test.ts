@@ -6,7 +6,7 @@ import {
   createEncounter,
   getEncounterById,
   listEncountersByPatientId,
-  updateEncounterOccurrenceDateTime,
+  updateEncounterStartDateTime,
 } from "@/infrastructure/repositories/encounter.repository";
 
 describe("encounter.repository (FHIR)", () => {
@@ -14,20 +14,20 @@ describe("encounter.repository (FHIR)", () => {
     vi.restoreAllMocks();
   });
 
-  it("creates Encounter in FHIR with finished status and period.start/end", async () => {
+  it("creates Encounter in FHIR with finished status and period.start only when endedAt is missing", async () => {
     const postSpy = vi.spyOn(fhirClient, "post").mockResolvedValue({
       resourceType: "Encounter",
       id: "enc-1",
       status: "finished",
       subject: { reference: "Patient/pat-1" },
       episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
-      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T10:30:00Z" },
+      period: { start: "2026-04-17T10:30:00Z" },
     });
 
     const created = await createEncounter({
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
-      occurrenceDate: "2026-04-17T10:30:00Z",
+      startedAt: "2026-04-17T10:30:00Z",
     });
 
     expect(postSpy).toHaveBeenCalledWith(
@@ -37,14 +37,14 @@ describe("encounter.repository (FHIR)", () => {
         status: "finished",
         subject: { reference: "Patient/pat-1" },
         episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
-        period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T10:30:00Z" },
+        period: { start: "2026-04-17T10:30:00Z" },
       }),
     );
     expect(created).toEqual({
       id: "enc-1",
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
-      occurrenceDate: "2026-04-17T10:30:00Z",
+      startedAt: "2026-04-17T10:30:00Z",
       status: "finished",
     });
   });
@@ -56,7 +56,7 @@ describe("encounter.repository (FHIR)", () => {
       status: "finished",
       subject: { reference: "Patient/pat-1" },
       episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
-      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T10:30:00Z" },
+      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T11:15:00Z" },
     });
 
     const found = await getEncounterById("enc-1");
@@ -65,7 +65,8 @@ describe("encounter.repository (FHIR)", () => {
       id: "enc-1",
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
-      occurrenceDate: "2026-04-17T10:30:00Z",
+      startedAt: "2026-04-17T10:30:00Z",
+      endedAt: "2026-04-17T11:15:00Z",
       status: "finished",
     });
   });
@@ -98,14 +99,14 @@ describe("encounter.repository (FHIR)", () => {
     await expect(getEncounterById("enc-1")).rejects.toThrow("server error");
   });
 
-  it("updates occurrence date-time and keeps period.start/end synchronized", async () => {
+  it("updates startedAt preserving period.end when it exists", async () => {
     const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "Encounter",
       id: "enc-1",
       status: "finished",
       subject: { reference: "Patient/pat-1" },
       episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
-      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T10:30:00Z" },
+      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-18T11:30:00Z" },
     });
     const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
       resourceType: "Encounter",
@@ -113,13 +114,13 @@ describe("encounter.repository (FHIR)", () => {
       status: "finished",
       subject: { reference: "Patient/pat-1" },
       episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
-      period: { start: "2026-04-18T09:15:00Z", end: "2026-04-18T09:15:00Z" },
+      period: { start: "2026-04-18T09:15:00Z", end: "2026-04-18T11:30:00Z" },
     });
 
-    const updated = await updateEncounterOccurrenceDateTime({
+    const updated = await updateEncounterStartDateTime({
       encounterId: "enc-1",
       patientId: "pat-1",
-      occurrenceDate: "2026-04-18T09:15:00Z",
+      startedAt: "2026-04-18T09:15:00Z",
     });
 
     expect(getSpy).toHaveBeenCalledWith("Encounter/enc-1");
@@ -128,11 +129,12 @@ describe("encounter.repository (FHIR)", () => {
       expect.objectContaining({
         period: {
           start: "2026-04-18T09:15:00Z",
-          end: "2026-04-18T09:15:00Z",
+          end: "2026-04-18T11:30:00Z",
         },
       }),
     );
-    expect(updated.occurrenceDate).toBe("2026-04-18T09:15:00Z");
+    expect(updated.startedAt).toBe("2026-04-18T09:15:00Z");
+    expect(updated.endedAt).toBe("2026-04-18T11:30:00Z");
   });
 
   it("lists encounters by patient using simple query", async () => {
@@ -160,7 +162,7 @@ describe("encounter.repository (FHIR)", () => {
         id: "enc-1",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "2026-04-17T10:30:00Z",
+        startedAt: "2026-04-17T10:30:00Z",
         status: "finished",
       },
     ]);

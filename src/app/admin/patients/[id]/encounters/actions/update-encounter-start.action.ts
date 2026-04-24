@@ -2,22 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 
-import { updateEncounterOccurrenceSchema } from "@/domain/encounter/encounter.schemas";
+import { updateEncounterStartSchema } from "@/domain/encounter/encounter.schemas";
 import {
   getEncounterById,
-  updateEncounterOccurrenceDateTime,
+  updateEncounterStartDateTime,
 } from "@/infrastructure/repositories/encounter.repository";
 
-export interface UpdateEncounterOccurrenceActionResult {
+export interface UpdateEncounterStartActionResult {
   ok: boolean;
   message?: string;
 }
 
-export async function updateEncounterOccurrenceAction(
+export async function updateEncounterStartAction(
   input: unknown,
-): Promise<UpdateEncounterOccurrenceActionResult> {
+): Promise<UpdateEncounterStartActionResult> {
   try {
-    const parsedInput = updateEncounterOccurrenceSchema.parse(input);
+    const parsedInput = updateEncounterStartSchema.parse(input);
     const encounter = await getEncounterById(parsedInput.encounterId);
 
     if (!encounter) {
@@ -34,7 +34,7 @@ export async function updateEncounterOccurrenceAction(
       };
     }
 
-    await updateEncounterOccurrenceDateTime(parsedInput);
+    await updateEncounterStartDateTime(parsedInput);
 
     revalidatePath(`/admin/patients/${parsedInput.patientId}/encounters`);
 

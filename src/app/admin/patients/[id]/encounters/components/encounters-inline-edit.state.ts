@@ -3,20 +3,20 @@ import { formatLocalDateTimeInputValue } from "@/lib/date-input";
 
 export interface EncountersInlineEditState {
   editingEncounterId: string | null;
-  draftOccurrenceDate: string;
+  draftStartedAt: string;
 }
 
 export function createInitialEncountersInlineEditState(): EncountersInlineEditState {
   return {
     editingEncounterId: null,
-    draftOccurrenceDate: "",
+    draftStartedAt: "",
   };
 }
 
 export function startEncounterInlineEdit(encounter: Encounter): EncountersInlineEditState {
   return {
     editingEncounterId: encounter.id,
-    draftOccurrenceDate: formatLocalDateTimeInputValue(encounter.occurrenceDate),
+    draftStartedAt: formatLocalDateTimeInputValue(encounter.startedAt),
   };
 }
 
@@ -26,20 +26,20 @@ export function changeEncounterInlineDraft(
 ): EncountersInlineEditState {
   return {
     ...state,
-    draftOccurrenceDate: nextDraft,
+    draftStartedAt: nextDraft,
   };
 }
 
 export function cancelEncounterInlineEdit(encounter: Encounter): EncountersInlineEditState {
   return {
     editingEncounterId: null,
-    draftOccurrenceDate: formatLocalDateTimeInputValue(encounter.occurrenceDate),
+    draftStartedAt: formatLocalDateTimeInputValue(encounter.startedAt),
   };
 }
 
 export function canSubmitEncounterInlineEdit(params: {
   isPending: boolean;
-  draftOccurrenceDate: string;
+  draftStartedAt: string;
 }): boolean {
-  return !params.isPending && Boolean(params.draftOccurrenceDate);
+  return !params.isPending && Boolean(params.draftStartedAt);
 }

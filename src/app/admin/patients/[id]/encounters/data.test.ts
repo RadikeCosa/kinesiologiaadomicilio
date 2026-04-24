@@ -58,14 +58,14 @@ describe("loadPatientEncountersPageData", () => {
         id: "enc-1",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "2026-04-15T10:30:00Z",
+        startedAt: "2026-04-15T10:30:00Z",
         status: "finished",
       },
       {
         id: "enc-2",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "2026-04-17T08:00:00Z",
+        startedAt: "2026-04-17T08:00:00Z",
         status: "finished",
       },
     ]);
@@ -98,21 +98,21 @@ describe("loadPatientEncountersPageData", () => {
         id: "enc-z",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "2026-04-24T10:00:00Z",
+        startedAt: "2026-04-24T10:00:00Z",
         status: "finished",
       },
       {
         id: "enc-minus-03",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "2026-04-24T07:30:00-03:00",
+        startedAt: "2026-04-24T07:30:00-03:00",
         status: "finished",
       },
       {
         id: "enc-plus-00",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "2026-04-24T11:00:00+00:00",
+        startedAt: "2026-04-24T11:00:00+00:00",
         status: "finished",
       },
     ]);
@@ -126,7 +126,7 @@ describe("loadPatientEncountersPageData", () => {
     ]);
   });
 
-  it("keeps rendering order stable with invalid or missing occurrenceDate values", async () => {
+  it("keeps rendering order stable with invalid or missing startedAt values", async () => {
     vi.mocked(getPatientById).mockResolvedValue({
       id: "pat-1",
       firstName: "Ana",
@@ -142,21 +142,21 @@ describe("loadPatientEncountersPageData", () => {
         id: "enc-valid",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "2026-04-24T11:00:00+00:00",
+        startedAt: "2026-04-24T11:00:00+00:00",
         status: "finished",
       },
       {
         id: "enc-missing",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "",
+        startedAt: "",
         status: "finished",
       },
       {
         id: "enc-invalid",
         patientId: "pat-1",
         episodeOfCareId: "epi-1",
-        occurrenceDate: "invalid-date",
+        startedAt: "invalid-date",
         status: "finished",
       },
     ]);

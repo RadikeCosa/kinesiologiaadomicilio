@@ -35,6 +35,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `/admin/patients/[id]`
 - `/admin/patients/[id]/administrative`
 - `/admin/patients/[id]/encounters`
+- `/admin/patients/[id]/encounters/new`
 - `/admin/patients/[id]/treatment`
 
 #### Responsabilidad actual por ruta (superficie de pacientes)
@@ -42,11 +43,13 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `/admin/patients`: listado operativo de pacientes.
 - `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica).
 - `/admin/patients/[id]/administrative`: edición administrativa no clínica (identidad, contacto y datos operativos).
-- `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (contexto clínico + visitas).
+- `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (listado de visitas + corrección inline rápida + CTA de alta).
+- `/admin/patients/[id]/encounters/new`: pantalla específica para registrar una visita.
 - `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
 
 #### Criterio vigente de presentación UI entre `encounters` y `treatment`
-- En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (registro y listado).
+- En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (listado y corrección rápida).
+- El registro de visita se realiza en `/admin/patients/[id]/encounters/new`.
 - El acceso desde `/encounters` hacia `/treatment` es secundario y compacto (navegación de apoyo, no CTA principal).
 - En `/admin/patients/[id]/treatment` domina la gestión de tratamiento (inicio o finalización según estado).
 - El lenguaje visible al usuario prioriza términos operativos de producto (“tratamiento”, “visitas”).
@@ -91,7 +94,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - representación visual del badge de tratamiento centralizada en helper compartido (`src/app/admin/patients/treatment-badge.ts`), separada de la lógica de estado operativo de dominio;
 - `finished_treatment` se representa con badge amarillo en la UI privada de pacientes;
 - pantalla de gestión clínica operativa por paciente (`/admin/patients/[id]/encounters`);
-- registro de visita realizada (`Encounter`) con gate de tratamiento activo;
+- pantalla específica para registrar visita realizada (`/admin/patients/[id]/encounters/new`) con gate de tratamiento activo;
 - listado de visitas del paciente ordenadas por fecha más reciente, con corrección inline acotada de fecha/hora de la visita, sin edición clínica completa del `Encounter`;
 - en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), sin co-protagonismo visual con visitas;
 - en `/encounters`, el bloque de contexto de tratamiento fue reducido visualmente para no competir con la operación de visitas;
@@ -167,6 +170,14 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `EpisodeOfCare.startDate` / `endDate` se tratan como fechas calendario (`YYYY-MM-DD`) con validación de formato y calendario real.
 - En defaults/envíos de `<input type="date">` se usa fecha local de calendario; **no usar `toISOString().slice(0,10)`** porque introduce riesgo UTC off-by-one.
 - `Encounter.period.start` / `period.end` se manejan como FHIR `dateTime` con offset; valores `datetime-local` se normalizan antes de persistir.
+- contrato temporal vigente (Fase 1):
+  - `startedAt` obligatorio para altas/actualizaciones operativas;
+  - `endedAt` opcional;
+  - validación `endedAt >= startedAt` cuando se informa finalización.
+- `occurrenceDate` se mantiene únicamente como compatibilidad transicional de **entrada** (payload legacy), no como contrato operativo vigente de salida.
+- compatibilidad legacy:
+  - encuentros históricos con `start === end` se tratan como instante operativo histórico (inicio conocido, sin duración real explícita).
+- inline edit en `/encounters` queda limitado a corrección rápida del inicio (`period.start`) y preserva `period.end` existente.
 - El listado de visitas ordena por timestamp real parseado (más recientes primero), no por comparación lexicográfica de strings.
 - Fechas se muestran en formato local consistente.
 - Horas se muestran en formato 24h.

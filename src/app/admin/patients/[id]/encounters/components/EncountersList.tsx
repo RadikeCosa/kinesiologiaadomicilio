@@ -4,7 +4,7 @@ import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
-import { updateEncounterOccurrenceAction } from "@/app/admin/patients/[id]/encounters/actions/update-encounter-occurrence.action";
+import { updateEncounterStartAction } from "@/app/admin/patients/[id]/encounters/actions/update-encounter-start.action";
 import {
   canSubmitEncounterInlineEdit,
   cancelEncounterInlineEdit,
@@ -16,6 +16,7 @@ import type { Encounter } from "@/domain/encounter/encounter.types";
 import {
   formatDateTimeDisplay,
   formatEncounterStatusLabel,
+  formatTimeDisplay,
 } from "@/lib/patient-admin-display";
 
 interface EncountersListProps {
@@ -26,6 +27,33 @@ interface EncountersListProps {
 
 function formatOccurrenceDate(value: string): string {
   return formatDateTimeDisplay(value);
+}
+
+function getDurationLabel(startedAt?: string, endedAt?: string): string | null {
+  if (!startedAt || !endedAt) {
+    return null;
+  }
+
+  const startTimestamp = new Date(startedAt).getTime();
+  const endTimestamp = new Date(endedAt).getTime();
+
+  if (Number.isNaN(startTimestamp) || Number.isNaN(endTimestamp) || endTimestamp < startTimestamp) {
+    return null;
+  }
+
+  const durationMinutes = Math.round((endTimestamp - startTimestamp) / 60000);
+  const hours = Math.floor(durationMinutes / 60);
+  const minutes = durationMinutes % 60;
+
+  if (hours === 0) {
+    return `${minutes} min`;
+  }
+
+  if (minutes === 0) {
+    return `${hours} h`;
+  }
+
+  return `${hours} h ${minutes} min`;
 }
 
 export function EncountersList({ patientId, encounters, hasActiveTreatment }: EncountersListProps) {
@@ -44,16 +72,16 @@ export function EncountersList({ patientId, encounters, hasActiveTreatment }: En
     clearMessage();
   }
 
-  function saveOccurrenceDate(encounterId: string) {
-    if (!canSubmitEncounterInlineEdit({ isPending, draftOccurrenceDate: inlineEditState.draftOccurrenceDate })) {
+  function saveStartedAt(encounterId: string) {
+    if (!canSubmitEncounterInlineEdit({ isPending, draftStartedAt: inlineEditState.draftStartedAt })) {
       return;
     }
 
     startTransition(async () => {
-      const result = await updateEncounterOccurrenceAction({
+      const result = await updateEncounterStartAction({
         encounterId,
         patientId,
-        occurrenceDate: inlineEditState.draftOccurrenceDate,
+        startedAt: inlineEditState.draftStartedAt,
       });
 
       setMessage({
@@ -88,6 +116,7 @@ export function EncountersList({ patientId, encounters, hasActiveTreatment }: En
         <ul className="mt-3 space-y-2">
           {encounters.map((encounter) => {
             const isEditing = inlineEditState.editingEncounterId === encounter.id;
+            const durationLabel = getDurationLabel(encounter.startedAt, encounter.endedAt);
 
             return (
               <li key={encounter.id} className="rounded border border-slate-200 bg-white p-3 text-sm text-slate-800">
@@ -99,7 +128,7 @@ export function EncountersList({ patientId, encounters, hasActiveTreatment }: En
                     <input
                       className="w-full rounded border border-slate-300 bg-white p-2"
                       id={`encounter-date-${encounter.id}`}
-                      name="occurrenceDate"
+                      name="startedAt"
                       onChange={(event) =>
                         setInlineEditState((previous) =>
                           changeEncounterInlineDraft(previous, event.target.value),
@@ -107,16 +136,16 @@ export function EncountersList({ patientId, encounters, hasActiveTreatment }: En
                       }
                       required
                       type="datetime-local"
-                      value={inlineEditState.draftOccurrenceDate}
+                      value={inlineEditState.draftStartedAt}
                     />
                     <div className="flex items-center gap-2">
                       <button
                         className="rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-50"
                         disabled={!canSubmitEncounterInlineEdit({
                           isPending,
-                          draftOccurrenceDate: inlineEditState.draftOccurrenceDate,
+                          draftStartedAt: inlineEditState.draftStartedAt,
                         })}
-                        onClick={() => saveOccurrenceDate(encounter.id)}
+                        onClick={() => saveStartedAt(encounter.id)}
                         type="button"
                       >
                         {isPending ? "Guardando..." : "Guardar"}
@@ -134,17 +163,48 @@ export function EncountersList({ patientId, encounters, hasActiveTreatment }: En
                 ) : (
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-medium">{formatOccurrenceDate(encounter.occurrenceDate)}</p>
+                      <p className="font-medium">{formatOccurrenceDate(encounter.startedAt)}</p>
+                      {encounter.endedAt ? (
+                        <p className="mt-1 text-xs text-slate-600">
+                          Finalización: {formatTimeDisplay(encounter.endedAt)}
+                        </p>
+                      ) : null}
+                      {durationLabel ? (
+                        <p className="mt-1 text-xs text-slate-600">
+                          Duración: {durationLabel}
+                        </p>
+                      ) : null}
                       <p className="mt-1 text-xs text-slate-600">Estado: {formatEncounterStatusLabel(encounter.status)}</p>
                     </div>
                     <button
                       aria-label="Editar fecha y hora"
-                      className="rounded border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-100"
+                      className="inline-flex items-center justify-center rounded border border-slate-300 bg-white p-1.5 text-slate-700 hover:bg-slate-100 disabled:opacity-50"
                       disabled={isPending}
                       onClick={() => handleStartEditing(encounter)}
                       type="button"
                     >
-                      ✏️
+                      <svg
+                        aria-hidden="true"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3 17.25V21h3.75L18.81 8.94l-3.75-3.75L3 17.25Z"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.6"
+                        />
+                        <path
+                          d="M14.96 5.04 18.71 8.79"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.6"
+                        />
+                      </svg>
                     </button>
                   </div>
                 )}
