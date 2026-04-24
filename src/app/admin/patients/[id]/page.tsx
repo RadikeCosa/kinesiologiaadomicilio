@@ -1,17 +1,15 @@
 import Link from "next/link";
 
+import { PhoneContactBlock } from "@/app/admin/patients/components/PhoneContactBlock";
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import {
   buildGoogleMapsSearchHref,
   formatAddressDisplay,
 } from "@/lib/patient-contact-links";
 import {
-  buildTelHref,
-  buildWhatsAppHref,
   formatContactRelationshipLabel,
   formatDateDisplay,
   formatDniDisplay,
-  formatPhoneDisplay,
 } from "@/lib/patient-admin-display";
 
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
@@ -50,6 +48,14 @@ function getTreatmentSummary(
   };
 }
 
+
+function getPrimaryPatientAction(
+  patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>,
+): "clinical" | "administrative" {
+  // Regla estable: tratamiento activo => priorizar operación clínica; caso contrario => priorizar administrativa.
+  return patient.activeEpisode ? "clinical" : "administrative";
+}
+
 export default async function AdminPatientDetailPage({
   params,
 }: AdminPatientDetailPageProps) {
@@ -57,9 +63,8 @@ export default async function AdminPatientDetailPage({
   const patient = await loadPatientDetail(id);
 
   const treatmentSummary = patient ? getTreatmentSummary(patient) : null;
-  const whatsappHref = patient ? buildWhatsAppHref(patient.phone) : null;
-  const telHref = patient ? buildTelHref(patient.phone) : null;
-  const phoneLabel = patient ? formatPhoneDisplay(patient.phone) : null;
+  const primaryAction = patient ? getPrimaryPatientAction(patient) : null;
+  const isClinicalPrimary = primaryAction === "clinical";
   const mapsHref = patient ? buildGoogleMapsSearchHref(patient.address) : null;
   const addressLabel = patient ? formatAddressDisplay(patient.address) : null;
 
@@ -101,13 +106,17 @@ export default async function AdminPatientDetailPage({
 
               <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-start">
                 <Link
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${isClinicalPrimary
+                    ? "bg-slate-900 text-white hover:bg-slate-700"
+                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"}`}
                   href={`/admin/patients/${patient.id}/encounters`}
                 >
                   Gestión Clínica
                 </Link>
                 <Link
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${!isClinicalPrimary
+                    ? "bg-slate-900 text-white hover:bg-slate-700"
+                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"}`}
                   href={`/admin/patients/${patient.id}/administrative`}
                 >
                   Gestión Administrativa
@@ -115,74 +124,53 @@ export default async function AdminPatientDetailPage({
               </div>
             </header>
 
-            <div className="mt-4 text-sm text-slate-800">
+            <div className="mt-4 grid gap-3 text-sm text-slate-800">
+              {patient.mainContact ? (
+                <section className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+                  <h2 className="text-xs font-semibold uppercase tracking-wide text-emerald-900">
+                    Contacto principal
+                  </h2>
+                  <dl className="mt-2 space-y-1.5">
+                    <div>
+                      <dt className="font-medium">Nombre</dt>
+                      <dd>{patient.mainContact.name ?? "No informado"}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium">Vínculo</dt>
+                      <dd>{formatContactRelationshipLabel(patient.mainContact.relationship)}</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-2">
+                    <PhoneContactBlock
+                      phone={patient.mainContact.phone}
+                      phoneLabel="Teléfono de contacto principal"
+                    />
+                  </div>
+                </section>
+              ) : null}
+
               <section className="rounded-md border border-slate-200 bg-white p-3">
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
-                  Contacto
+                  Contacto del paciente
                 </h2>
-                <dl className="mt-2 space-y-2">
-                  <div>
-                    <dt className="font-medium">Teléfono</dt>
-                    <dd>
-                      {!whatsappHref && !telHref ? (
-                        phoneLabel
-                      ) : telHref && !whatsappHref ? (
-                        <a
-                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                          href={telHref ?? undefined}
-                        >
-                          {phoneLabel}
-                        </a>
-                      ) : (
-                        <a
-                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                          href={whatsappHref ?? undefined}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          {phoneLabel}
-                        </a>
-                      )}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="font-medium">Dirección</dt>
-                    <dd>
-                      {!mapsHref ? (
-                        addressLabel
-                      ) : (
-                        <a
-                          className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                          href={mapsHref}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          {addressLabel}
-                        </a>
-                      )}
-                    </dd>
-                  </div>
-
-                  {patient.mainContact ? (
-                    <div>
-                      <dt className="font-medium">Contacto principal</dt>
-                      <dd className="space-y-1">
-                        <p>
-                          Nombre: {patient.mainContact.name ?? "No informado"}
-                        </p>
-                        <p>
-                          Vínculo:{" "}
-                          {formatContactRelationshipLabel(patient.mainContact.relationship)}
-                        </p>
-                        <p>
-                          Teléfono:{" "}
-                          {patient.mainContact.phone ?? "No informado"}
-                        </p>
-                      </dd>
-                    </div>
-                  ) : null}
-                </dl>
+                <div className="mt-2 space-y-2">
+                  <PhoneContactBlock phone={patient.phone} phoneLabel="Teléfono" />
+                  <p className="text-sm text-slate-700">
+                    <span className="font-medium">Dirección:</span>{" "}
+                    {!mapsHref ? (
+                      addressLabel
+                    ) : (
+                      <a
+                        className="font-medium text-sky-700 underline-offset-2 hover:underline"
+                        href={mapsHref}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {addressLabel}
+                      </a>
+                    )}
+                  </p>
+                </div>
               </section>
             </div>
           </section>
