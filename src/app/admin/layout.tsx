@@ -35,7 +35,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <nav aria-label="Navegación principal de admin">
               <ul className="flex items-center gap-1 sm:gap-3">
                 <li>
-                  <AdminNavLink href="/admin/" match="branch">
+                  <AdminNavLink href="/admin/patients/" match="branch">
                     Pacientes
                   </AdminNavLink>
                 </li>
