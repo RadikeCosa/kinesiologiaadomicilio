@@ -8,6 +8,7 @@ vi.mock("@/infrastructure/repositories/patient.repository", () => ({
 
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
   getActiveEpisodeByPatientId: vi.fn(),
+  getMostRecentEpisodeByPatientId: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
@@ -15,7 +16,10 @@ vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
 }));
 
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
-import { getActiveEpisodeByPatientId } from "@/infrastructure/repositories/episode-of-care.repository";
+import {
+  getActiveEpisodeByPatientId,
+  getMostRecentEpisodeByPatientId,
+} from "@/infrastructure/repositories/episode-of-care.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
 
 describe("loadPatientEncountersPageData", () => {
@@ -42,6 +46,12 @@ describe("loadPatientEncountersPageData", () => {
       status: "active",
       startDate: "2026-04-01",
     });
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue({
+      id: "epi-1",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-04-01",
+    });
 
     vi.mocked(listEncountersByPatientId).mockResolvedValue([
       {
@@ -63,10 +73,12 @@ describe("loadPatientEncountersPageData", () => {
     const data = await loadPatientEncountersPageData("pat-1");
 
     expect(getActiveEpisodeByPatientId).toHaveBeenCalledWith("pat-1");
+    expect(getMostRecentEpisodeByPatientId).toHaveBeenCalledWith("pat-1");
     expect(listEncountersByPatientId).toHaveBeenCalledWith("pat-1");
     expect(data).not.toBeNull();
     expect(data?.patient.fullName).toBe("Ana Pérez");
     expect(data?.activeEpisode?.id).toBe("epi-1");
+    expect(data?.mostRecentEpisode?.id).toBe("epi-1");
     expect(data?.encounters.map((item) => item.id)).toEqual(["enc-2", "enc-1"]);
   });
 });

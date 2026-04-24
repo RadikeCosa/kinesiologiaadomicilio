@@ -9,6 +9,40 @@ interface AdminPatientEncountersPageProps {
   params: Promise<{ id: string }>;
 }
 
+type TreatmentContext = {
+  toneClassName: string;
+  title: string;
+  detail: string;
+};
+
+function buildTreatmentContext(params: {
+  activeEpisodeStartDate?: string;
+  latestEpisodeStatus?: "active" | "finished";
+  latestEpisodeEndDate?: string;
+}): TreatmentContext {
+  if (params.activeEpisodeStartDate) {
+    return {
+      toneClassName: "border-emerald-200 bg-emerald-50/70 text-emerald-900",
+      title: "Tratamiento activo",
+      detail: `Inicio: ${formatDateDisplay(params.activeEpisodeStartDate)}`,
+    };
+  }
+
+  if (params.latestEpisodeStatus === "finished") {
+    return {
+      toneClassName: "border-slate-300 bg-slate-100/70 text-slate-800",
+      title: "Tratamiento finalizado",
+      detail: `Finalización: ${formatDateDisplay(params.latestEpisodeEndDate)}`,
+    };
+  }
+
+  return {
+    toneClassName: "border-amber-200 bg-amber-50/70 text-amber-900",
+    title: "Sin tratamiento iniciado",
+    detail: "Iniciá un tratamiento para habilitar el registro de visitas.",
+  };
+}
+
 export default async function AdminPatientEncountersPage({ params }: AdminPatientEncountersPageProps) {
   const { id } = await params;
   const pageData = await loadPatientEncountersPageData(id);
@@ -29,7 +63,11 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
     );
   }
 
-  const hasActiveEpisode = Boolean(pageData.activeEpisode);
+  const treatmentContext = buildTreatmentContext({
+    activeEpisodeStartDate: pageData.activeEpisode?.startDate,
+    latestEpisodeStatus: pageData.mostRecentEpisode?.status,
+    latestEpisodeEndDate: pageData.mostRecentEpisode?.endDate,
+  });
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -46,13 +84,14 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
         </div>
       </div>
 
-      <section className="mt-5 rounded border border-slate-200 bg-white p-3 text-sm text-slate-700">
-        <p>
-          {hasActiveEpisode
-            ? `Tratamiento activo desde ${formatDateDisplay(pageData.activeEpisode?.startDate)}.`
-            : "Tratamiento no activo."}{" "}
+      <section
+        className={`mt-5 w-full rounded-lg border p-3 text-sm sm:w-auto sm:max-w-xl ${treatmentContext.toneClassName}`}
+      >
+        <p className="font-medium">{treatmentContext.title}</p>
+        <p className="mt-1">
+          {treatmentContext.detail}{" "}
           <Link
-            className="font-medium text-slate-900 underline-offset-2 hover:underline"
+            className="font-medium underline-offset-2 hover:underline"
             href={`/admin/patients/${pageData.patient.id}/treatment`}
           >
             Ir a gestión de tratamiento
