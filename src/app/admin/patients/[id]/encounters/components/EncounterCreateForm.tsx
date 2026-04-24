@@ -11,13 +11,15 @@ interface EncounterCreateFormProps {
 }
 
 function getNowDateTimeLocal(): string {
-  return new Date().toISOString().slice(0, 16);
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
 }
 
 export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCreateFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ text: string; tone: "success" | "error" } | null>(null);
 
   const canCreateEncounter = Boolean(activeEpisodeId);
 
@@ -38,7 +40,10 @@ export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCre
     startTransition(async () => {
       const result = await createEncounterAction(input);
 
-      setMessage(result.message ?? (result.ok ? "Visita registrada correctamente." : "No se pudo registrar."));
+      setMessage({
+        text: result.ok ? "Visita registrada correctamente" : "No se pudo registrar la visita",
+        tone: result.ok ? "success" : "error",
+      });
 
       if (result.ok) {
         router.refresh();
@@ -77,7 +82,11 @@ export function EncounterCreateForm({ patientId, activeEpisodeId }: EncounterCre
           />
         </div>
 
-        {message ? <p className="text-sm text-slate-700">{message}</p> : null}
+        {message ? (
+          <p className={`text-sm ${message.tone === "success" ? "text-emerald-700" : "text-red-700"}`}>
+            {message.text}
+          </p>
+        ) : null}
 
         <button
           className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"

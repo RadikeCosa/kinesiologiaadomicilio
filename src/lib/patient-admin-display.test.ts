@@ -8,6 +8,7 @@ import {
   formatDateDisplay,
   formatDateTimeDisplay,
   formatDniDisplay,
+  formatEncounterStatusLabel,
   formatGenderLabel,
   formatPhoneDisplay,
   formatTimeDisplay,
@@ -105,5 +106,13 @@ describe("patient-admin-display", () => {
     expect(formatted).toContain("17/04/2026");
     expect(formatted).toMatch(/\d{2}:\d{2}/);
     expect(formatDateTimeDisplay(undefined)).toBe("No informado");
+  });
+
+  it("formats encounter statuses to human-friendly labels", () => {
+    expect(formatEncounterStatusLabel("finished")).toBe("Registrada");
+    expect(formatEncounterStatusLabel("in-progress")).toBe("En curso");
+    expect(formatEncounterStatusLabel("planned")).toBe("Planificada");
+    expect(formatEncounterStatusLabel("unknown")).toBe("No informado");
+    expect(formatEncounterStatusLabel(undefined)).toBe("No informado");
   });
 });

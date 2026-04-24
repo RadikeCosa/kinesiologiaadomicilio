@@ -8,6 +8,7 @@ describe("EncountersList", () => {
   it("renders date-time in localized format with 24h time", () => {
     const html = renderToStaticMarkup(
       createElement(EncountersList, {
+        hasActiveTreatment: true,
         encounters: [
           {
             id: "enc-1",
@@ -22,6 +23,8 @@ describe("EncountersList", () => {
 
     expect(html).toContain("17/04/2026");
     expect(html).toMatch(/\d{2}:\d{2}/);
+    expect(html).toContain("Estado: Registrada");
+    expect(html).not.toContain("Estado: finished");
     expect(html).not.toContain("AM");
     expect(html).not.toContain("PM");
   });
