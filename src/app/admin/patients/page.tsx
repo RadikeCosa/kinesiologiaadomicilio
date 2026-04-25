@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { MapsLinkAction } from "@/app/admin/patients/components/MapsLinkAction";
 import { PhoneContactActions } from "@/app/admin/patients/components/PhoneContactBlock";
 import { loadPatientsList } from "@/app/admin/patients/data";
 import {
@@ -94,21 +95,15 @@ export default async function AdminPatientsPage() {
                     </div>
                   </div>
 
-                  {mapsHref ? (
-                    <p className="text-sm text-slate-700">
-                      Dirección:{" "}
-                      <a
-                        className="font-medium text-sky-700 underline-offset-2 hover:underline"
-                        href={mapsHref}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        {addressLabel}
-                      </a>
-                    </p>
-                  ) : (
+                  <div className="space-y-1">
                     <p className="text-sm text-slate-700">Dirección: {addressLabel}</p>
-                  )}
+                    {mapsHref ? (
+                      <MapsLinkAction
+                        className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 underline-offset-2 hover:underline"
+                        href={mapsHref}
+                      />
+                    ) : null}
+                  </div>
                 </div>
               </article>
             );
