@@ -193,6 +193,9 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
   - el texto visible de dirección no se altera por la desambiguación del link;
   - el `href` de Google Maps se construye de forma centralizada en `buildGoogleMapsSearchHref` (`src/lib/patient-contact-links.ts`);
   - si la dirección no incluye contexto suficiente, el query agrega `Neuquén, Argentina`.
+  - en `/admin/patients` y `/admin/patients/[id]`, la dirección se renderiza siempre como texto legible y la salida externa vive en una acción secundaria separada (`Abrir en Maps`);
+  - la acción `Abrir en Maps` se renderiza solo cuando existe `mapsHref` válido y usa `target="_blank"` + `rel="noreferrer"`;
+  - en listado (`/admin/patients`) la acción mantiene jerarquía visual baja para no competir con nombre, badge y CTA principal del card.
 
 - **Títulos de pestaña (metadata privada)**
   - las rutas privadas tienen títulos específicos;

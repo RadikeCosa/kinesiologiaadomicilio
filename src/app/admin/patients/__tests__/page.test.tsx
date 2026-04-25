@@ -37,7 +37,7 @@ describe("/admin/patients page", () => {
         fullName: "Fede Finalizado",
         dni: "30999888",
         phone: "2997654321",
-        address: "Calle 2",
+        address: "",
         operationalStatus: "finished_treatment",
       },
       {
@@ -64,6 +64,17 @@ describe("/admin/patients page", () => {
     expect(html).toContain("Registrar visita");
     expect(html).not.toContain("href=\"/admin/patients/pat-finished/encounters/new\"");
     expect(html).not.toContain("href=\"/admin/patients/pat-pre/encounters/new\"");
+
+    expect(html).toContain("Dirección: Calle 1");
+    expect(html).toContain("Dirección: Sin dirección");
+    expect(html).toContain("Dirección: Calle 3");
+    expect(html).toContain("href=\"https://www.google.com/maps/search/?api=1&amp;query=Calle%201%2C%20Neuqu%C3%A9n%2C%20Argentina\"");
+    expect(html).toContain("href=\"https://www.google.com/maps/search/?api=1&amp;query=Calle%203%2C%20Neuqu%C3%A9n%2C%20Argentina\"");
+    expect(html).not.toContain("query=Calle%202");
+    expect(html).not.toContain(">Calle 1</a>");
+    expect(html).toContain("aria-label=\"Abrir en Maps\"");
+    expect(html).toContain("rel=\"noreferrer\"");
+    expect(html).toContain("target=\"_blank\"");
   });
 
   it("renders empty state without register encounter CTA", async () => {

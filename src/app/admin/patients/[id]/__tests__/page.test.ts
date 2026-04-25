@@ -67,6 +67,8 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Belgrano 123");
     expect(html).toContain("google.com/maps/search");
     expect(html).not.toContain(">Belgrano 123</a>");
+    expect(html).toContain("rel=\"noreferrer\"");
+    expect(html).toContain("target=\"_blank\"");
 
     const patientContactIndex = html.indexOf("Contacto del paciente");
     const addressIndex = html.indexOf("Dirección");
