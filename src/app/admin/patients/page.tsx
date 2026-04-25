@@ -78,10 +78,20 @@ export default async function AdminPatientsPage() {
                     <p className="text-xs text-slate-600">
                       DNI: {formatDniDisplay(patient.dni)} · Tel: {formatPhoneDisplay(patient.phone)}
                     </p>
-                    <PhoneContactActions
-                      phone={patient.phone}
-                      showMissingChannelsMessage={false}
-                    />
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      {patient.operationalStatus === "active_treatment" ? (
+                        <Link
+                          className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                          href={`/admin/patients/${patient.id}/encounters/new`}
+                        >
+                          Registrar visita
+                        </Link>
+                      ) : null}
+                      <PhoneContactActions
+                        phone={patient.phone}
+                        showMissingChannelsMessage={false}
+                      />
+                    </div>
                   </div>
 
                   {mapsHref ? (
