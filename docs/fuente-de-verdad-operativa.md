@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-24 (UTC)
+> Última actualización: 2026-04-25 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -40,7 +40,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 
 #### Responsabilidad actual por ruta (superficie de pacientes)
 - `/admin`: puerta de entrada operativa de la superficie privada.
-- `/admin/patients`: listado operativo de pacientes.
+- `/admin/patients`: listado operativo de pacientes, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
 - `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica).
 - `/admin/patients/[id]/administrative`: edición administrativa no clínica (identidad, contacto y datos operativos).
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (listado de visitas + corrección inline rápida + CTA de alta).
@@ -81,6 +81,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 
 #### Superficie privada clínica mínima
 - listado de pacientes;
+- acceso rápido contextual desde el listado a `Registrar visita` solo para pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`);
 - alta mínima de paciente (incluye dirección operativa opcional, `gender` y `birthDate` opcionales);
 - ficha consolidada de paciente en `/admin/patients/[id]` como hub (incluye visualización de dirección, `gender`, `birthDate` y navegación a gestión clínica/administrativa);
 - edición administrativa acotada en `/admin/patients/[id]/administrative` (incluye edición de dirección, `gender`, `birthDate` y datos no clínicos);
@@ -202,6 +203,12 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
   - metadata compacta cuando aplica: DNI, edad (si `birthDate` permite cálculo) y badge de tratamiento.
   - este criterio aplica a detalle, administrativa, visitas y tratamiento;
   - no se modifica el header global de `src/app/admin/layout.tsx`.
+
+- **Acción rápida en listado de pacientes (`/admin/patients`)**
+  - el CTA `Registrar visita` es contextual y se muestra solo con `operationalStatus === "active_treatment"`;
+  - el destino directo del CTA es `/admin/patients/[id]/encounters/new`;
+  - el CTA mantiene jerarquía visual secundaria para no competir con el nombre del paciente ni con `Nuevo paciente`;
+  - no reemplaza el gate real de registro, que sigue en `/encounters/new` y en la action server.
 
 - **Feedback de formularios privados**
   - éxito en verde;

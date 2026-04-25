@@ -38,6 +38,7 @@ El proyecto está en etapa **híbrida transicional**:
 #### Privado clínico mínimo
 - `/admin` como puerta de entrada de la superficie privada.
 - Listado y alta de pacientes.
+- Acceso rápido contextual desde el listado para `Registrar visita` en pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`).
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación.
 - Edición administrativa no clínica del paciente en `/admin/patients/[id]/administrative` (identidad, contacto y datos operativos).
 - Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (listado de visitas + corrección inline + CTA principal).
