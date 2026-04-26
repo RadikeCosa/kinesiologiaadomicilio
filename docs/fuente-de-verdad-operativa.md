@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-25 (UTC)
+> Última actualización: 2026-04-26 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -39,7 +39,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `/admin/patients/[id]/treatment`
 
 #### Responsabilidad actual por ruta (superficie de pacientes)
-- `/admin`: puerta de entrada operativa de la superficie privada.
+- `/admin`: dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes), sin gráficos.
 - `/admin/patients`: listado operativo de pacientes, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
 - `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
 - `/admin/patients/[id]/administrative`: edición administrativa no clínica (identidad, contacto y datos operativos).
@@ -107,8 +107,55 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas, con navegación secundaria a visitas;
 - en `/treatment`, cuando el tratamiento está finalizado se presenta estado explícito de cierre antes de cualquier reinicio;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
+- en `/admin`, las métricas son derivadas de lectura (no persistidas):
+  - resumen operativo por estado de paciente;
+  - edad de pacientes calculada solo sobre `birthDate` válido (con cobertura explícita);
+- en `/admin`, la edad se mantiene como dato derivado y no se persiste;
+- en `/admin`, las métricas globales de visitas (`Encounter`) permanecen fuera de Fase 1 por falta de consulta agregada eficiente;
+- en `/admin`, Fase 1 no introduce nuevas rutas ni gráficos.
 - no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
 - en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`, Fase 2 para `Identifier.type` + tests/fixtures de identidad y Fase 3 queda cerrada con `telecom`, `contact.relationship` y `name` resueltos incrementalmente, más deuda/trigger explícitos de `address` documentados en FHIR-018.
+
+#### Cierre documental — Fase 1 dashboard `/admin`
+
+- **Estado de cierre**: Fase 1 cerrada/aprobada para `/admin`.
+- **Observaciones no bloqueantes**: cobertura de render atendida parcialmente con micro-patch no funcional en `src/app/admin/__tests__/page.test.ts` (sin cambios de loader/read model/mapper/repository/arquitectura).
+- **Comportamiento vigente de `/admin`**:
+  - card `Resumen operativo`;
+  - card `Edad de pacientes`;
+  - CTAs principales `Ver pacientes` y `Nuevo paciente`.
+- **Métricas incluidas en Fase 1**:
+  - resumen operativo: pacientes totales, en tratamiento activo, tratamiento finalizado y sin tratamiento iniciado (`preliminary + ready_to_start`);
+  - edad: menor, mayor, promedio, con/sin fecha válida y cobertura.
+- **Reglas vigentes de edad/cobertura**:
+  - edad derivada de lectura desde `birthDate`, no persistida;
+  - solo fechas válidas/calculables cuentan como `con fecha válida`;
+  - ausentes o inválidas cuentan como `sin fecha válida`;
+  - sin edades calculables: UI muestra `—`;
+  - cobertura sin porcentaje calculable: UI muestra `—` y evita `0/0 (0%)`.
+- **Arquitectura vigente**:
+  - `src/app/admin/page.tsx` no calcula estadísticas inline;
+  - `loadAdminDashboard()` centraliza composición de `/admin`;
+  - `dashboard-metrics.ts` concentra funciones puras testeables;
+  - `dashboard.read-model.ts` mantiene contrato específico de dashboard;
+  - UI sin FHIR crudo y lógica route-local en `src/app/admin/*` (sin extracción prematura a dominio).
+- **Validación de fase**:
+  - tests unitarios de métricas;
+  - tests del loader;
+  - tests de render de `/admin`;
+  - micro-patch de borde para mezcla de fechas válidas/inválidas/ausentes, cobertura visible `1/3 (33%)` y fallback cuando `coverage.percentage === null`.
+- **Fuera de alcance preservado**:
+  - métricas globales de visitas, visitas recientes, última visita global, pacientes activos sin visitas;
+  - gráficos;
+  - nuevas rutas;
+  - nuevos métodos globales de `Encounter`;
+  - persistencia de edad;
+  - persistencia de métricas derivadas.
+- **Deuda futura**:
+  - evaluar mitigación del N+1 preexistente en `loadPatientsList()` (EpisodeOfCare);
+  - decidir si `generatedAt` se muestra en UI o se elimina del contrato;
+  - evaluar métricas globales de visitas solo con consulta agregada eficiente o método de repositorio adecuado;
+  - extraer métricas a dominio solo si aparecen consumidores reales fuera de `/admin`.
 
 ## 3) Fuentes de verdad activas
 

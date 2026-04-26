@@ -36,7 +36,7 @@ El proyecto está en etapa **híbrida transicional**:
 - GA4 integrado de forma directa (sin GTM) con eventos custom.
 
 #### Privado clínico mínimo
-- `/admin` como puerta de entrada de la superficie privada.
+- `/admin` como dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes).
 - Listado y alta de pacientes.
 - Acceso rápido contextual desde el listado para `Registrar visita` en pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`).
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación, con acción rápida contextual `Registrar visita` cuando hay tratamiento activo.
@@ -52,6 +52,38 @@ El proyecto está en etapa **híbrida transicional**:
 - `occurrenceDate` queda limitado a compatibilidad transicional de entrada para payloads legacy.
 - Captura y visualización administrativa de `gender` y `birthDate` en pacientes (alta, edición y detalle).
 - Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
+- Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad basadas en `birthDate` válido.
+- La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
+- Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
+- `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
+
+##### Cierre Fase 1 dashboard `/admin` (abril 2026)
+- **Estado**: fase cerrada/aprobada para `/admin` como dashboard operativo mínimo.
+- **Comportamiento vigente**:
+  - card `Resumen operativo`;
+  - card `Edad de pacientes`;
+  - CTAs principales preservados: `Ver pacientes` y `Nuevo paciente`.
+- **Métricas incluidas**:
+  - resumen operativo: total, en tratamiento activo, tratamiento finalizado, sin tratamiento iniciado;
+  - regla: `sin tratamiento iniciado = preliminary + ready_to_start`;
+  - edad: menor, mayor, promedio, con/sin fecha válida y cobertura.
+- **Reglas de edad/cobertura**:
+  - dato derivado de lectura (no persistido), calculado desde `birthDate`;
+  - solo fechas válidas/calculables cuentan como `con fecha válida`;
+  - fechas ausentes o inválidas cuentan como `sin fecha válida`;
+  - cuando no hay edades calculables la UI muestra `—`;
+  - cuando la cobertura no puede calcular porcentaje la UI muestra fallback `—` y evita un `0/0 (0%)` engañoso.
+- **Arquitectura vigente**:
+  - `src/app/admin/page.tsx` sin cálculos inline;
+  - `loadAdminDashboard()` centraliza composición;
+  - `dashboard-metrics.ts` concentra funciones puras testeables;
+  - `dashboard.read-model.ts` define contrato específico de dashboard;
+  - lógica route-local en `src/app/admin/*`, sin extracción prematura a `domain/patient`.
+- **Validación de fase**:
+  - tests unitarios de métricas;
+  - tests del loader;
+  - tests de render de `/admin`;
+  - micro-patch final de borde en render (`birthDate` válido + inválido + ausente, cobertura visible `1/3 (33%)`, fallback con `percentage === null`).
 
 ### Estado del frente FHIR Patient
 

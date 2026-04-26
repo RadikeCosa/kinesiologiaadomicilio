@@ -6,6 +6,7 @@ export interface PatientListItemReadModel {
   dni?: string;
   phone?: string;
   gender?: PatientGender;
+  birthDate?: string;
   address?: string;
   operationalStatus: PatientOperationalStatus;
   createdAt: string;
