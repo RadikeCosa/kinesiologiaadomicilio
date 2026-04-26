@@ -48,7 +48,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Gate operativo por DNI para iniciar tratamiento.
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
 - Registro y listado de visitas realizadas (`Encounter` base): alta en `/encounters/new` y listado operativo en `/encounters`.
-- Contrato operativo vigente (Fase 2 en altas nuevas): `startedAt` + `endedAt` obligatorios al registrar una visita en `/encounters/new`; lectura/listado legacy mantiene tolerancia para cierre ausente y para encuentros históricos con instante único (`start === end`).
+- Contrato operativo vigente en visitas: `startedAt` + `endedAt` obligatorios tanto al registrar (`/encounters/new`) como al editar en listado (`/encounters`), con validación temporal `endedAt >= startedAt`.
 - `occurrenceDate` queda limitado a compatibilidad transicional de entrada para payloads legacy.
 - Captura y visualización administrativa de `gender` y `birthDate` en pacientes (alta, edición y detalle).
 - Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.

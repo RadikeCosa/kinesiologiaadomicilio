@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fhirClient } from "@/lib/fhir/client";
+import { FhirClientError } from "@/lib/fhir/errors";
 import {
   createEpisodeOfCare,
   finishActiveEpisodeOfCare,
   getActiveEpisodeByPatientId,
+  getEpisodeById,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 
 describe("episode-of-care.repository (FHIR)", () => {
@@ -107,5 +109,39 @@ describe("episode-of-care.repository (FHIR)", () => {
       }),
     );
     expect(finished).toMatchObject({ id: "epi-1", status: "finished", endDate: "2026-04-17" });
+  });
+
+  it("gets episode by id", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "EpisodeOfCare",
+      id: "epi-10",
+      status: "active",
+      patient: { reference: "Patient/pat-1" },
+      period: { start: "2026-04-01" },
+    });
+
+    const episode = await getEpisodeById("epi-10");
+
+    expect(getSpy).toHaveBeenCalledWith("EpisodeOfCare/epi-10");
+    expect(episode).toMatchObject({
+      id: "epi-10",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-04-01",
+    });
+  });
+
+  it("returns null on getEpisodeById 404", async () => {
+    vi.spyOn(fhirClient, "get").mockRejectedValue(
+      new FhirClientError({
+        message: "not found",
+        method: "GET",
+        url: "http://fhir.test/EpisodeOfCare/epi-404",
+        status: 404,
+      }),
+    );
+
+    const episode = await getEpisodeById("epi-404");
+    expect(episode).toBeNull();
   });
 });

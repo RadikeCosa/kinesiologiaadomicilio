@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createEncounterSchema, updateEncounterStartSchema } from "@/domain/encounter/encounter.schemas";
+import { createEncounterSchema, updateEncounterPeriodSchema } from "@/domain/encounter/encounter.schemas";
 
 describe("encounter.schemas", () => {
   it("requires patientId, episodeOfCareId and startedAt", () => {
@@ -64,29 +64,26 @@ describe("encounter.schemas", () => {
   });
 
   it("keeps compatibility with occurrenceDate transitional payload", () => {
-    const parsed = createEncounterSchema.parse({
-      patientId: "pat-1",
-      episodeOfCareId: "epi-1",
-      occurrenceDate: "2026-04-17T10:30:00Z",
-    });
-
-    expect(parsed).toEqual({
-      patientId: "pat-1",
-      episodeOfCareId: "epi-1",
-      startedAt: "2026-04-17T10:30:00Z",
-      endedAt: undefined,
-    });
+    expect(() =>
+      createEncounterSchema.parse({
+        patientId: "pat-1",
+        episodeOfCareId: "epi-1",
+        occurrenceDate: "2026-04-17T10:30:00Z",
+      }),
+    ).toThrow("endedAt: es obligatorio.");
   });
 
-  it("validates update start payload", () => {
-    const parsed = updateEncounterStartSchema.parse({
+  it("validates update start/end payload", () => {
+    const parsed = updateEncounterPeriodSchema.parse({
       encounterId: " enc-1 ",
       patientId: " pat-1 ",
       startedAt: " 2026-04-17T10:30 ",
+      endedAt: " 2026-04-17T11:10 ",
     });
 
     expect(parsed.encounterId).toBe("enc-1");
     expect(parsed.patientId).toBe("pat-1");
     expect(parsed.startedAt).toMatch(/^2026-04-17T10:30:00(?:Z|[+-]\d{2}:\d{2})$/);
+    expect(parsed.endedAt).toMatch(/^2026-04-17T11:10:00(?:Z|[+-]\d{2}:\d{2})$/);
   });
 });

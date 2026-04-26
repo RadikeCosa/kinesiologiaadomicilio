@@ -1,6 +1,6 @@
 import { normalizeToFhirDateTime } from "@/lib/fhir/date-time";
 
-import type { CreateEncounterInput, UpdateEncounterStartInput } from "@/domain/encounter/encounter.types";
+import type { CreateEncounterInput, UpdateEncounterPeriodInput } from "@/domain/encounter/encounter.types";
 
 function assertObject(input: unknown, schemaName: string): Record<string, unknown> {
   if (typeof input !== "object" || input === null) {
@@ -66,17 +66,12 @@ export const createEncounterSchema = {
     const episodeOfCareId = normalizeRequiredString(record.episodeOfCareId, "episodeOfCareId");
     const normalizedEndedAt = normalizeOptionalString(record.endedAt, "endedAt");
 
-    if (normalizedStartedAt && !normalizedEndedAt) {
+    if (!normalizedEndedAt) {
       throw new Error("endedAt: es obligatorio.");
     }
 
-    const endedAt = normalizedEndedAt
-      ? normalizeToFhirDateTime(normalizedEndedAt, "endedAt")
-      : undefined;
-
-    if (endedAt) {
-      ensureEndedAtAfterStartedAt(startedAt, endedAt);
-    }
+    const endedAt = normalizeToFhirDateTime(normalizedEndedAt, "endedAt");
+    ensureEndedAtAfterStartedAt(startedAt, endedAt);
 
     return {
       patientId,
@@ -87,9 +82,9 @@ export const createEncounterSchema = {
   },
 };
 
-export const updateEncounterStartSchema = {
-  parse(input: unknown): UpdateEncounterStartInput {
-    const record = assertObject(input, "updateEncounterStartSchema");
+export const updateEncounterPeriodSchema = {
+  parse(input: unknown): UpdateEncounterPeriodInput {
+    const record = assertObject(input, "updateEncounterPeriodSchema");
     const normalizedStartedAt = normalizeOptionalString(record.startedAt, "startedAt");
     const normalizedOccurrenceDate = normalizeOptionalString(record.occurrenceDate, "occurrenceDate");
     const startedAtRaw = normalizedStartedAt ?? normalizedOccurrenceDate;
@@ -98,10 +93,21 @@ export const updateEncounterStartSchema = {
       throw new Error("startedAt: es obligatorio.");
     }
 
+    const normalizedEndedAt = normalizeOptionalString(record.endedAt, "endedAt");
+
+    if (!normalizedEndedAt) {
+      throw new Error("endedAt: es obligatorio.");
+    }
+
+    const startedAt = normalizeToFhirDateTime(startedAtRaw, "startedAt");
+    const endedAt = normalizeToFhirDateTime(normalizedEndedAt, "endedAt");
+    ensureEndedAtAfterStartedAt(startedAt, endedAt);
+
     return {
       encounterId: normalizeRequiredString(record.encounterId, "encounterId"),
       patientId: normalizeRequiredString(record.patientId, "patientId"),
-      startedAt: normalizeToFhirDateTime(startedAtRaw, "startedAt"),
+      startedAt,
+      endedAt,
     };
   },
 };

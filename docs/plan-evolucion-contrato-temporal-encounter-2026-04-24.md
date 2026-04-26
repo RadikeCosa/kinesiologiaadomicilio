@@ -3,20 +3,31 @@
 Fecha: 2026-04-24
 Estado base: alta de visita ya migrada a `/admin/patients/[id]/encounters/new`.
 
-> Nota de seguimiento: Fase 1 (`startedAt` obligatorio + `endedAt` opcional con compatibilidad legacy) implementada posteriormente sobre este plan.
+> Nota de seguimiento histórica: Fase 1 (`startedAt` obligatorio + `endedAt` opcional con compatibilidad legacy) implementada posteriormente sobre este plan.
 > Cleanup posterior: lectura tolerante de datos externos con `end < start` (se preserva `startedAt` y se oculta `endedAt` inválido) y reducción de superficie de `occurrenceDate` a compatibilidad de entrada.
+> Estado vigente (cierre de fase, 2026-04-26): alta y edición temporal en `/encounters/new` y `/encounters` operan con `startedAt` + `endedAt` obligatorios, validación `endedAt >= startedAt` y validación de rango temporal contra tratamiento/fecha futura en server/domain.
 
-## A. Estado actual del contrato temporal
+## A. Estado base histórico del contrato temporal (momento original del plan)
 
-- El dominio usa un único campo temporal `occurrenceDate` para representar la visita (sin distinguir inicio y fin).
-- En create e inline update ese único valor se persiste en FHIR como `period.start` y `period.end` con el mismo timestamp.
-- La lectura de FHIR prioriza `period.start` y cae a `period.end` si no hay start, volviendo siempre a `occurrenceDate`.
-- El listado, ordenamiento e inline edit operan sobre `occurrenceDate` (incluyendo el input `datetime-local`).
+- El dominio usaba un único campo temporal `occurrenceDate` para representar la visita (sin distinguir inicio y fin).
+- En create e inline update ese único valor se persistía en FHIR como `period.start` y `period.end` con el mismo timestamp.
+- La lectura de FHIR priorizaba `period.start` y caía a `period.end` si no había start, volviendo siempre a `occurrenceDate`.
+- El listado, ordenamiento e inline edit operaban sobre `occurrenceDate` (incluyendo el input `datetime-local`).
 
-Deuda principal:
+Deuda principal identificada en ese momento:
 - No hay forma de expresar duración real de sesión.
 - El inline edit pisa implícitamente `start` y `end` al mismo valor.
 - No existe regla de validación `end >= start` porque no hay ambos campos en dominio.
+
+## A.1 Estado operativo vigente (referencia de cierre)
+
+- Contrato temporal vigente de alta y edición:
+  - `startedAt` obligatorio;
+  - `endedAt` obligatorio;
+  - `endedAt >= startedAt`.
+- La edición temporal en `/encounters` reemplazó el esquema de “solo inicio” y actualiza período completo.
+- La lectura/listado conserva tolerancia legacy para datos históricos/externos, sin redefinir el contrato operativo vigente.
+- Eliminación/anulación y edición clínica profunda siguen fuera de alcance de esta fase.
 
 ## B. Opciones de diseño
 

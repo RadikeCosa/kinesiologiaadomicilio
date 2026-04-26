@@ -19,28 +19,18 @@ export function mapCreateEncounterInputToFhir(input: CreateEncounterInput): Fhir
     ],
     period: {
       start: startedAt,
-      ...(input.endedAt ? { end: input.endedAt } : {}),
+      end: input.endedAt,
     },
   };
 }
 
-export function mapEncounterStartDateTimeUpdate(existing: FhirEncounter, startedAt: string): FhirEncounter {
-  const existingEndedAt = existing.period?.end;
-
-  if (existingEndedAt) {
-    const startedAtTimestamp = new Date(startedAt).getTime();
-    const endedAtTimestamp = new Date(existingEndedAt).getTime();
-
-    if (!Number.isNaN(startedAtTimestamp) && !Number.isNaN(endedAtTimestamp) && startedAtTimestamp > endedAtTimestamp) {
-      throw new Error("No se puede mover el inicio después de la finalización registrada.");
-    }
-  }
-
+export function mapEncounterTimeRangeUpdate(existing: FhirEncounter, startedAt: string, endedAt: string): FhirEncounter {
   return {
     ...existing,
     period: {
       ...existing.period,
       start: startedAt,
+      end: endedAt,
     },
   };
 }

@@ -33,7 +33,8 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
   const treatmentBadge = patient
     ? getTreatmentBadgePresentation(patient.operationalStatus)
     : null;
-  const hasActiveTreatment = Boolean(patient?.activeEpisode);
+  const activeEpisode = patient?.activeEpisode ?? null;
+  const hasActiveTreatment = Boolean(activeEpisode);
   const hasFinishedTreatment = !hasActiveTreatment && patient?.latestEpisode?.status === "finished";
 
   if (!patient) {
@@ -85,12 +86,12 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
       </div>
 
       <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        {hasActiveTreatment ? (
+        {activeEpisode ? (
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
               Tratamiento activo
             </h2>
-            <p className="mt-3 text-sm text-slate-700">Inicio: {formatDateDisplay(patient.activeEpisode.startDate)}</p>
+            <p className="mt-3 text-sm text-slate-700">Inicio: {formatDateDisplay(activeEpisode.startDate)}</p>
             <div className="mt-4">
               <FinishEpisodeOfCareForm patient={patient} />
             </div>

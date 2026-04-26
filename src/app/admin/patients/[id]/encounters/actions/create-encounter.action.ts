@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { canCreateEncounter } from "@/domain/encounter/encounter.rules";
+import { canCreateEncounter, canUseEncounterTimeRangeWithinEpisode } from "@/domain/encounter/encounter.rules";
 import { createEncounterSchema } from "@/domain/encounter/encounter.schemas";
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
 import { getActiveEpisodeByPatientId } from "@/infrastructure/repositories/episode-of-care.repository";
@@ -31,6 +31,23 @@ export async function createEncounterAction(input: unknown): Promise<CreateEncou
       return {
         ok: false,
         message: "El tratamiento activo cambió. Reintentá desde la pantalla actualizada.",
+      };
+    }
+
+    const now = new Date();
+
+    const timeRangeValidation = canUseEncounterTimeRangeWithinEpisode({
+      startedAt: parsedInput.startedAt,
+      endedAt: parsedInput.endedAt,
+      episodeStartDate: activeEpisode.startDate,
+      episodeEndDate: activeEpisode.endDate,
+      now,
+    });
+
+    if (!timeRangeValidation.ok) {
+      return {
+        ok: false,
+        message: timeRangeValidation.message,
       };
     }
 
