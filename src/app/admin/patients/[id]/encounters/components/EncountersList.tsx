@@ -4,7 +4,11 @@ import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
-import { updateEncounterStartAction } from "@/app/admin/patients/[id]/encounters/actions/update-encounter-start.action";
+import { updateEncounterPeriodAction } from "@/app/admin/patients/[id]/encounters/actions/update-encounter-period.action";
+import {
+  getNextEndedAtOnStartChange,
+  isEncounterEndBeforeStart,
+} from "@/app/admin/patients/[id]/encounters/components/EncounterCreateForm";
 import {
   canSubmitEncounterInlineEdit,
   cancelEncounterInlineEdit,
@@ -78,16 +82,29 @@ export function EncountersList({
     clearMessage();
   }
 
-  function saveStartedAt(encounterId: string) {
-    if (!canSubmitEncounterInlineEdit({ isPending, draftStartedAt: inlineEditState.draftStartedAt })) {
+  function saveEncounterPeriod(encounterId: string) {
+    if (!canSubmitEncounterInlineEdit({
+      isPending,
+      draftStartedAt: inlineEditState.draftStartedAt,
+      draftEndedAt: inlineEditState.draftEndedAt,
+    })) {
+      return;
+    }
+
+    if (isEncounterEndBeforeStart(inlineEditState.draftStartedAt, inlineEditState.draftEndedAt)) {
+      setMessage({
+        text: "El cierre debe ser igual o posterior al inicio.",
+        tone: "error",
+      });
       return;
     }
 
     startTransition(async () => {
-      const result = await updateEncounterStartAction({
+      const result = await updateEncounterPeriodAction({
         encounterId,
         patientId,
         startedAt: inlineEditState.draftStartedAt,
+        endedAt: inlineEditState.draftEndedAt,
       });
 
       setMessage({
@@ -139,21 +156,52 @@ export function EncountersList({
                       name="startedAt"
                       onChange={(event) =>
                         setInlineEditState((previous) =>
-                          changeEncounterInlineDraft(previous, event.target.value),
+                          changeEncounterInlineDraft(previous, {
+                            startedAt: event.target.value,
+                            endedAt: getNextEndedAtOnStartChange({
+                              nextStartedAt: event.target.value,
+                              currentEndedAt: previous.draftEndedAt,
+                              hasUserEditedEndedAt: previous.hasUserEditedEndedAt,
+                            }),
+                          }),
                         )
                       }
                       required
                       type="datetime-local"
                       value={inlineEditState.draftStartedAt}
                     />
+                    <label className="block text-xs font-medium text-slate-700" htmlFor={`encounter-end-date-${encounter.id}`}>
+                      Cierre de la visita
+                    </label>
+                    <input
+                      className="w-full rounded border border-slate-300 bg-white p-2"
+                      id={`encounter-end-date-${encounter.id}`}
+                      min={inlineEditState.draftStartedAt || undefined}
+                      name="endedAt"
+                      onChange={(event) =>
+                        setInlineEditState((previous) =>
+                          changeEncounterInlineDraft(previous, {
+                            endedAt: event.target.value,
+                            hasUserEditedEndedAt: true,
+                          }),
+                        )
+                      }
+                      required
+                      type="datetime-local"
+                      value={inlineEditState.draftEndedAt}
+                    />
+                    {isEncounterEndBeforeStart(inlineEditState.draftStartedAt, inlineEditState.draftEndedAt) ? (
+                      <p className="text-xs text-red-700">El cierre debe ser igual o posterior al inicio.</p>
+                    ) : null}
                     <div className="flex items-center gap-2">
                       <button
                         className="rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-50"
                         disabled={!canSubmitEncounterInlineEdit({
                           isPending,
                           draftStartedAt: inlineEditState.draftStartedAt,
+                          draftEndedAt: inlineEditState.draftEndedAt,
                         })}
-                        onClick={() => saveStartedAt(encounter.id)}
+                        onClick={() => saveEncounterPeriod(encounter.id)}
                         type="button"
                       >
                         {isPending ? "Guardando..." : "Guardar"}
@@ -185,7 +233,7 @@ export function EncountersList({
                       <p className="mt-1 text-xs text-slate-600">Estado: {formatEncounterStatusLabel(encounter.status)}</p>
                     </div>
                     <button
-                      aria-label="Editar fecha y hora"
+                      aria-label="Editar horario"
                       className="inline-flex items-center justify-center rounded border border-slate-300 bg-white p-1.5 text-slate-700 hover:bg-slate-100 disabled:opacity-50"
                       disabled={isPending}
                       onClick={() => handleStartEditing(encounter)}

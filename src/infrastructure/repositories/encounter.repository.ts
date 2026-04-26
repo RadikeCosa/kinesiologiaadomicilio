@@ -1,7 +1,7 @@
 import type {
   CreateEncounterInput,
   Encounter,
-  UpdateEncounterStartInput,
+  UpdateEncounterPeriodInput,
 } from "@/domain/encounter/encounter.types";
 import { extractResourcesByType } from "@/lib/fhir/bundle-utils";
 import { fhirClient } from "@/lib/fhir/client";
@@ -13,7 +13,7 @@ import { type FhirEncounter } from "@/infrastructure/mappers/encounter/encounter
 import { mapFhirEncounterToDomain } from "@/infrastructure/mappers/encounter/encounter-read.mapper";
 import {
   mapCreateEncounterInputToFhir,
-  mapEncounterStartDateTimeUpdate,
+  mapEncounterTimeRangeUpdate,
 } from "@/infrastructure/mappers/encounter/encounter-write.mapper";
 
 function buildSearchPath(resourceType: string, query: string): string {
@@ -44,11 +44,11 @@ export async function getEncounterById(encounterId: string): Promise<Encounter |
   }
 }
 
-export async function updateEncounterStartDateTime(
-  input: UpdateEncounterStartInput,
+export async function updateEncounterTimeRange(
+  input: UpdateEncounterPeriodInput,
 ): Promise<Encounter> {
   const existing = await fhirClient.get<FhirEncounter>(`Encounter/${input.encounterId}`);
-  const updatedPayload = mapEncounterStartDateTimeUpdate(existing, input.startedAt);
+  const updatedPayload = mapEncounterTimeRangeUpdate(existing, input.startedAt, input.endedAt);
   const updated = await fhirClient.put<FhirEncounter>(`Encounter/${input.encounterId}`, updatedPayload);
 
   return mapFhirEncounterToDomain(updated);

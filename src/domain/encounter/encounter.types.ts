@@ -13,15 +13,16 @@ export interface CreateEncounterInput {
   patientId: string;
   episodeOfCareId: string;
   startedAt: string;
-  endedAt?: string;
+  endedAt: string;
   /**
    * @deprecated transitional alias while migrating from occurrenceDate to startedAt.
    */
   occurrenceDate?: string;
 }
 
-export interface UpdateEncounterStartInput {
+export interface UpdateEncounterPeriodInput {
   encounterId: string;
   patientId: string;
   startedAt: string;
+  endedAt: string;
 }

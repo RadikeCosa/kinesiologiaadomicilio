@@ -72,7 +72,7 @@ Ningún PR de este frente debería mezclar más de uno de estos grupos salvo que
 
 ## Nota de política local (Encounter)
 
-- Aunque FHIR permite omitir `Encounter.period.end`, la política operativa local para altas nuevas en `/admin/patients/[id]/encounters/new` requiere registrar inicio y cierre de la visita realizada (`startedAt` y `endedAt` obligatorios).
+- Aunque FHIR permite omitir `Encounter.period.end`, la política operativa local para altas y edición temporal de visitas (`/admin/patients/[id]/encounters/new` y `/admin/patients/[id]/encounters`) requiere registrar inicio y cierre (`startedAt` y `endedAt` obligatorios).
 - La lectura legacy mantiene tolerancia para `period.end` ausente y para históricos con `start === end`.
 
 ## Relación con otros documentos del repo

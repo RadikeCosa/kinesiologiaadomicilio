@@ -124,4 +124,26 @@ describe("createEncounterAction", () => {
     });
     expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/encounters");
   });
+
+  it("fails when visit is before treatment start", async () => {
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({
+      id: "epi-1",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-04-20",
+    });
+
+    const result = await createEncounterAction({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:00",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      message: "El inicio de la visita no puede ser anterior al inicio del tratamiento.",
+    });
+    expect(createEncounter).not.toHaveBeenCalled();
+  });
 });

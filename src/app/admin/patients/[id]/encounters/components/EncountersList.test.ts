@@ -6,8 +6,8 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
 }));
 
-vi.mock("@/app/admin/patients/[id]/encounters/actions/update-encounter-start.action", () => ({
-  updateEncounterStartAction: vi.fn(),
+vi.mock("@/app/admin/patients/[id]/encounters/actions/update-encounter-period.action", () => ({
+  updateEncounterPeriodAction: vi.fn(),
 }));
 
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
@@ -44,7 +44,7 @@ describe("EncountersList", () => {
     expect((html.match(/Finalización:/g) ?? []).length).toBe(1);
     expect((html.match(/Duración:/g) ?? []).length).toBe(1);
     expect(html).toContain("Estado: Registrada");
-    expect(html).toContain("aria-label=\"Editar fecha y hora\"");
+    expect(html).toContain("aria-label=\"Editar horario\"");
     expect(html).not.toContain("Estado: finished");
     expect(html).not.toContain("AM");
     expect(html).not.toContain("PM");

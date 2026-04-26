@@ -184,7 +184,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
   - encuentros históricos con `start === end` se tratan como instante operativo histórico (inicio conocido, sin duración real explícita).
 - `/encounters/new` registra una visita realizada, por eso requiere inicio y cierre en la carga operativa.
 - `occurrenceDate` se mantiene únicamente como compatibilidad transicional de **entrada** (payload legacy), no como contrato operativo vigente de salida.
-- inline edit en `/encounters` queda limitado a corrección rápida del inicio (`period.start`) y preserva `period.end` existente.
+- edición temporal en `/encounters` corrige inicio y cierre en conjunto, con `startedAt`/`endedAt` obligatorios y validación `endedAt >= startedAt`.
 - El listado de visitas ordena por timestamp real parseado (más recientes primero), no por comparación lexicográfica de strings.
 - Fechas se muestran en formato local consistente.
 - Horas se muestran en formato 24h.

@@ -3,15 +3,16 @@ import { describe, expect, it } from "vitest";
 import { mapFhirEncounterToDomain } from "@/infrastructure/mappers/encounter/encounter-read.mapper";
 import {
   mapCreateEncounterInputToFhir,
-  mapEncounterStartDateTimeUpdate,
+  mapEncounterTimeRangeUpdate,
 } from "@/infrastructure/mappers/encounter/encounter-write.mapper";
 
 describe("encounter mappers", () => {
-  it("maps create input to FHIR Encounter without period.end when endedAt is missing", () => {
+  it("maps create input to FHIR Encounter period.start/end", () => {
     const mapped = mapCreateEncounterInputToFhir({
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
       startedAt: "2026-04-17T10:30:00Z",
+      endedAt: "2026-04-17T11:00:00Z",
     });
 
     expect(mapped).toEqual({
@@ -21,6 +22,7 @@ describe("encounter mappers", () => {
       episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
       period: {
         start: "2026-04-17T10:30:00Z",
+        end: "2026-04-17T11:00:00Z",
       },
     });
   });
@@ -39,8 +41,8 @@ describe("encounter mappers", () => {
     });
   });
 
-  it("updates start preserving existing end", () => {
-    const mapped = mapEncounterStartDateTimeUpdate(
+  it("updates start/end preserving existing payload shape", () => {
+    const mapped = mapEncounterTimeRangeUpdate(
       {
         resourceType: "Encounter",
         id: "enc-1",
@@ -53,31 +55,13 @@ describe("encounter mappers", () => {
         },
       },
       "2026-04-17T10:45:00Z",
+      "2026-04-17T11:40:00Z",
     );
 
     expect(mapped.period).toEqual({
       start: "2026-04-17T10:45:00Z",
-      end: "2026-04-17T11:30:00Z",
+      end: "2026-04-17T11:40:00Z",
     });
-  });
-
-  it("blocks update when new start is after existing end", () => {
-    expect(() =>
-      mapEncounterStartDateTimeUpdate(
-        {
-          resourceType: "Encounter",
-          id: "enc-1",
-          status: "finished",
-          subject: { reference: "Patient/pat-1" },
-          episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
-          period: {
-            start: "2026-04-17T10:30:00Z",
-            end: "2026-04-17T11:30:00Z",
-          },
-        },
-        "2026-04-17T11:40:00Z",
-      ),
-    ).toThrow("No se puede mover el inicio después de la finalización registrada.");
   });
 
   it("maps legacy FHIR Encounter with start===end without exposing endedAt", () => {

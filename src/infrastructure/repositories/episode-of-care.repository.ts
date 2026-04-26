@@ -5,6 +5,7 @@ import type {
 } from "@/domain/episode-of-care/episode-of-care.types";
 import { extractResourcesByType, extractSingleResource } from "@/lib/fhir/bundle-utils";
 import { fhirClient } from "@/lib/fhir/client";
+import { FhirClientError } from "@/lib/fhir/errors";
 import {
   buildActiveEpisodeOfCareByPatientQuery,
   buildEpisodeOfCareByPatientQuery,
@@ -58,6 +59,23 @@ export async function getMostRecentEpisodeByPatientId(patientId: string): Promis
   const mostRecent = getMostRecentEpisode(episodes);
 
   return mostRecent ? mapFhirEpisodeOfCareToDomain(mostRecent) : null;
+}
+
+export async function getEpisodeById(episodeId: string): Promise<EpisodeOfCare | null> {
+  if (!episodeId.trim()) {
+    return null;
+  }
+
+  try {
+    const episode = await fhirClient.get<FhirEpisodeOfCare>(`EpisodeOfCare/${episodeId}`);
+    return mapFhirEpisodeOfCareToDomain(episode);
+  } catch (error) {
+    if (error instanceof FhirClientError && error.status === 404) {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
 export async function createEpisodeOfCare(input: StartEpisodeOfCareInput): Promise<EpisodeOfCare> {
