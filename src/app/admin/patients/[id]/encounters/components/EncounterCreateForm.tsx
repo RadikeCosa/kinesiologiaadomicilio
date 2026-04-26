@@ -1,11 +1,12 @@
 "use client";
 
-import { FormEvent, useTransition } from "react";
+import { FormEvent, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { createEncounterAction } from "@/app/admin/patients/[id]/encounters/actions/create-encounter.action";
+import { formatLocalDateTimeInputValue } from "@/lib/date-input";
 
 interface EncounterCreateFormProps {
   patientId: string;
@@ -14,10 +15,35 @@ interface EncounterCreateFormProps {
   successRedirectPath?: string;
 }
 
-function getNowDateTimeLocal(): string {
-  const now = new Date();
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 16);
+export function getEncounterCreateInitialDateTime(): string {
+  return formatLocalDateTimeInputValue(new Date());
+}
+
+export function isEncounterEndBeforeStart(startedAt: string, endedAt: string): boolean {
+  if (!startedAt || !endedAt) {
+    return false;
+  }
+
+  const startedAtTimestamp = new Date(startedAt).getTime();
+  const endedAtTimestamp = new Date(endedAt).getTime();
+
+  if (Number.isNaN(startedAtTimestamp) || Number.isNaN(endedAtTimestamp)) {
+    return false;
+  }
+
+  return endedAtTimestamp < startedAtTimestamp;
+}
+
+export function getNextEndedAtOnStartChange(params: {
+  nextStartedAt: string;
+  currentEndedAt: string;
+  hasUserEditedEndedAt: boolean;
+}): string {
+  if (!params.hasUserEditedEndedAt) {
+    return params.nextStartedAt;
+  }
+
+  return params.currentEndedAt;
 }
 
 export function EncounterCreateForm({
@@ -29,8 +55,39 @@ export function EncounterCreateForm({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { message, setMessage } = useFormFeedback();
+  const [startedAt, setStartedAt] = useState(getEncounterCreateInitialDateTime);
+  const [endedAt, setEndedAt] = useState(startedAt);
+  const [hasUserEditedEndedAt, setHasUserEditedEndedAt] = useState(false);
+  const [timeValidationError, setTimeValidationError] = useState<string | null>(null);
 
   const canCreateEncounter = Boolean(activeEpisodeId);
+
+  function validateTimeRange(nextStartedAt: string, nextEndedAt: string): string | null {
+    if (isEncounterEndBeforeStart(nextStartedAt, nextEndedAt)) {
+      return "El cierre debe ser igual o posterior al inicio.";
+    }
+
+    return null;
+  }
+
+  function handleStartedAtChange(nextStartedAt: string) {
+    setStartedAt(nextStartedAt);
+
+    const nextEndedAt = getNextEndedAtOnStartChange({
+      nextStartedAt,
+      currentEndedAt: endedAt,
+      hasUserEditedEndedAt,
+    });
+
+    setEndedAt(nextEndedAt);
+    setTimeValidationError(validateTimeRange(nextStartedAt, nextEndedAt));
+  }
+
+  function handleEndedAtChange(nextEndedAt: string) {
+    setHasUserEditedEndedAt(true);
+    setEndedAt(nextEndedAt);
+    setTimeValidationError(validateTimeRange(startedAt, nextEndedAt));
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,19 +96,25 @@ export function EncounterCreateForm({
       return;
     }
 
-    const formData = new FormData(event.currentTarget);
+    const validationError = validateTimeRange(startedAt, endedAt);
+
+    if (validationError) {
+      setTimeValidationError(validationError);
+      return;
+    }
+
     const input = {
       patientId,
       episodeOfCareId: activeEpisodeId,
-      startedAt: String(formData.get("startedAt") ?? ""),
-      endedAt: String(formData.get("endedAt") ?? "") || undefined,
+      startedAt,
+      endedAt,
     };
 
     startTransition(async () => {
       const result = await createEncounterAction(input);
 
       setMessage({
-        text: result.ok ? "Visita registrada correctamente" : "No se pudo registrar la visita",
+        text: result.ok ? "Visita registrada correctamente" : (result.message ?? "No se pudo registrar la visita"),
         tone: result.ok ? "success" : "error",
       });
 
@@ -90,31 +153,42 @@ export function EncounterCreateForm({
       <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
         <input name="episodeOfCareId" type="hidden" value={activeEpisodeId ?? ""} />
 
-        <div>
-          <label className="block text-sm font-medium" htmlFor="startedAt">
-            Inicio de la visita *
-          </label>
-          <input
-            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
-            defaultValue={getNowDateTimeLocal()}
-            id="startedAt"
-            name="startedAt"
-            required
-            type="datetime-local"
-          />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium" htmlFor="startedAt">
+              Inicio de la visita *
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+              id="startedAt"
+              name="startedAt"
+              onChange={(event) => handleStartedAtChange(event.target.value)}
+              required
+              type="datetime-local"
+              value={startedAt}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium" htmlFor="endedAt">
+              Cierre de la visita *
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+              id="endedAt"
+              min={startedAt || undefined}
+              name="endedAt"
+              onChange={(event) => handleEndedAtChange(event.target.value)}
+              required
+              type="datetime-local"
+              value={endedAt}
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium" htmlFor="endedAt">
-            Finalización de la visita (opcional)
-          </label>
-          <input
-            className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
-            id="endedAt"
-            name="endedAt"
-            type="datetime-local"
-          />
-        </div>
+        <p className="text-xs text-slate-600">Completá inicio y cierre para registrar una visita realizada.</p>
+
+        {timeValidationError ? <p className="text-sm text-red-700">{timeValidationError}</p> : null}
 
         {message ? (
           <p className={`text-sm ${message.tone === "success" ? "text-emerald-700" : "text-red-700"}`}>

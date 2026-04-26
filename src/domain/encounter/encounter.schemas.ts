@@ -62,7 +62,14 @@ export const createEncounterSchema = {
     }
 
     const startedAt = normalizeToFhirDateTime(startedAtRaw, "startedAt");
+    const patientId = normalizeRequiredString(record.patientId, "patientId");
+    const episodeOfCareId = normalizeRequiredString(record.episodeOfCareId, "episodeOfCareId");
     const normalizedEndedAt = normalizeOptionalString(record.endedAt, "endedAt");
+
+    if (normalizedStartedAt && !normalizedEndedAt) {
+      throw new Error("endedAt: es obligatorio.");
+    }
+
     const endedAt = normalizedEndedAt
       ? normalizeToFhirDateTime(normalizedEndedAt, "endedAt")
       : undefined;
@@ -72,8 +79,8 @@ export const createEncounterSchema = {
     }
 
     return {
-      patientId: normalizeRequiredString(record.patientId, "patientId"),
-      episodeOfCareId: normalizeRequiredString(record.episodeOfCareId, "episodeOfCareId"),
+      patientId,
+      episodeOfCareId,
       startedAt,
       endedAt,
     };

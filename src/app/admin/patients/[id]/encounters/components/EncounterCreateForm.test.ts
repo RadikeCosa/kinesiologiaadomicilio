@@ -10,7 +10,11 @@ vi.mock("@/app/admin/patients/[id]/encounters/actions/create-encounter.action", 
   createEncounterAction: vi.fn(),
 }));
 
-import { EncounterCreateForm } from "@/app/admin/patients/[id]/encounters/components/EncounterCreateForm";
+import {
+  EncounterCreateForm,
+  getNextEndedAtOnStartChange,
+  isEncounterEndBeforeStart,
+} from "@/app/admin/patients/[id]/encounters/components/EncounterCreateForm";
 (globalThis as { React?: typeof React }).React = React;
 
 describe("EncounterCreateForm", () => {
@@ -28,7 +32,7 @@ describe("EncounterCreateForm", () => {
     expect(html).toContain("href=\"/admin/patients/pat-1/treatment\"");
   });
 
-  it("renders startedAt and endedAt fields when active treatment exists", () => {
+  it("renders startedAt and endedAt as required and grouped in one responsive row", () => {
     const html = renderToStaticMarkup(
       createElement(EncounterCreateForm, {
         patientId: "pat-1",
@@ -37,8 +41,36 @@ describe("EncounterCreateForm", () => {
     );
 
     expect(html).toContain("Inicio de la visita *");
+    expect(html).toContain("Cierre de la visita *");
+    expect(html).not.toContain("(opcional)");
     expect(html).toContain("name=\"startedAt\"");
-    expect(html).toContain("Finalización de la visita (opcional)");
     expect(html).toContain("name=\"endedAt\"");
+    expect((html.match(/required=\"\"/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    expect(html).toContain("grid gap-4 md:grid-cols-2");
+  });
+
+  it("syncs endedAt with startedAt when user has not edited endedAt", () => {
+    const nextEndedAt = getNextEndedAtOnStartChange({
+      nextStartedAt: "2026-04-26T10:00",
+      currentEndedAt: "2026-04-26T09:00",
+      hasUserEditedEndedAt: false,
+    });
+
+    expect(nextEndedAt).toBe("2026-04-26T10:00");
+  });
+
+  it("does not overwrite endedAt when user already edited it", () => {
+    const nextEndedAt = getNextEndedAtOnStartChange({
+      nextStartedAt: "2026-04-26T10:00",
+      currentEndedAt: "2026-04-26T11:30",
+      hasUserEditedEndedAt: true,
+    });
+
+    expect(nextEndedAt).toBe("2026-04-26T11:30");
+  });
+
+  it("detects invalid time range when endedAt is before startedAt", () => {
+    expect(isEncounterEndBeforeStart("2026-04-26T11:00", "2026-04-26T10:30")).toBe(true);
+    expect(isEncounterEndBeforeStart("2026-04-26T11:00", "2026-04-26T11:00")).toBe(false);
   });
 });

@@ -175,13 +175,15 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `EpisodeOfCare.startDate` / `endDate` se tratan como fechas calendario (`YYYY-MM-DD`) con validación de formato y calendario real.
 - En defaults/envíos de `<input type="date">` se usa fecha local de calendario; **no usar `toISOString().slice(0,10)`** porque introduce riesgo UTC off-by-one.
 - `Encounter.period.start` / `period.end` se manejan como FHIR `dateTime` con offset; valores `datetime-local` se normalizan antes de persistir.
-- contrato temporal vigente (Fase 1):
-  - `startedAt` obligatorio para altas/actualizaciones operativas;
-  - `endedAt` opcional;
-  - validación `endedAt >= startedAt` cuando se informa finalización.
-- `occurrenceDate` se mantiene únicamente como compatibilidad transicional de **entrada** (payload legacy), no como contrato operativo vigente de salida.
-- compatibilidad legacy:
+- contrato operativo vigente de alta nueva (`/encounters/new`, Fase 2):
+  - `startedAt` obligatorio;
+  - `endedAt` obligatorio;
+  - validación `endedAt >= startedAt`.
+- contrato tolerante de lectura legacy:
+  - se tolera `period.end` ausente en datos históricos/externos;
   - encuentros históricos con `start === end` se tratan como instante operativo histórico (inicio conocido, sin duración real explícita).
+- `/encounters/new` registra una visita realizada, por eso requiere inicio y cierre en la carga operativa.
+- `occurrenceDate` se mantiene únicamente como compatibilidad transicional de **entrada** (payload legacy), no como contrato operativo vigente de salida.
 - inline edit en `/encounters` queda limitado a corrección rápida del inicio (`period.start`) y preserva `period.end` existente.
 - El listado de visitas ordena por timestamp real parseado (más recientes primero), no por comparación lexicográfica de strings.
 - Fechas se muestran en formato local consistente.
