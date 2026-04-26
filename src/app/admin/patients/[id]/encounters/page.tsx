@@ -56,7 +56,7 @@ function buildTreatmentMetadata(params: {
   return {
     toneClassName: "border-amber-200 bg-amber-50 text-amber-900",
     title: "Sin tratamiento iniciado",
-    detail: "Iniciá un tratamiento para habilitar el registro de visitas.",
+    detail: "No hay un tratamiento iniciado para este paciente.",
   };
 }
 
@@ -113,14 +113,24 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
             </span>
           ) : null}
         </div>
-        {pageData.activeEpisode ? (
-          <Link
-            className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
-            href={`/admin/patients/${pageData.patient.id}/encounters/new`}
-          >
-            Registrar visita
-          </Link>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          {pageData.activeEpisode ? (
+            <>
+              <Link
+                className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                href={`/admin/patients/${pageData.patient.id}/treatment`}
+              >
+                Gestionar tratamiento
+              </Link>
+              <Link
+                className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
+                href={`/admin/patients/${pageData.patient.id}/encounters/new`}
+              >
+                Registrar visita
+              </Link>
+            </>
+          ) : null}
+        </div>
       </div>
 
       <p className="mt-2 text-sm text-slate-600">Registro y seguimiento de visitas del paciente.</p>
@@ -140,7 +150,11 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
 
       {!pageData.activeEpisode ? (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          <span>Necesitás un tratamiento activo para registrar visitas.</span>
+          <span>
+            {pageData.mostRecentEpisode?.status === "finished"
+              ? "El tratamiento está finalizado. Revisá la gestión de tratamiento para continuar."
+              : "Necesitás un tratamiento activo para registrar visitas."}
+          </span>
           <Link
             className="inline-flex items-center justify-center rounded border border-amber-300 bg-white px-3 py-1.5 text-sm font-medium text-amber-900 hover:bg-amber-100"
             href={`/admin/patients/${pageData.patient.id}/treatment`}
@@ -153,6 +167,7 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
       <EncountersList
         encounters={pageData.encounters}
         hasActiveTreatment={Boolean(pageData.activeEpisode)}
+        hasFinishedTreatment={pageData.mostRecentEpisode?.status === "finished"}
         patientId={pageData.patient.id}
       />
     </section>

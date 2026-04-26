@@ -169,4 +169,29 @@ describe("loadPatientEncountersPageData", () => {
       "enc-invalid",
     ]);
   });
+
+  it("keeps most recent finished episode in the read model for UX differentiation", async () => {
+    vi.mocked(getPatientById).mockResolvedValue({
+      id: "pat-1",
+      firstName: "Ana",
+      lastName: "Pérez",
+      createdAt: "2026-04-17T12:00:00.000Z",
+      updatedAt: "2026-04-17T12:00:00.000Z",
+    });
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue(null);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue({
+      id: "epi-finished",
+      patientId: "pat-1",
+      status: "finished",
+      startDate: "2026-03-01",
+      endDate: "2026-03-30",
+    });
+    vi.mocked(listEncountersByPatientId).mockResolvedValue([]);
+
+    const data = await loadPatientEncountersPageData("pat-1");
+
+    expect(data?.activeEpisode).toBeNull();
+    expect(data?.mostRecentEpisode?.status).toBe("finished");
+    expect(data?.mostRecentEpisode?.endDate).toBe("2026-03-30");
+  });
 });
