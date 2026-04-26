@@ -124,27 +124,38 @@ export default async function AdminPatientDetailPage({
                 ) : null}
               </div>
 
-              <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-start">
-                <Link
-                  className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
-                    isClinicalPrimary
-                      ? "bg-slate-900 text-white hover:bg-slate-700"
-                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                  }`}
-                  href={`/admin/patients/${patient.id}/encounters`}
-                >
-                  Gestión Clínica
-                </Link>
-                <Link
-                  className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
-                    !isClinicalPrimary
-                      ? "bg-slate-900 text-white hover:bg-slate-700"
-                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                  }`}
-                  href={`/admin/patients/${patient.id}/administrative`}
-                >
-                  Gestión Administrativa
-                </Link>
+              <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                  <Link
+                    className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
+                      isClinicalPrimary
+                        ? "bg-slate-900 text-white hover:bg-slate-700"
+                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                    }`}
+                    href={`/admin/patients/${patient.id}/encounters`}
+                  >
+                    Gestión Clínica
+                  </Link>
+                  <Link
+                    className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
+                      !isClinicalPrimary
+                        ? "bg-slate-900 text-white hover:bg-slate-700"
+                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                    }`}
+                    href={`/admin/patients/${patient.id}/administrative`}
+                  >
+                    Gestión Administrativa
+                  </Link>
+                </div>
+
+                {patient.activeEpisode ? (
+                  <Link
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    href={`/admin/patients/${patient.id}/encounters/new`}
+                  >
+                    Registrar visita
+                  </Link>
+                ) : null}
               </div>
             </header>
 

@@ -73,6 +73,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("Tratamiento finalizado");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/encounters/new\"");
     expect(foundHtml).toContain("Registrar visita");
+    expect(foundHtml.match(/href=\"\/admin\/patients\/pat-1\/encounters\/new\"/g)?.length).toBe(1);
     expect(foundHtml).toContain("EncountersList");
     expect(foundHtml).not.toContain("Edad:");
   });
@@ -104,5 +105,6 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("Ir a gestión de tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
     expect(foundHtml).not.toContain("href=\"/admin/patients/pat-1/encounters/new\"");
+    expect(foundHtml).toContain("EncountersList");
   });
 });

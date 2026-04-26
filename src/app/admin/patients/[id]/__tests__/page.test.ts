@@ -116,6 +116,8 @@ describe("/admin/patients/[id] page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Inicio: 17/04/2026");
+    expect(html).toContain("Registrar visita");
+    expect(html).toContain("href=\"/admin/patients/pat-1/encounters/new\"");
   });
 
   it("renders patient age in header when birthDate is available", async () => {
@@ -179,5 +181,24 @@ describe("/admin/patients/[id] page", () => {
 
     expect(html).toContain("Paciente no encontrado");
     expect(html).toContain("No se encontró el paciente solicitado.");
+  });
+
+  it("does not render register encounter CTA when patient has no active treatment", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        operationalStatus: "finished_treatment",
+        activeEpisode: undefined,
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).not.toContain("href=\"/admin/patients/pat-1/encounters/new\"");
+    expect(html).not.toContain("Registrar visita");
+    expect(html).toContain("Gestión Clínica");
+    expect(html).toContain("Gestión Administrativa");
   });
 });
