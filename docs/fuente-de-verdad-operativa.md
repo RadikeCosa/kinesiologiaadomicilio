@@ -41,7 +41,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 #### Responsabilidad actual por ruta (superficie de pacientes)
 - `/admin`: puerta de entrada operativa de la superficie privada.
 - `/admin/patients`: listado operativo de pacientes, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
-- `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica).
+- `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
 - `/admin/patients/[id]/administrative`: edición administrativa no clínica (identidad, contacto y datos operativos).
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (listado de visitas + corrección inline rápida + CTA de alta).
 - `/admin/patients/[id]/encounters/new`: pantalla específica para registrar una visita.
@@ -99,6 +99,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - listado de visitas del paciente ordenadas por fecha más reciente, con corrección inline acotada de fecha/hora de la visita, sin edición clínica completa del `Encounter`;
 - en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), sin co-protagonismo visual con visitas;
 - en `/encounters`, el bloque de contexto de tratamiento fue reducido visualmente para no competir con la operación de visitas;
+- en `/encounters`, el CTA `Registrar visita` se mantiene como acción principal cuando hay tratamiento activo, pero en formato compacto (sin card de gran altura);
 - en `/encounters`, el loader diferencia tratamiento finalizado vs sin tratamiento iniciado usando `activeEpisode` + `mostRecentEpisode`;
 - en `/encounters`, se removió redundancia de estados positivos de tratamiento para priorizar la señal impeditiva real del registro de visitas;
 - en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas;
@@ -212,6 +213,16 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
   - el destino directo del CTA es `/admin/patients/[id]/encounters/new`;
   - el CTA mantiene jerarquía visual secundaria para no competir con el nombre del paciente ni con `Nuevo paciente`;
   - no reemplaza el gate real de registro, que sigue en `/encounters/new` y en la action server.
+
+- **Acción rápida en hub de paciente (`/admin/patients/[id]`)**
+  - el CTA `Registrar visita` se muestra solo cuando existe tratamiento activo;
+  - el destino del CTA es `/admin/patients/[id]/encounters/new`;
+  - mantiene jerarquía secundaria/operativa para convivir con `Gestión Clínica` y `Gestión Administrativa`.
+
+- **Acción principal en visitas (`/admin/patients/[id]/encounters`)**
+  - el CTA `Registrar visita` se muestra como acción principal y compacta cerca del encabezado operativo de la pantalla;
+  - sin tratamiento activo, se reemplaza por mensaje impeditivo + salida compacta a gestión de tratamiento;
+  - el registro real sigue ocurriendo en `/encounters/new` y el gate final permanece en la server action.
 
 - **Feedback de formularios privados**
   - éxito en verde;

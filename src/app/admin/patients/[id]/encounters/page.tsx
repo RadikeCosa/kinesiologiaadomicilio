@@ -129,41 +129,33 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
         className={`mt-5 w-full rounded-lg border p-3 text-sm sm:w-auto sm:max-w-xl ${treatmentContext.toneClassName}`}
       >
         <p className="font-medium">{treatmentContext.title}</p>
-        <p className="mt-1">
-          {treatmentContext.detail}{" "}
+        <p className="mt-1">{treatmentContext.detail}</p>
+      </section>
+
+      <section className="mt-6 flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-900">Registrar visita</h2>
+          <p className="mt-1 text-sm text-slate-700">
+            {pageData.activeEpisode
+              ? "Registrá una nueva visita realizada."
+              : "Necesitás un tratamiento activo para registrar visitas."}
+          </p>
+        </div>
+        {pageData.activeEpisode ? (
           <Link
-            className="font-medium underline-offset-2 hover:underline"
+            className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
+            href={`/admin/patients/${pageData.patient.id}/encounters/new`}
+          >
+            Registrar visita
+          </Link>
+        ) : (
+          <Link
+            className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             href={`/admin/patients/${pageData.patient.id}/treatment`}
           >
             Ir a gestión de tratamiento
           </Link>
-        </p>
-      </section>
-
-      <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <h2 className="text-lg font-medium text-slate-900">Registrar visita</h2>
-        <p className="mt-2 text-sm text-slate-700">
-          {pageData.activeEpisode
-            ? "Registrá una nueva visita realizada."
-            : "Necesitás un tratamiento activo para registrar visitas."}
-        </p>
-        <div className="mt-4">
-          {pageData.activeEpisode ? (
-            <Link
-              className="inline-flex items-center justify-center rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-              href={`/admin/patients/${pageData.patient.id}/encounters/new`}
-            >
-              Registrar visita
-            </Link>
-          ) : (
-            <Link
-              className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href={`/admin/patients/${pageData.patient.id}/treatment`}
-            >
-              Ir a gestión de tratamiento
-            </Link>
-          )}
-        </div>
+        )}
       </section>
       <EncountersList
         encounters={pageData.encounters}
