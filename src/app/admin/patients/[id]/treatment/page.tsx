@@ -33,6 +33,8 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
   const treatmentBadge = patient
     ? getTreatmentBadgePresentation(patient.operationalStatus)
     : null;
+  const hasActiveTreatment = Boolean(patient?.activeEpisode);
+  const hasFinishedTreatment = !hasActiveTreatment && patient?.latestEpisode?.status === "finished";
 
   if (!patient) {
     return (
@@ -59,13 +61,21 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
         >
           ← Volver al paciente
         </Link>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold text-slate-900">{patient.fullName}</h1>
-          <span
-            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge?.className}`}
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-semibold text-slate-900">{patient.fullName}</h1>
+            <span
+              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge?.className}`}
+            >
+              {treatmentBadge?.label}
+            </span>
+          </div>
+          <Link
+            className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            href={`/admin/patients/${patient.id}/encounters`}
           >
-            {treatmentBadge?.label}
-          </span>
+            Ver visitas
+          </Link>
         </div>
         <p className="mt-2 text-sm text-slate-600">Inicio y cierre del tratamiento del paciente.</p>
         <p className="mt-1 text-xs text-slate-500">
@@ -75,7 +85,7 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
       </div>
 
       <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        {patient.activeEpisode ? (
+        {hasActiveTreatment ? (
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
               Tratamiento activo
@@ -83,6 +93,21 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
             <p className="mt-3 text-sm text-slate-700">Inicio: {formatDateDisplay(patient.activeEpisode.startDate)}</p>
             <div className="mt-4">
               <FinishEpisodeOfCareForm patient={patient} />
+            </div>
+          </>
+        ) : hasFinishedTreatment ? (
+          <>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+              Tratamiento finalizado
+            </h2>
+            <p className="mt-3 text-sm text-slate-700">
+              Finalización: {formatDateDisplay(patient.latestEpisode?.endDate)}
+            </p>
+            <p className="mt-2 text-sm text-slate-700">
+              Este tratamiento ya está cerrado. Si hace falta continuar, podés iniciar un nuevo tratamiento.
+            </p>
+            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+              <StartEpisodeOfCareForm patient={patient} />
             </div>
           </>
         ) : (

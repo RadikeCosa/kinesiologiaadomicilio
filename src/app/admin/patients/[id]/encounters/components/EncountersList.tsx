@@ -23,6 +23,7 @@ interface EncountersListProps {
   patientId: string;
   encounters: Encounter[];
   hasActiveTreatment: boolean;
+  hasFinishedTreatment: boolean;
 }
 
 function formatOccurrenceDate(value: string): string {
@@ -56,7 +57,12 @@ function getDurationLabel(startedAt?: string, endedAt?: string): string | null {
   return `${hours} h ${minutes} min`;
 }
 
-export function EncountersList({ patientId, encounters, hasActiveTreatment }: EncountersListProps) {
+export function EncountersList({
+  patientId,
+  encounters,
+  hasActiveTreatment,
+  hasFinishedTreatment,
+}: EncountersListProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const { message, setMessage, clearMessage } = useFormFeedback();
@@ -107,10 +113,12 @@ export function EncountersList({ patientId, encounters, hasActiveTreatment }: En
       ) : null}
 
       {encounters.length === 0 ? (
-        <p className="mt-3 rounded border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
+          <p className="mt-3 rounded border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
           {hasActiveTreatment
             ? "Todavía no hay visitas. Registrá la primera."
-            : "Iniciá un tratamiento para poder registrar visitas."}
+            : hasFinishedTreatment
+              ? "No hay visitas registradas en este tratamiento."
+              : "No hay visitas registradas por el momento."}
         </p>
       ) : (
         <ul className="mt-3 space-y-2">

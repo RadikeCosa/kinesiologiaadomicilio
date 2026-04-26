@@ -97,13 +97,15 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - pantalla de gestión clínica operativa por paciente (`/admin/patients/[id]/encounters`);
 - pantalla específica para registrar visita realizada (`/admin/patients/[id]/encounters/new`) con gate de tratamiento activo;
 - listado de visitas del paciente ordenadas por fecha más reciente, con corrección inline acotada de fecha/hora de la visita, sin edición clínica completa del `Encounter`;
-- en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), sin co-protagonismo visual con visitas;
+- en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), incluyendo acceso rápido también durante tratamiento activo;
 - en `/encounters`, el bloque de contexto de tratamiento fue reducido visualmente para no competir con la operación de visitas;
 - en `/encounters`, `Registrar visita` vive en el header interno, alineado a la derecha y visible solo con tratamiento activo;
 - en `/encounters`, el loader diferencia tratamiento finalizado vs sin tratamiento iniciado usando `activeEpisode` + `mostRecentEpisode`;
 - en `/encounters`, el contexto de tratamiento se presenta como metadata compacta (pill/línea informativa), no como card protagonista;
-- en `/encounters`, sin tratamiento activo se muestra señal impeditiva compacta + salida a `/treatment`;
-- en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas;
+- en `/encounters`, sin tratamiento activo se muestra una única señal impeditiva dominante + salida a `/treatment`, evitando duplicación de bloqueos;
+- en `/encounters`, el copy distingue explícitamente `sin tratamiento iniciado` de `tratamiento finalizado`;
+- en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas, con navegación secundaria a visitas;
+- en `/treatment`, cuando el tratamiento está finalizado se presenta estado explícito de cierre antes de cualquier reinicio;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
 - en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`, Fase 2 para `Identifier.type` + tests/fixtures de identidad y Fase 3 queda cerrada con `telecom`, `contact.relationship` y `name` resueltos incrementalmente, más deuda/trigger explícitos de `address` documentados en FHIR-018.
@@ -222,7 +224,8 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 
 - **Acción principal en visitas (`/admin/patients/[id]/encounters`)**
   - el CTA `Registrar visita` se muestra como acción principal y compacta cerca del encabezado operativo de la pantalla;
-  - sin tratamiento activo, se reemplaza por mensaje impeditivo + salida compacta a gestión de tratamiento;
+  - sin tratamiento activo no se muestra acceso directo a `/encounters/new`: si está **sin tratamiento iniciado** el mensaje impeditivo orienta a iniciar/gestionar tratamiento; si está en **tratamiento finalizado** el mensaje reconoce el cierre y deriva a `Gestionar tratamiento` sin sugerir inicio inmediato como acción principal;
+  - la derivación desde visitas usa navegación secundaria compacta hacia `Gestionar tratamiento`, y en tratamiento se ofrece navegación secundaria compacta a `Ver visitas`;
   - el registro real sigue ocurriendo en `/encounters/new` y el gate final permanece en la server action.
 
 - **Feedback de formularios privados**
