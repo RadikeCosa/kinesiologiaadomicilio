@@ -41,7 +41,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Acceso rápido contextual desde el listado para `Registrar visita` en pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`).
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación, con acción rápida contextual `Registrar visita` cuando hay tratamiento activo.
 - Edición administrativa no clínica del paciente en `/admin/patients/[id]/administrative` (identidad, contacto y datos operativos).
-- Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (listado de visitas + corrección inline + CTA principal compacto).
+- Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (header interno con CTA primario `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento y listado de visitas con corrección inline).
 - Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.
 - Gestión específica de tratamiento (`EpisodeOfCare`) en `/admin/patients/[id]/treatment` (inicio/finalización).
 - La gestión de tratamiento ya no vive inline en `/admin/patients/[id]/encounters`.

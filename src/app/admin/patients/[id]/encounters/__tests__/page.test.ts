@@ -27,7 +27,7 @@ vi.mock("@/app/admin/patients/[id]/encounters/components/EncountersList", () => 
 }));
 
 describe("/admin/patients/[id]/encounters page", () => {
-  it("uses standardized back labels, renders compact metadata and CTA to new encounter", async () => {
+  it("uses standardized back labels, renders header CTA once and compact treatment metadata", async () => {
     loadPatientEncountersPageDataMock.mockResolvedValueOnce(null);
 
     const notFoundElement = await AdminPatientEncountersPage({
@@ -70,12 +70,13 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("Ana Pérez");
     expect(foundHtml).toContain("Registro y seguimiento de visitas del paciente.");
     expect(foundHtml).toContain("DNI: 30.111.222");
-    expect(foundHtml).toContain("Tratamiento finalizado");
+    expect(foundHtml).toContain("Tratamiento activo");
+    expect(foundHtml).toContain("Inicio: 01/04/2026");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/encounters/new\"");
     expect(foundHtml).toContain("Registrar visita");
     expect(foundHtml.match(/href=\"\/admin\/patients\/pat-1\/encounters\/new\"/g)?.length).toBe(1);
     expect(foundHtml).toContain("EncountersList");
-    expect(foundHtml).not.toContain("Edad:");
+    expect(foundHtml).not.toContain("Ir a gestión de tratamiento");
   });
 
   it("shows treatment CTA when there is no active treatment", async () => {
@@ -101,6 +102,8 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const foundHtml = renderToStaticMarkup(foundElement);
 
+    expect(foundHtml).toContain("Sin tratamiento iniciado");
+    expect(foundHtml).toContain("Iniciá un tratamiento para habilitar el registro de visitas.");
     expect(foundHtml).toContain("Necesitás un tratamiento activo para registrar visitas.");
     expect(foundHtml).toContain("Ir a gestión de tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");

@@ -116,8 +116,9 @@
 ## 6) Estado de implementación (2026-04-25)
 
 - Se agregó `Registrar visita` en `/admin/patients/[id]` como acción contextual secundaria, visible solo con tratamiento activo.
-- En `/admin/patients/[id]/encounters` se compactó el bloque de alta:
-  - el CTA principal sigue visible arriba;
-  - se redujo densidad visual (menos altura/copy/padding);
-  - sin tratamiento activo se mantiene mensaje impeditivo + salida compacta a tratamiento.
+- En `/admin/patients/[id]/encounters` se realizó una segunda iteración UX/UI:
+  - `Registrar visita` vive en el header interno, alineado a la derecha del nombre del paciente y se renderiza solo con tratamiento activo;
+  - se eliminó la card separada de “Registrar visita”;
+  - el contexto de tratamiento pasó a metadata compacta (estado + fecha relevante) debajo del subtítulo;
+  - sin tratamiento activo se mantiene mensaje impeditivo claro con salida compacta a tratamiento.
 - El gate real no se movió: permanece en `/encounters/new` y en `createEncounterAction`.
