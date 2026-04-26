@@ -101,6 +101,7 @@ export function mapPatientToListItemReadModel(
     dni: patient.dni,
     phone: patient.phone,
     gender: patient.gender,
+    birthDate: patient.birthDate,
     address: patient.address,
     operationalStatus: getPatientOperationalStatus({
       patient,
