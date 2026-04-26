@@ -70,6 +70,11 @@ Ningún PR de este frente debería mezclar más de uno de estos grupos salvo que
 - telecom/contact;
 - documentación.
 
+## Nota de política local (Encounter)
+
+- Aunque FHIR permite omitir `Encounter.period.end`, la política operativa local para altas nuevas en `/admin/patients/[id]/encounters/new` requiere registrar inicio y cierre de la visita realizada (`startedAt` y `endedAt` obligatorios).
+- La lectura legacy mantiene tolerancia para `period.end` ausente y para históricos con `start === end`.
+
 ## Relación con otros documentos del repo
 
 - `README.md`: estado general del producto y de la superficie implementada.

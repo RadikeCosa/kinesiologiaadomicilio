@@ -19,6 +19,37 @@ import { getActiveEpisodeByPatientId } from "@/infrastructure/repositories/episo
 import { revalidatePath } from "next/cache";
 
 describe("createEncounterAction", () => {
+  it("fails when endedAt is missing in new create payload", async () => {
+    const result = await createEncounterAction({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      message: "endedAt: es obligatorio.",
+    });
+    expect(getActiveEpisodeByPatientId).not.toHaveBeenCalled();
+    expect(createEncounter).not.toHaveBeenCalled();
+  });
+
+  it("fails when endedAt is before startedAt", async () => {
+    const result = await createEncounterAction({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T10:00",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      message: "endedAt: debe ser igual o posterior al inicio.",
+    });
+    expect(getActiveEpisodeByPatientId).not.toHaveBeenCalled();
+    expect(createEncounter).not.toHaveBeenCalled();
+  });
+
   it("fails when there is no active episode", async () => {
     vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue(null);
 
@@ -26,6 +57,7 @@ describe("createEncounterAction", () => {
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
       startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:00",
     });
 
     expect(result).toEqual({
@@ -46,6 +78,7 @@ describe("createEncounterAction", () => {
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
       startedAt: "2026-04-17T10:30:00Z",
+      endedAt: "2026-04-17T11:00:00Z",
     });
 
     expect(result).toEqual({
@@ -67,6 +100,7 @@ describe("createEncounterAction", () => {
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
       startedAt: "2026-04-17T10:30:00Z",
+      endedAt: "2026-04-17T11:00:00Z",
       status: "finished",
     });
 
@@ -74,12 +108,14 @@ describe("createEncounterAction", () => {
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
       startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:00",
     });
 
     expect(createEncounter).toHaveBeenCalledWith({
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
       startedAt: expect.stringMatching(/^2026-04-17T10:30:00(?:Z|[+-]\d{2}:\d{2})$/),
+      endedAt: expect.stringMatching(/^2026-04-17T11:00:00(?:Z|[+-]\d{2}:\d{2})$/),
     });
 
     expect(result).toEqual({

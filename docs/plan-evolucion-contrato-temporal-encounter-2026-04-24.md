@@ -96,6 +96,25 @@ Justificación:
 
 No recomendar autocompletar por defecto (ej. +45 min) en esta etapa para evitar datos clínicos artificiales.
 
+## D.1) Fase 2 operativa (actualización 2026-04-26)
+
+Decisión vigente para altas nuevas desde UI/action/schema (`/encounters/new`):
+- `startedAt` obligatorio;
+- `endedAt` obligatorio;
+- regla temporal obligatoria `endedAt >= startedAt`.
+
+Alcance explícito de la decisión:
+- endurece el contrato **operativo de alta nueva**;
+- no endurece lectura legacy ni datos históricos externos.
+
+Compatibilidad:
+- se mantiene tolerancia de lectura para `period.end` ausente;
+- se mantiene tolerancia para encuentros históricos con `start === end`.
+
+Nota FHIR:
+- FHIR permite omitir `Encounter.period.end`, pero la app aplica una regla local más estricta para registrar visitas realizadas en la operación diaria.
+
+
 ## E. Validaciones mínimas
 
 1. Formatos aceptados:

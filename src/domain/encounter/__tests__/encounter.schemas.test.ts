@@ -17,17 +17,27 @@ describe("encounter.schemas", () => {
     );
   });
 
-  it("normalizes startedAt datetime-local input to FHIR dateTime with seconds and offset", () => {
+  it("requires endedAt for new create payloads using startedAt", () => {
+    expect(() =>
+      createEncounterSchema.parse({
+        patientId: "pat-1",
+        episodeOfCareId: "epi-1",
+        startedAt: "2026-04-17T10:30",
+      })).toThrow("endedAt: es obligatorio.");
+  });
+
+  it("normalizes startedAt/endedAt datetime-local input to FHIR dateTime with seconds and offset", () => {
     const parsed = createEncounterSchema.parse({
       patientId: " pat-1 ",
       episodeOfCareId: " epi-1 ",
       startedAt: " 2026-04-17T10:30 ",
+      endedAt: " 2026-04-17T10:45 ",
     });
 
     expect(parsed.patientId).toBe("pat-1");
     expect(parsed.episodeOfCareId).toBe("epi-1");
     expect(parsed.startedAt).toMatch(/^2026-04-17T10:30:00(?:Z|[+-]\d{2}:\d{2})$/);
-    expect(parsed.endedAt).toBeUndefined();
+    expect(parsed.endedAt).toMatch(/^2026-04-17T10:45:00(?:Z|[+-]\d{2}:\d{2})$/);
   });
 
   it("accepts endedAt when endedAt is equal or after startedAt", () => {
