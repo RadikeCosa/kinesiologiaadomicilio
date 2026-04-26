@@ -146,56 +146,66 @@ export function EncountersList({
             return (
               <li key={encounter.id} className="rounded border border-slate-200 bg-white p-3 text-sm text-slate-800">
                 {isEditing ? (
-                  <div className="space-y-2">
-                    <label className="block text-xs font-medium text-slate-700" htmlFor={`encounter-date-${encounter.id}`}>
-                      Fecha y hora
-                    </label>
-                    <input
-                      className="w-full rounded border border-slate-300 bg-white p-2"
-                      id={`encounter-date-${encounter.id}`}
-                      name="startedAt"
-                      onChange={(event) =>
-                        setInlineEditState((previous) =>
-                          changeEncounterInlineDraft(previous, {
-                            startedAt: event.target.value,
-                            endedAt: getNextEndedAtOnStartChange({
-                              nextStartedAt: event.target.value,
-                              currentEndedAt: previous.draftEndedAt,
-                              hasUserEditedEndedAt: previous.hasUserEditedEndedAt,
-                            }),
-                          }),
-                        )
-                      }
-                      required
-                      type="datetime-local"
-                      value={inlineEditState.draftStartedAt}
-                    />
-                    <label className="block text-xs font-medium text-slate-700" htmlFor={`encounter-end-date-${encounter.id}`}>
-                      Cierre de la visita
-                    </label>
-                    <input
-                      className="w-full rounded border border-slate-300 bg-white p-2"
-                      id={`encounter-end-date-${encounter.id}`}
-                      min={inlineEditState.draftStartedAt || undefined}
-                      name="endedAt"
-                      onChange={(event) =>
-                        setInlineEditState((previous) =>
-                          changeEncounterInlineDraft(previous, {
-                            endedAt: event.target.value,
-                            hasUserEditedEndedAt: true,
-                          }),
-                        )
-                      }
-                      required
-                      type="datetime-local"
-                      value={inlineEditState.draftEndedAt}
-                    />
+                  <div className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor={`encounter-date-${encounter.id}`}>
+                          Inicio de la visita
+                        </label>
+                        <input
+                          className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+                          id={`encounter-date-${encounter.id}`}
+                          name="startedAt"
+                          onChange={(event) =>
+                            setInlineEditState((previous) =>
+                              changeEncounterInlineDraft(previous, {
+                                startedAt: event.target.value,
+                                endedAt: getNextEndedAtOnStartChange({
+                                  nextStartedAt: event.target.value,
+                                  currentEndedAt: previous.draftEndedAt,
+                                  hasUserEditedEndedAt: previous.hasUserEditedEndedAt,
+                                }),
+                              }),
+                            )
+                          }
+                          required
+                          type="datetime-local"
+                          value={inlineEditState.draftStartedAt}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium" htmlFor={`encounter-end-date-${encounter.id}`}>
+                          Cierre de la visita
+                        </label>
+                        <input
+                          className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
+                          id={`encounter-end-date-${encounter.id}`}
+                          min={inlineEditState.draftStartedAt || undefined}
+                          name="endedAt"
+                          onChange={(event) =>
+                            setInlineEditState((previous) =>
+                              changeEncounterInlineDraft(previous, {
+                                endedAt: event.target.value,
+                                hasUserEditedEndedAt: true,
+                              }),
+                            )
+                          }
+                          required
+                          type="datetime-local"
+                          value={inlineEditState.draftEndedAt}
+                        />
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-600">Completá inicio y cierre para actualizar la visita registrada.</p>
+
                     {isEncounterEndBeforeStart(inlineEditState.draftStartedAt, inlineEditState.draftEndedAt) ? (
-                      <p className="text-xs text-red-700">El cierre debe ser igual o posterior al inicio.</p>
+                      <p className="text-sm text-red-700">El cierre debe ser igual o posterior al inicio.</p>
                     ) : null}
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button
-                        className="rounded bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+                        className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
                         disabled={!canSubmitEncounterInlineEdit({
                           isPending,
                           draftStartedAt: inlineEditState.draftStartedAt,
@@ -207,7 +217,7 @@ export function EncountersList({
                         {isPending ? "Guardando..." : "Guardar"}
                       </button>
                       <button
-                        className="rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                        className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                         disabled={isPending}
                         onClick={() => handleCancelEditing(encounter)}
                         type="button"
