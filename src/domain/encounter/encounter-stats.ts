@@ -9,6 +9,15 @@ export interface EncounterStats {
   durationEligibleCount: number;
   durationExcludedCount: number;
   isDurationPartial: boolean;
+  daysToFirstVisitFromEpisodeStart: number | null;
+  isFirstVisitBeforeEpisodeStart: boolean;
+  averageDaysBetweenEpisodeVisits: number | null;
+  frequencyEligibleVisitCount: number;
+  frequencyIntervalCount: number;
+}
+
+interface EncounterWithTimestamp {
+  startedAtTimestamp: number;
 }
 
 function toTimestamp(value: string | undefined): number | null {
@@ -61,28 +70,132 @@ function resolveLastStartedAt(encounters: Encounter[]): string | null {
   return mostRecent?.startedAt ?? null;
 }
 
+function resolveEpisodeEncounters(params: {
+  encounters: Encounter[];
+  episodeOfCareId?: string;
+}): Encounter[] {
+  const { encounters, episodeOfCareId } = params;
+
+  if (!episodeOfCareId) {
+    return [];
+  }
+
+  return encounters.filter((encounter) => encounter.episodeOfCareId === episodeOfCareId);
+}
+
+function resolveSortedEpisodeStartedAtCandidates(encounters: Encounter[]): EncounterWithTimestamp[] {
+  const candidates: EncounterWithTimestamp[] = [];
+
+  for (const encounter of encounters) {
+    const startedAtTimestamp = toTimestamp(encounter.startedAt);
+
+    if (startedAtTimestamp === null) {
+      continue;
+    }
+
+    candidates.push({ startedAtTimestamp });
+  }
+
+  return candidates.sort((a, b) => a.startedAtTimestamp - b.startedAtTimestamp);
+}
+
+function resolveDaysToFirstVisitFromEpisodeStart(params: {
+  episodeStartDate?: string;
+  sortedEpisodeEncounters: EncounterWithTimestamp[];
+}): {
+  daysToFirstVisitFromEpisodeStart: number | null;
+  isFirstVisitBeforeEpisodeStart: boolean;
+} {
+  const { episodeStartDate, sortedEpisodeEncounters } = params;
+
+  const firstEncounter = sortedEpisodeEncounters[0];
+
+  if (!firstEncounter) {
+    return {
+      daysToFirstVisitFromEpisodeStart: null,
+      isFirstVisitBeforeEpisodeStart: false,
+    };
+  }
+
+  const episodeStartTimestamp = toTimestamp(episodeStartDate);
+
+  if (episodeStartTimestamp === null) {
+    return {
+      daysToFirstVisitFromEpisodeStart: null,
+      isFirstVisitBeforeEpisodeStart: false,
+    };
+  }
+
+  const rawDays = (firstEncounter.startedAtTimestamp - episodeStartTimestamp) / 86400000;
+
+  return {
+    daysToFirstVisitFromEpisodeStart: rawDays,
+    isFirstVisitBeforeEpisodeStart: rawDays < 0,
+  };
+}
+
+function resolveAverageDaysBetweenEpisodeVisits(sortedEpisodeEncounters: EncounterWithTimestamp[]): {
+  averageDaysBetweenEpisodeVisits: number | null;
+  frequencyIntervalCount: number;
+} {
+  if (sortedEpisodeEncounters.length < 2) {
+    return {
+      averageDaysBetweenEpisodeVisits: null,
+      frequencyIntervalCount: 0,
+    };
+  }
+
+  let intervalSum = 0;
+  let intervalCount = 0;
+
+  for (let index = 1; index < sortedEpisodeEncounters.length; index += 1) {
+    const current = sortedEpisodeEncounters[index];
+    const previous = sortedEpisodeEncounters[index - 1];
+    const intervalDays = (current.startedAtTimestamp - previous.startedAtTimestamp) / 86400000;
+
+    if (intervalDays < 0) {
+      continue;
+    }
+
+    intervalSum += intervalDays;
+    intervalCount += 1;
+  }
+
+  return {
+    averageDaysBetweenEpisodeVisits: intervalCount > 0 ? intervalSum / intervalCount : null,
+    frequencyIntervalCount: intervalCount,
+  };
+}
+
 export function calculateEncounterStats(params: {
   encounters: Encounter[];
   episodeOfCareId?: string;
+  episodeStartDate?: string;
 }): EncounterStats {
-  const { encounters, episodeOfCareId } = params;
+  const { encounters, episodeOfCareId, episodeStartDate } = params;
 
-  const treatmentCount = episodeOfCareId
-    ? encounters.filter((encounter) => encounter.episodeOfCareId === episodeOfCareId).length
-    : 0;
+  const episodeEncounters = resolveEpisodeEncounters({ encounters, episodeOfCareId });
+  const treatmentCount = episodeEncounters.length;
 
-  const durationEligibleEncounters = encounters.filter(isEligibleDuration);
+  const durationEligibleEncounters = episodeEncounters.filter(isEligibleDuration);
   const durationEligibleCount = durationEligibleEncounters.length;
-  const durationExcludedCount = encounters.length - durationEligibleCount;
+  const durationExcludedCount = treatmentCount - durationEligibleCount;
 
   const totalDurationMinutes = durationEligibleCount > 0
     ? durationEligibleEncounters.reduce((total, encounter) => total + getDurationMinutes(encounter), 0)
     : null;
 
+  const sortedEpisodeEncounterCandidates = resolveSortedEpisodeStartedAtCandidates(episodeEncounters);
+  const firstVisitFromEpisodeStart = resolveDaysToFirstVisitFromEpisodeStart({
+    episodeStartDate,
+    sortedEpisodeEncounters: sortedEpisodeEncounterCandidates,
+  });
+  const frequencyStats = resolveAverageDaysBetweenEpisodeVisits(sortedEpisodeEncounterCandidates);
+
   return {
     totalCount: encounters.length,
     treatmentCount,
-    lastStartedAt: resolveLastStartedAt(encounters),
+    lastStartedAt: resolveLastStartedAt(episodeEncounters),
     averageDurationMinutes: totalDurationMinutes !== null
       ? Math.round(totalDurationMinutes / durationEligibleCount)
       : null,
@@ -90,5 +203,10 @@ export function calculateEncounterStats(params: {
     durationEligibleCount,
     durationExcludedCount,
     isDurationPartial: durationEligibleCount > 0 && durationExcludedCount > 0,
+    daysToFirstVisitFromEpisodeStart: firstVisitFromEpisodeStart.daysToFirstVisitFromEpisodeStart,
+    isFirstVisitBeforeEpisodeStart: firstVisitFromEpisodeStart.isFirstVisitBeforeEpisodeStart,
+    averageDaysBetweenEpisodeVisits: frequencyStats.averageDaysBetweenEpisodeVisits,
+    frequencyEligibleVisitCount: sortedEpisodeEncounterCandidates.length,
+    frequencyIntervalCount: frequencyStats.frequencyIntervalCount,
   };
 }

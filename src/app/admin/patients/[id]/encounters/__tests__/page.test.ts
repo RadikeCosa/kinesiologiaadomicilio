@@ -62,6 +62,11 @@ describe("/admin/patients/[id]/encounters page", () => {
         durationEligibleCount: 0,
         durationExcludedCount: 0,
         isDurationPartial: false,
+        daysToFirstVisitFromEpisodeStart: null,
+        isFirstVisitBeforeEpisodeStart: false,
+        averageDaysBetweenEpisodeVisits: null,
+        frequencyEligibleVisitCount: 0,
+        frequencyIntervalCount: 0,
       },
     });
 
@@ -83,10 +88,16 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("Gestionar tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
     expect(foundHtml).toContain("Estadísticas de visitas");
+    expect(foundHtml).toContain("Visitas del tratamiento");
+    expect(foundHtml).not.toContain("Visitas registradas");
+    expect(foundHtml).toContain("Primera visita");
+    expect(foundHtml).toContain("Frecuencia promedio");
+    expect(foundHtml).toContain("Aún no calculable");
+    expect(foundHtml).not.toContain("Excluidas del cálculo de duración");
     expect(foundHtml).toContain("EncountersList");
   });
 
-  it("shows duration fallbacks and partial message when stats are partial", async () => {
+  it("shows duration helper and rhythm cards with expected copy", async () => {
     loadPatientEncountersPageDataMock.mockResolvedValueOnce({
       patient: {
         id: "pat-1",
@@ -110,6 +121,11 @@ describe("/admin/patients/[id]/encounters page", () => {
         durationEligibleCount: 3,
         durationExcludedCount: 2,
         isDurationPartial: true,
+        daysToFirstVisitFromEpisodeStart: 1,
+        isFirstVisitBeforeEpisodeStart: false,
+        averageDaysBetweenEpisodeVisits: 0.75,
+        frequencyEligibleVisitCount: 4,
+        frequencyIntervalCount: 3,
       },
     });
 
@@ -120,10 +136,93 @@ describe("/admin/patients/[id]/encounters page", () => {
 
     expect(html).toContain("Duración promedio");
     expect(html).toContain("Tiempo total registrado");
-    expect(html).toContain("Excluidas del cálculo de duración");
+    expect(html).not.toContain("Excluidas del cálculo de duración");
+    expect(html).toContain("Primera visita");
+    expect(html).toContain("Al día siguiente del inicio");
+    expect(html).toContain("Frecuencia promedio");
+    expect(html).toContain("Menos de 1 día");
     expect(html).toMatch(/Duración promedio<\/p><p[^>]*>—<\/p>/);
-    expect(html).toContain("Calculado sobre 3 de 5 visitas.");
-    expect(html).toContain("Incluye visitas sin cierre, legacy o con fechas no válidas.");
+    expect(html).toContain("* Duración calculada sobre 3 de 4 visitas del tratamiento. Se excluyen visitas sin cierre, legacy o con fechas no válidas.");
+  });
+
+  it("renders frequency singular/plural and first-visit anomaly copy", async () => {
+    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        operationalStatus: "active_treatment",
+      },
+      activeEpisode: {
+        id: "epi-1",
+        patientId: "pat-1",
+        status: "active",
+        startDate: "2026-04-01",
+      },
+      mostRecentEpisode: null,
+      encounters: [],
+      encounterStats: {
+        totalCount: 3,
+        treatmentCount: 3,
+        lastStartedAt: "2026-04-17T08:00:00Z",
+        averageDurationMinutes: 45,
+        totalDurationMinutes: 135,
+        durationEligibleCount: 3,
+        durationExcludedCount: 0,
+        isDurationPartial: false,
+        daysToFirstVisitFromEpisodeStart: -1,
+        isFirstVisitBeforeEpisodeStart: true,
+        averageDaysBetweenEpisodeVisits: 1.2,
+        frequencyEligibleVisitCount: 3,
+        frequencyIntervalCount: 2,
+      },
+    });
+
+    const element = await AdminPatientEncountersPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Antes del inicio registrado");
+    expect(html).toContain("Una visita cada 1 día");
+
+    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        operationalStatus: "active_treatment",
+      },
+      activeEpisode: {
+        id: "epi-1",
+        patientId: "pat-1",
+        status: "active",
+        startDate: "2026-04-01",
+      },
+      mostRecentEpisode: null,
+      encounters: [],
+      encounterStats: {
+        totalCount: 3,
+        treatmentCount: 3,
+        lastStartedAt: "2026-04-17T08:00:00Z",
+        averageDurationMinutes: 45,
+        totalDurationMinutes: 135,
+        durationEligibleCount: 3,
+        durationExcludedCount: 0,
+        isDurationPartial: false,
+        daysToFirstVisitFromEpisodeStart: 3.2,
+        isFirstVisitBeforeEpisodeStart: false,
+        averageDaysBetweenEpisodeVisits: 3.2,
+        frequencyEligibleVisitCount: 3,
+        frequencyIntervalCount: 2,
+      },
+    });
+
+    const elementPlural = await AdminPatientEncountersPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const htmlPlural = renderToStaticMarkup(elementPlural);
+
+    expect(htmlPlural).toContain("A los 4 días del inicio");
+    expect(htmlPlural).toContain("Una visita cada 3 días");
   });
 
   it("shows a single blocking signal and keeps no-CTA behavior without active treatment", async () => {
@@ -146,6 +245,11 @@ describe("/admin/patients/[id]/encounters page", () => {
         durationEligibleCount: 0,
         durationExcludedCount: 0,
         isDurationPartial: false,
+        daysToFirstVisitFromEpisodeStart: null,
+        isFirstVisitBeforeEpisodeStart: false,
+        averageDaysBetweenEpisodeVisits: null,
+        frequencyEligibleVisitCount: 0,
+        frequencyIntervalCount: 0,
       },
     });
 
