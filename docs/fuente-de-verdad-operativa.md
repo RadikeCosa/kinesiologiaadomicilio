@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-26 (UTC)
+> Última actualización: 2026-04-27 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -98,6 +98,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - pantalla específica para registrar visita realizada (`/admin/patients/[id]/encounters/new`) con gate de tratamiento activo;
 - listado de visitas del paciente ordenadas por fecha más reciente, con corrección inline acotada de fecha/hora de la visita, sin edición clínica completa del `Encounter`;
 - en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), incluyendo acceso rápido también durante tratamiento activo;
+- en `/encounters`, se muestran estadísticas clínicas mínimas derivadas de visitas (sin persistir nuevos datos), en bloque compacto previo al listado;
 - en `/encounters`, el bloque de contexto de tratamiento fue reducido visualmente para no competir con la operación de visitas;
 - en `/encounters`, `Registrar visita` vive en el header interno, alineado a la derecha y visible solo con tratamiento activo;
 - en `/encounters`, el loader diferencia tratamiento finalizado vs sin tratamiento iniciado usando `activeEpisode` + `mostRecentEpisode`;
@@ -229,6 +230,13 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - contrato tolerante de lectura legacy:
   - se tolera `period.end` ausente en datos históricos/externos;
   - encuentros históricos con `start === end` se tratan como instante operativo histórico (inicio conocido, sin duración real explícita).
+- métricas mínimas derivadas en `/encounters`:
+  - total de visitas registradas;
+  - visitas del tratamiento activo o más reciente;
+  - última visita registrada;
+  - duración promedio y tiempo total **solo** sobre visitas con duración explícita válida (`endedAt > startedAt`);
+  - visitas sin duración explícita / excluidas del cálculo temporal;
+  - cuando la duración se calcula sobre una parte de las visitas, la UI informa cobertura parcial (`Calculado sobre X de Y visitas`).
 - `/encounters/new` registra una visita realizada, por eso requiere inicio y cierre en la carga operativa.
 - `occurrenceDate` se mantiene únicamente como compatibilidad transicional de **entrada** (payload legacy), no como contrato operativo vigente de salida.
 - edición temporal en `/encounters` corrige inicio y cierre en conjunto, con `startedAt`/`endedAt` obligatorios y validación `endedAt >= startedAt`.

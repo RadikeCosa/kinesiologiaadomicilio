@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
+import { EncounterStatsSummary } from "@/app/admin/patients/[id]/encounters/components/EncounterStatsSummary";
 import { loadPatientEncountersPageData } from "@/app/admin/patients/[id]/encounters/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import {
@@ -63,12 +64,11 @@ function buildTreatmentMetadata(params: {
 export default async function AdminPatientEncountersPage({ params }: AdminPatientEncountersPageProps) {
   const { id } = await params;
   const pageData = await loadPatientEncountersPageData(id);
-  const patientDetail = pageData ? await loadPatientDetail(id) : null;
-  const patientAge = patientDetail
-    ? calculateAgeFromBirthDate(patientDetail.birthDate)
+  const patientAge = pageData
+    ? calculateAgeFromBirthDate(pageData.patient.birthDate)
     : null;
-  const treatmentBadge = patientDetail
-    ? getTreatmentBadgePresentation(patientDetail.operationalStatus)
+  const treatmentBadge = pageData
+    ? getTreatmentBadgePresentation(pageData.patient.operationalStatus)
     : null;
 
   if (!pageData) {
@@ -136,12 +136,8 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
       <p className="mt-2 text-sm text-slate-600">Registro y seguimiento de visitas del paciente.</p>
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">
-        {patientDetail ? (
-          <>
-            <span>DNI: {formatDniDisplay(patientDetail.dni)}</span>
-            {patientAge !== null ? <span>· Edad: {patientAge} años</span> : null}
-          </>
-        ) : null}
+        {pageData.patient.dni ? <span>DNI: {formatDniDisplay(pageData.patient.dni)}</span> : null}
+        {patientAge !== null ? <span>· Edad: {patientAge} años</span> : null}
         <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-medium ${treatmentMetadata.toneClassName}`}>
           {treatmentMetadata.title}
         </span>
@@ -163,6 +159,8 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
           </Link>
         </div>
       ) : null}
+
+      <EncounterStatsSummary stats={pageData.encounterStats} />
 
       <EncountersList
         encounters={pageData.encounters}
