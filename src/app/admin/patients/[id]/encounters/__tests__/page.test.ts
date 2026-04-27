@@ -39,7 +39,12 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(notFoundHtml).toContain("href=\"/admin/patients\"");
 
     loadPatientEncountersPageDataMock.mockResolvedValueOnce({
-      patient: { id: "pat-1", fullName: "Ana Pérez" },
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        dni: "30111222",
+        operationalStatus: "active_treatment",
+      },
       activeEpisode: {
         id: "epi-1",
         patientId: "pat-1",
@@ -48,16 +53,16 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
       mostRecentEpisode: null,
       encounters: [],
-    });
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      fullName: "Ana Pérez",
-      firstName: "Ana",
-      lastName: "Pérez",
-      dni: "30111222",
-      operationalStatus: "active_treatment",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
+      encounterStats: {
+        totalCount: 0,
+        treatmentCount: 0,
+        lastStartedAt: null,
+        averageDurationMinutes: null,
+        totalDurationMinutes: null,
+        durationEligibleCount: 0,
+        durationExcludedCount: 0,
+        isDurationPartial: false,
+      },
     });
 
     const foundElement = await AdminPatientEncountersPage({
@@ -77,25 +82,71 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml.match(/href=\"\/admin\/patients\/pat-1\/encounters\/new\"/g)?.length).toBe(1);
     expect(foundHtml).toContain("Gestionar tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
+    expect(foundHtml).toContain("Estadísticas de visitas");
     expect(foundHtml).toContain("EncountersList");
   });
 
-  it("shows a single blocking signal and treatment navigation when there is no active treatment", async () => {
+  it("shows duration fallbacks and partial message when stats are partial", async () => {
     loadPatientEncountersPageDataMock.mockResolvedValueOnce({
-      patient: { id: "pat-1", fullName: "Ana Pérez" },
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        operationalStatus: "active_treatment",
+      },
+      activeEpisode: {
+        id: "epi-1",
+        patientId: "pat-1",
+        status: "active",
+        startDate: "2026-04-01",
+      },
+      mostRecentEpisode: null,
+      encounters: [],
+      encounterStats: {
+        totalCount: 5,
+        treatmentCount: 4,
+        lastStartedAt: "2026-04-17T08:00:00Z",
+        averageDurationMinutes: null,
+        totalDurationMinutes: null,
+        durationEligibleCount: 3,
+        durationExcludedCount: 2,
+        isDurationPartial: true,
+      },
+    });
+
+    const element = await AdminPatientEncountersPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Duración promedio");
+    expect(html).toContain("Tiempo total registrado");
+    expect(html).toContain("Excluidas del cálculo de duración");
+    expect(html).toMatch(/Duración promedio<\/p><p[^>]*>—<\/p>/);
+    expect(html).toContain("Calculado sobre 3 de 5 visitas.");
+    expect(html).toContain("Incluye visitas sin cierre, legacy o con fechas no válidas.");
+  });
+
+  it("shows a single blocking signal and keeps no-CTA behavior without active treatment", async () => {
+    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        dni: "30111222",
+        operationalStatus: "ready_to_start",
+      },
       activeEpisode: null,
       mostRecentEpisode: null,
       encounters: [],
-    });
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      fullName: "Ana Pérez",
-      firstName: "Ana",
-      lastName: "Pérez",
-      dni: "30111222",
-      operationalStatus: "ready_to_start",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
+      encounterStats: {
+        totalCount: 0,
+        treatmentCount: 0,
+        lastStartedAt: null,
+        averageDurationMinutes: null,
+        totalDurationMinutes: null,
+        durationEligibleCount: 0,
+        durationExcludedCount: 0,
+        isDurationPartial: false,
+      },
     });
 
     const foundElement = await AdminPatientEncountersPage({
@@ -109,44 +160,6 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("Ir a gestión de tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
     expect(foundHtml).not.toContain("href=\"/admin/patients/pat-1/encounters/new\"");
-    expect(foundHtml).not.toContain("Tratamiento finalizado");
     expect(foundHtml).toContain("EncountersList");
-  });
-
-  it("differentiates finished treatment state without suggesting immediate new start", async () => {
-    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
-      patient: { id: "pat-1", fullName: "Ana Pérez" },
-      activeEpisode: null,
-      mostRecentEpisode: {
-        id: "epi-1",
-        patientId: "pat-1",
-        status: "finished",
-        startDate: "2026-03-01",
-        endDate: "2026-03-30",
-      },
-      encounters: [],
-    });
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      fullName: "Ana Pérez",
-      firstName: "Ana",
-      lastName: "Pérez",
-      dni: "30111222",
-      operationalStatus: "finished_treatment",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
-    });
-
-    const element = await AdminPatientEncountersPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
-    const html = renderToStaticMarkup(element);
-
-    expect(html).toContain("Tratamiento finalizado");
-    expect(html).toContain("Finalización: 30/03/2026");
-    expect(html).toContain("El tratamiento está finalizado. Revisá la gestión de tratamiento para continuar.");
-    expect(html).toContain("href=\"/admin/patients/pat-1/treatment\"");
-    expect(html).not.toContain("href=\"/admin/patients/pat-1/encounters/new\"");
-    expect(html).not.toContain("Iniciá un tratamiento para habilitar el registro de visitas.");
   });
 });

@@ -1,5 +1,9 @@
+import type { EncounterStats } from "@/domain/encounter/encounter-stats";
+import { calculateEncounterStats } from "@/domain/encounter/encounter-stats";
 import type { Encounter } from "@/domain/encounter/encounter.types";
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
+import { getPatientOperationalStatus } from "@/domain/patient/patient.rules";
+import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
 import {
   getActiveEpisodeByPatientId,
@@ -11,10 +15,14 @@ export interface PatientEncountersPageData {
   patient: {
     id: string;
     fullName: string;
+    dni?: string;
+    birthDate?: string;
+    operationalStatus: PatientOperationalStatus;
   };
   activeEpisode: EpisodeOfCare | null;
   mostRecentEpisode: EpisodeOfCare | null;
   encounters: Encounter[];
+  encounterStats: EncounterStats;
 }
 
 function buildFullName(patient: { firstName: string; lastName: string }): string {
@@ -47,6 +55,13 @@ function sortByMostRecentEncounter(encounters: Encounter[]): Encounter[] {
   });
 }
 
+function resolveStatsEpisodeId(params: {
+  activeEpisode: EpisodeOfCare | null;
+  mostRecentEpisode: EpisodeOfCare | null;
+}): string | undefined {
+  return params.activeEpisode?.id ?? params.mostRecentEpisode?.id;
+}
+
 export async function loadPatientEncountersPageData(patientId: string): Promise<PatientEncountersPageData | null> {
   const patient = await getPatientById(patientId);
 
@@ -60,13 +75,27 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     listEncountersByPatientId(patient.id),
   ]);
 
+  const sortedEncounters = sortByMostRecentEncounter(encounters);
+  const effectiveEpisodeId = resolveStatsEpisodeId({ activeEpisode, mostRecentEpisode });
+
   return {
     patient: {
       id: patient.id,
       fullName: buildFullName(patient),
+      dni: patient.dni,
+      birthDate: patient.birthDate,
+      operationalStatus: getPatientOperationalStatus({
+        patient,
+        hasActiveEpisode: Boolean(activeEpisode),
+        hasFinishedEpisode: mostRecentEpisode?.status === "finished",
+      }),
     },
     activeEpisode,
     mostRecentEpisode,
-    encounters: sortByMostRecentEncounter(encounters),
+    encounters: sortedEncounters,
+    encounterStats: calculateEncounterStats({
+      encounters: sortedEncounters,
+      episodeOfCareId: effectiveEpisodeId,
+    }),
   };
 }
