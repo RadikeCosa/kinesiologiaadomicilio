@@ -48,8 +48,8 @@ El proyecto está en etapa **híbrida transicional**:
 - Gate operativo por DNI para iniciar tratamiento.
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
 - Registro y listado de visitas realizadas (`Encounter` base): alta en `/encounters/new` y listado operativo en `/encounters`.
-- En `/admin/patients/[id]/encounters` se muestran estadísticas clínicas mínimas derivadas de visitas (sin persistencia nueva): total de visitas, visitas del tratamiento activo/reciente, última visita, duración promedio/tiempo total sobre visitas con duración explícita válida y conteo de visitas excluidas de duración.
-- Las métricas de duración en `/encounters` pueden ser parciales por datos legacy (ej. `start===end`) o encuentros sin cierre; la UI explicita cobertura (`Calculado sobre X de Y visitas`).
+- En `/admin/patients/[id]/encounters` se muestran estadísticas clínicas mínimas derivadas (sin persistencia nueva) con scope de episodio efectivo (activo si existe; si no, último registrado): visitas del tratamiento, última visita, primera visita, frecuencia promedio, duración promedio y tiempo total registrado.
+- Las métricas de duración en `/encounters` pueden ser parciales por datos legacy (ej. `start===end`) o encuentros sin cierre; la UI explicita cobertura como helper (`Duración calculada sobre X de Y visitas del tratamiento`).
 - Estas estadísticas viven en `/encounters` y no en el hub `/admin/patients/[id]` en esta fase.
 - Contrato operativo vigente en visitas: `startedAt` + `endedAt` obligatorios tanto al registrar (`/encounters/new`) como al editar en listado (`/encounters`), con validación temporal `endedAt >= startedAt`.
 - `occurrenceDate` queda limitado a compatibilidad transicional de entrada para payloads legacy.

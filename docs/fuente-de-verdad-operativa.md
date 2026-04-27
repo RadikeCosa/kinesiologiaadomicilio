@@ -230,13 +230,20 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - contrato tolerante de lectura legacy:
   - se tolera `period.end` ausente en datos históricos/externos;
   - encuentros históricos con `start === end` se tratan como instante operativo histórico (inicio conocido, sin duración real explícita).
-- métricas mínimas derivadas en `/encounters`:
-  - total de visitas registradas;
-  - visitas del tratamiento activo o más reciente;
-  - última visita registrada;
-  - duración promedio y tiempo total **solo** sobre visitas con duración explícita válida (`endedAt > startedAt`);
-  - visitas sin duración explícita / excluidas del cálculo temporal;
-  - cuando la duración se calcula sobre una parte de las visitas, la UI informa cobertura parcial (`Calculado sobre X de Y visitas`).
+- bloque de métricas mínimas derivadas en `/encounters` (sin persistir nuevos datos) con **scope único de episodio efectivo**:
+  - episodio efectivo = activo si existe; si no, último episodio registrado;
+  - visitas del tratamiento (conteo de visitas asociadas al episodio efectivo);
+  - última visita del tratamiento;
+  - primera visita del episodio efectivo (días desde `EpisodeOfCare.startDate` hasta la primera visita válida del episodio);
+  - frecuencia promedio entre visitas consecutivas válidas del episodio efectivo;
+  - duración promedio y tiempo total **solo** sobre visitas válidas del episodio efectivo con duración explícita (`endedAt > startedAt`).
+- transparencia de cobertura de duración en `/encounters`:
+  - la parcialidad de duración se informa como helper (no tarjeta protagonista);
+  - la cobertura `X de Y` usa `Y = visitas del tratamiento` (episodio efectivo), no el total histórico global;
+  - cuando hay exclusiones, el helper resume causales (sin cierre, legacy o fechas no válidas).
+- las métricas derivadas de ritmo y duración de `/encounters` se calculan en lectura y **no se persisten**.
+- cualquier métrica histórica/global futura debe documentarse explícitamente como scope separado del episodio efectivo.
+- `totalCount` global puede seguir existiendo en contrato de stats como dato auxiliar/compatibilidad, pero no integra el set protagonista del bloque de `/encounters`.
 - `/encounters/new` registra una visita realizada, por eso requiere inicio y cierre en la carga operativa.
 - `occurrenceDate` se mantiene únicamente como compatibilidad transicional de **entrada** (payload legacy), no como contrato operativo vigente de salida.
 - edición temporal en `/encounters` corrige inicio y cierre en conjunto, con `startedAt`/`endedAt` obligatorios y validación `endedAt >= startedAt`.

@@ -55,11 +55,11 @@ function sortByMostRecentEncounter(encounters: Encounter[]): Encounter[] {
   });
 }
 
-function resolveStatsEpisodeId(params: {
+function resolveEffectiveEpisode(params: {
   activeEpisode: EpisodeOfCare | null;
   mostRecentEpisode: EpisodeOfCare | null;
-}): string | undefined {
-  return params.activeEpisode?.id ?? params.mostRecentEpisode?.id;
+}): EpisodeOfCare | null {
+  return params.activeEpisode ?? params.mostRecentEpisode;
 }
 
 export async function loadPatientEncountersPageData(patientId: string): Promise<PatientEncountersPageData | null> {
@@ -76,7 +76,7 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
   ]);
 
   const sortedEncounters = sortByMostRecentEncounter(encounters);
-  const effectiveEpisodeId = resolveStatsEpisodeId({ activeEpisode, mostRecentEpisode });
+  const effectiveEpisode = resolveEffectiveEpisode({ activeEpisode, mostRecentEpisode });
 
   return {
     patient: {
@@ -95,7 +95,8 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     encounters: sortedEncounters,
     encounterStats: calculateEncounterStats({
       encounters: sortedEncounters,
-      episodeOfCareId: effectiveEpisodeId,
+      episodeOfCareId: effectiveEpisode?.id,
+      episodeStartDate: effectiveEpisode?.startDate,
     }),
   };
 }

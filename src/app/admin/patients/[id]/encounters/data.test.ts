@@ -86,6 +86,12 @@ describe("loadPatientEncountersPageData", () => {
     expect(data?.encounters.map((item) => item.id)).toEqual(["enc-2", "enc-1"]);
     expect(data?.encounterStats.totalCount).toBe(2);
     expect(data?.encounterStats.treatmentCount).toBe(1);
+    expect(data?.encounterStats.daysToFirstVisitFromEpisodeStart).toBe(14 + (10.5 / 24));
+    expect(data?.encounterStats.averageDaysBetweenEpisodeVisits).toBeNull();
+    expect(data?.encounterStats.totalDurationMinutes).toBe(30);
+    expect(data?.encounterStats.averageDurationMinutes).toBe(30);
+    expect(data?.encounterStats.durationEligibleCount).toBe(1);
+    expect(data?.encounterStats.durationExcludedCount).toBe(0);
   });
 
   it("sorts encounters by real time when offsets differ", async () => {
@@ -219,6 +225,9 @@ describe("loadPatientEncountersPageData", () => {
     expect(data?.activeEpisode?.id).toBe("epi-active");
     expect(data?.mostRecentEpisode?.id).toBe("epi-recent");
     expect(data?.encounterStats.treatmentCount).toBe(1);
+    expect(data?.encounterStats.frequencyEligibleVisitCount).toBe(1);
+    expect(data?.encounterStats.totalDurationMinutes).toBeNull();
+    expect(data?.encounterStats.durationExcludedCount).toBe(1);
   });
 
   it("uses most recent finished episode for treatmentCount when there is no active episode", async () => {
@@ -259,6 +268,10 @@ describe("loadPatientEncountersPageData", () => {
     expect(data?.activeEpisode).toBeNull();
     expect(data?.mostRecentEpisode?.status).toBe("finished");
     expect(data?.encounterStats.treatmentCount).toBe(1);
+    expect(data?.encounterStats.daysToFirstVisitFromEpisodeStart).toBe(19 + (10 / 24));
+    expect(data?.encounterStats.averageDaysBetweenEpisodeVisits).toBeNull();
+    expect(data?.encounterStats.totalDurationMinutes).toBeNull();
+    expect(data?.encounterStats.durationExcludedCount).toBe(1);
   });
 
   it("returns treatmentCount 0 when patient has no treatment", async () => {
@@ -284,5 +297,11 @@ describe("loadPatientEncountersPageData", () => {
     const data = await loadPatientEncountersPageData("pat-1");
 
     expect(data?.encounterStats.treatmentCount).toBe(0);
+    expect(data?.encounterStats.daysToFirstVisitFromEpisodeStart).toBeNull();
+    expect(data?.encounterStats.averageDaysBetweenEpisodeVisits).toBeNull();
+    expect(data?.encounterStats.frequencyEligibleVisitCount).toBe(0);
+    expect(data?.encounterStats.totalDurationMinutes).toBeNull();
+    expect(data?.encounterStats.durationEligibleCount).toBe(0);
+    expect(data?.encounterStats.durationExcludedCount).toBe(0);
   });
 });
