@@ -7,7 +7,7 @@ import {
 } from "@/infrastructure/mappers/episode-of-care/episode-of-care-write.mapper";
 
 describe("episode-of-care mappers", () => {
-  it("maps start input to FHIR EpisodeOfCare", () => {
+  it("maps start input to FHIR EpisodeOfCare without referralRequest", () => {
     const mapped = mapStartEpisodeOfCareInputToFhir({
       patientId: "pat-1",
       startDate: "2026-04-17",
@@ -18,6 +18,22 @@ describe("episode-of-care mappers", () => {
       status: "active",
       patient: { reference: "Patient/pat-1" },
       period: { start: "2026-04-17" },
+    });
+  });
+
+  it("maps start input to FHIR EpisodeOfCare with referralRequest", () => {
+    const mapped = mapStartEpisodeOfCareInputToFhir({
+      patientId: "pat-1",
+      startDate: "2026-04-17",
+      serviceRequestId: "sr-1",
+    });
+
+    expect(mapped).toEqual({
+      resourceType: "EpisodeOfCare",
+      status: "active",
+      patient: { reference: "Patient/pat-1" },
+      period: { start: "2026-04-17" },
+      referralRequest: [{ reference: "ServiceRequest/sr-1" }],
     });
   });
 
@@ -57,6 +73,39 @@ describe("episode-of-care mappers", () => {
       status: "finished",
       startDate: "2026-04-17",
       endDate: "2026-04-29",
+      serviceRequestId: undefined,
     });
+  });
+
+  it("maps first valid referralRequest reference to serviceRequestId", () => {
+    const mapped = mapFhirEpisodeOfCareToDomain({
+      resourceType: "EpisodeOfCare",
+      id: "epi-2",
+      status: "active",
+      patient: { reference: "Patient/pat-1" },
+      period: { start: "2026-04-17" },
+      referralRequest: [
+        { reference: "invalid-reference" },
+        { reference: "ServiceRequest/sr-valid" },
+      ],
+    });
+
+    expect(mapped).toMatchObject({
+      id: "epi-2",
+      serviceRequestId: "sr-valid",
+    });
+  });
+
+  it("supports referralRequest references with _history", () => {
+    const mapped = mapFhirEpisodeOfCareToDomain({
+      resourceType: "EpisodeOfCare",
+      id: "epi-3",
+      status: "active",
+      patient: { reference: "Patient/pat-1" },
+      period: { start: "2026-04-17" },
+      referralRequest: [{ reference: "ServiceRequest/sr-2/_history/4" }],
+    });
+
+    expect(mapped.serviceRequestId).toBe("sr-2");
   });
 });

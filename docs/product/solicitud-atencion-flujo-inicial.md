@@ -11,6 +11,10 @@
 > Actualización de estado (2026-04-28): **PRODUCT-SR-002 implementado** como segundo corte funcional en `/admin/patients/[id]/administrative` (aceptar, cancelar y cerrar como No inició con motivo), manteniendo no-alcances clínicos/operativos globales.
 >
 > Actualización de estado (2026-04-28): **PRODUCT-SR-HARDENING cerrado** (fidelidad `accepted/in_review` + ownership paciente↔solicitud en update), quedando base robusta para planificar SR-003 sin expandir alcance clínico en esta etapa.
+>
+> Actualización de estado (2026-04-28): **PRODUCT-SR-003 implementado/cerrado** como tercer corte funcional: una solicitud `accepted` puede derivar a `/treatment` y, al iniciar tratamiento desde esa superficie, se vincula el `EpisodeOfCare` mediante `referralRequest` sin mover ownership clínico fuera de `/treatment`.
+>
+> Actualización de estado (2026-04-28): **PRODUCT-SR-HARDENING-2 cerrado**: política `single-use` para SR accepted implementada (si ya tiene vínculo con `EpisodeOfCare`, debe registrarse nueva solicitud para otro ciclo).
 
 ## 1) Propósito del documento
 

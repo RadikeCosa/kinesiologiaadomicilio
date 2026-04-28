@@ -57,6 +57,9 @@ El proyecto está en etapa **híbrida transicional**:
 - Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - En `/admin/patients/[id]/administrative` las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse en forma mínima y resolverse administrativamente (aceptar, cancelar y cerrar como No inició con motivo).
 - Resolver o registrar solicitudes de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
+- Una solicitud `accepted` puede derivar desde `/administrative` a `/admin/patients/[id]/treatment?serviceRequestId={id}` para iniciar tratamiento desde la superficie clínica correspondiente.
+- Al iniciar tratamiento desde ese contexto, el `EpisodeOfCare` se crea vinculado a la solicitud mediante `referralRequest` (`ServiceRequest/{id}`), manteniendo el flujo legacy cuando no hay `serviceRequestId`.
+- Política vigente `single-use`: una solicitud `accepted` ya vinculada a algún `EpisodeOfCare` no puede reutilizarse para iniciar otro ciclo; se requiere nueva solicitud.
 - Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad basadas en `birthDate` válido.
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.

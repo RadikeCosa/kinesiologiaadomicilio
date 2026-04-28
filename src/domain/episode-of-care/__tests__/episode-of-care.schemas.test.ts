@@ -19,11 +19,26 @@ describe("episode-of-care.schemas", () => {
     const parsed = startEpisodeOfCareSchema.parse({
       patientId: " pat-001 ",
       startDate: " 2026-04-16 ",
+      serviceRequestId: " sr-001 ",
     });
 
     expect(parsed).toEqual({
       patientId: "pat-001",
       startDate: "2026-04-16",
+      serviceRequestId: "sr-001",
+    });
+  });
+
+  it("keeps start input valid without optional serviceRequestId", () => {
+    const parsed = startEpisodeOfCareSchema.parse({
+      patientId: "pat-002",
+      startDate: "2026-05-01",
+    });
+
+    expect(parsed).toEqual({
+      patientId: "pat-002",
+      startDate: "2026-05-01",
+      serviceRequestId: undefined,
     });
   });
 

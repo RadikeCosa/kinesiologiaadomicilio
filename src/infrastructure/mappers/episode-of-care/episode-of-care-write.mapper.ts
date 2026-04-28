@@ -7,6 +7,8 @@ import { buildPatientReference } from "@/lib/fhir/references";
 import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care/episode-of-care-fhir.types";
 
 export function mapStartEpisodeOfCareInputToFhir(input: StartEpisodeOfCareInput): FhirEpisodeOfCare {
+  const serviceRequestId = input.serviceRequestId?.trim();
+
   return {
     resourceType: "EpisodeOfCare",
     status: "active",
@@ -16,6 +18,9 @@ export function mapStartEpisodeOfCareInputToFhir(input: StartEpisodeOfCareInput)
     period: {
       start: input.startDate,
     },
+    referralRequest: serviceRequestId
+      ? [{ reference: `ServiceRequest/${serviceRequestId}` }]
+      : undefined,
   };
 }
 

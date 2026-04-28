@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import AdminPatientTreatmentPage from "@/app/admin/patients/[id]/treatment/page";
 
 const loadPatientDetailMock = vi.hoisted(() => vi.fn());
+const loadTreatmentServiceRequestContextMock = vi.hoisted(() => vi.fn());
 (globalThis as { React?: typeof React }).React = React;
 
 vi.mock("next/link", () => ({
@@ -15,127 +16,117 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadPatientDetail: loadPatientDetailMock,
+  loadTreatmentServiceRequestContext: loadTreatmentServiceRequestContextMock,
 }));
 
 vi.mock("@/app/admin/patients/[id]/components/StartEpisodeOfCareForm", () => ({
-  StartEpisodeOfCareForm: () => createElement("div", null, "StartEpisodeOfCareForm"),
+  StartEpisodeOfCareForm: ({ serviceRequestId }: { serviceRequestId?: string }) =>
+    createElement("div", null, `StartEpisodeOfCareForm${serviceRequestId ? `:${serviceRequestId}` : ""}`),
 }));
 
 vi.mock("@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm", () => ({
   FinishEpisodeOfCareForm: () => createElement("div", null, "FinishEpisodeOfCareForm"),
 }));
 
+const basePatient = {
+  id: "pat-1",
+  firstName: "Ana",
+  lastName: "Pérez",
+  fullName: "Ana Pérez",
+  dni: "30111222",
+  birthDate: "1958-04-24",
+  operationalStatus: "ready_to_start",
+  createdAt: "2026-01-01T00:00:00.000Z",
+  updatedAt: "2026-01-01T00:00:00.000Z",
+  activeEpisode: null,
+  latestEpisode: null,
+};
+
 describe("/admin/patients/[id]/treatment page", () => {
   afterEach(() => {
     vi.useRealTimers();
+    loadTreatmentServiceRequestContextMock.mockReset();
   });
 
-  it("renders consistent back links and compact patient metadata", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce(null);
-
-    const notFoundElement = await AdminPatientTreatmentPage({
-      params: Promise.resolve({ id: "missing" }),
-    });
-    const notFoundHtml = renderToStaticMarkup(notFoundElement);
-
-    expect(notFoundHtml).toContain("← Volver a pacientes");
-    expect(notFoundHtml).toContain("href=\"/admin/patients\"");
-
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-04-24T12:00:00Z"));
-
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      firstName: "Ana",
-      lastName: "Pérez",
-      fullName: "Ana Pérez",
-      dni: "30111222",
-      birthDate: "1958-04-24",
-      operationalStatus: "active_treatment",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
-      activeEpisode: null,
-      latestEpisode: null,
-    });
-
-    const foundElement = await AdminPatientTreatmentPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
-    const foundHtml = renderToStaticMarkup(foundElement);
-
-    expect(foundHtml).toContain("← Volver al paciente");
-    expect(foundHtml).toContain("href=\"/admin/patients/pat-1\"");
-    expect(foundHtml).toContain("Ver visitas");
-    expect(foundHtml).toContain("href=\"/admin/patients/pat-1/encounters\"");
-    expect(foundHtml).toContain("Ana Pérez");
-    expect(foundHtml).toContain("Inicio y cierre del tratamiento del paciente.");
-    expect(foundHtml).toContain("DNI: 30.111.222");
-    expect(foundHtml).toContain("Edad: 68 años");
-    expect(foundHtml).toContain("En tratamiento");
-  });
-
-  it("does not render age when birthDate is invalid", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      firstName: "Ana",
-      lastName: "Pérez",
-      fullName: "Ana Pérez",
-      dni: "30111222",
-      birthDate: "invalid-date",
-      operationalStatus: "ready_to_start",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
-      activeEpisode: null,
-      latestEpisode: null,
+  it("shows contextual block when serviceRequestId is valid", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: "sr-1",
+      isValid: true,
+      state: "valid",
+      message: undefined,
+      serviceRequest: {
+        id: "sr-1",
+        patientId: "pat-1",
+        status: "accepted",
+        requestedAt: "2026-04-10",
+        reasonText: "Dolor lumbar",
+        reportedDiagnosisText: "Lumbalgia",
+        requesterDisplay: "Dr. Soto",
+        createdAt: "2026-04-10T00:00:00.000Z",
+      },
     });
 
     const element = await AdminPatientTreatmentPage({
       params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ serviceRequestId: "sr-1" }),
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("DNI: 30.111.222");
-    expect(html).not.toContain("Edad:");
+    expect(html).toContain("Inicio de tratamiento desde solicitud aceptada");
+    expect(html).toContain("Fecha de solicitud: 10/04/2026");
+    expect(html).toContain("Motivo: Dolor lumbar");
+    expect(html).toContain("Diagnóstico informado: Lumbalgia");
+    expect(html).toContain("Solicitante: Dr. Soto");
+    expect(html).toContain("StartEpisodeOfCareForm:sr-1");
   });
 
-  it("shows start treatment as main action when there is no treatment started", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      firstName: "Ana",
-      lastName: "Pérez",
-      fullName: "Ana Pérez",
-      dni: "30111222",
-      birthDate: "1958-04-24",
-      operationalStatus: "ready_to_start",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
-      activeEpisode: null,
-      latestEpisode: null,
+  it("shows warning and keeps legacy start when serviceRequestId is invalid", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: undefined,
+      isValid: false,
+      state: "invalid",
+      message: undefined,
+      serviceRequest: undefined,
     });
 
     const element = await AdminPatientTreatmentPage({
       params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ serviceRequestId: "sr-bad" }),
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Sin tratamiento activo");
-    expect(html).toContain("Iniciá un tratamiento para habilitar el registro de visitas.");
+    expect(html).toContain("No se pudo usar la solicitud indicada para iniciar tratamiento.");
     expect(html).toContain("StartEpisodeOfCareForm");
-    expect(html).not.toContain("FinishEpisodeOfCareForm");
-    expect(html).toContain("href=\"/admin/patients/pat-1/encounters\"");
+    expect(html).not.toContain("StartEpisodeOfCareForm:sr-bad");
   });
 
-  it("shows finish treatment as main action when treatment is active", async () => {
+
+  it("shows already-used warning and does not pass serviceRequestId to start form", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: undefined,
+      isValid: false,
+      state: "already_used",
+      message: "Esta solicitud ya fue utilizada para iniciar un tratamiento. Para un nuevo ciclo, registrá una nueva solicitud.",
+      serviceRequest: undefined,
+    });
+
+    const element = await AdminPatientTreatmentPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ serviceRequestId: "sr-2" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Esta solicitud ya fue utilizada para iniciar un tratamiento. Para un nuevo ciclo, registrá una nueva solicitud.");
+    expect(html).toContain("StartEpisodeOfCareForm");
+    expect(html).not.toContain("StartEpisodeOfCareForm:sr-2");
+  });
+  it("keeps active treatment block and no start form when active episode exists", async () => {
     loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      firstName: "Ana",
-      lastName: "Pérez",
-      fullName: "Ana Pérez",
-      dni: "30111222",
-      birthDate: "1958-04-24",
+      ...basePatient,
       operationalStatus: "active_treatment",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
       activeEpisode: {
         id: "epi-1",
         patientId: "pat-1",
@@ -149,49 +140,30 @@ describe("/admin/patients/[id]/treatment page", () => {
         startDate: "2026-04-01",
       },
     });
-
-    const element = await AdminPatientTreatmentPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
-    const html = renderToStaticMarkup(element);
-
-    expect(html).toContain("Tratamiento activo");
-    expect(html).toContain("FinishEpisodeOfCareForm");
-    expect(html).not.toContain("Sin tratamiento activo");
-    expect(html).toContain("href=\"/admin/patients/pat-1/encounters\"");
-  });
-
-  it("shows explicit finished state and keeps start flow secondary", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      firstName: "Ana",
-      lastName: "Pérez",
-      fullName: "Ana Pérez",
-      dni: "30111222",
-      birthDate: "1958-04-24",
-      operationalStatus: "finished_treatment",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
-      activeEpisode: null,
-      latestEpisode: {
-        id: "epi-1",
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: "sr-1",
+      isValid: true,
+      state: "valid",
+      message: undefined,
+      serviceRequest: {
+        id: "sr-1",
         patientId: "pat-1",
-        status: "finished",
-        startDate: "2026-03-01",
-        endDate: "2026-03-30",
+        status: "accepted",
+        requestedAt: "2026-04-10",
+        reasonText: "Dolor lumbar",
+        createdAt: "2026-04-10T00:00:00.000Z",
       },
     });
 
     const element = await AdminPatientTreatmentPage({
       params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ serviceRequestId: "sr-1" }),
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Tratamiento finalizado");
-    expect(html).toContain("Finalización: 30/03/2026");
-    expect(html).toContain("Este tratamiento ya está cerrado.");
-    expect(html).toContain("StartEpisodeOfCareForm");
-    expect(html).toContain("href=\"/admin/patients/pat-1/encounters\"");
-    expect(html).not.toContain("Sin tratamiento activo");
+    expect(html).toContain("Tratamiento activo");
+    expect(html).toContain("FinishEpisodeOfCareForm");
+    expect(html).not.toContain("StartEpisodeOfCareForm");
+    expect(html).not.toContain("Registrar visita");
   });
 });

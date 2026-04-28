@@ -3,7 +3,10 @@ import Link from "next/link";
 
 import { FinishEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm";
 import { StartEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/StartEpisodeOfCareForm";
-import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
+import {
+  loadPatientDetail,
+  loadTreatmentServiceRequestContext,
+} from "@/app/admin/patients/[id]/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import {
   calculateAgeFromBirthDate,
@@ -13,6 +16,7 @@ import {
 
 interface AdminPatientTreatmentPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ serviceRequestId?: string }>;
 }
 
 export async function generateMetadata({
@@ -26,9 +30,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function AdminPatientTreatmentPage({ params }: AdminPatientTreatmentPageProps) {
+export default async function AdminPatientTreatmentPage({
+  params,
+  searchParams,
+}: AdminPatientTreatmentPageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
   const patient = await loadPatientDetail(id);
+  const treatmentServiceRequestContext = patient
+    ? await loadTreatmentServiceRequestContext({
+        patientId: patient.id,
+        serviceRequestId: resolvedSearchParams?.serviceRequestId,
+      })
+    : { serviceRequestId: undefined, isValid: false, serviceRequest: undefined, state: "none", message: undefined };
   const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
   const treatmentBadge = patient
     ? getTreatmentBadgePresentation(patient.operationalStatus)
@@ -85,6 +99,43 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
         </p>
       </div>
 
+      {treatmentServiceRequestContext.serviceRequest ? (
+        <section className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-emerald-900">
+            Inicio de tratamiento desde solicitud aceptada
+          </h2>
+          <p className="mt-3 text-sm text-emerald-900">
+            Fecha de solicitud: {formatDateDisplay(treatmentServiceRequestContext.serviceRequest.requestedAt)}
+          </p>
+          <p className="mt-2 text-sm text-emerald-900">
+            Motivo: {treatmentServiceRequestContext.serviceRequest.reasonText}
+          </p>
+          {treatmentServiceRequestContext.serviceRequest.reportedDiagnosisText ? (
+            <p className="mt-2 text-sm text-emerald-900">
+              Diagnóstico informado: {treatmentServiceRequestContext.serviceRequest.reportedDiagnosisText}
+            </p>
+          ) : null}
+          {treatmentServiceRequestContext.serviceRequest.requesterDisplay ? (
+            <p className="mt-2 text-sm text-emerald-900">
+              Solicitante: {treatmentServiceRequestContext.serviceRequest.requesterDisplay}
+            </p>
+          ) : null}
+          <p className="mt-3 text-sm text-emerald-800">
+            El tratamiento se iniciará desde esta solicitud. La visita se habilitará recién cuando exista un
+            tratamiento activo.
+          </p>
+        </section>
+      ) : treatmentServiceRequestContext.state === "already_used" ? (
+        <p className="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          {treatmentServiceRequestContext.message}
+        </p>
+      ) : resolvedSearchParams?.serviceRequestId ? (
+        <p className="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          No se pudo usar la solicitud indicada para iniciar tratamiento. Si iniciás el tratamiento desde este
+          formulario, no quedará vinculado a esa solicitud.
+        </p>
+      ) : null}
+
       <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
         {activeEpisode ? (
           <>
@@ -108,7 +159,10 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
               Este tratamiento ya está cerrado. Si hace falta continuar, podés iniciar un nuevo tratamiento.
             </p>
             <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-              <StartEpisodeOfCareForm patient={patient} />
+              <StartEpisodeOfCareForm
+                patient={patient}
+                serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
+              />
             </div>
           </>
         ) : (
@@ -120,7 +174,10 @@ export default async function AdminPatientTreatmentPage({ params }: AdminPatient
               Iniciá un tratamiento para habilitar el registro de visitas.
             </p>
             <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-              <StartEpisodeOfCareForm patient={patient} />
+              <StartEpisodeOfCareForm
+                patient={patient}
+                serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
+              />
             </div>
           </>
         )}

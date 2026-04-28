@@ -1,10 +1,10 @@
 # FHIR-019 — ServiceRequest para solicitudes de atención
 
-> Estado: referencia transicional vigente / previa a implementación  
-> Fecha: 2026-04-27  
+> Estado: referencia transicional vigente (base ya adoptada parcialmente en runtime)  
+> Fecha: 2026-04-27 (actualizado 2026-04-28)  
 > Alcance: modelado FHIR preliminar para solicitudes de atención
 
-> Aclaración de estado: al 2026-04-28 **no hay `ServiceRequest` implementado** en código, rutas, mappers ni repositorios de este repo.
+> Aclaración de estado (2026-04-28): `ServiceRequest` y el vínculo con `EpisodeOfCare.referralRequest` están implementados en runtime para el flujo SR-003 (inicio de tratamiento desde `/treatment`), manteniéndose este documento como referencia conceptual/transicional.
 
 ## 1) Propósito
 

@@ -13,4 +13,7 @@ export interface FhirEpisodeOfCare extends FhirResource {
   note?: Array<{
     text?: string;
   }>;
+  referralRequest?: Array<{
+    reference?: string;
+  }>;
 }
