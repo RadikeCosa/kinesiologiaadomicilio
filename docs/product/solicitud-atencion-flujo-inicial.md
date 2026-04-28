@@ -1,462 +1,316 @@
-# Solicitud de atención — flujo inicial y encaje funcional
+# Solicitudes de atención — flujo operativo y encaje funcional
 
 > Estado: borrador de discusión  
 > Fecha: 2026-04-27  
 > Alcance: hipótesis funcional/producto previa a auditoría e implementación
 
+> Nota interna de naming: el archivo se mantiene como `solicitud-atencion-flujo-inicial.md` por continuidad, pero por el nuevo enfoque podría renombrarse más adelante a `docs/product/solicitudes-atencion-flujo-operativo.md`.
+
 ## 1) Propósito del documento
 
-Este documento ordena la hipótesis funcional para incorporar una **solicitud inicial de atención** en la app clínica privada.
+Este documento actualiza la hipótesis funcional para pasar de una lógica de **“solicitud inicial única”** a un modelo operativo de **solicitudes de atención**.
 
 La intención no es implementar todavía `ServiceRequest`, sino definir primero:
 
 - qué problema de producto resuelve;
 - cómo se inserta en el flujo real de trabajo;
-- qué superficies privadas podría impactar;
-- qué estados operativos nuevos podrían aparecer;
+- cómo convive con tratamiento activo y ciclos cerrados;
+- qué superficies privadas impacta;
+- qué estados operativos deberían verse en UI;
 - qué debería entrar en una primera versión;
 - qué decisiones quedan pendientes antes de auditar e implementar.
 
-Este documento es deliberadamente previo a una auditoría técnica/FHIR.
+Este documento sigue siendo deliberadamente previo a una definición técnica/FHIR final.
 
 ---
 
-## 2) Problema de producto
+## 2) Reencuadre funcional (de hipótesis lineal a modelo operativo)
 
-El flujo privado actual cubre principalmente:
+### 2.1 Hipótesis previa (a corregir)
 
-\`\`\`text
-Patient → EpisodeOfCare → Encounter
-\`\`\`
+El flujo anterior se entendía casi linealmente como:
 
-Es decir:
+```text
+Patient → ServiceRequest → EpisodeOfCare → Encounter
+```
 
-\`\`\`text
-Paciente → Tratamiento → Visitas
-\`\`\`
+Eso era útil para pensar la admisión inicial, pero resultó incompleto para la operación real.
 
-Ese flujo funciona cuando el paciente ya está listo para iniciar tratamiento, pero no representa bien la etapa previa de la vida real:
+### 2.2 Nuevo enfoque
 
-\`\`\`text
-Me contactan → registro la consulta/solicitud → evalúo si inicia tratamiento o no
-\`\`\`
+`ServiceRequest` (en lenguaje de producto: **solicitud de atención**) debe pensarse como una **unidad de demanda de atención/servicio** que puede existir:
 
-En la práctica, una persona puede contactar por distintos motivos:
+- antes de iniciar tratamiento;
+- durante un tratamiento activo;
+- luego de un ciclo cerrado, cuando el paciente vuelve a consultar.
 
-- el mismo paciente consulta;
-- escribe un familiar;
-- deriva o indica un médico;
-- consulta un cuidador;
-- se recibe un pedido médico formal;
-- se consulta por un síntoma sin diagnóstico;
-- se decide iniciar tratamiento;
-- se decide no iniciar por motivos operativos, económicos, clínicos o de disponibilidad.
+Por lo tanto:
 
-Actualmente esa etapa queda difusa entre datos administrativos del paciente y el inicio de tratamiento.
+- un paciente puede tener múltiples solicitudes de atención;
+- un `EpisodeOfCare` puede asociarse a una o varias solicitudes aceptadas;
+- en esta etapa del producto, un paciente puede tener como máximo un tratamiento activo.
 
----
+Durante tratamiento activo, una nueva solicitud puede:
 
-## 3) Hipótesis central
-
-La app debería incorporar una entidad funcional previa al tratamiento:
-
-> **Solicitud de atención**
-
-En términos FHIR, esta entidad probablemente se modelará con `ServiceRequest`.
-
-En lenguaje de producto, conviene priorizar nombres comprensibles para el uso cotidiano:
-
-- "Solicitud de atención"
-- "Consulta inicial"
-- "Pedido de atención"
-- "Solicitud de servicio"
-
-**Hipótesis preliminar:** "Solicitud de atención" parece el nombre más claro y amplio para UI.
-
----
-
-## 4) Definición funcional
-
-Una solicitud de atención representa el pedido, consulta o demanda inicial por la cual una persona podría requerir atención kinésica.
-
-La solicitud puede:
-
-- crearse junto con el alta del paciente;
-- crearse después desde la administración del paciente;
-- quedar pendiente;
-- ser evaluada;
-- derivar en inicio de tratamiento;
+- quedar en evaluación;
 - cerrarse sin tratamiento;
-- registrar el motivo por el cual no se inició.
-
-> La solicitud de atención no es el tratamiento.  
-> La solicitud de atención no es una visita.  
-> La solicitud de atención no reemplaza al paciente.
+- aceptarse y agregarse al `EpisodeOfCare` activo;
+- diferirse para un ciclo futuro.
 
 ---
 
-## 5) Mapa conceptual
+## 3) Aclaraciones fundamentales (guardrails de producto)
 
-\`\`\`text
+- `ServiceRequest` **no es** tratamiento.
+- `ServiceRequest` **no es** visita.
+- `ServiceRequest` **no reemplaza** `Patient`.
+- Una solicitud puede **no terminar** en tratamiento.
+- Una solicitud puede aparecer **durante tratamiento activo**.
+- Una solicitud aceptada **no implica automáticamente** tratamiento iniciado.
+- **Tratamiento pendiente** = solicitud aceptada, pero `EpisodeOfCare` todavía no iniciado.
+- **Tratamiento activo** = existe `EpisodeOfCare` activo y, por definición operativa, al menos una solicitud aceptada asociada o asociable.
+- **Ciclo cerrado** = el `EpisodeOfCare` terminó.
+
+---
+
+## 4) Mapa conceptual actualizado
+
+```text
 Patient
-  └── ServiceRequest / Solicitud de atención
-        ├── pendiente / abierta / aceptada / no iniciada / cerrada
-        ├── solicitante
-        ├── motivo de consulta
-        ├── diagnóstico informado opcional
-        ├── notas administrativas o de admisión
-        └── puede originar EpisodeOfCare
-              └── Encounter(s)
-\`\`\`
+  └── ServiceRequest[]
+        ├── en evaluación
+        ├── cerrada sin tratamiento / rechazada
+        ├── aceptada con tratamiento pendiente
+        ├── aceptada y vinculada a EpisodeOfCare activo
+        └── aceptada y vinculada a EpisodeOfCare cerrado
 
-**Relación conceptual:**
+EpisodeOfCare
+  └── puede estar basado o vinculado a una o varias ServiceRequest aceptadas
+
+Encounter
+  └── pertenece al ciclo de tratamiento / EpisodeOfCare
+```
+
+### Relación conceptual de entidades
 
 | Entidad | Rol |
 |---|---|
 | `Patient` | identidad base de la persona |
-| `ServiceRequest` | solicitud inicial de atención |
-| `EpisodeOfCare` | tratamiento iniciado |
-| `Encounter` | visita realizada |
+| `ServiceRequest` | unidad de demanda de atención (no necesariamente inicial) |
+| `EpisodeOfCare` | ciclo de tratamiento |
+| `Encounter` | visita dentro de un tratamiento |
 
 ---
 
-## 6) Flujo real esperado
+## 5) Marco FHIR (aclaración de alcance)
 
-### 6.1 Alta rápida sin solicitud
+En FHIR, esta entidad probablemente se modelará como `ServiceRequest`.
 
-1. Se crea el paciente con datos mínimos.
-2. No se registra solicitud inicial en ese momento.
-3. El paciente queda disponible para completar datos o crear solicitud más adelante.
+Sin embargo, este documento es de producto/flujo y **no** define todavía:
 
-Este flujo sirve cuando se quiere cargar una persona rápidamente sin completar todavía el motivo de consulta.
-
-### 6.2 Alta de paciente con solicitud inicial
-
-1. Se crea el paciente.
-2. En el mismo acto se registra una solicitud de atención.
-3. La solicitud queda abierta/pendiente.
-4. Luego puede evaluarse y convertirse o no en tratamiento.
-
-Este flujo sirve cuando el contacto inicial ya incluye motivo de consulta, solicitante y contexto suficiente.
-
-### 6.3 Solicitud creada desde administración
-
-1. El paciente ya existe.
-2. Desde la superficie administrativa se crea una solicitud de atención.
-3. La solicitud queda asociada al paciente.
-4. Luego se decide si inicia tratamiento o no.
-
-Este flujo permite no sobrecargar el alta inicial.
-
-### 6.4 Solicitud que deriva en tratamiento
-
-1. Existe una solicitud de atención.
-2. Se acepta iniciar tratamiento.
-3. Se crea un EpisodeOfCare.
-4. La solicitud queda resuelta/vinculada al tratamiento.
-5. Desde el tratamiento activo se habilita el registro de visitas.
-
-### 6.5 Solicitud que no inicia tratamiento
-
-1. Existe una solicitud de atención.
-2. Se decide no iniciar tratamiento.
-3. Se registra un motivo.
-4. El paciente queda con antecedente administrativo de solicitud no iniciada.
-
-Motivos posibles:
-
-- le pareció caro;
-- no hay disponibilidad;
-- el paciente/familia decidió no iniciar;
-- fuera del área de atención;
-- no corresponde atención kinésica domiciliaria;
-- derivado a otro profesional;
-- no responde;
-- otro.
+- mapeo FHIR definitivo;
+- estrategia final de codificación;
+- decisiones cerradas de interoperabilidad.
 
 ---
 
-## 7) Superficies impactadas
+## 6) Estado actual confirmado en código
 
-La incorporación de solicitud de atención podría impactar varias superficies.
+Al momento de este documento:
 
-### 7.1 `/admin/patients/new`
-
-Alta de paciente.
-
-**Hipótesis:**
-
-- mantener el alta liviana;
-- permitir crear solicitud inicial opcionalmente;
-- no hacer obligatoria la solicitud;
-- no convertir el alta en una historia clínica extensa.
-
-**Posible estructura:**
-
-\`\`\`
-Datos mínimos del paciente
-- Nombre *
-- Apellido *
-- Teléfono
-- DNI
-- Dirección
-
-Solicitud de atención inicial
-[ ] Registrar solicitud de atención ahora
-
-Si se activa:
-- Solicitado por
-- Tipo de solicitante
-- Motivo de consulta
-- Diagnóstico informado / pedido médico
-- Notas
-\`\`\`
-
-### 7.2 `/admin/patients/[id]/administrative`
-
-Superficie administrativa del paciente.
-
-**Hipótesis:**
-
-- dejar de pensarla como un formulario directo de edición;
-- convertirla en una pantalla de lectura + acciones;
-- mostrar datos administrativos y contacto;
-- incluir bloque de solicitud de atención;
-- permitir crear/ver/gestionar solicitud;
-- dejar "Editar datos administrativos" como una acción secundaria.
-
-**Posible nombre funcional:** Administración del paciente
-
-**Posibles secciones:**
-
-- Datos administrativos
-- Contacto y dirección
-- Contacto principal / quién escribe
-- Solicitud de atención
-- Acciones administrativas
-
-### 7.3 `/admin/patients`
-
-Listado de pacientes.
-
-**Hipótesis:**
-
-- incorporar estado operativo derivado;
-- revisar badges;
-- agregar CTA contextual según estado;
-- eventualmente agregar filtros por estado.
-
-**Ejemplos de CTA contextual:**
-
-\`\`\`
-Sin solicitud          → Crear solicitud
-Solicitud abierta      → Ver solicitud
-Solicitud aceptada     → Iniciar tratamiento
-Tratamiento activo     → Registrar visita
-Tratamiento finalizado → Ver visitas / Ver historial
-\`\`\`
-
-### 7.4 `/admin/patients/[id]`
-
-Hub/resumen del paciente.
-
-**Hipótesis:**
-
-- no sobrecargar el hub;
-- mostrar un resumen compacto del estado operativo;
-- mantener navegación hacia administración, tratamiento y visitas;
-- eventualmente mostrar acceso rápido a solicitud activa.
-
-### 7.5 `/admin/patients/[id]/treatment`
-
-Gestión de tratamiento.
-
-**Hipótesis:**
-
-- mantener esta superficie enfocada en EpisodeOfCare;
-- permitir iniciar tratamiento desde una solicitud aceptada;
-- no mezclar admisión inicial con tratamiento activo;
-- no crear tratamiento hasta que haya decisión real de inicio.
-
-### 7.6 `/admin/patients/[id]/encounters`
-
-Visitas.
-
-**Hipótesis:**
-
-- no modificar demasiado esta superficie;
-- mantener Encounter dependiente de tratamiento activo;
-- no permitir registrar visitas solo por tener solicitud abierta;
-- conservar el gate operativo de tratamiento activo.
+- no existe todavía `ServiceRequest` implementado;
+- no existen estados derivados de solicitud en código;
+- `PatientOperationalStatus` en código sigue limitado al flujo vigente de paciente/tratamiento;
+- los estados propuestos aquí son hipótesis de producto para evolución futura;
+- el gap entre documento y código actual es esperado en esta etapa.
 
 ---
 
-## 8) Estados operativos posibles
+## 7) Estados operativos del caso
 
-Hay dos capas distintas:
+Para operación y UI conviene mostrar un estado derivado del caso del paciente.
 
-- Estado de solicitud
-- Estado de tratamiento
-
-Pero para la UI puede convenir un estado operativo derivado del caso.
-
-### 8.1 Estados de solicitud posibles
+### 7.1 Secuencia base sugerida
 
 - Sin solicitud
-- Solicitud abierta
 - Solicitud en evaluación
-- Solicitud aceptada
-- Solicitud no iniciada
-- Solicitud cancelada
-- Ingresada por error
-
-### 8.2 Estados de tratamiento actuales
-
-- Sin tratamiento iniciado
+- Solicitud cerrada sin tratamiento / no iniciada / rechazada
+- Tratamiento pendiente
 - Tratamiento activo
-- Tratamiento finalizado
+- Ciclo cerrado
 
-### 8.3 Estado operativo derivado sugerido
+### 7.2 Tipo conceptual propuesto
 
-**Versión amplia:**
-
-\`\`\`ts
+```ts
 type PatientOperationalStatus =
-  | "no_request"
-  | "request_open"
-  | "request_in_review"
-  | "request_accepted"
-  | "request_not_started"
+  | "no_service_request"
+  | "service_request_in_review"
+  | "service_request_closed_without_treatment"
+  | "accepted_request_treatment_pending"
   | "active_treatment"
-  | "finished_treatment";
-\`\`\`
+  | "closed_cycle";
+```
 
-**Versión mínima para V1:**
-
-\`\`\`ts
-type PatientOperationalStatus =
-  | "no_request"
-  | "request_open"
-  | "request_not_started"
-  | "active_treatment"
-  | "finished_treatment";
-\`\`\`
-
-**Recomendación preliminar:** empezar con la versión mínima.
-
----
-
-## 9) Badges sugeridos
-
-Los badges deberían representar el estado operativo del caso, no solamente el tratamiento.
-
-**Posibles labels:**
+### 7.3 Labels UI sugeridos
 
 - Sin solicitud
-- Solicitud abierta
-- No inició
+- En evaluación
+- No inició / Cerrada sin tratamiento
+- Tratamiento pendiente
 - Tratamiento activo
-- Tratamiento finalizado
+- Ciclo cerrado
 
-**A evaluar:**
-
-- si conviene mantener "Sin iniciar" para tratamiento o reemplazarlo por "Sin solicitud";
-- si "No inició" es suficientemente claro;
-- si "Solicitud abierta" es mejor que "Pendiente";
-- si "En evaluación" aporta o complica.
+> Nota de copy: “Rechazada” puede ser técnicamente útil, pero en UI puede sonar duro. Mantener abierta la decisión entre variantes como “No inició”, “Cerrada sin tratamiento” o “No aceptada”.
 
 ---
 
-## 10) Matriz inicial de CTAs por estado
+### 7.4 Glosario breve de estado técnico/copy UI
 
-| Estado operativo | Badge sugerido | CTA contextual sugerido | Destino probable |
-|---|---|---|---|
-| Sin solicitud | Sin solicitud | Crear solicitud | `/admin/patients/[id]/administrative` o futura subruta |
-| Solicitud abierta | Solicitud abierta | Ver solicitud | `/admin/patients/[id]/administrative` o futura subruta |
-| Solicitud no iniciada | No inició | Ver motivo | `/admin/patients/[id]/administrative` |
-| Tratamiento activo | Tratamiento activo | Registrar visita | `/admin/patients/[id]/encounters/new` |
-| Tratamiento finalizado | Tratamiento finalizado | Ver visitas | `/admin/patients/[id]/encounters` |
+| Estado técnico interno conceptual | Label UI sugerido | Copy alternativo pendiente |
+| --- | --- | --- |
+| `no_service_request` | Sin solicitud | — |
+| `service_request_in_review` | En evaluación | — |
+| `service_request_closed_without_treatment` | No inició | Cerrada sin tratamiento / No aceptada |
+| `accepted_request_treatment_pending` | Tratamiento pendiente | — |
+| `active_treatment` | Tratamiento activo | — |
+| `closed_cycle` | Ciclo cerrado | — |
 
-Pendiente definir si "Iniciar tratamiento" aparece:
-
-- desde el listado;
-- desde `/administrative`;
-- desde `/treatment`;
-- o solo desde `/treatment` para mantener responsabilidad clara.
-
-**Hipótesis preliminar:** el listado puede sugerir la acción, pero la creación real de EpisodeOfCare debería seguir ocurriendo en `/treatment`.
+Nota: el copy definitivo para solicitud cerrada sin tratamiento sigue abierto.
 
 ---
 
-## 11) Filtros posibles en `/admin/patients`
+## 8) Regla de prioridad para badge/listado (múltiples solicitudes)
 
-No implementar en primera instancia hasta definir bien los estados.
+Cuando conviven varias solicitudes/estados, el badge principal debería resolverse con esta prioridad:
 
-**Filtros candidatos:**
+1. Si hay tratamiento activo → **Tratamiento activo**.
+2. Si no hay tratamiento activo pero hay solicitud aceptada pendiente → **Tratamiento pendiente**.
+3. Si hay solicitud en evaluación → **En evaluación**.
+4. Si el último `EpisodeOfCare` está cerrado → **Ciclo cerrado**.
+5. Si solo hay solicitudes cerradas sin tratamiento → **No inició** o **Cerrada sin tratamiento**.
+6. Si no hay solicitudes → **Sin solicitud**.
 
-- Todos
-- Solicitudes abiertas
-- Tratamientos activos
-- Finalizados
-- Sin solicitud
-- No iniciados
+Aclaración: si hay tratamiento activo y además una nueva solicitud en evaluación, el badge principal debe seguir mostrando **Tratamiento activo**. La solicitud en evaluación puede mostrarse como indicador secundario.
 
-**Versión mínima futura:**
+Criterio de desempate temporal:
 
-- Todos
-- Solicitudes abiertas
-- Tratamientos activos
-- Finalizados
+- cuando no hay tratamiento activo ni tratamiento pendiente, una solicitud en evaluación más reciente puede tomar prioridad sobre un ciclo cerrado previo;
+- el criterio temporal debe usar la solicitud/episodio más reciente disponible;
+- si hay tratamiento activo, este conserva prioridad como badge principal.
 
----
+### 8.1 Escenarios mixtos de referencia
 
-## 12) Campos mínimos de solicitud para V1
-
-### 12.1 Campos visibles en UI
-
-- Fecha de solicitud
-- Solicitado por
-- Tipo de solicitante
-- Motivo de consulta
-- Diagnóstico informado / pedido médico
-- Estado de solicitud
-- Resultado
-- Motivo de no inicio
-- Notas
-
-### 12.2 Tipo de solicitante
-
-- Paciente
-- Familiar
-- Cuidador/a
-- Médico/a
-- Otro
-
-### 12.3 Resultado posible
-
-- Pendiente
-- Aceptada para iniciar tratamiento
-- No inicia tratamiento
-- Cancelada
-
-### 12.4 Motivo de no inicio
-
-- Le pareció caro
-- Sin disponibilidad
-- Decidió no iniciar
-- Fuera del área de atención
-- No corresponde atención domiciliaria
-- Derivado a otro profesional
-- No responde
-- Otro
+| Escenario | Badge principal | Indicador secundario | CTA principal | CTA secundaria |
+| --- | --- | --- | --- | --- |
+| Tratamiento activo + nueva solicitud en evaluación | Tratamiento activo | Nueva solicitud en evaluación | Registrar visita | Nueva solicitud / Ver solicitud |
+| Ciclo cerrado + nueva solicitud en evaluación | En evaluación | Ciclo cerrado previo | Ver solicitud / Resolver solicitud | Ver ciclo cerrado |
+| Solicitud aceptada sin tratamiento iniciado | Tratamiento pendiente | — | Iniciar tratamiento | Ver solicitud |
+| Solo solicitudes cerradas sin tratamiento | No inició o Cerrada sin tratamiento | — | Ver motivo | Nueva solicitud |
 
 ---
 
-## 13) Posible contrato de dominio inicial
+## 9) Matriz de CTAs por estado operativo
 
-Snippet conceptual, no definitivo:
+| Estado operativo | CTA principal | CTA secundaria |
+| --- | --- | --- |
+| Sin solicitud | Crear solicitud | Editar datos |
+| En evaluación | Ver solicitud | Resolver solicitud |
+| No inició / cerrada sin tratamiento | Ver motivo | Nueva solicitud |
+| Tratamiento pendiente | Iniciar tratamiento | Ver solicitud |
+| Tratamiento activo | Registrar visita | Nueva solicitud |
+| Ciclo cerrado | Ver visitas | Nueva solicitud |
 
-\`\`\`ts
+Regla de responsabilidad:
+
+- la acción real de iniciar tratamiento debe seguir pasando por `/admin/patients/[id]/treatment` (o una ruta equivalente que preserve esa responsabilidad);
+- no mezclar gestión completa de `ServiceRequest` con responsabilidades de `EpisodeOfCare`.
+
+---
+
+## 10) Superficies impactadas
+
+### 10.1 Mini matriz de ownership de ruta (dirección propuesta)
+
+| Superficie | Ownership |
+| --- | --- |
+| `/admin/patients/[id]/administrative` | datos administrativos + solicitudes de atención |
+| `/admin/patients/[id]/treatment` | inicio/cierre de `EpisodeOfCare` |
+| `/admin/patients/[id]/encounters` | visitas realizadas |
+| `/admin/patients/[id]` | resumen operativo compacto |
+| `/admin/patients` | listado, badge y CTA contextual |
+
+Esta matriz expresa dirección funcional propuesta y no implementación actual.
+
+### 10.2 `/admin/patients/new`
+
+- mantener alta liviana;
+- permitir crear solicitud opcionalmente en el alta;
+- no volver obligatorio el formulario de solicitud.
+
+### 10.3 `/admin/patients/[id]/administrative`
+
+Evolución esperada:
+
+- pasar de “formulario de edición” a “Administración del paciente”;
+- visualizar datos administrativos;
+- editar datos;
+- crear/ver/resolver solicitudes.
+
+Es la superficie natural para la gestión de solicitudes de atención.
+
+### 10.4 `/admin/patients`
+
+- revisar badges;
+- agregar CTA contextual por estado;
+- eventualmente permitir filtros por estado operativo.
+
+### 10.5 `/admin/patients/[id]`
+
+- mostrar resumen operativo del caso;
+- no sobrecargar el hub;
+- mostrar motivos/diagnósticos activos o relevantes en forma compacta.
+
+### 10.6 `/admin/patients/[id]/treatment`
+
+- mantener foco en `EpisodeOfCare`;
+- mostrar solicitudes aceptadas asociadas al tratamiento;
+- mostrar motivos de consulta / diagnósticos informados asociados;
+- permitir iniciar tratamiento desde solicitud aceptada;
+- no convertir `/treatment` en gestor completo de solicitudes.
+
+### 10.7 `/admin/patients/[id]/encounters`
+
+- mantener foco en visitas;
+- mostrar motivos/diagnósticos asociados al tratamiento en formato compacto;
+- no habilitar visitas solo por tener solicitud abierta (debe existir tratamiento activo).
+
+---
+
+## 11) Motivo de consulta y diagnóstico informado (visibilidad transversal)
+
+Debe quedar explícito que el motivo de consulta y el diagnóstico informado:
+
+- no deberían quedar ocultos solo en `/administrative`;
+- deben poder aparecer como resumen en:
+  - detalle del paciente;
+  - tratamiento;
+  - visitas;
+  - administración.
+
+Distribución esperada:
+
+- `/administrative`: versión completa de solicitudes.
+- `/treatment`: solicitudes aceptadas asociadas al `EpisodeOfCare`.
+- `/encounters`: resumen compacto para contexto asistencial.
+- `/admin/patients/[id]`: resumen operativo del caso.
+
+Aclaración de lenguaje: “diagnóstico informado” no necesariamente equivale a diagnóstico profesional confirmado. Evitar en UI llamarlo simplemente “diagnóstico” cuando pueda generar ambigüedad.
+
+---
+
+## 12) Contrato conceptual de dominio (no definitivo)
+
+```ts
 type ServiceRequestRequesterType =
   | "patient"
   | "family"
@@ -465,13 +319,20 @@ type ServiceRequestRequesterType =
   | "other";
 
 type ServiceRequestStatus =
-  | "open"
+  | "in_review"
   | "accepted"
-  | "not_started"
+  | "closed_without_treatment"
   | "cancelled"
   | "entered_in_error";
 
-type ServiceRequestNotStartedReason =
+type ServiceRequestEpisodeLinkStatus =
+  | "none"
+  | "pending_episode_start"
+  | "linked_to_active_episode"
+  | "linked_to_closed_episode"
+  | "deferred_to_future_episode";
+
+type ServiceRequestClosedReason =
   | "too_expensive"
   | "no_availability"
   | "patient_declined"
@@ -481,7 +342,7 @@ type ServiceRequestNotStartedReason =
   | "no_response"
   | "other";
 
-type InitialServiceRequest = {
+type PatientServiceRequest = {
   id: string;
   patientId: string;
   requestedAt: string;
@@ -491,187 +352,175 @@ type InitialServiceRequest = {
   reasonText: string;
   reportedDiagnosisText?: string;
   status: ServiceRequestStatus;
-  notStartedReason?: ServiceRequestNotStartedReason;
-  notStartedReasonText?: string;
+  episodeLinkStatus: ServiceRequestEpisodeLinkStatus;
+  closedReason?: ServiceRequestClosedReason;
+  closedReasonText?: string;
   notes?: string;
-  resultingEpisodeOfCareId?: string;
+  episodeOfCareId?: string;
 };
-\`\`\`
+```
+
+Este contrato se mantiene como **conceptual** y sujeto a ajustes tras la auditoría funcional/técnica.
 
 ---
 
-## 14) Encaje FHIR preliminar
+## Recorte anti-sobrediseño: V0 antes de ServiceRequest
 
-Este documento no define todavía el mapeo FHIR final.
+### Decisión de producto
 
-**Hipótesis:**
+- No implementar `ServiceRequest` todavía.
+- Primero reencuadrar `/admin/patients/[id]/administrative` como “Administración del paciente”.
+- V0 no agrega persistencia FHIR nueva.
+- V0 no crea rutas nuevas.
+- V0 no altera `EpisodeOfCare` ni `Encounter`.
 
-- usar `ServiceRequest` para representar la solicitud inicial;
-- usar `subject` para vincular al `Patient`;
-- usar `authoredOn` para fecha de solicitud;
-- usar `requester` cuando exista un recurso referenciable;
-- usar una representación transicional para solicitantes no modelados todavía;
-- usar `reason` / concepto equivalente para motivo de consulta;
-- usar `status` y/o `statusReason` para resultado/motivo de no inicio;
-- vincular con `EpisodeOfCare` cuando la solicitud derive en tratamiento.
+### Qué aporta valor ahora
 
-**Decisiones pendientes:**
+- Mostrar datos administrativos en modo lectura.
+- Separar edición como acción.
+- Mostrar estado operativo simple basado en lo ya existente:
+  - Tratamiento activo.
+  - Ciclo cerrado.
+  - Sin tratamiento activo.
+- Mantener CTAs existentes:
+  - Registrar visita cuando hay tratamiento activo.
+  - Ir a tratamiento / gestionar tratamiento.
+  - Editar datos administrativos.
 
-- cómo representar familiar/cuidador sin crear todavía `RelatedPerson`;
-- cómo representar médico solicitante sin crear todavía `Practitioner`;
-- si el diagnóstico informado debe quedar como texto, `Condition`, `supportingInfo` u otra estrategia;
-- cómo vincular técnicamente `ServiceRequest` con `EpisodeOfCare`;
-- cómo mantener compatibilidad con el nivel actual de complejidad del sistema.
+### Qué queda como referencia futura
 
----
+- Múltiples `ServiceRequest` por paciente.
+- Estados finos de solicitud.
+- Requester transicional.
+- Motivos de cierre.
+- Vínculo `ServiceRequest` ↔ `EpisodeOfCare`.
+- FHIR-019 como referencia transicional previa a implementación.
 
-## 15) Decisiones pendientes
+### Qué NO entra en V0
 
-Antes de auditar o implementar, definir:
+- `ServiceRequest` persistido.
+- Mappers/repositorio/schemas nuevos.
+- Filtros por estado de solicitud.
+- Badges secundarios.
+- Rutas `/requests`.
+- Alta de paciente con solicitud opcional.
+- Integración transversal de motivo/diagnóstico informado.
+- Taxonomía completa de `closedReason`.
 
-- **Nombre visible principal:**
-  - Solicitud de atención
-  - Consulta inicial
-  - Pedido de atención
-  - Solicitud de servicio
-- **Si `/administrative` debe cambiar de responsabilidad:**
-  - de formulario de edición;
-  - a pantalla de lectura + acciones administrativas.
-- **Si el alta de paciente debe permitir crear solicitud:**
-  - sí, opcional;
-  - no, solo desde administración;
-  - sí, pero en paso posterior.
-- **Si debe existir ruta propia:**
-  - `/admin/patients/[id]/requests`
-  - `/admin/patients/[id]/requests/new`
-  - subruta bajo `/administrative`
-  - todo dentro de `/administrative` en V1.
-- Cuántos estados usar en V1.
-- Qué CTA contextual mostrar en `/patients`.
-- Si el listado debe tener filtros en V1 o dejarlo para después.
-- Desde dónde se inicia tratamiento cuando una solicitud fue aceptada.
+### V1 mínima futura con ServiceRequest
 
----
+La V1 se mantiene como evolución futura, no como alcance actual de implementación:
 
-## 16) Recomendación preliminar
-
-La dirección más ordenada parece ser:
-
-1. Mantener alta de paciente liviana.
-2. Permitir crear solicitud inicial opcionalmente en el alta.
-3. Convertir `/administrative` en "Administración del paciente":
-   - lectura de datos;
-   - acciones;
-   - solicitud de atención.
-4. Mantener `/treatment` como única superficie fuerte de EpisodeOfCare.
-5. Mantener `/encounters` como superficie de visitas.
-6. Evolucionar `/patients` con badges/CTA contextuales.
-7. Dejar filtros para una fase posterior.
+- `ServiceRequest` mínimo con:
+  - `status`
+  - `intent`
+  - `subject`
+  - `authoredOn`
+  - `reasonText`
+- 3 estados UI:
+  - en evaluación
+  - aceptada
+  - cerrada sin tratamiento
+- Sin requester complejo.
+- Sin filtros avanzados.
+- Sin integración completa en todas las superficies.
 
 ---
 
-## 17) Plan incremental tentativo
+## 13) Plan incremental actualizado
 
 ### Fase 0 — Documento y auditoría
 
-**Alcance:**
-
 - cerrar hipótesis funcional;
-- pedir auditoría UX/UI + arquitectura;
-- pedir auditoría FHIR de ServiceRequest.
-
-Sin código.
+- auditar UX/rutas/superficies;
+- auditar modelado FHIR `ServiceRequest` y vínculo con `EpisodeOfCare`.
 
 ### Fase 1 — Reencuadre UI de `/administrative`
 
-**Alcance:**
+- convertirla en lectura + acciones;
+- todavía sin `ServiceRequest` real persistido.
 
-- convertir la pantalla en lectura + acciones;
-- mantener edición administrativa como acción o subflujo;
-- no crear todavía ServiceRequest.
+### Fase 2 — Estado operativo derivado
 
-**Objetivo:** preparar la superficie antes de agregar nueva entidad.
+- revisar `PatientOperationalStatus`;
+- revisar badges;
+- revisar CTA contextual en listado.
 
-### Fase 2 — Definir contrato de dominio
-
-**Alcance:**
+### Fase 3 — Contrato de dominio `ServiceRequest`
 
 - tipos;
 - schemas;
-- reglas mínimas;
+- reglas;
 - estados;
-- motivos de no inicio;
-- tests unitarios.
+- motivos de cierre/rechazo/no inicio.
 
-Sin UI compleja todavía.
+### Fase 4 — Persistencia/mappers/repositorio FHIR
 
-### Fase 3 — Persistencia FHIR
+- `ServiceRequest` repository;
+- read/write mappers;
+- búsqueda por `patient`;
+- vínculo con `EpisodeOfCare`;
+- tests.
 
-**Alcance:**
+### Fase 5 — UI de creación/visualización/resolución
 
-- repositorio;
-- mappers;
-- fixtures;
-- tests;
-- decisión de mapeo transicional para solicitante, motivo y statusReason.
+- crear solicitud desde `/administrative`;
+- eventualmente crear solicitud desde alta de paciente;
+- visualizar solicitudes;
+- resolver solicitud como aceptada, cerrada sin tratamiento o diferida.
 
-### Fase 4 — UI de solicitud
-
-**Alcance:**
-
-- crear solicitud desde paciente existente;
-- visualizar solicitud en administración;
-- cerrar solicitud sin tratamiento;
-- eventualmente crear desde alta de paciente.
-
-### Fase 5 — Integración con tratamiento
-
-**Alcance:**
+### Fase 6 — Integración con tratamiento
 
 - iniciar tratamiento desde solicitud aceptada;
-- vincular solicitud con EpisodeOfCare;
-- ajustar estado operativo derivado;
-- ajustar badges/CTA del listado.
+- asociar una o más solicitudes aceptadas al `EpisodeOfCare`;
+- permitir agregar una nueva solicitud aceptada al tratamiento activo.
 
-### Fase 6 — Listado y filtros
+### Fase 7 — Resumen transversal y listado
 
-**Alcance:**
-
-- CTA contextual por estado;
-- filtros por solicitud/tratamiento;
-- refinamiento de badges.
+- mostrar motivos/diagnósticos en paciente, tratamiento y visitas;
+- filtros en `/patients`;
+- refinamiento de badges y CTAs.
 
 ---
 
-## 18) Fuera de alcance explícito por ahora
+## 14) Fuera de alcance explícito por ahora
 
-No incluir todavía:
-
+- multi `EpisodeOfCare` activo;
+- `Practitioner` completo;
+- `RelatedPerson` completo;
+- `Condition` formal;
+- `DocumentReference` para pedido médico adjunto;
+- carga de archivos;
 - agenda;
 - pagos;
 - presupuestos;
-- self-booking;
-- portal de paciente;
-- multiusuario;
-- carga de documentos adjuntos;
-- Practitioner completo;
-- RelatedPerson completo;
-- Condition formal;
-- CarePlan;
-- Task;
-- QuestionnaireResponse;
-- historia clínica longitudinal rica.
+- portal;
+- historia clínica longitudinal rica;
+- `CarePlan`;
+- `Task`;
+- `QuestionnaireResponse`.
 
 ---
 
-## 19) Criterio de decisión
+## 15) Decisiones abiertas
 
-Una implementación futura debería considerarse correcta si:
+- copy final en UI para estado “rechazada/no inició/cerrada sin tratamiento/no aceptada”;
+- nivel de detalle de badges secundarios cuando coexisten tratamiento activo + solicitud en evaluación;
+- estrategia de ruta concreta para gestionar solicitudes (todo en `/administrative` vs subrutas);
+- estrategia FHIR transicional para solicitantes sin recursos completos (`Practitioner`/`RelatedPerson`);
+- forma final de representar “diagnóstico informado” sin ambigüedad clínica.
 
-- no obliga a crear tratamiento antes de tiempo;
-- permite registrar solicitudes que no terminan en tratamiento;
-- no ensucia EpisodeOfCare con estados de admisión;
-- no convierte el alta de paciente en un formulario pesado;
-- mejora la operación del listado de pacientes;
-- mantiene `/treatment` y `/encounters` con responsabilidades claras;
-- permite crecer hacia FHIR sin sobrediseñar la V1.
+---
+
+## 16) Criterio de consistencia esperado
+
+El enfoque se considera correctamente reflejado si el documento deja claro que:
+
+- no hay una única solicitud por paciente;
+- puede haber múltiples solicitudes;
+- las solicitudes pueden coexistir con tratamiento activo;
+- una solicitud aceptada puede vincularse a un `EpisodeOfCare` nuevo o existente;
+- los motivos/diagnósticos asociados deben estar visibles transversalmente;
+- `/administrative` es candidata a ser la superficie de gestión administrativa y solicitudes;
+- `/treatment` sigue siendo la superficie de `EpisodeOfCare`;
+- `/encounters` sigue siendo la superficie de visitas.

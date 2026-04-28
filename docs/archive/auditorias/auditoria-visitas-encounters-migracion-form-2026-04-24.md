@@ -1,3 +1,8 @@
+> Estado: archivado  
+> Motivo: Documento histórico de auditoría/cierre/plan ya superado por la fuente operativa vigente o por implementación cerrada.  
+> Fecha de archivo: 2026-04-28  
+> Reemplazado/relacionado con: docs/fuente-de-verdad-operativa.md
+
 # Auditoría técnica + UX/UI — flujo de visitas/encounters
 
 Fecha: 2026-04-24

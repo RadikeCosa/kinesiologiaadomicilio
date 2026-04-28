@@ -1,3 +1,8 @@
+> Estado: archivado  
+> Motivo: Documento histórico de auditoría/cierre/plan ya superado por la fuente operativa vigente o por implementación cerrada.  
+> Fecha de archivo: 2026-04-28  
+> Reemplazado/relacionado con: docs/fuente-de-verdad-operativa.md
+
 # Auditoría UX/UI y arquitectura de superficie
 
 Fecha: 2026-04-23 (UTC)

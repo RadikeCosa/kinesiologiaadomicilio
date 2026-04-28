@@ -1,3 +1,8 @@
+> Estado: archivado  
+> Motivo: Documento histórico de auditoría/cierre/plan ya superado por la fuente operativa vigente o por implementación cerrada.  
+> Fecha de archivo: 2026-04-28  
+> Reemplazado/relacionado con: docs/fuente-de-verdad-operativa.md
+
 # Auditoría post-implementación — Fase 1 contrato temporal Encounter
 
 Fecha: 2026-04-24
@@ -47,7 +52,7 @@ Riesgos detectados:
 - Documentación:
   - `docs/fuente-de-verdad-operativa.md`
   - `README.md`
-  - `docs/plan-evolucion-contrato-temporal-encounter-2026-04-24.md`
+  - `docs/archive/planes-cerrados/plan-evolucion-contrato-temporal-encounter-2026-04-24.md`
 
 ## C. Contract consistency review
 
