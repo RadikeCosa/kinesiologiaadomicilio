@@ -21,7 +21,7 @@ Usar este checklist cuando un cambio toque alguno de estos frentes:
 - [ ] ¿El `README.md` sigue describiendo correctamente el estado implementado?
 - [ ] ¿`docs/fuente-de-verdad-operativa.md` sigue alineada con el comportamiento real?
 - [ ] ¿`docs/fhir/README.md` o documentos FHIR específicos requieren actualización?
-- [ ] ¿`docs/product/*` requiere actualización si cambió una hipótesis o decisión de producto?
+- [ ] ¿`docs/product/*` (o `docs/producto/*` si existiera) requiere actualización si cambió una hipótesis o decisión de producto?
 - [ ] ¿Hay documentación histórica que debería moverse a `docs/archive`?
 - [ ] ¿Se agregaron rutas nuevas que deban documentarse?
 - [ ] ¿Se cambió un estado operativo, badge, CTA o gate?

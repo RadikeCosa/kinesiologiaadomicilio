@@ -43,6 +43,8 @@
 ### Fase 4 (futura)
 - FHIR-019 a FHIR-023
 
+> Gate recomendado antes de Fase 4: cerrar primero Producto V0 en `/admin/patients/[id]/administrative` (lectura + acciones, sin `ServiceRequest` persistido, sin rutas nuevas y sin cambios en `EpisodeOfCare`/`Encounter`).
+
 ## Tickets
 
 ### FHIR-001 — ADR identidad operativa y semántica de identificador

@@ -4,7 +4,7 @@
 > Fecha: 2026-04-27  
 > Alcance: hipótesis funcional/producto previa a auditoría e implementación
 
-> Nota interna de naming: el archivo se mantiene como `solicitud-atencion-flujo-inicial.md` por continuidad, pero por el nuevo enfoque podría renombrarse más adelante a `docs/product/solicitudes-atencion-flujo-operativo.md`.
+> Nota de naming vigente: por ahora se **mantiene** `solicitud-atencion-flujo-inicial.md` para evitar romper referencias. Si se renombra a `solicitudes-atencion-flujo-operativo.md`, debe hacerse con actualización completa de enlaces en el mismo PR.
 
 ## 1) Propósito del documento
 
@@ -427,59 +427,45 @@ La V1 se mantiene como evolución futura, no como alcance actual de implementaci
 
 ---
 
-## 13) Plan incremental actualizado
+## 13) Plan incremental actualizado (dos carriles)
 
-### Fase 0 — Documento y auditoría
+### Carril A — Producto V0 (siguiente iteración recomendada)
 
-- cerrar hipótesis funcional;
-- auditar UX/rutas/superficies;
-- auditar modelado FHIR `ServiceRequest` y vínculo con `EpisodeOfCare`.
+Objetivo: entregar valor operativo sin introducir `ServiceRequest` persistido.
 
-### Fase 1 — Reencuadre UI de `/administrative`
+- Reencuadrar `/admin/patients/[id]/administrative` como **“Administración del paciente”**.
+- Priorizar **lectura + acciones** (no rediseño profundo ni nuevas rutas).
+- Mantener CTAs actuales y navegación vigente.
+- No cambiar lógica ni contratos de `EpisodeOfCare` y `Encounter`.
+- No incorporar estados nuevos persistidos.
 
-- convertirla en lectura + acciones;
-- todavía sin `ServiceRequest` real persistido.
+#### Nota de cierre (2026-04-28)
 
-### Fase 2 — Estado operativo derivado
+**Estado:** Producto V0 administrativo implementado/cerrado.
 
-- revisar `PatientOperationalStatus`;
-- revisar badges;
-- revisar CTA contextual en listado.
+Alcance efectivamente cerrado en esta etapa:
+- `/admin/patients/[id]/administrative` opera en lectura + acciones por defecto;
+- edición explícita detrás de CTA `Editar datos`;
+- sin `ServiceRequest` persistido;
+- sin rutas nuevas;
+- sin cambios en `EpisodeOfCare`/`Encounter`;
+- sin cambios FHIR (FHIR V1 continúa como carril futuro).
 
-### Fase 3 — Contrato de dominio `ServiceRequest`
+Próximo carril recomendado:
+1. pulido UX opcional de la superficie administrativa;
+2. luego, auditoría de estados operativos futuros de producto;
+3. recién después, FHIR V1 al cerrar decisiones técnicas pendientes.
 
-- tipos;
-- schemas;
-- reglas;
-- estados;
-- motivos de cierre/rechazo/no inicio.
+### Carril B — FHIR V1 futura (posterior a Producto V0)
 
-### Fase 4 — Persistencia/mappers/repositorio FHIR
+Objetivo: implementar `ServiceRequest` real con validación técnica previa.
 
-- `ServiceRequest` repository;
-- read/write mappers;
-- búsqueda por `patient`;
-- vínculo con `EpisodeOfCare`;
-- tests.
-
-### Fase 5 — UI de creación/visualización/resolución
-
-- crear solicitud desde `/administrative`;
-- eventualmente crear solicitud desde alta de paciente;
-- visualizar solicitudes;
-- resolver solicitud como aceptada, cerrada sin tratamiento o diferida.
-
-### Fase 6 — Integración con tratamiento
-
-- iniciar tratamiento desde solicitud aceptada;
-- asociar una o más solicitudes aceptadas al `EpisodeOfCare`;
-- permitir agregar una nueva solicitud aceptada al tratamiento activo.
-
-### Fase 7 — Resumen transversal y listado
-
-- mostrar motivos/diagnósticos en paciente, tratamiento y visitas;
-- filtros en `/patients`;
-- refinamiento de badges y CTAs.
+1. Validar `EpisodeOfCare.referralRequest` en HAPI/R4.
+2. Cerrar mapping `ServiceRequest.status/statusReason`.
+3. Definir requester transicional.
+4. Validar búsquedas mínimas.
+5. Definir fallback si `referralRequest` no aplica.
+6. Recién después, avanzar con implementación incremental (tipos/schemas → mappers → repositorio → UI).
 
 ---
 

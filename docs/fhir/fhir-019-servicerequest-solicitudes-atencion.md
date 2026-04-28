@@ -4,6 +4,8 @@
 > Fecha: 2026-04-27  
 > Alcance: modelado FHIR preliminar para solicitudes de atención
 
+> Aclaración de estado: al 2026-04-28 **no hay `ServiceRequest` implementado** en código, rutas, mappers ni repositorios de este repo.
+
 ## 1) Propósito
 
 Este documento define una estrategia **FHIR transicional** para modelar solicitudes de atención usando `ServiceRequest`.
@@ -318,3 +320,15 @@ Este documento se considera correcto si:
 - mantiene `Encounter` dependiente de `EpisodeOfCare`;
 - declara un owner único para el vínculo SR↔EoC;
 - deja claras las deudas transicionales.
+
+---
+
+## 18) Próximos pasos recomendados (antes de implementar)
+
+1. Cerrar primero el carril **Producto V0** en `/admin/patients/[id]/administrative` (reencuadre a “Administración del paciente”, lectura + acciones, sin persistencia nueva).
+2. Luego ejecutar decisiones técnicas pendientes de FHIR V1:
+   - validar `EpisodeOfCare.referralRequest` en HAPI/R4;
+   - cerrar mapping `ServiceRequest.status/statusReason`;
+   - definir requester transicional;
+   - validar búsquedas mínimas;
+   - definir fallback si `referralRequest` no aplica.

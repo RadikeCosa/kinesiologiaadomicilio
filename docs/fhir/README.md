@@ -57,6 +57,10 @@ Centralizar la documentación de trabajo para la remediación técnica del model
    - decisiones aceptadas y abiertas de modelado para fases futuras;
    - no implica implementación vigente de `ServiceRequest` en código.
 
+11. `../product/solicitud-atencion-flujo-inicial.md`
+   - hipótesis funcional de producto y plan incremental;
+   - separa carril Producto V0 (sin `ServiceRequest` persistido) del carril FHIR V1 futura.
+
 ## Flujo recomendado de trabajo
 
 1. Leer la ADR antes de tocar identidad, DNI o semántica de `Identifier`.
@@ -115,3 +119,4 @@ Ningún PR de este frente debería mezclar más de uno de estos grupos salvo que
 - `docs/fhir/fhir-015-contrato-transicional-contact-relationship.md`
 - `docs/fhir/fhir-018-deuda-address-trigger-evolucion.md`
 - `docs/fhir/fhir-019-servicerequest-solicitudes-atencion.md`
+- `docs/product/solicitud-atencion-flujo-inicial.md`
