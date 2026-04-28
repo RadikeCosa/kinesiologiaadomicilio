@@ -1,7 +1,7 @@
 # Documentación FHIR
 
 > Estado: vigente
-> Última actualización: 2026-04-23 (UTC)
+> Última actualización: 2026-04-28 (UTC)
 
 ## Objetivo
 
@@ -61,6 +61,21 @@ Centralizar la documentación de trabajo para la remediación técnica del model
    - hipótesis funcional de producto y plan incremental;
    - separa carril Producto V0 (sin `ServiceRequest` persistido) del carril FHIR V1 futura.
 
+12. `fhir-020-validacion-hapi-servicerequest-episodeofcare.md`
+   - validación técnica en HAPI local (R4 4.0.1 / HAPI 8.8.0) del vínculo `EpisodeOfCare.referralRequest` ↔ `ServiceRequest`;
+   - contrato de búsqueda confirmado con `incoming-referral`;
+   - fallback recomendado de composición por `patient`.
+
+13. `fhir-021-servicerequest-status-statusreason.md`
+   - cierre documental del mapping transicional de `ServiceRequest.status`;
+   - decisión de uso de `statusReason.text` para cierre sin tratamiento;
+   - separación explícita entre estado FHIR de solicitud y estado operativo derivado.
+
+14. `fhir-022-servicerequest-requester-busquedas.md`
+   - cierre documental de requester transicional (`requester.display`) para V1;
+   - definición de `requesterType`/`requesterContact` como deuda controlada de dominio/read-model;
+   - contrato mínimo de búsquedas V1 y prohibición de `EpisodeOfCare?referralRequest=...`.
+
 ## Flujo recomendado de trabajo
 
 1. Leer la ADR antes de tocar identidad, DNI o semántica de `Identifier`.
@@ -119,4 +134,7 @@ Ningún PR de este frente debería mezclar más de uno de estos grupos salvo que
 - `docs/fhir/fhir-015-contrato-transicional-contact-relationship.md`
 - `docs/fhir/fhir-018-deuda-address-trigger-evolucion.md`
 - `docs/fhir/fhir-019-servicerequest-solicitudes-atencion.md`
+- `docs/fhir/fhir-020-validacion-hapi-servicerequest-episodeofcare.md`
+- `docs/fhir/fhir-021-servicerequest-status-statusreason.md`
+- `docs/fhir/fhir-022-servicerequest-requester-busquedas.md`
 - `docs/product/solicitud-atencion-flujo-inicial.md`

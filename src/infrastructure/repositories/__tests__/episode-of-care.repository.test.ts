@@ -2,11 +2,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
+import { buildEpisodeOfCareByIncomingReferralQuery } from "@/lib/fhir/search-params";
 import {
   createEpisodeOfCare,
   finishActiveEpisodeOfCare,
   getActiveEpisodeByPatientId,
   getEpisodeById,
+  listEpisodeOfCareByIncomingReferral,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 
 describe("episode-of-care.repository (FHIR)", () => {
@@ -109,6 +111,64 @@ describe("episode-of-care.repository (FHIR)", () => {
       }),
     );
     expect(finished).toMatchObject({ id: "epi-1", status: "finished", endDate: "2026-04-17" });
+  });
+
+
+  it("lists episodes by incoming-referral query", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-sr-1",
+            status: "active",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-04-10" },
+          },
+        },
+      ],
+    });
+
+    const episodes = await listEpisodeOfCareByIncomingReferral("sr-1");
+
+    expect(getSpy).toHaveBeenCalledWith("EpisodeOfCare?incoming-referral=ServiceRequest%2Fsr-1");
+    expect(episodes).toHaveLength(1);
+    expect(episodes[0]).toMatchObject({ id: "epi-sr-1", patientId: "pat-1" });
+  });
+
+  it("returns [] for empty bundle on incoming-referral query", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [],
+    });
+
+    const episodes = await listEpisodeOfCareByIncomingReferral("sr-1");
+
+    expect(episodes).toEqual([]);
+  });
+
+  it("returns [] when incoming-referral serviceRequestId is empty", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get");
+
+    const episodes = await listEpisodeOfCareByIncomingReferral("   ");
+
+    expect(episodes).toEqual([]);
+    expect(getSpy).not.toHaveBeenCalled();
+  });
+
+  it("builds incoming-referral query from simple id without referralRequest", () => {
+    const query = buildEpisodeOfCareByIncomingReferralQuery("sr-1");
+
+    expect(query).toBe("incoming-referral=ServiceRequest%2Fsr-1");
+    expect(query).not.toContain("referralRequest");
+  });
+
+  it("builds incoming-referral query from full ServiceRequest reference", () => {
+    const query = buildEpisodeOfCareByIncomingReferralQuery("ServiceRequest/sr-2");
+
+    expect(query).toBe("incoming-referral=ServiceRequest%2Fsr-2");
+    expect(query).not.toContain("referralRequest");
   });
 
   it("gets episode by id", async () => {

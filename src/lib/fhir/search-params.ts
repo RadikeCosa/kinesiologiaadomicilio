@@ -1,5 +1,5 @@
 import { buildDniIdentifier, formatIdentifierSearchValue } from "@/lib/fhir/identifiers";
-import { buildPatientReference } from "@/lib/fhir/references";
+import { buildPatientReference, extractIdFromReference } from "@/lib/fhir/references";
 
 export function buildPatientSearchByDniQuery(dni: string): string {
   const params = new URLSearchParams({
@@ -39,6 +39,24 @@ export function buildActiveEpisodeOfCareByPatientQuery(patientId: string): strin
 export function buildEncounterByPatientQuery(patientId: string): string {
   const params = new URLSearchParams({
     subject: buildPatientReference(patientId),
+  });
+
+  return params.toString();
+}
+
+
+export function buildServiceRequestBySubjectQuery(patientId: string): string {
+  const params = new URLSearchParams({
+    subject: buildPatientReference(patientId),
+  });
+
+  return params.toString();
+}
+
+export function buildEpisodeOfCareByIncomingReferralQuery(serviceRequestId: string): string {
+  const normalizedServiceRequestId = extractIdFromReference(serviceRequestId) ?? serviceRequestId;
+  const params = new URLSearchParams({
+    "incoming-referral": `ServiceRequest/${normalizedServiceRequestId}`,
   });
 
   return params.toString();
