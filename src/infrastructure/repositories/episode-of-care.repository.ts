@@ -8,6 +8,7 @@ import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
 import {
   buildActiveEpisodeOfCareByPatientQuery,
+  buildEpisodeOfCareByIncomingReferralQuery,
   buildEpisodeOfCareByPatientQuery,
 } from "@/lib/fhir/search-params";
 import type { FhirBundle } from "@/lib/fhir/types";
@@ -59,6 +60,19 @@ export async function getMostRecentEpisodeByPatientId(patientId: string): Promis
   const mostRecent = getMostRecentEpisode(episodes);
 
   return mostRecent ? mapFhirEpisodeOfCareToDomain(mostRecent) : null;
+}
+
+
+export async function listEpisodeOfCareByIncomingReferral(serviceRequestId: string): Promise<EpisodeOfCare[]> {
+  if (!serviceRequestId.trim()) {
+    return [];
+  }
+
+  const query = buildEpisodeOfCareByIncomingReferralQuery(serviceRequestId);
+  const bundle = await fhirClient.get<FhirBundle<FhirEpisodeOfCare>>(buildSearchPath("EpisodeOfCare", query));
+  const episodes = extractResourcesByType<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
+
+  return episodes.map(mapFhirEpisodeOfCareToDomain);
 }
 
 export async function getEpisodeById(episodeId: string): Promise<EpisodeOfCare | null> {

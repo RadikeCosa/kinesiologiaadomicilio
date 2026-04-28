@@ -27,4 +27,10 @@ describe("loadPatientDetail", () => {
       status: "active",
     });
   });
+
+  it("preserves operationalStatus derivation without service request side effects", async () => {
+    const detail = await loadPatientDetail("pat-003");
+
+    expect(detail?.operationalStatus).toBe("active_treatment");
+  });
 });

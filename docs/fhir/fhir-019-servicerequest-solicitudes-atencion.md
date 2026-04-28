@@ -68,13 +68,17 @@ Justificación breve:
 - `Encounter` no referencia `ServiceRequest` en V1.
 - el vínculo SR↔`EpisodeOfCare` tendrá owner único; primera opción a validar: `EpisodeOfCare.referralRequest`.
 
-## 4.2) Decisiones abiertas antes de implementación
+## 4.2) Decisiones cerradas antes de implementación (actualizado)
 
-- mapping final `in_review` → `draft`/`active`;
-- mapping final `closed_without_treatment` → `revoked`/`completed`;
-- validación HAPI de `EpisodeOfCare.referralRequest`;
-- fallback si `referralRequest` no es viable;
-- search params exactos contra HAPI.
+- mapping transicional `ServiceRequest.status/statusReason` cerrado en FHIR-021:
+  - `in_review`/`accepted` → `active`;
+  - `closed_without_treatment`/`cancelled` → `revoked`;
+  - `entered_in_error` → `entered-in-error`.
+- validación HAPI de `EpisodeOfCare.referralRequest` cerrada en FHIR-020 (viable en HAPI local).
+- contrato de búsqueda por vínculo cerrado en FHIR-020/FHIR-022:
+  - usar `EpisodeOfCare?incoming-referral=...`;
+  - no usar `EpisodeOfCare?referralRequest=...`.
+- requester transicional y búsquedas mínimas cerradas en FHIR-022.
 
 ---
 
@@ -114,11 +118,11 @@ type ServiceRequestStatus =
   | "entered_in_error";
 ```
 
-Mapping FHIR preliminar (a validar contra HAPI antes de implementar):
+Mapping FHIR transicional cerrado (FHIR-021):
 
-- `in_review` → `active` o `draft` (decisión abierta);
+- `in_review` → `active`;
 - `accepted` → `active`;
-- `closed_without_treatment` → `revoked` o `completed` (decisión abierta según política);
+- `closed_without_treatment` → `revoked`;
 - `cancelled` → `revoked`;
 - `entered_in_error` → `entered-in-error`.
 
@@ -204,12 +208,13 @@ Riesgos:
 
 ## 10) Vínculo ServiceRequest ↔ EpisodeOfCare
 
-Decisión transicional propuesta:
+Decisión transicional cerrada (FHIR-020):
 
 - owner primario del vínculo: `EpisodeOfCare`;
 - `EpisodeOfCare` puede referenciar una o varias `ServiceRequest` aceptadas;
-- evaluar `EpisodeOfCare.referralRequest` como primera opción en R4/HAPI;
-- si no es viable, definir fallback antes de implementar;
+- `EpisodeOfCare.referralRequest` es viable en HAPI local validado (R4 4.0.1 / HAPI 8.8.0);
+- para búsqueda por vínculo usar `incoming-referral` (no `referralRequest` como search param);
+- si degrada búsqueda por vínculo, aplicar fallback de composición por `patient`;
 - evitar duplicar vínculo en ambos recursos sin regla única.
 
 Escenarios:
@@ -240,7 +245,7 @@ Búsquedas necesarias:
 - `ServiceRequest` vinculadas a `EpisodeOfCare` (según estrategia elegida);
 - `EpisodeOfCare` con referencias a `ServiceRequest` aceptadas.
 
-Los search params exactos deben validarse contra HAPI antes de implementar.
+Search params validados y documentados en FHIR-020/FHIR-022; cualquier despliegue fuera del entorno validado debe reverificar capabilities del servidor destino.
 
 ---
 
@@ -277,14 +282,10 @@ Los search params exactos deben validarse contra HAPI antes de implementar.
 
 ## 15) Deudas explícitas
 
-- mapping final `status/statusReason`;
-- validación HAPI de `EpisodeOfCare.referralRequest`;
-- estrategia final de `requesterType`;
-- estrategia final de `requesterContact`;
 - posible evolución a `Condition`;
 - posible evolución a `Practitioner`/`RelatedPerson`;
 - posible evolución a `DocumentReference` para pedido médico;
-- estrategia de búsqueda por vínculo SR↔EoC.
+- codificación estructurada futura de `statusReason` (si aparece necesidad analítica/interoperable).
 
 ---
 
@@ -326,9 +327,8 @@ Este documento se considera correcto si:
 ## 18) Próximos pasos recomendados (antes de implementar)
 
 1. Cerrar primero el carril **Producto V0** en `/admin/patients/[id]/administrative` (reencuadre a “Administración del paciente”, lectura + acciones, sin persistencia nueva).
-2. Luego ejecutar decisiones técnicas pendientes de FHIR V1:
-   - validar `EpisodeOfCare.referralRequest` en HAPI/R4;
-   - cerrar mapping `ServiceRequest.status/statusReason`;
-   - definir requester transicional;
-   - validar búsquedas mínimas;
-   - definir fallback si `referralRequest` no aplica.
+2. Con FHIR-020/FHIR-021/FHIR-022 cerrados, avanzar a FHIR-023 (implementación incremental) manteniendo:
+   - owner único del vínculo SR↔EoC en `EpisodeOfCare.referralRequest`;
+   - query por vínculo con `incoming-referral`;
+   - fallback por composición con `patient` si degrada búsqueda por vínculo;
+   - separación estricta entre estado de solicitud y estado operativo derivado de paciente.

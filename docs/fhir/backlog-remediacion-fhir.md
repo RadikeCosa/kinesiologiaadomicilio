@@ -1,7 +1,7 @@
 # Backlog de implementación FHIR
 
 > Estado: vigente
-> Última actualización: 2026-04-23 (UTC)
+> Última actualización: 2026-04-28 (UTC)
 
 ## Orden recomendado de ejecución
 
@@ -147,21 +147,37 @@
 **Entregable documental:** `docs/fhir/fhir-019-servicerequest-solicitudes-atencion.md`.
 
 ### FHIR-020 — Validar HAPI/R4 para vínculo `ServiceRequest` ↔ `EpisodeOfCare.referralRequest`
+**Estado:** cerrado documentalmente (2026-04-28).
 **Objetivo:** confirmar viabilidad real del vínculo propuesto y definir fallback si no aplica.
 **Dependencias:** FHIR-019.
 **Criterio de aceptación:** decisión técnica documentada (viable/no viable + fallback).
+**Resultado:** viable en HAPI local; contrato de query por vínculo: `EpisodeOfCare?incoming-referral=...`; `EpisodeOfCare?referralRequest=...` inválido (`HAPI-0524`).
+**Referencia:** `docs/fhir/fhir-020-validacion-hapi-servicerequest-episodeofcare.md`.
 
 ### FHIR-021 — Cerrar mapping transicional de `ServiceRequest.status/statusReason`
+**Estado:** cerrado documentalmente (2026-04-28).
 **Objetivo:** definir mapping operativo estable para estados y cierre sin tratamiento.
 **Dependencias:** FHIR-019, FHIR-020.
 **Criterio de aceptación:** tabla de mapping acordada y documentada para implementación.
+**Resultado:** `in_review`/`accepted` → `active`; `closed_without_treatment`/`cancelled` → `revoked`; `entered_in_error` → `entered-in-error`; uso de `statusReason.text` para motivo de cierre.
+**Referencia:** `docs/fhir/fhir-021-servicerequest-status-statusreason.md`.
 
 ### FHIR-022 — Definir requester transicional y estrategia de búsqueda mínima
+**Estado:** cerrado documentalmente (2026-04-28).
 **Objetivo:** cerrar decisión de requester (`display`, dominio y/o extensión futura) y búsquedas mínimas en HAPI.
 **Dependencias:** FHIR-019.
 **Criterio de aceptación:** convención documentada y criterios de búsqueda validados.
+**Resultado:** requester V1 con `requester.display`; `requesterType` y `requesterContact` quedan en dominio/read-model con fallback transicional en `note`; contrato de búsqueda mínima documentado.
+**Referencia:** `docs/fhir/fhir-022-servicerequest-requester-busquedas.md`.
 
-### FHIR-023 — Implementación incremental de `ServiceRequest` (futuro)
+### FHIR-023 — Implementación incremental de `ServiceRequest` (cerrado técnico)
+**Estado:** cerrado técnicamente (PR1→PR5 completados, 2026-04-28).
 **Objetivo:** ejecutar implementación mínima en orden: tipos/schemas → mappers → repositorio.
 **Dependencias:** FHIR-020, FHIR-021, FHIR-022.
 **Criterio de aceptación:** implementación incremental con tests y documentación sincronizada.
+**Resultado:**
+- PR1 completado: contrato de dominio mínimo (`types` + `schemas`) y tests de dominio para create/status.
+- PR2 completado: mappers FHIR read/write de `ServiceRequest` (status mapping, note tagging y tests de mapper).
+- PR3 completado: repository + search params de `ServiceRequest` (create/list/get por subject con tests).
+- PR4 completado: soporte técnico de vínculo EoC↔SR por `incoming-referral` (builder + query de repository + tests sin UI).
+- PR5 completado: integración técnica mínima en loader/read-model interno (composición de ServiceRequest sin UI visible ni cambio de estado operativo).
