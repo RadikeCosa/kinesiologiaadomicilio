@@ -6,6 +6,8 @@
 
 > Nota de naming vigente: por ahora se **mantiene** `solicitud-atencion-flujo-inicial.md` para evitar romper referencias. Si se renombra a `solicitudes-atencion-flujo-operativo.md`, debe hacerse con actualización completa de enlaces en el mismo PR.
 
+> Actualización de estado (2026-04-28): **PRODUCT-SR-001 implementado** como primer corte funcional en `/admin/patients/[id]/administrative` (lectura + alta mínima), preservando no-alcances de resolución/cierre/aceptación para SR-002.
+
 ## 1) Propósito del documento
 
 Este documento actualiza la hipótesis funcional para pasar de una lógica de **“solicitud inicial única”** a un modelo operativo de **solicitudes de atención**.
@@ -116,13 +118,13 @@ Sin embargo, este documento es de producto/flujo y **no** define todavía:
 
 ## 6) Estado actual confirmado en código
 
-Al momento de este documento:
+Estado actualizado al 2026-04-28:
 
-- no existe todavía `ServiceRequest` implementado;
-- no existen estados derivados de solicitud en código;
-- `PatientOperationalStatus` en código sigue limitado al flujo vigente de paciente/tratamiento;
-- los estados propuestos aquí son hipótesis de producto para evolución futura;
-- el gap entre documento y código actual es esperado en esta etapa.
+- existe implementación mínima de `ServiceRequest` en `/admin/patients/[id]/administrative` (lectura + alta mínima);
+- no existe aún resolución/cierre/aceptación de solicitudes desde UI;
+- `PatientOperationalStatus` en código sigue limitado al flujo vigente de paciente/tratamiento (sin señal SR en derivación global);
+- los estados extendidos propuestos aquí continúan como hipótesis de evolución futura;
+- el cierre de SR-001 reduce parte del gap documento↔código y SR-002 queda como siguiente corte funcional.
 
 ---
 

@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  loadPatientAdministrativeContext,
   loadPatientServiceRequestContext,
   sortServiceRequestsByRequestedAtDesc,
 } from "@/app/admin/patients/[id]/data";
@@ -9,9 +10,43 @@ vi.mock("@/infrastructure/repositories/service-request.repository", () => ({
   listServiceRequestsByPatientId: vi.fn(),
 }));
 
+vi.mock("@/infrastructure/repositories/patient.repository", () => ({
+  getPatientById: vi.fn(),
+}));
+
+vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
+  getActiveEpisodeByPatientId: vi.fn(),
+  getMostRecentEpisodeByPatientId: vi.fn(),
+}));
+
+vi.mock("@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper", () => ({
+  mapEpisodeOfCareRead: vi.fn((episode) => episode),
+}));
+
+vi.mock("@/infrastructure/mappers/patient/patient-read.mapper", () => ({
+  mapPatientToDetailReadModel: vi.fn((patient) => ({
+    id: patient.id,
+    fullName: "Ana Pérez",
+    firstName: "Ana",
+    lastName: "Pérez",
+    dni: "30111222",
+    operationalStatus: "active_treatment",
+    activeEpisode: { id: "ep-1", status: "active", patientId: patient.id },
+    latestEpisode: { id: "ep-1", status: "active", patientId: patient.id },
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  })),
+}));
+
+import { getActiveEpisodeByPatientId, getMostRecentEpisodeByPatientId } from "@/infrastructure/repositories/episode-of-care.repository";
+import { getPatientById } from "@/infrastructure/repositories/patient.repository";
 import { listServiceRequestsByPatientId } from "@/infrastructure/repositories/service-request.repository";
 
 describe("patient detail service-request technical composition", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("loads empty context when repository returns empty list", async () => {
     vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([]);
 
@@ -83,5 +118,40 @@ describe("patient detail service-request technical composition", () => {
     ]);
 
     expect(sorted.map((item) => item.id)).toEqual(["sr-11", "sr-10"]);
+  });
+
+  it("loads administrative context with patient + serviceRequests without changing operationalStatus", async () => {
+    vi.mocked(getPatientById).mockResolvedValueOnce({ id: "pat-1" } as never);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValueOnce({ id: "ep-1", status: "active" } as never);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValueOnce(null);
+    vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([
+      {
+        id: "sr-9",
+        patientId: "pat-1",
+        requestedAt: "2026-04-22",
+        reasonText: "Motivo",
+        status: "accepted",
+      },
+    ]);
+
+    const context = await loadPatientAdministrativeContext("pat-1");
+
+    expect(context.patient?.id).toBe("pat-1");
+    expect(context.patient?.operationalStatus).toBe("active_treatment");
+    expect(context.serviceRequests).toHaveLength(1);
+    expect(context.latestServiceRequest?.id).toBe("sr-9");
+  });
+
+  it("returns null patient and empty serviceRequests for missing patient", async () => {
+    vi.mocked(getPatientById).mockResolvedValueOnce(null);
+
+    const context = await loadPatientAdministrativeContext("pat-missing");
+
+    expect(context).toEqual({
+      patient: null,
+      serviceRequests: [],
+      latestServiceRequest: null,
+    });
+    expect(listServiceRequestsByPatientId).not.toHaveBeenCalled();
   });
 });

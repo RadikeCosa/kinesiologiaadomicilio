@@ -14,6 +14,10 @@ export interface PatientServiceRequestReadContext {
   latestServiceRequest: ServiceRequest | null;
 }
 
+export interface PatientAdministrativeReadContext extends PatientServiceRequestReadContext {
+  patient: PatientDetailReadModel | null;
+}
+
 export function sortServiceRequestsByRequestedAtDesc(serviceRequests: ServiceRequest[]): ServiceRequest[] {
   return [...serviceRequests].sort((a, b) => {
     if (a.requestedAt !== b.requestedAt) {
@@ -38,6 +42,25 @@ export async function loadPatientServiceRequestContext(patientId: string): Promi
   return {
     serviceRequests: orderedServiceRequests,
     latestServiceRequest: orderedServiceRequests[0] ?? null,
+  };
+}
+
+export async function loadPatientAdministrativeContext(patientId: string): Promise<PatientAdministrativeReadContext> {
+  const patient = await loadPatientDetail(patientId);
+
+  if (!patient) {
+    return {
+      patient: null,
+      serviceRequests: [],
+      latestServiceRequest: null,
+    };
+  }
+
+  const serviceRequestContext = await loadPatientServiceRequestContext(patient.id);
+
+  return {
+    patient,
+    ...serviceRequestContext,
   };
 }
 
