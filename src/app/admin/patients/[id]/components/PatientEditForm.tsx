@@ -243,7 +243,7 @@ export function PatientEditForm({
           onClick={() => onEditingChange(false)}
           type="button"
         >
-          Cancelar y volver al paciente
+          Cancelar edición
         </button>
       </form>
     </section>

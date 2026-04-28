@@ -12,6 +12,8 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - ciclo básico de tratamiento (`EpisodeOfCare`);
 - registro/listado simple de visitas realizadas (`Encounter` base).
 
+Y **sin** implementación vigente de `ServiceRequest` en código (queda como carril futuro).
+
 ## 1.1) Dirección evolutiva del proyecto
 
 - **Estado actual**:
@@ -42,7 +44,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - `/admin`: dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes), sin gráficos.
 - `/admin/patients`: listado operativo de pacientes, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
 - `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
-- `/admin/patients/[id]/administrative`: edición administrativa no clínica (identidad, contacto y datos operativos).
+- `/admin/patients/[id]/administrative`: administración no clínica con lectura + acciones (edición explícita de identidad, contacto y datos operativos).
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (header con acción primaria `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento y listado de visitas con corrección inline rápida).
 - `/admin/patients/[id]/encounters/new`: pantalla específica para registrar una visita.
 - `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
@@ -84,7 +86,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - acceso rápido contextual desde el listado a `Registrar visita` solo para pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`);
 - alta mínima de paciente (incluye dirección operativa opcional, `gender` y `birthDate` opcionales);
 - ficha consolidada de paciente en `/admin/patients/[id]` como hub (incluye visualización de dirección, `gender`, `birthDate` y navegación a gestión clínica/administrativa);
-- edición administrativa acotada en `/admin/patients/[id]/administrative` (incluye edición de dirección, `gender`, `birthDate` y datos no clínicos);
+- superficie administrativa acotada en `/admin/patients/[id]/administrative` con lectura + acciones (incluye edición explícita de dirección, `gender`, `birthDate` y datos no clínicos);
 - gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
   - inicio de tratamiento;
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
@@ -179,6 +181,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - historial longitudinal rico;
 - detalle clínico profundo por encuentro;
 - notas clínicas longitudinales / notas generales persistidas en UI;
+- `ServiceRequest` como recurso implementado (solicitudes de atención);
 - `Observation` / `Procedure`;
 - agenda;
 - pagos;

@@ -17,16 +17,12 @@ vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadPatientDetail: loadPatientDetailMock,
 }));
 
-vi.mock("@/app/admin/patients/[id]/components/PatientAdministrativeEditor", () => ({
-  PatientAdministrativeEditor: () => createElement("div", null, "PatientAdministrativeEditor"),
-}));
-
 describe("/admin/patients/[id]/administrative page", () => {
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it("renders internal header with metadata and treatment badge", async () => {
+  it("renders reading-first admin summary with explicit edit action", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-24T12:00:00Z"));
 
@@ -50,10 +46,15 @@ describe("/admin/patients/[id]/administrative page", () => {
     expect(html).toContain("← Volver al paciente");
     expect(html).toContain("href=\"/admin/patients/pat-1\"");
     expect(html).toContain("Ana Pérez");
-    expect(html).toContain("Gestión de datos administrativos y de contacto del paciente.");
+    expect(html).toContain("Resumen administrativo");
     expect(html).toContain("DNI: 30.111.222");
     expect(html).toContain("Edad: 68 años");
     expect(html).toContain("En tratamiento");
+    expect(html).toContain("Editar datos");
+    expect(html).toContain("Datos administrativos y de contacto");
+    expect(html).not.toContain("name=\"dni\"");
+    expect(html).not.toContain("Guardar cambios");
+    expect(html).not.toContain("ServiceRequest");
   });
 
   it("does not render age metadata when birthDate is missing", async () => {
@@ -97,6 +98,18 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(backLinkIndex).toBeGreaterThan(-1);
     expect(titleIndex).toBeGreaterThan(backLinkIndex);
+  });
+
+  it("keeps not-found fallback", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(null);
+
+    const element = await AdminPatientAdministrativePage({
+      params: Promise.resolve({ id: "missing-id" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("← Volver a pacientes");
+    expect(html).toContain("No se encontró el paciente solicitado.");
   });
 
 });
