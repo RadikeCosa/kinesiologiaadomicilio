@@ -130,6 +130,17 @@ Al momento de este documento:
 
 Para operación y UI conviene mostrar un estado derivado del caso del paciente.
 
+### 7.0 Separación explícita: vigente vs futuro
+
+- **Vigente en código hoy (2026-04-28):**
+  - `preliminary`
+  - `ready_to_start`
+  - `active_treatment`
+  - `finished_treatment`
+- Esta derivación actual depende de `EpisodeOfCare` (activo/finalizado) y de la presencia de DNI; no existe señal de `ServiceRequest` en runtime.
+- **Modelo de esta sección:** es **futuro/conceptual** y no debe interpretarse como implementado.
+- `PatientOperationalStatus` futuro sigue siendo un estado **derivado** (read-model), no persistido como verdad clínica en FHIR.
+
 ### 7.1 Secuencia base sugerida
 
 - Sin solicitud
@@ -170,12 +181,53 @@ type PatientOperationalStatus =
 | --- | --- | --- |
 | `no_service_request` | Sin solicitud | — |
 | `service_request_in_review` | En evaluación | — |
-| `service_request_closed_without_treatment` | No inició | Cerrada sin tratamiento / No aceptada |
+| `service_request_closed_without_treatment` | No inició | Cerrada sin tratamiento / No aceptada / No avanzó |
 | `accepted_request_treatment_pending` | Tratamiento pendiente | — |
 | `active_treatment` | Tratamiento activo | — |
 | `closed_cycle` | Ciclo cerrado | — |
 
-Nota: el copy definitivo para solicitud cerrada sin tratamiento sigue abierto.
+### 7.4.1 Decisión de copy (V1 futura) para `service_request_closed_without_treatment`
+
+Decisión recomendada:
+
+- **Label principal badge/listado:** `No inició`
+- **Texto explicativo corto (detalle):** `La solicitud se cerró sin iniciar tratamiento.`
+- **CTA principal sugerida:** `Ver motivo`
+- **CTA secundaria sugerida:** `Nueva solicitud`
+
+Justificación de producto:
+
+- evita tono duro/acusatorio;
+- diferencia claramente este estado de `closed_cycle` (tratamiento que sí existió y terminó);
+- evita confusión con `finished_treatment` (tratamiento finalizado);
+- conserva lenguaje operativo breve para listado y badge.
+
+Términos a evitar como label principal visible:
+
+- `Rechazada`
+- `Denegada`
+- `Fallida`
+- `Abandonada`
+
+Nota: `Cerrada sin tratamiento` puede quedar como copy de apoyo contextual, pero no como label principal.
+
+### 7.5 Qué depende sí o sí de `ServiceRequest` real
+
+No puede implementarse de forma correcta sin `ServiceRequest` persistido y consultable:
+
+- distinguir `no_service_request` de `service_request_closed_without_treatment`;
+- representar `service_request_in_review`;
+- representar `accepted_request_treatment_pending`;
+- priorizar estados mixtos usando temporalidad de solicitudes;
+- habilitar CTAs de solicitud (`Ver solicitud`, `Resolver solicitud`, `Nueva solicitud`) con respaldo real.
+
+### 7.6 Qué NO anticipar ahora
+
+- no cambiar estados operativos vigentes en código;
+- no modificar badges/CTAs actuales;
+- no mezclar estado de solicitud con estado de `EpisodeOfCare`;
+- no persistir un estado operativo derivado como estado clínico FHIR;
+- no abrir rutas nuevas de solicitudes en esta fase.
 
 ---
 
@@ -198,6 +250,12 @@ Criterio de desempate temporal:
 - el criterio temporal debe usar la solicitud/episodio más reciente disponible;
 - si hay tratamiento activo, este conserva prioridad como badge principal.
 
+Reglas complementarias de cierre/prioridad:
+
+- `closed_cycle` representa último ciclo cerrado cuando no existe solicitud más relevante;
+- `no_service_request` solo aplica cuando no hay solicitudes y tampoco ciclos relevantes;
+- `service_request_closed_without_treatment` se muestra como `No inició` (label principal recomendado para V1 futura).
+
 ### 8.1 Escenarios mixtos de referencia
 
 | Escenario | Badge principal | Indicador secundario | CTA principal | CTA secundaria |
@@ -207,6 +265,24 @@ Criterio de desempate temporal:
 | Solicitud aceptada sin tratamiento iniciado | Tratamiento pendiente | — | Iniciar tratamiento | Ver solicitud |
 | Solo solicitudes cerradas sin tratamiento | No inició o Cerrada sin tratamiento | — | Ver motivo | Nueva solicitud |
 
+### 8.2 Criterios de aceptación funcional futura (escenarios temporales límite)
+
+> Estos escenarios son **criterios funcionales futuros** para validar diseño de producto cuando exista `ServiceRequest` real.  
+> **No son tests implementados actualmente** ni cambian el comportamiento vigente.
+
+| Caso | Escenario temporal límite | Estado principal esperado | Indicador secundario esperado | Guardrail / observación |
+| --- | --- | --- | --- | --- |
+| 1 | Paciente sin solicitud y sin ciclos. | `no_service_request` | — | Caso base sin demanda ni tratamiento previo. |
+| 2 | Paciente con solicitud en evaluación y sin tratamiento. | `service_request_in_review` | — | No habilita visitas. |
+| 3 | Paciente con solicitud cerrada sin tratamiento y sin ciclos. | `service_request_closed_without_treatment` (`No inició`) | — | Diferenciar de ciclo cerrado. |
+| 4 | Paciente con solicitud aceptada, pero sin `EpisodeOfCare` iniciado. | `accepted_request_treatment_pending` | — | CTA esperada: iniciar tratamiento. |
+| 5 | Paciente con `EpisodeOfCare` activo. | `active_treatment` | — | **Puede registrar visita**. |
+| 6 | Paciente con `EpisodeOfCare` activo + nueva solicitud en evaluación. | `active_treatment` | Solicitud en evaluación | `Registrar visita` sigue dependiendo del episodio activo, no de la solicitud. |
+| 7 | Paciente con ciclo cerrado y sin solicitud nueva. | `closed_cycle` | — | Refleja último ciclo finalizado. |
+| 8 | Paciente con ciclo cerrado + solicitud nueva en evaluación más reciente. | `service_request_in_review` | Ciclo cerrado previo | La temporalidad reciente de la solicitud prevalece sobre el cierre previo. |
+| 9 | Paciente con solicitud aceptada pendiente + ciclo cerrado previo. | `accepted_request_treatment_pending` | Ciclo cerrado previo | La solicitud aceptada pendiente tiene mayor prioridad operativa. |
+| 10 | Paciente con solicitud cerrada sin tratamiento posterior a ciclo cerrado. | `service_request_closed_without_treatment` (`No inició`) | Ciclo cerrado previo | Al ser evento más reciente de demanda, prevalece sobre `closed_cycle`; evita confundir con tratamiento finalizado vigente. |
+
 ---
 
 ## 9) Matriz de CTAs por estado operativo
@@ -215,7 +291,7 @@ Criterio de desempate temporal:
 | --- | --- | --- |
 | Sin solicitud | Crear solicitud | Editar datos |
 | En evaluación | Ver solicitud | Resolver solicitud |
-| No inició / cerrada sin tratamiento | Ver motivo | Nueva solicitud |
+| No inició | Ver motivo | Nueva solicitud |
 | Tratamiento pendiente | Iniciar tratamiento | Ver solicitud |
 | Tratamiento activo | Registrar visita | Nueva solicitud |
 | Ciclo cerrado | Ver visitas | Nueva solicitud |
@@ -224,6 +300,73 @@ Regla de responsabilidad:
 
 - la acción real de iniciar tratamiento debe seguir pasando por `/admin/patients/[id]/treatment` (o una ruta equivalente que preserve esa responsabilidad);
 - no mezclar gestión completa de `ServiceRequest` con responsabilidades de `EpisodeOfCare`.
+
+### 9.1 Guardrail innegociable de operación clínica
+
+- `Registrar visita` solo se habilita con `EpisodeOfCare` **activo**.
+- Una solicitud aceptada (`accepted_request_treatment_pending`) **no habilita visitas por sí sola**.
+- El ownership de habilitación de visitas permanece en la capa de tratamiento (`EpisodeOfCare`), no en solicitud.
+
+### 9.2 Matriz futura badge/CTA por superficie (dirección funcional)
+
+> Esta matriz define dirección futura de producto. **No representa comportamiento implementado hoy**.
+
+| Estado conceptual futuro | `/admin/patients` | `/admin/patients/[id]` | `/admin/patients/[id]/administrative` | `/admin/patients/[id]/treatment` | `/admin/patients/[id]/encounters` |
+| --- | --- | --- | --- | --- | --- |
+| `no_service_request` | Badge “Sin solicitud”. CTA principal: Gestión administrativa. | Resumen: sin solicitud. CTA principal: Gestión administrativa. | CTA principal: Crear solicitud. | Mantener foco en tratamiento; sin efecto automático por solicitud. | Sin CTA `Registrar visita` si no hay tratamiento activo. |
+| `service_request_in_review` | Badge “En evaluación”. CTA principal: Ver solicitud. | Resumen de solicitud en evaluación + acceso a administrativa. | CTA principal: Ver/Resolver solicitud. | Sin iniciar visitas por solicitud en evaluación. | Sin CTA `Registrar visita` si no hay tratamiento activo. |
+| `service_request_closed_without_treatment` | Badge “No inició”. CTA: Ver motivo/Nueva solicitud. | Resumen de cierre sin tratamiento. | CTA principal: Nueva solicitud. | No iniciar tratamiento automáticamente. | Sin CTA `Registrar visita` si no hay tratamiento activo. |
+| `accepted_request_treatment_pending` | Badge “Tratamiento pendiente”. CTA principal: Iniciar tratamiento. | CTA principal: Ir a tratamiento para iniciar. | Ver solicitud aceptada + contexto administrativo. | Acción principal: Iniciar `EpisodeOfCare`. | Sin CTA `Registrar visita` hasta tener episodio activo. |
+| `active_treatment` | Badge “Tratamiento activo”. CTA principal: Registrar visita. | CTA rápida: Registrar visita. | Gestión administrativa secundaria. | Acción principal: gestionar inicio/cierre de ciclo. | CTA principal: Registrar visita (si episodio activo). |
+| `closed_cycle` | Badge “Ciclo cerrado”. CTA principal: Ver visitas / Nueva solicitud. | Resumen de último ciclo cerrado. | CTA principal: Nueva solicitud. | Posible reinicio de tratamiento según criterio clínico-operativo. | Listado histórico; sin alta de visita si no hay episodio activo. |
+
+### 9.3 Ejemplos de copy UI futuro por superficie (referencia)
+
+> Ejemplos de copy para implementación futura (cuando exista solicitud persistida).  
+> No representan comportamiento vigente ni cambios runtime actuales.
+
+1. **`/admin/patients` (listado/card)**
+   - Caso `No inició`:
+     - Badge: `No inició`
+     - Línea breve: `La solicitud se cerró sin iniciar tratamiento.`
+     - CTA principal: `Ver motivo`
+     - CTA secundaria: `Nueva solicitud`
+   - Caso `Tratamiento activo`:
+     - Badge: `Tratamiento activo`
+     - Línea breve: `En curso desde 12/05/2026`
+     - CTA principal: `Registrar visita`
+     - CTA secundaria: `Ver paciente`
+
+2. **`/admin/patients/[id]` (resumen operativo)**
+   - Estado principal + secundario (ejemplo mixto):
+     - Estado principal: `Tratamiento activo`
+     - Indicador secundario: `Nueva solicitud en evaluación`
+     - Resumen: `Tratamiento en curso. Hay una solicitud nueva pendiente de revisión.`
+
+3. **`/admin/patients/[id]/administrative` (administrativo + solicitudes)**
+   - Bloque futuro sugerido:
+     - Título: `Solicitudes de atención`
+     - Estado visible: `No inició`
+     - Copy: `La última solicitud se cerró sin iniciar tratamiento.`
+     - CTA principal: `Nueva solicitud`
+     - Nota de alcance: `Hasta implementar persistencia de solicitudes, este bloque es solo referencia funcional.`
+
+4. **`/admin/patients/[id]/treatment` (ownership de tratamiento)**
+   - Caso `Tratamiento pendiente` por solicitud aceptada:
+     - Estado: `Tratamiento pendiente`
+     - Copy: `Hay una solicitud aceptada. Para continuar, iniciá el tratamiento.`
+     - CTA principal: `Iniciar tratamiento`
+     - Aclaración: `Esta pantalla mantiene ownership de inicio/cierre de tratamiento (EpisodeOfCare).`
+
+5. **`/admin/patients/[id]/encounters` (visitas)**
+   - Sin tratamiento activo:
+     - Copy: `Necesitás un tratamiento activo para registrar visitas.`
+     - CTA: `Ir a gestión de tratamiento`
+   - Con tratamiento activo:
+     - Copy: `Podés registrar una nueva visita del tratamiento activo.`
+     - CTA principal: `Registrar visita`
+   - Guardrail explícito:
+     - `Una solicitud aceptada por sí sola no habilita registrar visitas.`
 
 ---
 
@@ -466,6 +609,18 @@ Objetivo: implementar `ServiceRequest` real con validación técnica previa.
 4. Validar búsquedas mínimas.
 5. Definir fallback si `referralRequest` no aplica.
 6. Recién después, avanzar con implementación incremental (tipos/schemas → mappers → repositorio → UI).
+
+#### Gate de entrada para abrir FHIR-020/021/022
+
+Antes de abrir ejecución técnica de FHIR-020/021/022, deben estar explícitamente cerradas estas precondiciones:
+
+1. Validación real de `EpisodeOfCare.referralRequest` en HAPI/R4 (o descarte con justificación).
+2. Mapping acordado y estable para `ServiceRequest.status/statusReason`.
+3. Definición de requester transicional (`display`, alcance y límites).
+4. Búsquedas mínimas validadas contra servidor objetivo.
+5. Fallback documentado si `referralRequest` no aplica.
+
+Sin este gate, el carril FHIR se mantiene como referencia técnica futura y no como implementación.
 
 ---
 
