@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PatientAdministrativeEditor } from "@/app/admin/patients/[id]/components/PatientAdministrativeEditor";
-import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
+import { PatientServiceRequestsSection } from "@/app/admin/patients/[id]/administrative/components/PatientServiceRequestsSection";
+import { loadPatientAdministrativeContext } from "@/app/admin/patients/[id]/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import {
   calculateAgeFromBirthDate,
@@ -17,7 +18,7 @@ export async function generateMetadata({
   params,
 }: AdminPatientAdministrativePageProps): Promise<Metadata> {
   const { id } = await params;
-  const patient = await loadPatientDetail(id);
+  const { patient } = await loadPatientAdministrativeContext(id);
 
   return {
     title: patient
@@ -30,7 +31,7 @@ export default async function AdminPatientAdministrativePage({
   params,
 }: AdminPatientAdministrativePageProps) {
   const { id } = await params;
-  const patient = await loadPatientDetail(id);
+  const { patient, serviceRequests } = await loadPatientAdministrativeContext(id);
   const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
   const treatmentBadge = patient
     ? getTreatmentBadgePresentation(patient.operationalStatus)
@@ -106,6 +107,7 @@ export default async function AdminPatientAdministrativePage({
               </div>
             </section>
           </div>
+          <PatientServiceRequestsSection patientId={patient.id} serviceRequests={serviceRequests} />
         </>
       ) : (
         <>

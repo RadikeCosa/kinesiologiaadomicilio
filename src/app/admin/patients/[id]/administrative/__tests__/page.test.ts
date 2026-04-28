@@ -5,8 +5,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import AdminPatientAdministrativePage from "@/app/admin/patients/[id]/administrative/page";
 
-const loadPatientDetailMock = vi.hoisted(() => vi.fn());
+const loadPatientAdministrativeContextMock = vi.hoisted(() => vi.fn());
 (globalThis as { React?: typeof React }).React = React;
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
 
 vi.mock("next/link", () => ({
   default: ({ children, href, ...rest }: { children: ReactNode; href: string }) =>
@@ -14,7 +18,8 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/app/admin/patients/[id]/data", () => ({
-  loadPatientDetail: loadPatientDetailMock,
+  loadPatientDetail: vi.fn(),
+  loadPatientAdministrativeContext: loadPatientAdministrativeContextMock,
 }));
 
 describe("/admin/patients/[id]/administrative page", () => {
@@ -22,20 +27,49 @@ describe("/admin/patients/[id]/administrative page", () => {
     vi.useRealTimers();
   });
 
-  it("renders reading-first admin summary with explicit edit action", async () => {
+  it("renders reading-first admin summary, service request section and explicit edit action", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-04-24T12:00:00Z"));
 
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      fullName: "Ana Pérez",
-      firstName: "Ana",
-      lastName: "Pérez",
-      dni: "30111222",
-      birthDate: "1958-04-24",
-      operationalStatus: "active_treatment",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
+    loadPatientAdministrativeContextMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        firstName: "Ana",
+        lastName: "Pérez",
+        dni: "30111222",
+        birthDate: "1958-04-24",
+        operationalStatus: "active_treatment",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      serviceRequests: [
+        {
+          id: "sr-1",
+          patientId: "pat-1",
+          requestedAt: "2026-04-21",
+          reasonText: "Dolor lumbar",
+          reportedDiagnosisText: "Lumbalgia",
+          requesterDisplay: "Dra. Pérez",
+          status: "in_review",
+        },
+        {
+          id: "sr-2",
+          patientId: "pat-1",
+          requestedAt: "2026-04-10",
+          reasonText: "Control funcional",
+          status: "closed_without_treatment",
+        },
+      ],
+      latestServiceRequest: {
+        id: "sr-1",
+        patientId: "pat-1",
+        requestedAt: "2026-04-21",
+        reasonText: "Dolor lumbar",
+        reportedDiagnosisText: "Lumbalgia",
+        requesterDisplay: "Dra. Pérez",
+        status: "in_review",
+      },
     });
 
     const element = await AdminPatientAdministrativePage({
@@ -52,21 +86,39 @@ describe("/admin/patients/[id]/administrative page", () => {
     expect(html).toContain("En tratamiento");
     expect(html).toContain("Editar datos");
     expect(html).toContain("Datos administrativos y de contacto");
-    expect(html).not.toContain("name=\"dni\"");
-    expect(html).not.toContain("Guardar cambios");
-    expect(html).not.toContain("ServiceRequest");
+
+    expect(html).toContain("Solicitudes de atención");
+    expect(html).toContain("Registro administrativo de demandas o consultas");
+    expect(html).toContain("Motivo de consulta");
+    expect(html).toContain("Dolor lumbar");
+    expect(html).toContain("Diagnóstico informado");
+    expect(html).toContain("Lumbalgia");
+    expect(html).toContain("Solicitante");
+    expect(html).toContain("Dra. Pérez");
+    expect(html).toContain("En evaluación");
+    expect(html).toContain("No inició");
+
+    expect(html).toContain("Nueva solicitud");
+    expect(html).not.toContain("<form");
+    expect(html).not.toContain("Aceptar solicitud");
+    expect(html).not.toContain("Cerrar solicitud");
+    expect(html).not.toContain("Resolver solicitud");
   });
 
-  it("does not render age metadata when birthDate is missing", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      fullName: "Ana Pérez",
-      firstName: "Ana",
-      lastName: "Pérez",
-      dni: "30111222",
-      operationalStatus: "ready_to_start",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
+  it("renders empty state for service requests when there are none", async () => {
+    loadPatientAdministrativeContextMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        firstName: "Ana",
+        lastName: "Pérez",
+        dni: "30111222",
+        operationalStatus: "ready_to_start",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      serviceRequests: [],
+      latestServiceRequest: null,
     });
 
     const element = await AdminPatientAdministrativePage({
@@ -76,16 +128,23 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(html).toContain("DNI: 30.111.222");
     expect(html).not.toContain("Edad:");
+    expect(html).toContain("Solicitudes de atención");
+    expect(html).toContain("Todavía no hay solicitudes de atención registradas.");
   });
+
   it("keeps back link before page title", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce({
-      id: "pat-1",
-      fullName: "Ana Pérez",
-      firstName: "Ana",
-      lastName: "Pérez",
-      operationalStatus: "preliminary",
-      createdAt: "2026-01-01T00:00:00.000Z",
-      updatedAt: "2026-01-01T00:00:00.000Z",
+    loadPatientAdministrativeContextMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        firstName: "Ana",
+        lastName: "Pérez",
+        operationalStatus: "preliminary",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      serviceRequests: [],
+      latestServiceRequest: null,
     });
 
     const element = await AdminPatientAdministrativePage({
@@ -101,7 +160,11 @@ describe("/admin/patients/[id]/administrative page", () => {
   });
 
   it("keeps not-found fallback", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce(null);
+    loadPatientAdministrativeContextMock.mockResolvedValueOnce({
+      patient: null,
+      serviceRequests: [],
+      latestServiceRequest: null,
+    });
 
     const element = await AdminPatientAdministrativePage({
       params: Promise.resolve({ id: "missing-id" }),
@@ -110,6 +173,6 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(html).toContain("← Volver a pacientes");
     expect(html).toContain("No se encontró el paciente solicitado.");
+    expect(html).not.toContain("Solicitudes de atención");
   });
-
 });
