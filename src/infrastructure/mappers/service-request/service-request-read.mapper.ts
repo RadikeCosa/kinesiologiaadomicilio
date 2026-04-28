@@ -7,6 +7,7 @@ const NOTE_PREFIXES = {
   reportedDiagnosis: "reported-diagnosis:v1:",
   requesterContact: "requester-contact:v1:",
   generalNote: "general-note:v1:",
+  workflowStatus: "workflow-status:v1:",
 } as const;
 
 function normalizeOptionalString(value?: string): string | undefined {
@@ -68,11 +69,29 @@ function resolveRevokedDomainStatus(resource: Pick<FhirServiceRequest, "statusRe
   return "closed_without_treatment";
 }
 
+function resolveActiveDomainStatus(resource: Pick<FhirServiceRequest, "note">): ServiceRequest["status"] {
+  if (!resource.note?.length) {
+    return "in_review";
+  }
+
+  for (const entry of resource.note) {
+    const text = normalizeOptionalString(entry.text);
+
+    if (!text || !text.startsWith(NOTE_PREFIXES.workflowStatus)) {
+      continue;
+    }
+
+    const workflowStatus = text.slice(NOTE_PREFIXES.workflowStatus.length).trim();
+    return workflowStatus === "accepted" ? "accepted" : "in_review";
+  }
+
+  return "in_review";
+}
+
 export function mapFhirServiceRequestStatusToDomainStatus(resource: Pick<FhirServiceRequest, "status" | "statusReason" | "note">): ServiceRequest["status"] {
   switch (resource.status) {
     case "active":
-      // Política explícita: active es ambiguo (in_review/accepted) -> default conservador in_review.
-      return "in_review";
+      return resolveActiveDomainStatus(resource);
     case "revoked":
       // Política explícita: sin señal concluyente, revoked -> closed_without_treatment.
       return resolveRevokedDomainStatus(resource);

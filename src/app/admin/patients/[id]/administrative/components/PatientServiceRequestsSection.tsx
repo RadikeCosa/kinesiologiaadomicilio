@@ -8,6 +8,7 @@ import { formatDateDisplay } from "@/lib/patient-admin-display";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { ServiceRequestCreateForm } from "@/app/admin/patients/[id]/administrative/components/ServiceRequestCreateForm";
+import { ServiceRequestStatusActions } from "@/app/admin/patients/[id]/administrative/components/ServiceRequestStatusActions";
 import { getServiceRequestStatusLabel } from "@/app/admin/patients/[id]/administrative/service-request-status-label";
 
 interface PatientServiceRequestsSectionProps {
@@ -119,7 +120,22 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests }: Pa
                     <dd className="mt-1">{serviceRequest.requesterDisplay}</dd>
                   </div>
                 ) : null}
+
+                {serviceRequest.closedReasonText ? (
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Motivo de cierre/cancelación
+                    </dt>
+                    <dd className="mt-1">{serviceRequest.closedReasonText}</dd>
+                  </div>
+                ) : null}
               </dl>
+
+              <ServiceRequestStatusActions
+                currentStatus={serviceRequest.status}
+                patientId={patientId}
+                serviceRequestId={serviceRequest.id}
+              />
             </li>
           ))}
         </ul>

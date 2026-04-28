@@ -6,6 +6,7 @@ import {
   mapFhirServiceRequestToDomain,
 } from "@/infrastructure/mappers/service-request/service-request-read.mapper";
 import {
+  applyServiceRequestStatusUpdateToFhir,
   buildServiceRequestNotes,
   mapCreateServiceRequestInputToFhir,
   mapServiceRequestStatusToFhirStatus,
@@ -29,6 +30,16 @@ describe("service-request mappers", () => {
       requester: undefined,
       note: undefined,
     });
+  });
+
+  it("create minimal does not add workflow-status note", () => {
+    const mapped = mapCreateServiceRequestInputToFhir({
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+    });
+
+    expect(mapped.note).toBeUndefined();
   });
 
   it("does not include optional empty fields in create payload", () => {
@@ -73,6 +84,200 @@ describe("service-request mappers", () => {
     expect(mapServiceRequestStatusToFhirStatus("entered_in_error")).toBe("entered-in-error");
   });
 
+  it("applies accepted update as active and clears statusReason", () => {
+    const updated = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-1",
+        status: "revoked",
+        statusReason: { text: "Motivo previo" },
+        note: [{ text: "general-note:v1:Nota previa" }],
+      },
+      {
+        id: "sr-1",
+        status: "accepted",
+      },
+    );
+
+    expect(updated.status).toBe("active");
+    expect(updated.statusReason).toBeUndefined();
+    expect(updated.note).toEqual([
+      { text: "general-note:v1:Nota previa" },
+      { text: "workflow-status:v1:accepted" },
+    ]);
+  });
+
+  it("applies closed_without_treatment update as revoked with statusReason", () => {
+    const updated = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-2",
+        status: "active",
+      },
+      {
+        id: "sr-2",
+        status: "closed_without_treatment",
+        closedReasonText: "No requiere tratamiento en este momento",
+      },
+    );
+
+    expect(updated.status).toBe("revoked");
+    expect(updated.statusReason).toEqual({ text: "No requiere tratamiento en este momento" });
+  });
+
+  it("applies cancelled update as revoked with statusReason", () => {
+    const updated = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-3",
+        status: "active",
+      },
+      {
+        id: "sr-3",
+        status: "cancelled",
+        closedReasonText: "Paciente cancela",
+      },
+    );
+
+    expect(updated.status).toBe("revoked");
+    expect(updated.statusReason).toEqual({ text: "Paciente cancela" });
+  });
+
+  it("applies entered_in_error update as entered-in-error", () => {
+    const updated = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-4",
+        status: "active",
+      },
+      {
+        id: "sr-4",
+        status: "entered_in_error",
+      },
+    );
+
+    expect(updated.status).toBe("entered-in-error");
+    expect(updated.statusReason).toBeUndefined();
+  });
+
+  it("removes workflow-status when moving back to in_review", () => {
+    const updated = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-4b",
+        status: "active",
+        note: [
+          { text: "workflow-status:v1:accepted" },
+          { text: "general-note:v1:Seguimiento" },
+        ],
+      },
+      {
+        id: "sr-4b",
+        status: "in_review",
+      },
+    );
+
+    expect(updated.status).toBe("active");
+    expect(updated.note).toEqual([{ text: "general-note:v1:Seguimiento" }]);
+  });
+
+  it("removes workflow-status when closing or cancelling and preserves unrelated notes", () => {
+    const closed = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-4c",
+        status: "active",
+        note: [
+          { text: "workflow-status:v1:accepted" },
+          { text: "general-note:v1:Seguimiento" },
+        ],
+      },
+      {
+        id: "sr-4c",
+        status: "closed_without_treatment",
+        closedReasonText: "No corresponde",
+      },
+    );
+
+    const cancelled = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-4d",
+        status: "active",
+        note: [
+          { text: "workflow-status:v1:accepted" },
+          { text: "general-note:v1:Seguimiento" },
+        ],
+      },
+      {
+        id: "sr-4d",
+        status: "cancelled",
+        closedReasonText: "Paciente cancela",
+      },
+    );
+
+    expect(closed.note).toEqual([{ text: "general-note:v1:Seguimiento" }]);
+    expect(cancelled.note).toEqual([{ text: "general-note:v1:Seguimiento" }]);
+    expect(closed.statusReason).toEqual({ text: "No corresponde" });
+    expect(cancelled.statusReason).toEqual({ text: "Paciente cancela" });
+  });
+
+  it("does not duplicate workflow-status when accepted multiple times", () => {
+    const updated = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-4e",
+        status: "active",
+        note: [
+          { text: "workflow-status:v1:accepted" },
+          { text: "general-note:v1:Seguimiento" },
+        ],
+      },
+      {
+        id: "sr-4e",
+        status: "accepted",
+      },
+    );
+
+    expect(updated.note).toEqual([
+      { text: "general-note:v1:Seguimiento" },
+      { text: "workflow-status:v1:accepted" },
+    ]);
+  });
+
+  it("preserves existing fields and keeps unrelated note/requester/subject/reasonCode on accepted", () => {
+    const resource = {
+      resourceType: "ServiceRequest" as const,
+      id: "sr-5",
+      status: "active" as const,
+      intent: "order" as const,
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-28",
+      reasonCode: [{ text: "Dolor lumbar" }],
+      requester: { display: "Dra. Pérez" },
+      note: [{ text: "general-note:v1:Nota" }],
+    };
+
+    const updated = applyServiceRequestStatusUpdateToFhir(resource, {
+      id: "sr-5",
+      status: "accepted",
+    });
+
+    expect(updated).toMatchObject({
+      id: "sr-5",
+      status: "active",
+      intent: "order",
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-28",
+      reasonCode: [{ text: "Dolor lumbar" }],
+      requester: { display: "Dra. Pérez" },
+      note: [
+        { text: "general-note:v1:Nota" },
+        { text: "workflow-status:v1:accepted" },
+      ],
+    });
+  });
+
   it("buildServiceRequestNotes returns only tagged known entries", () => {
     const notes = buildServiceRequestNotes({
       reportedDiagnosisText: " Dx informado ",
@@ -86,7 +291,7 @@ describe("service-request mappers", () => {
     ]);
   });
 
-  it("maps minimal FHIR payload to domain using active -> in_review policy", () => {
+  it("maps minimal FHIR active payload without workflow note as in_review", () => {
     const mapped = mapFhirServiceRequestToDomain({
       resourceType: "ServiceRequest",
       id: "sr-1",
@@ -108,6 +313,34 @@ describe("service-request mappers", () => {
       requesterContact: undefined,
       notes: undefined,
     });
+  });
+
+  it("maps active + workflow-status:v1:accepted as accepted", () => {
+    const mapped = mapFhirServiceRequestToDomain({
+      resourceType: "ServiceRequest",
+      id: "sr-accepted",
+      status: "active",
+      subject: { reference: "Patient/pat-2" },
+      authoredOn: "2026-04-28",
+      reasonCode: [{ text: "Dolor de rodilla" }],
+      note: [{ text: "workflow-status:v1:accepted" }],
+    });
+
+    expect(mapped.status).toBe("accepted");
+  });
+
+  it("maps active + unknown workflow-status as in_review", () => {
+    const mapped = mapFhirServiceRequestToDomain({
+      resourceType: "ServiceRequest",
+      id: "sr-unknown-workflow",
+      status: "active",
+      subject: { reference: "Patient/pat-2" },
+      authoredOn: "2026-04-28",
+      reasonCode: [{ text: "Dolor de rodilla" }],
+      note: [{ text: "workflow-status:v1:pending" }],
+    });
+
+    expect(mapped.status).toBe("in_review");
   });
 
   it("extracts requesterDisplay, statusReason and tagged notes", () => {

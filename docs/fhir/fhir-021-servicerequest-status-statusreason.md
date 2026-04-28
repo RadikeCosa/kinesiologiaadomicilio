@@ -4,7 +4,7 @@
 > Fecha: 2026-04-28
 > Alcance: decisión transicional previa a implementación runtime de `ServiceRequest`.
 
-> Aclaración de alcance: este documento **no implementa** `ServiceRequest` en código, mappers, repositorios, rutas ni UI.
+> Aclaración de alcance: este documento cerró decisión de mapping previa a implementación. El mapping definido aquí hoy se encuentra aplicado en runtime (mappers/repository) y usado por la UI administrativa de resolución de solicitudes en `/admin/patients/[id]/administrative`.
 
 ## 1) Objetivo
 
@@ -62,6 +62,15 @@ Ejemplo conceptual:
 Fallback transicional:
 
 - Si un servidor/perfil no aceptara `statusReason`, usar `note.text` etiquetada (ej: `closed-reason:`) como mecanismo documental transitorio.
+
+### 3.1) Nota técnica de desambiguación `accepted` vs `in_review` (runtime actual)
+
+Como ambos estados de dominio (`accepted` e `in_review`) mapean a FHIR `active`, el runtime aplica una convención técnica de lectura/escritura en `note` para preservar fidelidad de estado:
+
+- `workflow-status:v1:accepted` => interpretar `active` como `accepted`;
+- `active` sin marca (o marca desconocida) => interpretar como `in_review`.
+
+Estado al 2026-04-28: esta convención sigue **vigente** y queda **probada** por tests de mapper (roundtrip, no-duplicación de workflow tag, limpieza al cerrar/cancelar y preservación de notas no relacionadas).
 
 ## 4) Representación de “No inició” sin copy duro
 

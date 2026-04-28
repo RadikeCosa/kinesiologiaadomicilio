@@ -7,6 +7,7 @@ import {
   createServiceRequest,
   getServiceRequestById,
   listServiceRequestsByPatientId,
+  updateServiceRequestStatus,
 } from "@/infrastructure/repositories/service-request.repository";
 
 describe("service-request.repository (FHIR)", () => {
@@ -159,5 +160,168 @@ describe("service-request.repository (FHIR)", () => {
 
   it("builds service request subject query", () => {
     expect(buildServiceRequestBySubjectQuery("pat-1")).toBe("subject=Patient%2Fpat-1");
+  });
+
+  it("updates status: GET + PUT + mapped domain response", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-11",
+      status: "active",
+      intent: "order",
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-20",
+      reasonCode: [{ text: "Motivo original" }],
+      note: [{ text: "general-note:v1:Nota original" }],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-11",
+      status: "active",
+      intent: "order",
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-20",
+      reasonCode: [{ text: "Motivo original" }],
+      note: [{ text: "general-note:v1:Nota original" }],
+    });
+
+    const updated = await updateServiceRequestStatus({
+      id: " sr-11 ",
+      status: " accepted ",
+    });
+
+    expect(getSpy).toHaveBeenCalledWith("ServiceRequest/sr-11");
+    expect(putSpy).toHaveBeenCalledWith(
+      "ServiceRequest/sr-11",
+      expect.objectContaining({
+        resourceType: "ServiceRequest",
+        id: "sr-11",
+        status: "active",
+      }),
+    );
+    expect(updated).toMatchObject({
+      id: "sr-11",
+      patientId: "pat-1",
+      status: "in_review",
+      reasonText: "Motivo original",
+    });
+  });
+
+  it("updates closed_without_treatment with revoked + statusReason.text", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-12",
+      status: "active",
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-20",
+      reasonCode: [{ text: "Motivo original" }],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-12",
+      status: "revoked",
+      statusReason: { text: "No requiere tratamiento" },
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-20",
+      reasonCode: [{ text: "Motivo original" }],
+    });
+
+    await updateServiceRequestStatus({
+      id: "sr-12",
+      status: "closed_without_treatment",
+      closedReasonText: "No requiere tratamiento",
+    });
+
+    expect(putSpy).toHaveBeenCalledWith(
+      "ServiceRequest/sr-12",
+      expect.objectContaining({
+        status: "revoked",
+        statusReason: { text: "No requiere tratamiento" },
+      }),
+    );
+  });
+
+  it("updates cancelled with revoked + statusReason.text", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-13",
+      status: "active",
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-20",
+      reasonCode: [{ text: "Motivo original" }],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-13",
+      status: "revoked",
+      statusReason: { text: "Paciente cancela" },
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-20",
+      reasonCode: [{ text: "Motivo original" }],
+    });
+
+    await updateServiceRequestStatus({
+      id: "sr-13",
+      status: "cancelled",
+      closedReasonText: "Paciente cancela",
+    });
+
+    expect(putSpy).toHaveBeenCalledWith(
+      "ServiceRequest/sr-13",
+      expect.objectContaining({
+        status: "revoked",
+        statusReason: { text: "Paciente cancela" },
+      }),
+    );
+  });
+
+  it("does not call GET/PUT when update input is invalid", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get");
+    const putSpy = vi.spyOn(fhirClient, "put");
+
+    await expect(
+      updateServiceRequestStatus({
+        id: "sr-14",
+        status: "cancelled",
+      }),
+    ).rejects.toThrow("closedReasonText: es obligatorio para closed_without_treatment/cancelled.");
+
+    expect(getSpy).not.toHaveBeenCalled();
+    expect(putSpy).not.toHaveBeenCalled();
+  });
+
+  it("throws clear error on GET 404", async () => {
+    vi.spyOn(fhirClient, "get").mockRejectedValue(
+      new FhirClientError({
+        message: "not found",
+        method: "GET",
+        url: "http://localhost:8080/fhir/ServiceRequest/sr-missing",
+        status: 404,
+      }),
+    );
+
+    await expect(
+      updateServiceRequestStatus({
+        id: "sr-missing",
+        status: "accepted",
+      }),
+    ).rejects.toThrow("ServiceRequest not found: sr-missing");
+  });
+
+  it("propagates non-404 GET errors during update", async () => {
+    vi.spyOn(fhirClient, "get").mockRejectedValue(
+      new FhirClientError({
+        message: "boom",
+        method: "GET",
+        url: "http://localhost:8080/fhir/ServiceRequest/sr-15",
+        status: 500,
+      }),
+    );
+
+    await expect(
+      updateServiceRequestStatus({
+        id: "sr-15",
+        status: "accepted",
+      }),
+    ).rejects.toBeInstanceOf(FhirClientError);
   });
 });

@@ -100,9 +100,11 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(html).toContain("Nueva solicitud");
     expect(html).not.toContain("<form");
-    expect(html).not.toContain("Aceptar solicitud");
-    expect(html).not.toContain("Cerrar solicitud");
-    expect(html).not.toContain("Resolver solicitud");
+    expect(html).toContain("Aceptar");
+    expect(html).toContain("No inició");
+    expect(html).toContain("Cancelar");
+    expect(html).not.toContain("Registrar visita");
+    expect(html).not.toContain("Iniciar tratamiento");
   });
 
   it("renders empty state for service requests when there are none", async () => {

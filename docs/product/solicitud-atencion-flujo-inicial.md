@@ -7,6 +7,10 @@
 > Nota de naming vigente: por ahora se **mantiene** `solicitud-atencion-flujo-inicial.md` para evitar romper referencias. Si se renombra a `solicitudes-atencion-flujo-operativo.md`, debe hacerse con actualización completa de enlaces en el mismo PR.
 
 > Actualización de estado (2026-04-28): **PRODUCT-SR-001 implementado** como primer corte funcional en `/admin/patients/[id]/administrative` (lectura + alta mínima), preservando no-alcances de resolución/cierre/aceptación para SR-002.
+>
+> Actualización de estado (2026-04-28): **PRODUCT-SR-002 implementado** como segundo corte funcional en `/admin/patients/[id]/administrative` (aceptar, cancelar y cerrar como No inició con motivo), manteniendo no-alcances clínicos/operativos globales.
+>
+> Actualización de estado (2026-04-28): **PRODUCT-SR-HARDENING cerrado** (fidelidad `accepted/in_review` + ownership paciente↔solicitud en update), quedando base robusta para planificar SR-003 sin expandir alcance clínico en esta etapa.
 
 ## 1) Propósito del documento
 

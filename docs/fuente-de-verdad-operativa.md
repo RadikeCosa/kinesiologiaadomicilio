@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-27 (UTC)
+> Última actualización: 2026-04-28 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -12,7 +12,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - ciclo básico de tratamiento (`EpisodeOfCare`);
 - registro/listado simple de visitas realizadas (`Encounter` base).
 
-Y con implementación mínima de `ServiceRequest` en `/admin/patients/[id]/administrative` (lectura + alta mínima), sin resolución/cierre/aceptación en esta fase.
+Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrative` (lectura + alta mínima + resolución administrativa: aceptar, no inició/cerrar y cancelar con motivo), preservando no-alcances clínicos.
 
 ## 1.1) Dirección evolutiva del proyecto
 
@@ -87,9 +87,9 @@ Y con implementación mínima de `ServiceRequest` en `/admin/patients/[id]/admin
 - alta mínima de paciente (incluye dirección operativa opcional, `gender` y `birthDate` opcionales);
 - ficha consolidada de paciente en `/admin/patients/[id]` como hub (incluye visualización de dirección, `gender`, `birthDate` y navegación a gestión clínica/administrativa);
 - superficie administrativa acotada en `/admin/patients/[id]/administrative` con lectura + acciones (incluye edición explícita de dirección, `gender`, `birthDate` y datos no clínicos);
-- en `/admin/patients/[id]/administrative`, las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state y pueden registrarse con formulario mínimo embebido;
-- en esta fase de solicitudes no existe resolución/cierre/aceptación desde UI;
-- crear solicitud no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`;
+- en `/admin/patients/[id]/administrative`, las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse con formulario mínimo embebido y resolverse administrativamente (`Aceptar`, `No inició`, `Cancelar`);
+- al cerrar como `No inició` o `Cancelar`, la UI administrativa exige motivo y lo muestra en listado cuando existe;
+- registrar o resolver solicitudes no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`;
 - gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
   - inicio de tratamiento;
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
@@ -184,7 +184,7 @@ Y con implementación mínima de `ServiceRequest` en `/admin/patients/[id]/admin
 - historial longitudinal rico;
 - detalle clínico profundo por encuentro;
 - notas clínicas longitudinales / notas generales persistidas en UI;
-- resolución/cierre/aceptación de `ServiceRequest` desde UI (la implementación vigente es lectura + alta mínima en `/administrative`);
+- resolución clínica o inicio de tratamiento desde `ServiceRequest` (la implementación vigente es resolución **administrativa** en `/administrative`, sin iniciar tratamiento);
 - `Observation` / `Procedure`;
 - agenda;
 - pagos;

@@ -1,4 +1,8 @@
-import type { CreateServiceRequestInput, ServiceRequestStatus } from "@/domain/service-request/service-request.types";
+import type {
+  CreateServiceRequestInput,
+  ServiceRequestStatus,
+  UpdateServiceRequestStatusInput,
+} from "@/domain/service-request/service-request.types";
 import { buildPatientReference } from "@/lib/fhir/references";
 
 import { type FhirServiceRequest } from "@/infrastructure/mappers/service-request/service-request-fhir.types";
@@ -7,6 +11,7 @@ const NOTE_PREFIXES = {
   reportedDiagnosis: "reported-diagnosis:v1:",
   requesterContact: "requester-contact:v1:",
   generalNote: "general-note:v1:",
+  workflowStatus: "workflow-status:v1:",
 } as const;
 
 function normalizeOptionalString(value?: string): string | undefined {
@@ -77,5 +82,32 @@ export function mapCreateServiceRequestInputToFhir(input: CreateServiceRequestIn
       requesterContact: input.requesterContact,
       notes: input.notes,
     }),
+  };
+}
+
+function shouldSetStatusReason(status: ServiceRequestStatus): boolean {
+  return status === "closed_without_treatment" || status === "cancelled";
+}
+
+export function applyServiceRequestStatusUpdateToFhir(
+  resource: FhirServiceRequest,
+  input: UpdateServiceRequestStatusInput,
+): FhirServiceRequest {
+  const nextStatus = mapServiceRequestStatusToFhirStatus(input.status);
+  const notesWithoutWorkflowStatus = (resource.note ?? []).filter((entry) => {
+    const text = normalizeOptionalString(entry.text);
+    return !(text && text.startsWith(NOTE_PREFIXES.workflowStatus));
+  });
+  const nextNote = input.status === "accepted"
+    ? [...notesWithoutWorkflowStatus, { text: `${NOTE_PREFIXES.workflowStatus}accepted` }]
+    : notesWithoutWorkflowStatus;
+
+  return {
+    ...resource,
+    status: nextStatus,
+    statusReason: shouldSetStatusReason(input.status) && input.closedReasonText
+      ? { text: input.closedReasonText }
+      : undefined,
+    note: nextNote.length ? nextNote : undefined,
   };
 }
