@@ -23,6 +23,11 @@
 16. FHIR-016 — Implementación mínima `Patient.contact`
 17. FHIR-017 — Mejora incremental `Patient.name`
 18. FHIR-018 — Deuda explícita y trigger de evolución `Patient.address`
+19. FHIR-019 — ADR/modelado transicional `ServiceRequest`
+20. FHIR-020 — Validar HAPI/R4 para vínculo `ServiceRequest` ↔ `EpisodeOfCare.referralRequest`
+21. FHIR-021 — Cerrar mapping transicional de `ServiceRequest.status/statusReason`
+22. FHIR-022 — Definir requester transicional y estrategia de búsqueda mínima
+23. FHIR-023 — Implementación incremental (`types/schemas/mappers/repository`) de `ServiceRequest`
 
 ## Agrupación por fase
 
@@ -34,6 +39,9 @@
 
 ### Fase 3
 - FHIR-013 a FHIR-018
+
+### Fase 4 (futura)
+- FHIR-019 a FHIR-023
 
 ## Tickets
 
@@ -129,3 +137,29 @@
 **Dependencias:** ninguna.
 **Criterio de aceptación:** criterio de salida documentado.
 **Entregable documental:** `docs/fhir/fhir-018-deuda-address-trigger-evolucion.md`.
+
+### FHIR-019 — ADR/modelado transicional `ServiceRequest`
+**Objetivo:** establecer referencia transicional previa a implementación para solicitudes de atención con `ServiceRequest`.
+**Dependencias:** ninguna.
+**Criterio de aceptación:** documento FHIR-019 aprobado como base de trabajo.
+**Entregable documental:** `docs/fhir/fhir-019-servicerequest-solicitudes-atencion.md`.
+
+### FHIR-020 — Validar HAPI/R4 para vínculo `ServiceRequest` ↔ `EpisodeOfCare.referralRequest`
+**Objetivo:** confirmar viabilidad real del vínculo propuesto y definir fallback si no aplica.
+**Dependencias:** FHIR-019.
+**Criterio de aceptación:** decisión técnica documentada (viable/no viable + fallback).
+
+### FHIR-021 — Cerrar mapping transicional de `ServiceRequest.status/statusReason`
+**Objetivo:** definir mapping operativo estable para estados y cierre sin tratamiento.
+**Dependencias:** FHIR-019, FHIR-020.
+**Criterio de aceptación:** tabla de mapping acordada y documentada para implementación.
+
+### FHIR-022 — Definir requester transicional y estrategia de búsqueda mínima
+**Objetivo:** cerrar decisión de requester (`display`, dominio y/o extensión futura) y búsquedas mínimas en HAPI.
+**Dependencias:** FHIR-019.
+**Criterio de aceptación:** convención documentada y criterios de búsqueda validados.
+
+### FHIR-023 — Implementación incremental de `ServiceRequest` (futuro)
+**Objetivo:** ejecutar implementación mínima en orden: tipos/schemas → mappers → repositorio.
+**Dependencias:** FHIR-020, FHIR-021, FHIR-022.
+**Criterio de aceptación:** implementación incremental con tests y documentación sincronizada.

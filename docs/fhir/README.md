@@ -52,6 +52,11 @@ Centralizar la documentación de trabajo para la remediación técnica del model
    - triggers operativos para evolución futura a modelo estructurado;
    - límites de alcance mientras no aparezcan esos triggers.
 
+10. `fhir-019-servicerequest-solicitudes-atencion.md`
+   - referencia transicional previa a implementación para modelar solicitudes de atención con `ServiceRequest`;
+   - decisiones aceptadas y abiertas de modelado para fases futuras;
+   - no implica implementación vigente de `ServiceRequest` en código.
+
 ## Flujo recomendado de trabajo
 
 1. Leer la ADR antes de tocar identidad, DNI o semántica de `Identifier`.
@@ -109,3 +114,4 @@ Ningún PR de este frente debería mezclar más de uno de estos grupos salvo que
 - `docs/fhir/fhir-013-contrato-transicional-telecom.md`
 - `docs/fhir/fhir-015-contrato-transicional-contact-relationship.md`
 - `docs/fhir/fhir-018-deuda-address-trigger-evolucion.md`
+- `docs/fhir/fhir-019-servicerequest-solicitudes-atencion.md`
