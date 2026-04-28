@@ -40,7 +40,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Listado y alta de pacientes.
 - Acceso rápido contextual desde el listado para `Registrar visita` en pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`).
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación, con acción rápida contextual `Registrar visita` cuando hay tratamiento activo.
-- Administración no clínica del paciente en `/admin/patients/[id]/administrative` con lectura + acciones, edición explícita de identidad/contacto/datos operativos y sección de solicitudes de atención (lectura + alta mínima).
+- Administración no clínica del paciente en `/admin/patients/[id]/administrative` con lectura + acciones, edición explícita de identidad/contacto/datos operativos y sección de solicitudes de atención (lectura, alta mínima y resolución administrativa: aceptar, cancelar, cerrar como No inició con motivo).
 - Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (header interno con CTA primario `Registrar visita` **solo** con tratamiento activo, navegación secundaria compacta a tratamiento, metadata compacta, estadísticas clínicas mínimas derivadas y diferenciación de estado entre sin inicio/finalizado).
 - Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.
 - Gestión específica de tratamiento (`EpisodeOfCare`) en `/admin/patients/[id]/treatment` (inicio/finalización, estado finalizado explícito y navegación secundaria a visitas).
@@ -55,8 +55,8 @@ El proyecto está en etapa **híbrida transicional**:
 - `occurrenceDate` queda limitado a compatibilidad transicional de entrada para payloads legacy.
 - Captura y visualización administrativa de `gender` y `birthDate` en pacientes (alta, edición y detalle).
 - Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
-- En `/admin/patients/[id]/administrative` las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state y pueden registrarse en forma mínima (sin resolución/cierre/aceptación en esta fase).
-- Registrar solicitud de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
+- En `/admin/patients/[id]/administrative` las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse en forma mínima y resolverse administrativamente (aceptar, cancelar y cerrar como No inició con motivo).
+- Resolver o registrar solicitudes de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
 - Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad basadas en `birthDate` válido.
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.

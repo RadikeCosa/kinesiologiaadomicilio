@@ -1,6 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createPatientServiceRequestAction } from "@/app/admin/patients/[id]/administrative/actions";
+import {
+  createPatientServiceRequestAction,
+  updatePatientServiceRequestStatusAction,
+} from "@/app/admin/patients/[id]/administrative/actions";
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
@@ -8,6 +11,8 @@ vi.mock("next/cache", () => ({
 
 vi.mock("@/infrastructure/repositories/service-request.repository", () => ({
   createServiceRequest: vi.fn(),
+  getServiceRequestById: vi.fn(),
+  updateServiceRequestStatus: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
@@ -21,7 +26,11 @@ vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
 
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
 import { createEpisodeOfCare } from "@/infrastructure/repositories/episode-of-care.repository";
-import { createServiceRequest } from "@/infrastructure/repositories/service-request.repository";
+import {
+  createServiceRequest,
+  getServiceRequestById,
+  updateServiceRequestStatus,
+} from "@/infrastructure/repositories/service-request.repository";
 import { revalidatePath } from "next/cache";
 
 function buildFormData(values: Record<string, string>): FormData {
@@ -33,6 +42,10 @@ function buildFormData(values: Record<string, string>): FormData {
 
   return formData;
 }
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe("createPatientServiceRequestAction", () => {
   it("creates service request, keeps initial in_review policy and revalidates administrative route", async () => {
@@ -117,6 +130,282 @@ describe("createPatientServiceRequestAction", () => {
     await createPatientServiceRequestAction(
       "pat-1",
       buildFormData({ requestedAt: "2026-04-28", reasonText: "Control" }),
+    );
+
+    expect(createEpisodeOfCare).not.toHaveBeenCalled();
+    expect(createEncounter).not.toHaveBeenCalled();
+  });
+});
+
+describe("updatePatientServiceRequestStatusAction", () => {
+  it("updates to accepted, revalidates route and returns success message", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-1",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "in_review",
+    });
+    vi.mocked(updateServiceRequestStatus).mockResolvedValueOnce({
+      id: "sr-1",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "in_review",
+    });
+
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-1",
+        status: "accepted",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      message: "Solicitud aceptada correctamente.",
+    });
+    expect(getServiceRequestById).toHaveBeenCalledWith("sr-1");
+    expect(updateServiceRequestStatus).toHaveBeenCalledWith({
+      id: "sr-1",
+      status: "accepted",
+      closedReasonText: undefined,
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/administrative");
+  });
+
+  it("updates to closed_without_treatment with reason and revalidates route", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-2",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "accepted",
+    });
+    vi.mocked(updateServiceRequestStatus).mockResolvedValueOnce({
+      id: "sr-2",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "closed_without_treatment",
+      closedReasonText: "No requiere tratamiento",
+    });
+
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        serviceRequestId: "sr-2",
+        status: "closed_without_treatment",
+        closedReasonText: "No requiere tratamiento",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      message: "Solicitud cerrada sin iniciar tratamiento.",
+    });
+    expect(updateServiceRequestStatus).toHaveBeenCalledWith({
+      id: "sr-2",
+      status: "closed_without_treatment",
+      closedReasonText: "No requiere tratamiento",
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/administrative");
+  });
+
+  it("updates to cancelled with reason and revalidates route", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-3",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "accepted",
+    });
+    vi.mocked(updateServiceRequestStatus).mockResolvedValueOnce({
+      id: "sr-3",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "cancelled",
+      closedReasonText: "Paciente cancela",
+    });
+
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-3",
+        status: "cancelled",
+        closedReasonText: "Paciente cancela",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      message: "Solicitud cancelada correctamente.",
+    });
+    expect(updateServiceRequestStatus).toHaveBeenCalledWith({
+      id: "sr-3",
+      status: "cancelled",
+      closedReasonText: "Paciente cancela",
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/administrative");
+  });
+
+  it("fails for closed_without_treatment without reason and does not revalidate", async () => {
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-4",
+        status: "closed_without_treatment",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo actualizar la solicitud de atención.",
+    });
+    expect(getServiceRequestById).not.toHaveBeenCalled();
+    expect(updateServiceRequestStatus).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("fails for cancelled without reason and does not revalidate", async () => {
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-5",
+        status: "cancelled",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo actualizar la solicitud de atención.",
+    });
+    expect(getServiceRequestById).not.toHaveBeenCalled();
+    expect(updateServiceRequestStatus).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("fails for invalid status and does not call repository", async () => {
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-6",
+        status: "invalid-status",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo actualizar la solicitud de atención.",
+    });
+    expect(getServiceRequestById).not.toHaveBeenCalled();
+    expect(updateServiceRequestStatus).not.toHaveBeenCalled();
+  });
+
+  it("returns generic error when getServiceRequestById fails and does not revalidate", async () => {
+    vi.mocked(getServiceRequestById).mockRejectedValueOnce(new Error("boom"));
+
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-7",
+        status: "accepted",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo actualizar la solicitud de atención.",
+    });
+    expect(updateServiceRequestStatus).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("returns generic error when service request does not exist", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce(null);
+
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-missing",
+        status: "accepted",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo actualizar la solicitud de atención.",
+    });
+    expect(updateServiceRequestStatus).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("returns generic error when service request belongs to another patient", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-foreign",
+      patientId: "pat-2",
+      requestedAt: "2026-04-28",
+      reasonText: "Control",
+      status: "in_review",
+    });
+
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-foreign",
+        status: "accepted",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo actualizar la solicitud de atención.",
+    });
+    expect(updateServiceRequestStatus).not.toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("returns generic error when update repository fails and does not revalidate", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-7",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Control",
+      status: "in_review",
+    });
+    vi.mocked(updateServiceRequestStatus).mockRejectedValueOnce(new Error("boom"));
+
+    const result = await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-7",
+        status: "accepted",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo actualizar la solicitud de atención.",
+    });
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("does not call EpisodeOfCare or Encounter repositories", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-8",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Control",
+      status: "in_review",
+    });
+    await updatePatientServiceRequestStatusAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-8",
+        status: "accepted",
+      }),
     );
 
     expect(createEpisodeOfCare).not.toHaveBeenCalled();
