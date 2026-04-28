@@ -90,6 +90,12 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - en `/admin/patients/[id]/administrative`, las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse con formulario mínimo embebido y resolverse administrativamente (`Aceptar`, `No inició`, `Cancelar`);
 - al cerrar como `No inició` o `Cancelar`, la UI administrativa exige motivo y lo muestra en listado cuando existe;
 - registrar o resolver solicitudes no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`;
+- una solicitud `accepted` en `/administrative` puede derivar a `/treatment` con `serviceRequestId`;
+- `/treatment` conserva ownership de inicio/cierre y valida contexto de solicitud antes de iniciar;
+- al iniciar con solicitud válida, `EpisodeOfCare` se vincula por `referralRequest = ServiceRequest/{id}`;
+- política vigente `single-use`: una SR `accepted` ya vinculada por `incoming-referral` no puede iniciar otro tratamiento y `/treatment` solicita nueva solicitud para nuevo ciclo;
+- solicitudes inválidas/no aceptadas/no pertenecientes no originan inicio;
+- visitas siguen dependiendo solo de `EpisodeOfCare` activo y `PatientOperationalStatus` no deriva de `ServiceRequest`.
 - gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
   - inicio de tratamiento;
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);

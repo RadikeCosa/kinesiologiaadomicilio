@@ -41,6 +41,39 @@ describe("episode-of-care.repository (FHIR)", () => {
     expect(created).toMatchObject({ id: "epi-1", patientId: "pat-1", status: "active" });
   });
 
+  it("creates an active episode in FHIR with referralRequest when serviceRequestId is provided", async () => {
+    const postSpy = vi.spyOn(fhirClient, "post").mockResolvedValue({
+      resourceType: "EpisodeOfCare",
+      id: "epi-2",
+      status: "active",
+      patient: { reference: "Patient/pat-1" },
+      period: { start: "2026-04-18" },
+      referralRequest: [{ reference: "ServiceRequest/sr-1" }],
+    });
+
+    const created = await createEpisodeOfCare({
+      patientId: "pat-1",
+      startDate: "2026-04-18",
+      serviceRequestId: "sr-1",
+    });
+
+    expect(postSpy).toHaveBeenCalledWith(
+      "EpisodeOfCare",
+      expect.objectContaining({
+        resourceType: "EpisodeOfCare",
+        status: "active",
+        patient: { reference: "Patient/pat-1" },
+        referralRequest: [{ reference: "ServiceRequest/sr-1" }],
+      }),
+    );
+    expect(created).toMatchObject({
+      id: "epi-2",
+      patientId: "pat-1",
+      status: "active",
+      serviceRequestId: "sr-1",
+    });
+  });
+
   it("gets active episode by patient id with simple query", async () => {
     const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "Bundle",

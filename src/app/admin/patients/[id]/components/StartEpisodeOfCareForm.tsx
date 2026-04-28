@@ -10,10 +10,12 @@ import { formatLocalDateInputValue } from "@/lib/date-input";
 
 interface StartEpisodeOfCareFormProps {
   patient: PatientDetailReadModel;
+  serviceRequestId?: string;
 }
 
 export function StartEpisodeOfCareForm({
   patient,
+  serviceRequestId,
 }: StartEpisodeOfCareFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -47,6 +49,9 @@ export function StartEpisodeOfCareForm({
     const input = {
       patientId: patient.id,
       startDate: String(formData.get("startDate") ?? ""),
+      serviceRequestId: serviceRequestId
+        ? String(formData.get("serviceRequestId") ?? serviceRequestId)
+        : undefined,
     };
 
     startTransition(async () => {
@@ -74,6 +79,9 @@ export function StartEpisodeOfCareForm({
       ) : null}
 
       <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+        {serviceRequestId ? (
+          <input name="serviceRequestId" type="hidden" value={serviceRequestId} />
+        ) : null}
         <div>
           <label className="block text-sm font-medium" htmlFor="startDate">
             Fecha de inicio *

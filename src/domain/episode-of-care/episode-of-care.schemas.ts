@@ -54,6 +54,15 @@ function normalizeRequiredIsoDate(value: unknown, field: string): string {
   return normalized;
 }
 
+function normalizeOptionalString(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return normalized || undefined;
+}
+
 export const startEpisodeOfCareSchema = {
   parse(input: unknown): StartEpisodeOfCareInput {
     const record = assertObject(input, "startEpisodeOfCareSchema");
@@ -61,6 +70,7 @@ export const startEpisodeOfCareSchema = {
     return {
       patientId: normalizeRequiredString(record.patientId, "patientId"),
       startDate: normalizeRequiredIsoDate(record.startDate, "startDate"),
+      serviceRequestId: normalizeOptionalString(record.serviceRequestId),
     };
   },
 };

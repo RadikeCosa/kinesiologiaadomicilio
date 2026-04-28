@@ -5,6 +5,10 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
 }));
+vi.mock("next/link", () => ({
+  default: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) =>
+    createElement("a", { href, ...rest }, children),
+}));
 
 import {
   getServiceRequestCreateFormVisibility,
@@ -72,6 +76,8 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("Aceptar");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
+    expect(html).toContain("Iniciar tratamiento");
+    expect(html).toContain("href=\"/admin/patients/pat-1/treatment?serviceRequestId=sr-3\"");
   });
 
   it("renders closedReasonText when present", () => {
@@ -93,5 +99,28 @@ describe("PatientServiceRequestsSection", () => {
 
     expect(html).toContain("Motivo de cierre/cancelación");
     expect(html).toContain("No requiere tratamiento");
+    expect(html).not.toContain("Iniciar tratamiento");
+  });
+
+  it("shows treatment CTA only for accepted requests", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-9",
+        serviceRequests: [
+          { id: "sr-a", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "A", status: "accepted" },
+          { id: "sr-r", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "R", status: "in_review" },
+          { id: "sr-cw", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "CW", status: "closed_without_treatment" },
+          { id: "sr-c", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "C", status: "cancelled" },
+          { id: "sr-e", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "E", status: "entered_in_error" },
+        ],
+      }),
+    );
+
+    expect(html).toContain("href=\"/admin/patients/pat-9/treatment?serviceRequestId=sr-a\"");
+    expect(html).toContain("Iniciar tratamiento");
+    expect(html).not.toContain("serviceRequestId=sr-r");
+    expect(html).not.toContain("serviceRequestId=sr-cw");
+    expect(html).not.toContain("serviceRequestId=sr-c");
+    expect(html).not.toContain("serviceRequestId=sr-e");
   });
 });

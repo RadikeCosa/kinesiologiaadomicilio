@@ -5,11 +5,13 @@ import { startEpisodeOfCareSchema } from "@/domain/episode-of-care/episode-of-ca
 import {
   createEpisodeOfCare,
   getActiveEpisodeByPatientId,
+  listEpisodeOfCareByIncomingReferral,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 import {
   existsAnotherPatientWithDni,
   getPatientById,
 } from "@/infrastructure/repositories/patient.repository";
+import { getServiceRequestById } from "@/infrastructure/repositories/service-request.repository";
 
 export interface StartEpisodeOfCareActionResult {
   ok: boolean;
@@ -49,6 +51,33 @@ export async function startEpisodeOfCareAction(
         ok: false,
         message: startValidation.message,
       };
+    }
+
+    if (parsedInput.serviceRequestId) {
+      const serviceRequest = await getServiceRequestById(parsedInput.serviceRequestId);
+
+      if (!serviceRequest || serviceRequest.patientId !== patient.id) {
+        return {
+          ok: false,
+          message: "No se pudo iniciar el tratamiento con la solicitud indicada.",
+        };
+      }
+
+      if (serviceRequest.status !== "accepted") {
+        return {
+          ok: false,
+          message: "Solo una solicitud aceptada puede iniciar tratamiento.",
+        };
+      }
+
+      const linkedEpisodes = await listEpisodeOfCareByIncomingReferral(parsedInput.serviceRequestId);
+
+      if (linkedEpisodes.length > 0) {
+        return {
+          ok: false,
+          message: "Esta solicitud ya fue utilizada para iniciar un tratamiento. Para un nuevo ciclo, registrá una nueva solicitud.",
+        };
+      }
     }
 
     await createEpisodeOfCare(parsedInput);

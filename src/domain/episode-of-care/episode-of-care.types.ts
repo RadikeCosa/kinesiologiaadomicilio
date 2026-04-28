@@ -6,11 +6,13 @@ export interface EpisodeOfCare {
   status: EpisodeOfCareStatus;
   startDate: string;
   endDate?: string;
+  serviceRequestId?: string;
 }
 
 export interface StartEpisodeOfCareInput {
   patientId: string;
   startDate: string;
+  serviceRequestId?: string;
 }
 
 export interface FinishEpisodeOfCareInput {

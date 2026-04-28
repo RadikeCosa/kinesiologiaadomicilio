@@ -5,9 +5,13 @@ import { mapPatientToDetailReadModel } from "@/infrastructure/mappers/patient/pa
 import {
   getActiveEpisodeByPatientId,
   getMostRecentEpisodeByPatientId,
+  listEpisodeOfCareByIncomingReferral,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
-import { listServiceRequestsByPatientId } from "@/infrastructure/repositories/service-request.repository";
+import {
+  getServiceRequestById,
+  listServiceRequestsByPatientId,
+} from "@/infrastructure/repositories/service-request.repository";
 
 export interface PatientServiceRequestReadContext {
   serviceRequests: ServiceRequest[];
@@ -16,6 +20,14 @@ export interface PatientServiceRequestReadContext {
 
 export interface PatientAdministrativeReadContext extends PatientServiceRequestReadContext {
   patient: PatientDetailReadModel | null;
+}
+
+export interface TreatmentServiceRequestContext {
+  serviceRequestId?: string;
+  isValid: boolean;
+  serviceRequest?: ServiceRequest;
+  state: "none" | "invalid" | "valid" | "already_used";
+  message?: string;
 }
 
 export function sortServiceRequestsByRequestedAtDesc(serviceRequests: ServiceRequest[]): ServiceRequest[] {
@@ -78,4 +90,58 @@ export async function loadPatientDetail(id: string): Promise<PatientDetailReadMo
     activeEpisode: activeEpisode ? mapEpisodeOfCareRead(activeEpisode) : null,
     latestEpisode: latestEpisode ? mapEpisodeOfCareRead(latestEpisode) : null,
   });
+}
+
+export async function loadTreatmentServiceRequestContext(input: {
+  patientId: string;
+  serviceRequestId?: string;
+}): Promise<TreatmentServiceRequestContext> {
+  const normalizedServiceRequestId = input.serviceRequestId?.trim();
+
+  if (!normalizedServiceRequestId) {
+    return {
+      serviceRequestId: undefined,
+      isValid: false,
+      serviceRequest: undefined,
+      state: "none",
+      message: undefined,
+    };
+  }
+
+  const serviceRequest = await getServiceRequestById(normalizedServiceRequestId);
+  const isValid = Boolean(
+    serviceRequest
+      && serviceRequest.patientId === input.patientId
+      && serviceRequest.status === "accepted",
+  );
+
+  if (!isValid) {
+    return {
+      serviceRequestId: undefined,
+      isValid: false,
+      serviceRequest: undefined,
+      state: "invalid",
+      message: undefined,
+    };
+  }
+
+  const linkedEpisodes = await listEpisodeOfCareByIncomingReferral(normalizedServiceRequestId);
+
+  if (linkedEpisodes.length > 0) {
+    return {
+      serviceRequestId: undefined,
+      isValid: false,
+      serviceRequest: undefined,
+      state: "already_used",
+      message: "Esta solicitud ya fue utilizada para iniciar un tratamiento. Para un nuevo ciclo, registrá una nueva solicitud.",
+    };
+  }
+
+  return {
+    serviceRequestId: normalizedServiceRequestId,
+    isValid: true,
+    serviceRequest: serviceRequest ?? undefined,
+    state: "valid",
+    message: undefined,
+  };
 }

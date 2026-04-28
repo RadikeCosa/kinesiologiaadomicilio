@@ -6,6 +6,9 @@
 
 ## 1) Objetivo
 
+> Nota de adopción runtime (2026-04-28): lo validado en este documento fue adoptado en la app para SR-003. El inicio de tratamiento en `/treatment` puede persistir `EpisodeOfCare.referralRequest = ServiceRequest/{id}` y la consulta por vínculo usa `incoming-referral` en repositorio.
+
+
 Validar si el servidor HAPI-FHIR usado en local soporta de forma viable el vinculo `ServiceRequest` <-> `EpisodeOfCare` con owner unico desde `EpisodeOfCare.referralRequest`, incluyendo:
 
 - create/read de `Patient`, `ServiceRequest`, `EpisodeOfCare`;
