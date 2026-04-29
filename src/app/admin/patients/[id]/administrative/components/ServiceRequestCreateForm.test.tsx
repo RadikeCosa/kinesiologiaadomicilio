@@ -11,7 +11,7 @@ import { ServiceRequestCreateForm } from "@/app/admin/patients/[id]/administrati
 (globalThis as { React?: typeof React }).React = React;
 
 describe("ServiceRequestCreateForm", () => {
-  it("renders required and optional fields for minimal request creation", () => {
+  it("renders core fields and grouped requester section", () => {
     const html = renderToStaticMarkup(
       createElement(ServiceRequestCreateForm, {
         patientId: "pat-1",
@@ -24,16 +24,45 @@ describe("ServiceRequestCreateForm", () => {
     expect(html).toContain("name=\"requestedAt\"");
     expect(html).toContain("Motivo de consulta *");
     expect(html).toContain("name=\"reasonText\"");
-    expect(html).toContain("Diagnóstico informado");
-    expect(html).toContain("Quién solicita");
+
+    expect(html).toContain("Quién consulta");
+    expect(html).toContain("Indicá si consulta el paciente, un familiar, cuidador, médico u otra persona.");
+    expect(html).toContain("Relación con el paciente");
     expect(html).toContain("name=\"requesterType\"");
-    expect(html).toContain("Contacto del solicitante");
+    expect(html).toContain("Nombre de quien consulta");
+    expect(html).toContain("name=\"requesterDisplay\"");
+
+    expect(html).toContain("Más detalles");
+    expect(html).toContain("Diagnóstico informado");
+    expect(html).toContain("name=\"reportedDiagnosisText\"");
+    expect(html).toContain("Contacto de quien consulta");
+    expect(html).toContain("name=\"requesterContact\"");
     expect(html).toContain("Notas internas");
+    expect(html).toContain("name=\"notes\"");
+
     expect(html).toContain("Registrar solicitud");
     expect(html).toContain("Cancelar");
+  });
 
-    expect(html).not.toContain("Aceptar solicitud");
-    expect(html).not.toContain("Cerrar solicitud");
-    expect(html).not.toContain("Resolver solicitud");
+  it("keeps original field names used by action payload", () => {
+    const html = renderToStaticMarkup(
+      createElement(ServiceRequestCreateForm, {
+        patientId: "pat-1",
+        onCancel: vi.fn(),
+        onSubmitted: vi.fn(),
+      }),
+    );
+
+    [
+      "requestedAt",
+      "reasonText",
+      "requesterType",
+      "requesterDisplay",
+      "reportedDiagnosisText",
+      "requesterContact",
+      "notes",
+    ].forEach((fieldName) => {
+      expect(html).toContain(`name=\"${fieldName}\"`);
+    });
   });
 });
