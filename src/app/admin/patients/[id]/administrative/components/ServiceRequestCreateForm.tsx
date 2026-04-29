@@ -44,40 +44,19 @@ export function ServiceRequestCreateForm({
 
   return (
     <form className="mt-3 space-y-3 rounded-md border border-slate-300 bg-white p-3" onSubmit={handleSubmit}>
-      <div className="grid gap-3 md:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium text-slate-800" htmlFor="requestedAt">
-            Fecha de solicitud *
-          </label>
-          <input
-            className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-            id="requestedAt"
-            name="requestedAt"
-            onChange={(event) => setRequestedAt(event.target.value)}
-            required
-            type="date"
-            value={requestedAt}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-slate-800" htmlFor="requesterType">
-            Tipo de solicitante
-          </label>
-          <select
-            className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-            defaultValue=""
-            id="requesterType"
-            name="requesterType"
-          >
-            <option value="">No informado</option>
-            {REQUESTER_TYPE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-slate-800" htmlFor="requestedAt">
+          Fecha de solicitud *
+        </label>
+        <input
+          className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+          id="requestedAt"
+          name="requestedAt"
+          onChange={(event) => setRequestedAt(event.target.value)}
+          required
+          type="date"
+          value={requestedAt}
+        />
       </div>
 
       <div>
@@ -93,57 +72,88 @@ export function ServiceRequestCreateForm({
         />
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium text-slate-800" htmlFor="reportedDiagnosisText">
-            Diagnóstico informado
-          </label>
-          <input
-            className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-            id="reportedDiagnosisText"
-            name="reportedDiagnosisText"
-            type="text"
-          />
-        </div>
+      <section className="rounded border border-slate-200 bg-slate-50 p-3" aria-labelledby="quien-consulta-title">
+        <h3 className="text-sm font-semibold text-slate-900" id="quien-consulta-title">
+          Quién consulta
+        </h3>
+        <p className="mt-1 text-xs text-slate-600">
+          Indicá si consulta el paciente, un familiar, cuidador, médico u otra persona.
+        </p>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-800" htmlFor="requesterDisplay">
-            Quién solicita
-          </label>
-          <input
-            className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-            id="requesterDisplay"
-            name="requesterDisplay"
-            type="text"
-          />
-        </div>
-      </div>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-slate-800" htmlFor="requesterType">
+              Relación con el paciente
+            </label>
+            <select
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+              defaultValue=""
+              id="requesterType"
+              name="requesterType"
+            >
+              <option value="">No informado</option>
+              {REQUESTER_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <div>
-          <label className="block text-sm font-medium text-slate-800" htmlFor="requesterContact">
-            Contacto del solicitante
-          </label>
-          <input
-            className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-            id="requesterContact"
-            name="requesterContact"
-            type="text"
-          />
+          <div>
+            <label className="block text-sm font-medium text-slate-800" htmlFor="requesterDisplay">
+              Nombre de quien consulta
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+              id="requesterDisplay"
+              name="requesterDisplay"
+              type="text"
+            />
+          </div>
         </div>
+      </section>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-800" htmlFor="notes">
-            Notas internas
-          </label>
-          <input
-            className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-            id="notes"
-            name="notes"
-            type="text"
-          />
+      <details className="rounded border border-slate-200 bg-slate-50 p-3">
+        <summary className="cursor-pointer text-sm font-semibold text-slate-900">Más detalles</summary>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-slate-800" htmlFor="reportedDiagnosisText">
+              Diagnóstico informado
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+              id="reportedDiagnosisText"
+              name="reportedDiagnosisText"
+              type="text"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-800" htmlFor="requesterContact">
+              Contacto de quien consulta
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+              id="requesterContact"
+              name="requesterContact"
+              type="text"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-slate-800" htmlFor="notes">
+              Notas internas
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+              id="notes"
+              name="notes"
+              type="text"
+            />
+          </div>
         </div>
-      </div>
+      </details>
 
       <p className="text-xs text-slate-500">El estado inicial se registra automáticamente como En evaluación.</p>
 

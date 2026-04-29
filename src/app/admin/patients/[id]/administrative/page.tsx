@@ -12,6 +12,7 @@ import {
 
 interface AdminPatientAdministrativePageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ newServiceRequest?: string }>;
 }
 
 export async function generateMetadata({
@@ -29,8 +30,11 @@ export async function generateMetadata({
 
 export default async function AdminPatientAdministrativePage({
   params,
+  searchParams,
 }: AdminPatientAdministrativePageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const initialCreateOpen = resolvedSearchParams?.newServiceRequest === "1";
   const { patient, serviceRequests } = await loadPatientAdministrativeContext(id);
   const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
   const treatmentBadge = patient
@@ -107,7 +111,11 @@ export default async function AdminPatientAdministrativePage({
               </div>
             </section>
           </div>
-          <PatientServiceRequestsSection patientId={patient.id} serviceRequests={serviceRequests} />
+          <PatientServiceRequestsSection
+            initialCreateOpen={initialCreateOpen}
+            patientId={patient.id}
+            serviceRequests={serviceRequests}
+          />
         </>
       ) : (
         <>

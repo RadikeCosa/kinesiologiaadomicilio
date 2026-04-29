@@ -131,7 +131,7 @@ describe("/admin/patients/[id]/administrative page", () => {
     expect(html).toContain("DNI: 30.111.222");
     expect(html).not.toContain("Edad:");
     expect(html).toContain("Solicitudes de atención");
-    expect(html).toContain("Todavía no hay solicitudes de atención registradas.");
+    expect(html).toContain("Registrá la primera solicitud para dejar asentado el motivo de consulta y avanzar con la evaluación.");
   });
 
   it("keeps back link before page title", async () => {
@@ -159,6 +159,58 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(backLinkIndex).toBeGreaterThan(-1);
     expect(titleIndex).toBeGreaterThan(backLinkIndex);
+  });
+
+
+  it("opens create form when newServiceRequest=1 is provided", async () => {
+    loadPatientAdministrativeContextMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        firstName: "Ana",
+        lastName: "Pérez",
+        operationalStatus: "ready_to_start",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      serviceRequests: [],
+      latestServiceRequest: null,
+    });
+
+    const element = await AdminPatientAdministrativePage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ newServiceRequest: "1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Registrar solicitud");
+    expect(html).toContain("Motivo de consulta *");
+    expect(html).not.toContain("Nueva solicitud");
+  });
+
+  it("keeps create form closed when query param is absent", async () => {
+    loadPatientAdministrativeContextMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        firstName: "Ana",
+        lastName: "Pérez",
+        operationalStatus: "ready_to_start",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      serviceRequests: [],
+      latestServiceRequest: null,
+    });
+
+    const element = await AdminPatientAdministrativePage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Nueva solicitud");
+    expect(html).not.toContain("Registrar solicitud");
   });
 
   it("keeps not-found fallback", async () => {

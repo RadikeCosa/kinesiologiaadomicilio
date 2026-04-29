@@ -15,19 +15,20 @@ import { getServiceRequestStatusLabel } from "@/app/admin/patients/[id]/administ
 interface PatientServiceRequestsSectionProps {
   patientId: string;
   serviceRequests: ServiceRequest[];
+  initialCreateOpen?: boolean;
 }
 
 export function getServiceRequestCreateFormVisibility(action: "open" | "cancel"): boolean {
   return action === "open";
 }
 
-export function PatientServiceRequestsSection({ patientId, serviceRequests }: PatientServiceRequestsSectionProps) {
+export function PatientServiceRequestsSection({ patientId, serviceRequests, initialCreateOpen = false }: PatientServiceRequestsSectionProps) {
   const router = useRouter();
-  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(initialCreateOpen);
   const { message, setMessage } = useFormFeedback();
 
   return (
-    <section className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <section className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4" id="solicitudes">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
           Solicitudes de atención
@@ -78,7 +79,7 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests }: Pa
 
       {serviceRequests.length === 0 ? (
         <p className="mt-3 rounded border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
-          Todavía no hay solicitudes de atención registradas.
+          Registrá la primera solicitud para dejar asentado el motivo de consulta y avanzar con la evaluación.
         </p>
       ) : (
         <ul className="mt-3 space-y-3">
@@ -140,6 +141,9 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests }: Pa
                   >
                     Iniciar tratamiento
                   </Link>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Se realiza en la pantalla de Tratamiento.
+                  </p>
                 </div>
               ) : null}
 

@@ -171,6 +171,18 @@ describe("/admin/patients/[id] page", () => {
     expect(html).not.toContain("Edad:");
   });
 
+  it("renders direct CTA to create service request in administrative", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient());
+
+    const element = await AdminPatientDetailPage({
+      params: Promise.resolve({ id: "pat-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Crear solicitud de atención");
+    expect(html).toContain('href="/admin/patients/pat-1/administrative?newServiceRequest=1#solicitudes"');
+  });
+
   it("renders not found state when patient does not exist", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(null);
 

@@ -66,9 +66,50 @@ describe("PatientServiceRequestsSection", () => {
 
     expect(html).toContain("href=\"/admin/patients/pat-9/treatment?serviceRequestId=sr-a\"");
     expect(html).toContain("Iniciar tratamiento");
+    expect(html).toContain("Se realiza en la pantalla de Tratamiento.");
     expect(html).not.toContain("serviceRequestId=sr-r");
     expect(html).not.toContain("serviceRequestId=sr-cw");
     expect(html).not.toContain("serviceRequestId=sr-c");
     expect(html).not.toContain("serviceRequestId=sr-e");
   });
+
+  it("renders action-oriented empty state copy", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-empty",
+        serviceRequests: [],
+      }),
+    );
+
+    expect(html).toContain("Registrá la primera solicitud para dejar asentado el motivo de consulta y avanzar con la evaluación.");
+    expect(html).toContain("Nueva solicitud");
+  });
+
+
+  it("renders create form open when initialCreateOpen is true", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-open",
+        serviceRequests: [],
+        initialCreateOpen: true,
+      }),
+    );
+
+    expect(html).toContain("Registrar solicitud");
+    expect(html).toContain("Motivo de consulta *");
+    expect(html).not.toContain("Nueva solicitud");
+  });
+
+  it("keeps create form closed by default without initialCreateOpen", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-closed",
+        serviceRequests: [],
+      }),
+    );
+
+    expect(html).toContain("Nueva solicitud");
+    expect(html).not.toContain("Registrar solicitud");
+  });
+
 });
