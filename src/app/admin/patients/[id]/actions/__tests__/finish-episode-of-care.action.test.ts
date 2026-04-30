@@ -19,6 +19,7 @@ describe("finishEpisodeOfCareAction", () => {
     const result = await finishEpisodeOfCareAction({
       patientId: "pat-1",
       endDate: "2026-04-17",
+      closureReason: "treatment_completed",
     });
 
     expect(result).toEqual({
@@ -40,16 +41,19 @@ describe("finishEpisodeOfCareAction", () => {
       status: "finished",
       startDate: "2026-04-01",
       endDate: "2026-04-17",
+      closureReason: "treatment_completed",
     });
 
     const result = await finishEpisodeOfCareAction({
       patientId: "pat-1",
       endDate: "2026-04-17",
+      closureReason: "treatment_completed",
     });
 
     expect(finishActiveEpisodeOfCare).toHaveBeenCalledWith({
       patientId: "pat-1",
       endDate: "2026-04-17",
+      closureReason: "treatment_completed",
     });
     expect(result).toEqual({
       ok: true,

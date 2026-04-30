@@ -75,7 +75,7 @@ describe("PatientServiceRequestsSection", () => {
   });
 
 
-  it("highlights closed_without_treatment and cancelled reasons", () => {
+  it("renders compact and status-specific reasons for closed requests", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-10",
@@ -86,9 +86,11 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("Motivo por el que no inició");
+    expect(html).toContain("Motivo de no inicio");
+    expect(html).toContain("Motivo de cancelación");
     expect(html).toContain("No contesta llamadas");
     expect(html).toContain("Derivó por otra cobertura");
+    expect(html).not.toContain("bg-amber-50");
     expect(html).not.toContain("serviceRequestId=sr-cw");
     expect(html).not.toContain("serviceRequestId=sr-c");
   });
@@ -141,6 +143,21 @@ describe("PatientServiceRequestsSection", () => {
 
     expect(html).toContain("Nueva solicitud");
     expect(html).not.toContain("Registrar solicitud");
+  });
+
+
+  it("shows fallback when closed reason is missing", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-11",
+        serviceRequests: [
+          { id: "sr-c", patientId: "pat-11", requestedAt: "2026-04-21", reasonText: "C", status: "cancelled" },
+        ],
+      }),
+    );
+
+    expect(html).toContain("Motivo de cancelación");
+    expect(html).toContain("Motivo no registrado");
   });
 
 });

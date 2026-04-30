@@ -136,6 +136,8 @@ describe("patient detail service-request technical composition", () => {
       hasServiceRequests: true,
       hasInReview: true,
       pendingAcceptedServiceRequestId: "sr-accepted",
+      latestClosedRequestStatus: undefined,
+      latestClosedRequestReason: undefined,
     });
   });
 
@@ -151,6 +153,8 @@ describe("patient detail service-request technical composition", () => {
       hasServiceRequests: true,
       hasInReview: false,
       pendingAcceptedServiceRequestId: undefined,
+      latestClosedRequestStatus: undefined,
+      latestClosedRequestReason: undefined,
     });
   });
   it("loads administrative context with patient + serviceRequests without changing operationalStatus", async () => {
@@ -187,4 +191,18 @@ describe("patient detail service-request technical composition", () => {
     });
     expect(listServiceRequestsByPatientId).not.toHaveBeenCalled();
   });
+
+
+  it("includes latest closed request reason when available", async () => {
+    vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([
+      { id: "sr-closed", patientId: "pat-1", requestedAt: "2026-04-22", reasonText: "Motivo", status: "closed_without_treatment", closedReasonText: "Motivos económicos" },
+      { id: "sr-review", patientId: "pat-1", requestedAt: "2026-04-21", reasonText: "Otro", status: "in_review" },
+    ] as never);
+
+    const context = await loadPatientHubServiceRequestContext("pat-1");
+
+    expect(context.latestClosedRequestStatus).toBe("closed_without_treatment");
+    expect(context.latestClosedRequestReason).toBe("Motivos económicos");
+  });
+
 });
