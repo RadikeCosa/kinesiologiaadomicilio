@@ -3,18 +3,26 @@ import { describe, expect, it } from "vitest";
 import { canFinishEpisodeOfCare, canStartEpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.rules";
 
 describe("episode-of-care.rules", () => {
-  it("fails when patient has no DNI", () => {
+  const basePatient = {
+    firstName: "Ana",
+    lastName: "Pérez",
+    address: "Calle 123",
+    phone: "2995550101",
+    mainContact: undefined,
+  };
+
+  it("allows start without DNI when minimum operational data exists with patient phone", () => {
     const result = canStartEpisodeOfCare(
-      { dni: undefined },
+      basePatient,
       { hasActiveEpisode: false, duplicatePatientByDni: false },
     );
 
-    expect(result).toMatchObject({ ok: false, reason: "missing_patient_dni" });
+    expect(result).toEqual({ ok: true });
   });
 
   it("fails when patient already has active episode", () => {
     const result = canStartEpisodeOfCare(
-      { dni: "32123456" },
+      basePatient,
       { hasActiveEpisode: true, duplicatePatientByDni: false },
     );
 
@@ -23,7 +31,7 @@ describe("episode-of-care.rules", () => {
 
   it("fails when there is a duplicate DNI", () => {
     const result = canStartEpisodeOfCare(
-      { dni: "32123456" },
+      basePatient,
       { hasActiveEpisode: false, duplicatePatientByDni: true },
     );
 
@@ -32,11 +40,52 @@ describe("episode-of-care.rules", () => {
 
   it("passes when all conditions are met", () => {
     const result = canStartEpisodeOfCare(
-      { dni: "32123456" },
+      basePatient,
       { hasActiveEpisode: false, duplicatePatientByDni: false },
     );
 
     expect(result).toEqual({ ok: true });
+  });
+
+  it("allows start without patient phone when main contact phone exists", () => {
+    const result = canStartEpisodeOfCare(
+      { ...basePatient, phone: undefined, mainContact: { phone: "2994445566" } },
+      { hasActiveEpisode: false, duplicatePatientByDni: false },
+    );
+
+    expect(result).toEqual({ ok: true });
+  });
+
+  it("fails when missing first name", () => {
+    const result = canStartEpisodeOfCare(
+      { ...basePatient, firstName: " " },
+      { hasActiveEpisode: false, duplicatePatientByDni: false },
+    );
+    expect(result).toMatchObject({ ok: false, reason: "missing_patient_name" });
+  });
+
+  it("fails when missing last name", () => {
+    const result = canStartEpisodeOfCare(
+      { ...basePatient, lastName: " " },
+      { hasActiveEpisode: false, duplicatePatientByDni: false },
+    );
+    expect(result).toMatchObject({ ok: false, reason: "missing_patient_name" });
+  });
+
+  it("fails when missing address", () => {
+    const result = canStartEpisodeOfCare(
+      { ...basePatient, address: " " },
+      { hasActiveEpisode: false, duplicatePatientByDni: false },
+    );
+    expect(result).toMatchObject({ ok: false, reason: "missing_patient_address" });
+  });
+
+  it("fails when missing patient and main contact phones", () => {
+    const result = canStartEpisodeOfCare(
+      { ...basePatient, phone: undefined, mainContact: { phone: " " } },
+      { hasActiveEpisode: false, duplicatePatientByDni: false },
+    );
+    expect(result).toMatchObject({ ok: false, reason: "missing_contact_phone" });
   });
 
   it("fails finish when there is no active episode", () => {

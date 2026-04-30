@@ -45,7 +45,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.
 - Gestión específica de tratamiento (`EpisodeOfCare`) en `/admin/patients/[id]/treatment` (inicio/finalización, estado finalizado explícito y navegación secundaria a visitas).
 - La gestión de tratamiento ya no vive inline en `/admin/patients/[id]/encounters`.
-- Gate operativo por DNI para iniciar tratamiento.
+- El DNI es un dato administrativo opcional: se normaliza y persiste cuando existe, pero no bloquea el inicio de tratamiento.
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
 - Registro y listado de visitas realizadas (`Encounter` base): alta en `/encounters/new` y listado operativo en `/encounters`.
 - En `/admin/patients/[id]/encounters` se muestran estadísticas clínicas mínimas derivadas (sin persistencia nueva) con scope de episodio efectivo (activo si existe; si no, último registrado): visitas del tratamiento, última visita, primera visita, frecuencia promedio, duración promedio y tiempo total registrado.

@@ -49,6 +49,8 @@ function createSeedStore(): TestStore {
         meta: { lastUpdated: buildSeedTimestamp(11) },
         name: [{ family: "Listo", given: ["Paciente"] }],
         identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }],
+        telecom: [{ system: "phone", value: "2995550101" }],
+        address: [{ text: "Calle Lista 123" }],
       },
       {
         resourceType: "Patient",
@@ -56,6 +58,8 @@ function createSeedStore(): TestStore {
         meta: { lastUpdated: buildSeedTimestamp(12) },
         name: [{ family: "Activo", given: ["Paciente"] }],
         identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "30999888" }],
+        telecom: [{ system: "phone", value: "2995550102" }],
+        address: [{ text: "Calle Activa 456" }],
       },
     ],
     episodes: [

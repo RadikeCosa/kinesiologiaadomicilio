@@ -17,11 +17,11 @@ Además, hoy no existe soporte real para:
 
 ## Decisión
 
-### 1. Regla operativa vigente
+### 1. Regla operativa vigente (actualizada)
 
-Se mantiene **DNI como requisito operativo actual** para iniciar `EpisodeOfCare`.
+El DNI deja de ser requisito operativo para iniciar `EpisodeOfCare`: pasa a ser un dato administrativo opcional.
 
-Esto se acepta como decisión transicional de negocio y producto, no como diseño final universal.
+El inicio de tratamiento se apoya en solicitud `ServiceRequest` aceptada válida + datos operativos mínimos del paciente (nombre, apellido, domicilio de atención y teléfono operativo del paciente o contacto principal).
 
 ### 2. Semántica mínima de `Patient.identifier`
 
@@ -43,7 +43,7 @@ Queda explícitamente fuera de alcance actual:
 
 ## Rationale
 
-- Mantener DNI como gate evita abrir una refactorización de reglas de negocio en el corto plazo.
+- Mantener DNI como dato opcional preserva compatibilidad e interoperabilidad sin bloquear operación clínica.
 - Incorporar `Identifier.type` mejora semántica con costo técnico bajo.
 - No introducir todavía metadatos de verificación evita inventar semántica no soportada por el producto real.
 
@@ -57,8 +57,8 @@ Queda explícitamente fuera de alcance actual:
 
 ### Negativas / deuda aceptada
 
-- el flujo sigue rígido para pacientes sin DNI disponible;
-- la identidad sigue acoplada a una única estrategia operativa;
+- la ausencia de DNI ya no bloquea el flujo clínico mínimo;
+- la identidad operativa deja de depender de una única estrategia;
 - la evolución futura requerirá revisión explícita de esta ADR.
 
 ## Triggers de revisión

@@ -1,7 +1,10 @@
 import type { Patient } from "@/domain/patient/patient.types";
+import { hasMinimumOperationalDataForTreatment } from "@/domain/patient/patient.rules";
 
 export type StartEpisodeOfCareFailureReason =
-  | "missing_patient_dni"
+  | "missing_patient_name"
+  | "missing_patient_address"
+  | "missing_contact_phone"
   | "patient_already_has_active_episode"
   | "duplicate_patient_by_dni";
 
@@ -19,17 +22,12 @@ export interface CanStartEpisodeOfCareOptions {
 }
 
 export function canStartEpisodeOfCare(
-  patient: Pick<Patient, "dni">,
+  patient: Pick<Patient, "firstName" | "lastName" | "address" | "phone" | "mainContact">,
   options: CanStartEpisodeOfCareOptions,
 ): StartEpisodeOfCareResult {
-  const normalizedDni = patient.dni?.trim();
-
-  if (!normalizedDni) {
-    return {
-      ok: false,
-      reason: "missing_patient_dni",
-      message: "No se puede iniciar tratamiento sin DNI.",
-    };
+  const minimumOperationalDataValidation = hasMinimumOperationalDataForTreatment(patient);
+  if (!minimumOperationalDataValidation.ok) {
+    return minimumOperationalDataValidation;
   }
 
   if (options.hasActiveEpisode) {
