@@ -226,12 +226,14 @@ export default async function AdminPatientDetailPage({
                   </Link>
                 </div>
 
-                <Link
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                  href={`/admin/patients/${patient.id}/administrative?newServiceRequest=1#solicitudes`}
-                >
-                  Crear solicitud de atención
-                </Link>
+                {!patient.activeEpisode ? (
+                  <Link
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    href={`/admin/patients/${patient.id}/administrative?newServiceRequest=1#service-requests`}
+                  >
+                    Crear solicitud de atención
+                  </Link>
+                ) : null}
 
                 {patient.activeEpisode ? (
                   <Link

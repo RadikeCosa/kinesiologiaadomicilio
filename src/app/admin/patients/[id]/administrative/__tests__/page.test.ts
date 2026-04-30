@@ -6,7 +6,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import AdminPatientAdministrativePage from "@/app/admin/patients/[id]/administrative/page";
 
 const loadPatientAdministrativeContextMock = vi.hoisted(() => vi.fn());
-const loadPatientHubServiceRequestContextMock = vi.hoisted(() => vi.fn());
 const loadPatientServiceRequestHistoryContextMock = vi.hoisted(() => vi.fn());
 (globalThis as { React?: typeof React }).React = React;
 
@@ -22,7 +21,6 @@ vi.mock("next/link", () => ({
 vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadPatientDetail: vi.fn(),
   loadPatientAdministrativeContext: loadPatientAdministrativeContextMock,
-  loadPatientHubServiceRequestContext: loadPatientHubServiceRequestContextMock,
   loadPatientServiceRequestHistoryContext: loadPatientServiceRequestHistoryContextMock,
 }));
 

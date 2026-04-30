@@ -35,6 +35,7 @@ describe("ServiceRequestStatusActions", () => {
         patientId: "pat-1",
         serviceRequestId: "sr-1",
         currentStatus: "in_review",
+        displayStatus: "in_review",
       }),
     );
 
@@ -45,18 +46,19 @@ describe("ServiceRequestStatusActions", () => {
     expect(html).not.toContain("Iniciar tratamiento");
   });
 
-  it("accepted exposes No inició y Cancelar, but not Aceptar e iniciar tratamiento", () => {
+  it("accepted pending shows legacy start action and no resolution", () => {
     const html = renderToStaticMarkup(
       createElement(ServiceRequestStatusActions, {
         patientId: "pat-1",
         serviceRequestId: "sr-2",
         currentStatus: "accepted",
+        displayStatus: "accepted_pending_treatment",
       }),
     );
 
     expect(html).not.toContain("Aceptar e iniciar tratamiento");
-    expect(html).toContain("No inició");
-    expect(html).toContain("Cancelar");
+    expect(html).toContain("Iniciar tratamiento");
+    expect(html).not.toContain("No inició");
   });
 
   it("terminal statuses and entered_in_error do not render standard actions", () => {
@@ -65,6 +67,7 @@ describe("ServiceRequestStatusActions", () => {
         patientId: "pat-1",
         serviceRequestId: "sr-3",
         currentStatus: "closed_without_treatment",
+        displayStatus: "closed_without_treatment",
       }),
     );
     const cancelledHtml = renderToStaticMarkup(
@@ -72,6 +75,7 @@ describe("ServiceRequestStatusActions", () => {
         patientId: "pat-1",
         serviceRequestId: "sr-4",
         currentStatus: "cancelled",
+        displayStatus: "cancelled",
       }),
     );
     const enteredInErrorHtml = renderToStaticMarkup(
@@ -79,6 +83,7 @@ describe("ServiceRequestStatusActions", () => {
         patientId: "pat-1",
         serviceRequestId: "sr-5",
         currentStatus: "entered_in_error",
+        displayStatus: "entered_in_error",
       }),
     );
 
@@ -93,7 +98,8 @@ describe("ServiceRequestStatusActions", () => {
       "close_without_treatment",
       "cancel",
     ]);
-    expect(getServiceRequestStatusActions("accepted")).toEqual(["close_without_treatment", "cancel"]);
+    expect(getServiceRequestStatusActions("accepted_pending_treatment")).toEqual(["start_treatment_legacy"]);
+    expect(getServiceRequestStatusActions("accepted_linked_to_treatment")).toEqual([]);
     expect(getServiceRequestStatusActions("closed_without_treatment")).toEqual([]);
     expect(getServiceRequestStatusActions("cancelled")).toEqual([]);
     expect(getServiceRequestStatusActions("entered_in_error")).toEqual([]);

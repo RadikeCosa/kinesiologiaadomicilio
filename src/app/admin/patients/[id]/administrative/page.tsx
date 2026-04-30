@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { PatientAdministrativeEditor } from "@/app/admin/patients/[id]/components/PatientAdministrativeEditor";
 import { PatientServiceRequestsSection } from "@/app/admin/patients/[id]/administrative/components/PatientServiceRequestsSection";
-import { loadPatientAdministrativeContext, loadPatientHubServiceRequestContext, loadPatientServiceRequestHistoryContext } from "@/app/admin/patients/[id]/data";
+import { loadPatientAdministrativeContext, loadPatientServiceRequestHistoryContext } from "@/app/admin/patients/[id]/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import {
   calculateAgeFromBirthDate,
@@ -38,9 +38,6 @@ export default async function AdminPatientAdministrativePage({
   const initialCreateOpen = resolvedSearchParams?.newServiceRequest === "1";
   const initialAdministrativeEditing = resolvedSearchParams?.editAdministrative === "1";
   const { patient, serviceRequests } = await loadPatientAdministrativeContext(id);
-  const serviceRequestHubContext = patient
-    ? await loadPatientHubServiceRequestContext(patient.id)
-    : null;
   const serviceRequestHistoryContext = patient
     ? await loadPatientServiceRequestHistoryContext(patient.id)
     : { activeServiceRequest: null, historicalServiceRequests: [] };
@@ -146,7 +143,6 @@ export default async function AdminPatientAdministrativePage({
                   mainContactPhone: patient.mainContact?.phone,
                 }}
                 patientId={patient.id}
-                pendingAcceptedServiceRequestId={serviceRequestHubContext?.pendingAcceptedServiceRequestId}
                 activeServiceRequest={serviceRequestHistoryContext.activeServiceRequest}
                 historicalServiceRequests={serviceRequestHistoryContext.historicalServiceRequests}
                 serviceRequests={serviceRequests}
@@ -164,7 +160,6 @@ export default async function AdminPatientAdministrativePage({
                   mainContactPhone: patient.mainContact?.phone,
                 }}
                 patientId={patient.id}
-                pendingAcceptedServiceRequestId={serviceRequestHubContext?.pendingAcceptedServiceRequestId}
                 activeServiceRequest={serviceRequestHistoryContext.activeServiceRequest}
                 historicalServiceRequests={serviceRequestHistoryContext.historicalServiceRequests}
                 serviceRequests={serviceRequests}

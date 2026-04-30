@@ -147,7 +147,7 @@ describe("/admin/patients/[id] page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Crear solicitud de atención");
-    expect(html).toContain('href="/admin/patients/pat-1/administrative?newServiceRequest=1#solicitudes"');
+    expect(html).toContain('href="/admin/patients/pat-1/administrative?newServiceRequest=1#service-requests"');
   });
 
   it("renders not found state when patient does not exist", async () => {

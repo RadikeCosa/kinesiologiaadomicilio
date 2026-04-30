@@ -32,9 +32,11 @@ export interface TreatmentServiceRequestContext {
 }
 export interface ServiceRequestHistoryItem {
   serviceRequest: ServiceRequest;
-  linkedEpisodeId?: string;
-  linkedEpisodeStartDate?: string;
-  linkedEpisodeEndDate?: string;
+  linkedEpisodeOfCareId?: string;
+  linkedEpisodeOfCareStartDate?: string;
+  linkedEpisodeOfCareEndDate?: string;
+  displayStatus: ServiceRequestDisplayStatus;
+  startedTreatment: boolean;
   isPendingOperational: boolean;
 }
 export interface PatientServiceRequestHistoryContext {
@@ -59,6 +61,13 @@ export interface PatientHubServiceRequestContext {
   latestClosedRequestStatus?: "closed_without_treatment" | "cancelled";
   latestClosedRequestReason?: string;
 }
+export type ServiceRequestDisplayStatus =
+  | "in_review"
+  | "accepted_linked_to_treatment"
+  | "accepted_pending_treatment"
+  | "closed_without_treatment"
+  | "cancelled"
+  | "entered_in_error";
 
 export function isOperationalPendingServiceRequest(input: {
   status: ServiceRequest["status"];
@@ -73,6 +82,27 @@ export function isOperationalPendingServiceRequest(input: {
   }
 
   return false;
+}
+
+export function getServiceRequestDisplayStatus(input: {
+  status: ServiceRequest["status"];
+  hasIncomingReferralLink: boolean;
+}): ServiceRequestDisplayStatus {
+  if (input.status === "accepted") {
+    return input.hasIncomingReferralLink ? "accepted_linked_to_treatment" : "accepted_pending_treatment";
+  }
+
+  return input.status;
+}
+
+export function selectActiveServiceRequestToResolve(items: ServiceRequestHistoryItem[]): ServiceRequestHistoryItem | null {
+  const inReview = items.find((item) => item.displayStatus === "in_review");
+  if (inReview) {
+    return inReview;
+  }
+
+  const acceptedPending = items.find((item) => item.displayStatus === "accepted_pending_treatment");
+  return acceptedPending ?? null;
 }
 
 export async function loadPatientHubServiceRequestContext(patientId: string): Promise<PatientHubServiceRequestContext> {
@@ -160,9 +190,14 @@ export async function loadPatientServiceRequestHistoryContext(patientId: string)
 
     return {
       serviceRequest,
-      linkedEpisodeId: linkedEpisode?.id,
-      linkedEpisodeStartDate: linkedEpisode?.startDate,
-      linkedEpisodeEndDate: linkedEpisode?.endDate,
+      linkedEpisodeOfCareId: linkedEpisode?.id,
+      linkedEpisodeOfCareStartDate: linkedEpisode?.startDate,
+      linkedEpisodeOfCareEndDate: linkedEpisode?.endDate,
+      displayStatus: getServiceRequestDisplayStatus({
+        status: serviceRequest.status,
+        hasIncomingReferralLink: linkedEpisodes.length > 0,
+      }),
+      startedTreatment: linkedEpisodes.length > 0,
       isPendingOperational: isOperationalPendingServiceRequest({
         status: serviceRequest.status,
         hasIncomingReferralLink: linkedEpisodes.length > 0,
@@ -170,9 +205,8 @@ export async function loadPatientServiceRequestHistoryContext(patientId: string)
     } satisfies ServiceRequestHistoryItem;
   }));
 
-  const activeIndex = enriched.findIndex((item) => item.isPendingOperational);
-  const activeServiceRequest = activeIndex >= 0 ? enriched[activeIndex] : null;
-  const historicalServiceRequests = enriched.filter((_, index) => index !== activeIndex);
+  const activeServiceRequest = selectActiveServiceRequestToResolve(enriched);
+  const historicalServiceRequests = enriched.filter((item) => item.serviceRequest.id !== activeServiceRequest?.serviceRequest.id);
 
   return { activeServiceRequest, historicalServiceRequests };
 }

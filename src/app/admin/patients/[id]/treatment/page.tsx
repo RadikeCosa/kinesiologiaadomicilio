@@ -52,7 +52,8 @@ export default async function AdminPatientTreatmentPage({
     : null;
   const activeEpisode = patient?.activeEpisode ?? null;
   const hasActiveTreatment = Boolean(activeEpisode);
-  const hasFinishedTreatment = !hasActiveTreatment && patient?.latestEpisode?.status === "finished";
+  const hasClosedEpisodes = treatmentEpisodeHistory.length > 0;
+  const hasAnyEpisode = hasActiveTreatment || hasClosedEpisodes;
   const canStartTreatmentFromCurrentContext = treatmentServiceRequestContext.state === "valid" && Boolean(treatmentServiceRequestContext.serviceRequestId);
 
   if (!patient) {
@@ -151,27 +152,18 @@ export default async function AdminPatientTreatmentPage({
               <FinishEpisodeOfCareForm patient={patient} />
             </div>
           </>
-        ) : hasFinishedTreatment ? (
+        ) : hasClosedEpisodes ? (
           <>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Tratamiento finalizado
-            </h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">No hay tratamiento activo</h2>
             <p className="mt-3 text-sm text-slate-700">
-              Tratamiento finalizado el {formatDateDisplay(patient.latestEpisode?.endDate)}
+              Este paciente tiene tratamientos finalizados registrados. Podés revisar los ciclos cerrados y sus motivos de cierre.
             </p>
-            {patient.latestEpisode?.closureReason ? (
-              <p className="mt-1 text-sm text-slate-700">
-                Motivo: {EPISODE_OF_CARE_CLOSURE_REASON_LABELS[patient.latestEpisode.closureReason]}
-              </p>
-            ) : null}
-            {patient.latestEpisode?.closureDetail ? (
-              <p className="mt-1 text-sm text-slate-700">
-                Detalle: {patient.latestEpisode.closureDetail}
-              </p>
-            ) : null}
-            <p className="mt-2 text-sm text-slate-700">
-              Este tratamiento ya está cerrado. Si hace falta continuar, podés iniciar un nuevo tratamiento.
-            </p>
+            <Link
+              className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              href={`/admin/patients/${patient.id}/administrative#service-requests`}
+            >
+              Ver historial de solicitudes
+            </Link>
             {canStartTreatmentFromCurrentContext ? (
               <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
                 <StartEpisodeOfCareForm
@@ -187,12 +179,16 @@ export default async function AdminPatientTreatmentPage({
           </>
         ) : (
           <>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Sin tratamiento activo
-            </h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">No hay tratamientos registrados</h2>
             <p className="mt-3 text-sm text-slate-700">
-              Iniciá un tratamiento para habilitar el registro de visitas.
+              Para iniciar un tratamiento, primero registrá o resolvé una solicitud de atención.
             </p>
+            <Link
+              className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              href={`/admin/patients/${patient.id}/administrative#service-requests`}
+            >
+              Ir a solicitudes
+            </Link>
             {canStartTreatmentFromCurrentContext ? (
               <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
                 <StartEpisodeOfCareForm
@@ -200,16 +196,12 @@ export default async function AdminPatientTreatmentPage({
                   serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
                 />
               </div>
-            ) : (
-              <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-                Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.
-              </p>
-            )}
+            ) : null}
           </>
         )}
       </section>
 
-      {treatmentEpisodeHistory.length > 0 ? (
+      {hasAnyEpisode && treatmentEpisodeHistory.length > 0 ? (
         <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Historial de ciclos cerrados</h2>
           <ul className="mt-3 space-y-2">
