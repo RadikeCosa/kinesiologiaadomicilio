@@ -160,7 +160,7 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("Motivo no registrado");
   });
 
-  it("renders linked treatment state and hides pending/actions for linked in_review safeguard", () => {
+  it("renders linked active treatment state and hides resolution actions", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-12",
@@ -171,18 +171,57 @@ describe("PatientServiceRequestsSection", () => {
         historicalServiceRequests: [
           {
             serviceRequest: { id: "sr-linked", patientId: "pat-12", requestedAt: "2026-04-21", reasonText: "C", status: "in_review" },
-            displayStatus: "accepted_linked_to_treatment",
+            displayStatus: "accepted_linked_active_treatment",
             startedTreatment: true,
             isPendingOperational: false,
             linkedEpisodeOfCareId: "ep-1",
+            linkedEpisode: { id: "ep-1", status: "active", startDate: "2026-04-22" },
           },
         ],
       }),
     );
 
-    expect(html).toContain("Aceptada — tratamiento iniciado.");
+    expect(html).toContain("Aceptada — tratamiento activo.");
+    expect(html).toContain("Tratamiento iniciado");
     expect(html).not.toContain("Pendiente de iniciar tratamiento.");
     expect(html).not.toContain("Aceptar e iniciar tratamiento");
+    expect(html).not.toContain("No inició");
+    expect(html).not.toContain("Cancelar");
+  });
+
+  it("renders linked finished treatment with closure reason and detail", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-13",
+        serviceRequests: [
+          { id: "sr-finished", patientId: "pat-13", requestedAt: "2026-04-21", reasonText: "C", status: "accepted" },
+        ],
+        historicalServiceRequests: [
+          {
+            serviceRequest: { id: "sr-finished", patientId: "pat-13", requestedAt: "2026-04-21", reasonText: "C", status: "accepted" },
+            displayStatus: "accepted_linked_finished_treatment",
+            startedTreatment: true,
+            isPendingOperational: false,
+            linkedEpisodeOfCareId: "ep-f",
+            linkedEpisode: {
+              id: "ep-f",
+              status: "finished",
+              startDate: "2026-04-22",
+              endDate: "2026-04-30",
+              closureReason: "clinical_discharge",
+              closureDetail: "Alta por objetivos cumplidos",
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(html).toContain("Aceptada — tratamiento finalizado.");
+    expect(html).toContain("Tratamiento finalizado");
+    expect(html).toContain("Motivo de cierre");
+    expect(html).toContain("Alta clínica");
+    expect(html).toContain("Detalle");
+    expect(html).toContain("Alta por objetivos cumplidos");
     expect(html).not.toContain("No inició");
     expect(html).not.toContain("Cancelar");
   });

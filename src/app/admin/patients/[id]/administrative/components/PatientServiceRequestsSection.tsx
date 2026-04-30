@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { ServiceRequest } from "@/domain/service-request/service-request.types";
 import type { ServiceRequestDisplayStatus, ServiceRequestHistoryItem } from "@/app/admin/patients/[id]/data";
 import { formatDateDisplay } from "@/lib/patient-admin-display";
+import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { ServiceRequestCreateForm } from "@/app/admin/patients/[id]/administrative/components/ServiceRequestCreateForm";
@@ -33,8 +34,10 @@ export function getServiceRequestCreateFormVisibility(action: "open" | "cancel")
 
 function getDisplayStatusLabel(displayStatus: ServiceRequestDisplayStatus): string {
   switch (displayStatus) {
-    case "accepted_linked_to_treatment":
-      return "Aceptada — tratamiento iniciado";
+    case "accepted_linked_active_treatment":
+      return "Aceptada — tratamiento activo";
+    case "accepted_linked_finished_treatment":
+      return "Aceptada — tratamiento finalizado";
     case "accepted_pending_treatment":
       return "Pendiente de iniciar tratamiento";
     case "in_review":
@@ -53,6 +56,7 @@ function getDisplayStatusLabel(displayStatus: ServiceRequestDisplayStatus): stri
 function renderServiceRequestCard({ item, patientId, missingTreatmentRequirements }: { item: ServiceRequestHistoryItem; patientId: string; missingTreatmentRequirements: string[]; }) {
   const serviceRequest = item.serviceRequest;
   const isClosedState = serviceRequest.status === "closed_without_treatment" || serviceRequest.status === "cancelled";
+  const linkedEpisode = item.linkedEpisode;
 
   return (
     <li className="rounded-md border border-slate-200 bg-white p-3" key={serviceRequest.id}>
@@ -76,6 +80,32 @@ function renderServiceRequestCard({ item, patientId, missingTreatmentRequirement
               {serviceRequest.status === "closed_without_treatment" ? "Motivo de no inicio" : "Motivo de cancelación"}
             </dt>
             <dd className="mt-1 text-slate-700">{serviceRequest.closedReasonText ?? "Motivo no registrado"}</dd>
+          </div>
+        ) : null}
+        {linkedEpisode?.startDate ? (
+          <div className="sm:col-span-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">Tratamiento iniciado</dt>
+            <dd className="mt-1 text-slate-700">{formatDateDisplay(linkedEpisode.startDate)}</dd>
+          </div>
+        ) : null}
+        {item.displayStatus === "accepted_linked_finished_treatment" && linkedEpisode?.endDate ? (
+          <div className="sm:col-span-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">Tratamiento finalizado</dt>
+            <dd className="mt-1 text-slate-700">{formatDateDisplay(linkedEpisode.endDate)}</dd>
+          </div>
+        ) : null}
+        {item.displayStatus === "accepted_linked_finished_treatment" && linkedEpisode?.closureReason ? (
+          <div className="sm:col-span-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">Motivo de cierre</dt>
+            <dd className="mt-1 text-slate-700">
+              {EPISODE_OF_CARE_CLOSURE_REASON_LABELS[linkedEpisode.closureReason as keyof typeof EPISODE_OF_CARE_CLOSURE_REASON_LABELS] ?? linkedEpisode.closureReason}
+            </dd>
+          </div>
+        ) : null}
+        {item.displayStatus === "accepted_linked_finished_treatment" && linkedEpisode?.closureDetail ? (
+          <div className="sm:col-span-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">Detalle</dt>
+            <dd className="mt-1 text-slate-700">{linkedEpisode.closureDetail}</dd>
           </div>
         ) : null}
         {serviceRequest.reportedDiagnosisText ? (
