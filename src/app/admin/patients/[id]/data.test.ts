@@ -4,6 +4,7 @@ import {
   isOperationalPendingServiceRequest,
   loadPatientAdministrativeContext,
   loadPatientHubServiceRequestContext,
+  loadPatientServiceRequestHistoryContext,
   loadPatientServiceRequestContext,
   sortServiceRequestsByRequestedAtDesc,
 } from "@/app/admin/patients/[id]/data";
@@ -204,6 +205,24 @@ describe("patient detail service-request technical composition", () => {
 
     expect(context.latestClosedRequestStatus).toBe("closed_without_treatment");
     expect(context.latestClosedRequestReason).toBe("Motivos económicos");
+  });
+
+  it("marks in_review with linked episode as started treatment and accepted_linked_to_treatment", async () => {
+    vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([
+      { id: "sr-linked", patientId: "pat-1", requestedAt: "2026-04-22", reasonText: "Motivo", status: "in_review" },
+    ] as never);
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([{ id: "ep-1", startDate: "2026-04-23" }] as never);
+
+    const context = await loadPatientServiceRequestHistoryContext("pat-1");
+
+    expect(context.activeServiceRequest).toBeNull();
+    expect(context.historicalServiceRequests).toHaveLength(1);
+    expect(context.historicalServiceRequests[0]).toMatchObject({
+      displayStatus: "accepted_linked_to_treatment",
+      startedTreatment: true,
+      linkedEpisodeOfCareId: "ep-1",
+      isPendingOperational: false,
+    });
   });
 
 });
