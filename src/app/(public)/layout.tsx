@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ScrollDepthTracker } from "@/components/ScrollDepthTracker";
 import { BUSINESS_CONFIG } from "@/lib/config";
 import { servicesData } from "@/lib/servicesData";
 
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
 const businessUrl = BUSINESS_CONFIG.url;
 
 const structuredData = {
@@ -124,6 +126,7 @@ export default function PublicLayout({
       </a>
 
       <ScrollDepthTracker />
+      {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       <Header />
 
       <script
