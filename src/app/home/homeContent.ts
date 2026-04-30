@@ -3,10 +3,10 @@ export const HOME_CONTENT = {
     sectionTitle: "Sobre Ramiro",
     name: "Ramiro Cosa",
     tagline: "Más de 20 años de experiencia en kinesiología domiciliaria",
-    bio: "Ramiro acompaña a personas mayores y pacientes en recuperación directamente en su hogar. Con más de 14 años dedicados a la atención domiciliaria, conoce bien las necesidades de quienes atraviesan una convalecencia y de las familias que los acompañan.",
+    bio: "Ramiro acompaña a personas mayores y pacientes en recuperación directamente en su hogar. Tiene más de 20 años de experiencia profesional y más de 14 años de trabajo específico en atención domiciliaria, por lo que conoce bien las necesidades de quienes atraviesan una convalecencia y de las familias que los acompañan.",
     highlights: [
       "+20 años de experiencia profesional",
-      "14 años especializado en atención domiciliaria",
+      "Más de 14 años de trabajo específico en atención domiciliaria",
       "Foco en adultos mayores y recuperación postquirúrgica",
       "Cada tratamiento comienza con una evaluación inicial",
     ],
@@ -21,8 +21,9 @@ export const HOME_CONTENT = {
   serviceContext: {
     title: "Cómo trabajamos",
     items: [
-      "Servicio particular, sin obra social",
-      "La primera sesión es una evaluación inicial para entender tu situación y brindar un plan de tratamiento personalizado",
+      "Atención particular, sin obra social",
+      "Primera visita con evaluación inicial y plan de tratamiento personalizado",
+      "Atención en Neuquén Capital y zonas cercanas según disponibilidad",
       "Atención para adultos",
     ],
   },

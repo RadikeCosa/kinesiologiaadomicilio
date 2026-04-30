@@ -10,13 +10,38 @@ import {
   SECTION_Y_SPACING,
 } from "@/components/ui/styleTokens";
 import { SERVICES_PAGE_CONTENT } from "./servicesPageContent";
+import { BUSINESS_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación",
+  title: "Servicios de kinesiología y fisioterapia a domicilio en Neuquén",
   description:
-    "Servicios especializados de kinesiología y rehabilitación a domicilio: postoperatorio, adultos mayores, cuidados paliativos y terapia física personalizada en Neuquén.",
+    "Kinesiología a domicilio en Neuquén con enfoque en rehabilitación y fisioterapia a domicilio como complemento terapéutico. Atención para adultos, adultos mayores, postoperatorios, cuidados paliativos y recuperación funcional.",
   alternates: {
-    canonical: "https://kinesiologiaadomicilio.vercel.app/services",
+    canonical: `${BUSINESS_CONFIG.url}/services`,
+  },
+  openGraph: {
+    title: "Servicios de kinesiología y fisioterapia a domicilio en Neuquén",
+    description:
+      "Kinesiología a domicilio en Neuquén con enfoque en rehabilitación y fisioterapia a domicilio como complemento terapéutico. Atención para adultos, adultos mayores, postoperatorios, cuidados paliativos y recuperación funcional.",
+    url: `${BUSINESS_CONFIG.url}/services`,
+    siteName: "Rehabilitación a domicilio Neuquén",
+    locale: "es_AR",
+    type: "website",
+    images: [
+      {
+        url: "/og-placeholder.png",
+        width: 1200,
+        height: 630,
+        alt: "Servicios de kinesiología y fisioterapia a domicilio en Neuquén",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Servicios de kinesiología y fisioterapia a domicilio en Neuquén",
+    description:
+      "Kinesiología a domicilio en Neuquén con enfoque en rehabilitación y fisioterapia a domicilio como complemento terapéutico. Atención para adultos, adultos mayores, postoperatorios, cuidados paliativos y recuperación funcional.",
+    images: ["/og-placeholder.png"],
   },
   keywords: [
     "servicios kinesiología domicilio",
