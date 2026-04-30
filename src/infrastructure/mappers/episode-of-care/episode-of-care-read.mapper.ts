@@ -6,13 +6,17 @@ import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care
 
 const CLOSURE_REASON_PREFIX = "closure-reason:v1:";
 const CLOSURE_DETAIL_PREFIX = "closure-detail:v1:";
+const EPISODE_OF_CARE_CLOSURE_REASON_EXTENSION_URL =
+  "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason";
+const EPISODE_OF_CARE_CLOSURE_DETAIL_EXTENSION_URL =
+  "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-detail";
 
 function normalizeOptionalString(value?: string): string | undefined {
   const normalized = value?.trim();
   return normalized || undefined;
 }
 
-function extractClosureReason(note?: FhirEpisodeOfCare["note"]): EpisodeOfCareClosureReason | undefined {
+function extractClosureReasonFromNote(note?: FhirEpisodeOfCare["note"]): EpisodeOfCareClosureReason | undefined {
   if (!note?.length) return undefined;
 
   for (const entry of note) {
@@ -31,6 +35,30 @@ function extractClosureDetail(note?: FhirEpisodeOfCare["note"]): string | undefi
     const text = normalizeOptionalString(entry.text);
     if (!text || !text.startsWith(CLOSURE_DETAIL_PREFIX)) continue;
     const value = text.slice(CLOSURE_DETAIL_PREFIX.length).trim();
+    if (value) return value;
+  }
+  return undefined;
+}
+
+function extractClosureReasonFromExtension(extension?: FhirEpisodeOfCare["extension"]): EpisodeOfCareClosureReason | undefined {
+  if (!extension?.length) return undefined;
+
+  for (const entry of extension) {
+    if (entry.url !== EPISODE_OF_CARE_CLOSURE_REASON_EXTENSION_URL) continue;
+    const value = normalizeOptionalString(entry.valueCode);
+    if (value && EPISODE_OF_CARE_CLOSURE_REASONS.includes(value as EpisodeOfCareClosureReason)) {
+      return value as EpisodeOfCareClosureReason;
+    }
+  }
+
+  return undefined;
+}
+
+function extractClosureDetailFromExtension(extension?: FhirEpisodeOfCare["extension"]): string | undefined {
+  if (!extension?.length) return undefined;
+  for (const entry of extension) {
+    if (entry.url !== EPISODE_OF_CARE_CLOSURE_DETAIL_EXTENSION_URL) continue;
+    const value = normalizeOptionalString(entry.valueString);
     if (value) return value;
   }
   return undefined;
@@ -74,6 +102,9 @@ export function mapEpisodeOfCareRead(resource: EpisodeOfCare): EpisodeOfCare {
 }
 
 export function mapFhirEpisodeOfCareToDomain(resource: FhirEpisodeOfCare): EpisodeOfCare {
+  const closureReasonFromExtension = extractClosureReasonFromExtension(resource.extension);
+  const closureDetailFromExtension = extractClosureDetailFromExtension(resource.extension);
+
   return {
     id: resource.id ?? "",
     patientId: extractIdFromReference(resource.patient?.reference) ?? "",
@@ -81,7 +112,7 @@ export function mapFhirEpisodeOfCareToDomain(resource: FhirEpisodeOfCare): Episo
     startDate: resource.period?.start ?? "",
     endDate: resource.period?.end,
     serviceRequestId: extractFirstServiceRequestId(resource.referralRequest),
-    closureReason: extractClosureReason(resource.note),
-    closureDetail: extractClosureDetail(resource.note),
+    closureReason: closureReasonFromExtension ?? extractClosureReasonFromNote(resource.note),
+    closureDetail: closureDetailFromExtension ?? extractClosureDetail(resource.note),
   };
 }

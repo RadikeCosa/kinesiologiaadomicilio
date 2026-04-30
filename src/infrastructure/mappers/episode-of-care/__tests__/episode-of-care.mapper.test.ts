@@ -45,8 +45,13 @@ describe("episode-of-care mappers", () => {
         status: "active",
         patient: { reference: "Patient/pat-1" },
         period: { start: "2026-04-01" },
+        extension: [{ url: "https://other.local/fhir/StructureDefinition/custom", valueString: "keep" }],
       },
-      { endDate: "2026-04-17" },
+      {
+        endDate: "2026-04-17",
+        closureReason: "treatment_completed",
+        closureDetail: " Se cumplieron objetivos ",
+      },
     );
 
     expect(mapped).toEqual({
@@ -55,7 +60,45 @@ describe("episode-of-care mappers", () => {
       status: "finished",
       patient: { reference: "Patient/pat-1" },
       period: { start: "2026-04-01", end: "2026-04-17" },
+      extension: [
+        { url: "https://other.local/fhir/StructureDefinition/custom", valueString: "keep" },
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason",
+          valueCode: "treatment_completed",
+        },
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-detail",
+          valueString: "Se cumplieron objetivos",
+        },
+      ],
     });
+  });
+
+  it("replaces previous closure extensions without duplicating and preserves unrelated ones", () => {
+    const mapped = applyFinishEpisodeOfCareToFhir(
+      {
+        resourceType: "EpisodeOfCare",
+        id: "epi-dup",
+        status: "active",
+        extension: [
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason", valueCode: "administrative_discharge" },
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-detail", valueString: "Detalle anterior" },
+          { url: "https://other.local/fhir/StructureDefinition/custom", valueString: "keep" },
+        ],
+      },
+      {
+        endDate: "2026-04-17",
+        closureReason: "cancelled",
+      },
+    );
+
+    expect(mapped.extension).toEqual([
+      { url: "https://other.local/fhir/StructureDefinition/custom", valueString: "keep" },
+      {
+        url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason",
+        valueCode: "cancelled",
+      },
+    ]);
   });
 
   it("maps FHIR EpisodeOfCare to domain", () => {
@@ -107,5 +150,80 @@ describe("episode-of-care mappers", () => {
     });
 
     expect(mapped.serviceRequestId).toBe("sr-2");
+  });
+
+  it("reads closure reason/detail from extension", () => {
+    const mapped = mapFhirEpisodeOfCareToDomain({
+      resourceType: "EpisodeOfCare",
+      id: "epi-ext",
+      status: "finished",
+      patient: { reference: "Patient/pat-1" },
+      period: { start: "2026-04-01", end: "2026-04-17" },
+      extension: [
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason",
+          valueCode: "treatment_completed",
+        },
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-detail",
+          valueString: "Objetivos logrados",
+        },
+      ],
+    });
+
+    expect(mapped.closureReason).toBe("treatment_completed");
+    expect(mapped.closureDetail).toBe("Objetivos logrados");
+  });
+
+  it("keeps legacy fallback from note and prioritizes extension when both exist", () => {
+    const fromLegacy = mapFhirEpisodeOfCareToDomain({
+      resourceType: "EpisodeOfCare",
+      id: "epi-legacy",
+      status: "finished",
+      note: [
+        { text: "closure-reason:v1:lost_to_follow_up" },
+        { text: "closure-detail:v1:Paciente interrumpe" },
+      ],
+    });
+
+    const prioritized = mapFhirEpisodeOfCareToDomain({
+      resourceType: "EpisodeOfCare",
+      id: "epi-priority",
+      status: "finished",
+      note: [
+        { text: "closure-reason:v1:lost_to_follow_up" },
+        { text: "closure-detail:v1:Detalle legacy" },
+      ],
+      extension: [
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason",
+          valueCode: "treatment_completed",
+        },
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-detail",
+          valueString: "Detalle extension",
+        },
+      ],
+    });
+
+    expect(fromLegacy.closureReason).toBe("lost_to_follow_up");
+    expect(fromLegacy.closureDetail).toBe("Paciente interrumpe");
+    expect(prioritized.closureReason).toBe("treatment_completed");
+    expect(prioritized.closureDetail).toBe("Detalle extension");
+  });
+
+  it("ignores invalid extension reason and does not break when reason/detail are missing", () => {
+    const mapped = mapFhirEpisodeOfCareToDomain({
+      resourceType: "EpisodeOfCare",
+      id: "epi-invalid",
+      status: "finished",
+      extension: [{
+        url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason",
+        valueCode: "invalid_reason",
+      }],
+    });
+
+    expect(mapped.closureReason).toBeUndefined();
+    expect(mapped.closureDetail).toBeUndefined();
   });
 });

@@ -1,5 +1,11 @@
 import { type FhirResource } from "@/lib/fhir/types";
 
+export type FhirExtension = {
+  url: string;
+  valueCode?: string;
+  valueString?: string;
+};
+
 export interface FhirEpisodeOfCare extends FhirResource {
   resourceType: "EpisodeOfCare";
   status: "active" | "finished";
@@ -13,6 +19,7 @@ export interface FhirEpisodeOfCare extends FhirResource {
   note?: Array<{
     text?: string;
   }>;
+  extension?: FhirExtension[];
   referralRequest?: Array<{
     reference?: string;
   }>;

@@ -206,7 +206,7 @@ describe("service-request.repository (FHIR)", () => {
     });
   });
 
-  it("updates closed_without_treatment with revoked + statusReason.text", async () => {
+  it("updates closed_without_treatment with revoked + statusReason.text + resolution note", async () => {
     vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "ServiceRequest",
       id: "sr-12",
@@ -236,11 +236,12 @@ describe("service-request.repository (FHIR)", () => {
       expect.objectContaining({
         status: "revoked",
         statusReason: { text: "No requiere tratamiento" },
+        note: [{ text: "resolution-reason:v1:No requiere tratamiento" }],
       }),
     );
   });
 
-  it("updates cancelled with revoked + statusReason.text", async () => {
+  it("updates cancelled with revoked + statusReason.text + resolution note", async () => {
     vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "ServiceRequest",
       id: "sr-13",
@@ -270,6 +271,7 @@ describe("service-request.repository (FHIR)", () => {
       expect.objectContaining({
         status: "revoked",
         statusReason: { text: "Paciente cancela" },
+        note: [{ text: "resolution-reason:v1:Paciente cancela" }],
       }),
     );
   });

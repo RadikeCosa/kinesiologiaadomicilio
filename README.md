@@ -44,6 +44,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (header interno con CTA primario `Registrar visita` **solo** con tratamiento activo, navegación secundaria compacta a tratamiento, metadata compacta, estadísticas clínicas mínimas derivadas y diferenciación de estado entre sin inicio/finalizado).
 - Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.
 - Gestión específica de tratamiento (`EpisodeOfCare`) en `/admin/patients/[id]/treatment` (inicio/finalización con motivo de cierre y detalle opcional, estado finalizado explícito y navegación secundaria a visitas).
+- En `EpisodeOfCare`, motivo y detalle de cierre se persisten en `extension[]` (URLs versionables con `valueCode`/`valueString`); `note[]` queda solo como fallback legacy de lectura por compatibilidad.
 - La gestión de tratamiento ya no vive inline en `/admin/patients/[id]/encounters`.
 - El DNI es un dato administrativo opcional: se normaliza y persiste cuando existe, pero no bloquea el inicio de tratamiento.
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
@@ -70,7 +71,7 @@ El proyecto está en etapa **híbrida transicional**:
   - `in_review` sin vínculo => pendiente operativa;
   - `accepted` sin vínculo => `Pendiente de iniciar tratamiento` (compatibilidad transicional);
   - `closed_without_treatment`/`cancelled` => históricas terminales, no compiten como pendientes.
-- Los motivos de `No inició`/`Cancelar` se leen primero desde `statusReason.text` y usan fallback controlado del `CodeableConcept` disponible (por ejemplo `statusReason.coding[].display`), y se muestran en el historial operativo junto al detalle de cierre del tratamiento cuando aplica.
+- Los motivos de `No inició`/`Cancelar` se intentan persistir en `statusReason.text` y, por compatibilidad con HAPI local, también se guardan en `ServiceRequest.note[]` como `resolution-reason:v1:<texto>`; la lectura prioriza `statusReason` (incluyendo fallback de `coding[].display/text`) y usa `note[]` como fallback final, y se muestran en el historial operativo junto al detalle de cierre del tratamiento cuando aplica.
 - Durante tratamiento activo, crear una nueva solicitud se mantiene como acción administrativa secundaria (no CTA clínico principal del hub).
 - `/admin/patients/[id]/treatment` mantiene el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen si existe).
 - `/admin/patients/[id]/treatment` funciona como superficie de gestión del tratamiento actual y también de historial compacto de ciclos cerrados; sin tratamiento activo pero con ciclos finalizados, prioriza el historial y ofrece acceso directo al historial de solicitudes en `/administrative#service-requests`.
