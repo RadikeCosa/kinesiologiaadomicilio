@@ -107,7 +107,7 @@ describe("service-request mappers", () => {
     ]);
   });
 
-  it("applies closed_without_treatment update as revoked with statusReason", () => {
+  it("applies closed_without_treatment update as revoked with statusReason and resolution note", () => {
     const updated = applyServiceRequestStatusUpdateToFhir(
       {
         resourceType: "ServiceRequest",
@@ -123,9 +123,10 @@ describe("service-request mappers", () => {
 
     expect(updated.status).toBe("revoked");
     expect(updated.statusReason).toEqual({ text: "No requiere tratamiento en este momento" });
+    expect(updated.note).toEqual([{ text: "resolution-reason:v1:No requiere tratamiento en este momento" }]);
   });
 
-  it("applies cancelled update as revoked with statusReason", () => {
+  it("applies cancelled update as revoked with statusReason and resolution note", () => {
     const updated = applyServiceRequestStatusUpdateToFhir(
       {
         resourceType: "ServiceRequest",
@@ -141,6 +142,7 @@ describe("service-request mappers", () => {
 
     expect(updated.status).toBe("revoked");
     expect(updated.statusReason).toEqual({ text: "Paciente cancela" });
+    expect(updated.note).toEqual([{ text: "resolution-reason:v1:Paciente cancela" }]);
   });
 
   it("applies entered_in_error update as entered-in-error", () => {
@@ -216,12 +218,44 @@ describe("service-request mappers", () => {
       },
     );
 
-    expect(closed.note).toEqual([{ text: "general-note:v1:Seguimiento" }]);
-    expect(cancelled.note).toEqual([{ text: "general-note:v1:Seguimiento" }]);
+    expect(closed.note).toEqual([
+      { text: "general-note:v1:Seguimiento" },
+      { text: "resolution-reason:v1:No corresponde" },
+    ]);
+    expect(cancelled.note).toEqual([
+      { text: "general-note:v1:Seguimiento" },
+      { text: "resolution-reason:v1:Paciente cancela" },
+    ]);
     expect(closed.statusReason).toEqual({ text: "No corresponde" });
     expect(cancelled.statusReason).toEqual({ text: "Paciente cancela" });
   });
 
+
+
+  it("replaces previous resolution-reason note and preserves unrelated notes", () => {
+    const updated = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-4d2",
+        status: "revoked",
+        note: [
+          { text: "general-note:v1:Seguimiento" },
+          { text: "resolution-reason:v1:Motivo viejo" },
+          { text: "workflow-status:v1:accepted" },
+        ],
+      },
+      {
+        id: "sr-4d2",
+        status: "cancelled",
+        closedReasonText: "Motivo nuevo",
+      },
+    );
+
+    expect(updated.note).toEqual([
+      { text: "general-note:v1:Seguimiento" },
+      { text: "resolution-reason:v1:Motivo nuevo" },
+    ]);
+  });
   it("does not duplicate workflow-status when accepted multiple times", () => {
     const updated = applyServiceRequestStatusUpdateToFhir(
       {
@@ -394,6 +428,24 @@ describe("service-request mappers", () => {
     expect(mappedFromText.closedReasonText).toBe("Motivo alternativo");
   });
 
+
+
+  it("falls back to resolution-reason note when statusReason is missing", () => {
+    const mapped = mapFhirServiceRequestToDomain({
+      resourceType: "ServiceRequest",
+      id: "sr-note-reason",
+      status: "revoked",
+      subject: { reference: "Patient/pat-2" },
+      authoredOn: "2026-04-28",
+      reasonCode: [{ text: "Dolor de rodilla" }],
+      note: [
+        { text: "general-note:v1:Seguimiento" },
+        { text: "resolution-reason:v1:  Paciente no responde  " },
+      ],
+    });
+
+    expect(mapped.closedReasonText).toBe("Paciente no responde");
+  });
   it("maps entered-in-error to entered_in_error", () => {
     expect(
       mapFhirServiceRequestStatusToDomainStatus({
