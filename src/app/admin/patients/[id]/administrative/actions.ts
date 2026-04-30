@@ -17,6 +17,7 @@ import {
   listEpisodeOfCareByIncomingReferral,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
+import { updatePatient } from "@/infrastructure/repositories/patient.repository";
 import { canStartEpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.rules";
 import { existsAnotherPatientWithDni } from "@/infrastructure/repositories/patient.repository";
 import { formatLocalDateInputValue } from "@/lib/date-input";
@@ -127,6 +128,37 @@ export async function createPatientServiceRequestAction(
   formData: FormData,
 ): Promise<CreatePatientServiceRequestActionResult> {
   try {
+    const administrativeAddress = getOptionalFormValue(formData, "administrativeAddress");
+    const administrativePhone = getOptionalFormValue(formData, "administrativePhone");
+    const administrativeMainContactPhone = getOptionalFormValue(formData, "administrativeMainContactPhone");
+    const existingPatient = await getPatientById(patientId);
+
+    if (!existingPatient) {
+      return {
+        ok: false,
+        message: "No se pudo registrar la solicitud de atención.",
+      };
+    }
+
+    const shouldUpdateAdministrativeFields = Boolean(
+      administrativeAddress?.trim()
+      || administrativePhone?.trim()
+      || administrativeMainContactPhone?.trim(),
+    );
+
+    if (shouldUpdateAdministrativeFields) {
+      await updatePatient({
+        id: patientId,
+        address: administrativeAddress || existingPatient.address,
+        phone: administrativePhone || existingPatient.phone,
+        mainContact: {
+          name: existingPatient.mainContact?.name,
+          relationship: existingPatient.mainContact?.relationship,
+          phone: administrativeMainContactPhone || existingPatient.mainContact?.phone,
+        },
+      });
+    }
+
     const parsedInput = createServiceRequestSchema.parse({
       patientId,
       requestedAt: getOptionalFormValue(formData, "requestedAt"),

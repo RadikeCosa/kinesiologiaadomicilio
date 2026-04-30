@@ -14,6 +14,12 @@ import { getServiceRequestStatusLabel } from "@/app/admin/patients/[id]/administ
 interface PatientServiceRequestsSectionProps {
   patientId: string;
   serviceRequests: ServiceRequest[];
+  patientAdministrativeSnapshot?: {
+    address?: string;
+    phone?: string;
+    mainContactPhone?: string;
+  };
+  missingTreatmentRequirements?: string[];
   initialCreateOpen?: boolean;
   contextualMessage?: string;
 }
@@ -22,7 +28,7 @@ export function getServiceRequestCreateFormVisibility(action: "open" | "cancel")
   return action === "open";
 }
 
-export function PatientServiceRequestsSection({ patientId, serviceRequests, initialCreateOpen = false, contextualMessage }: PatientServiceRequestsSectionProps) {
+export function PatientServiceRequestsSection({ patientId, serviceRequests, patientAdministrativeSnapshot, missingTreatmentRequirements = [], initialCreateOpen = false, contextualMessage }: PatientServiceRequestsSectionProps) {
   const router = useRouter();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(initialCreateOpen);
   const { message, setMessage } = useFormFeedback();
@@ -79,6 +85,7 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, init
               text: result.message || "No se pudo registrar la solicitud de atención.",
             });
           }}
+          initialAdministrativeData={patientAdministrativeSnapshot}
           patientId={patientId}
         />
       ) : null}
@@ -143,6 +150,7 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, init
 
                 <ServiceRequestStatusActions
                   currentStatus={serviceRequest.status}
+                  missingTreatmentRequirements={serviceRequest.status === "in_review" ? missingTreatmentRequirements : []}
                   patientId={patientId}
                   serviceRequestId={serviceRequest.id}
                 />

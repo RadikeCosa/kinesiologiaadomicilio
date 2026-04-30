@@ -12,6 +12,11 @@ import {
 
 interface ServiceRequestCreateFormProps {
   patientId: string;
+  initialAdministrativeData?: {
+    address?: string;
+    phone?: string;
+    mainContactPhone?: string;
+  };
   onCancel: () => void;
   onSubmitted: (result: CreatePatientServiceRequestActionResult) => void;
 }
@@ -26,6 +31,7 @@ const REQUESTER_TYPE_OPTIONS: Array<{ value: ServiceRequestRequesterType; label:
 
 export function ServiceRequestCreateForm({
   patientId,
+  initialAdministrativeData,
   onCancel,
   onSubmitted,
 }: ServiceRequestCreateFormProps) {
@@ -114,10 +120,56 @@ export function ServiceRequestCreateForm({
         </div>
       </section>
 
+      <section className="rounded border border-sky-200 bg-sky-50 p-3" aria-labelledby="datos-tratamiento-title">
+        <h3 className="text-sm font-semibold text-slate-900" id="datos-tratamiento-title">
+          Datos necesarios para iniciar tratamiento
+        </h3>
+        <p className="mt-1 text-xs text-slate-700">
+          El domicilio y los teléfonos pertenecen a la ficha administrativa del paciente. Se usan para poder aceptar la solicitud e iniciar tratamiento.
+        </p>
+        <div className="mt-3 grid gap-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-800" htmlFor="administrativeAddress">
+              Domicilio de atención
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+              defaultValue={initialAdministrativeData?.address ?? ""}
+              id="administrativeAddress"
+              name="administrativeAddress"
+              type="text"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-800" htmlFor="administrativePhone">
+              Teléfono del paciente
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+              defaultValue={initialAdministrativeData?.phone ?? ""}
+              id="administrativePhone"
+              inputMode="tel"
+              name="administrativePhone"
+              type="tel"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-800" htmlFor="administrativeMainContactPhone">
+              Teléfono del contacto principal
+            </label>
+            <input
+              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
+              defaultValue={initialAdministrativeData?.mainContactPhone ?? ""}
+              id="administrativeMainContactPhone"
+              inputMode="tel"
+              name="administrativeMainContactPhone"
+              type="tel"
+            />
+          </div>
+        </div>
+      </section>
+
       <p className="text-xs text-slate-500">El estado inicial se registra automáticamente como En evaluación.</p>
-      <p className="text-xs text-slate-500">
-        El teléfono y el domicilio de atención se completan en los datos administrativos del paciente.
-      </p>
 
       <div className="flex flex-wrap items-center gap-2">
         <button

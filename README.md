@@ -56,8 +56,11 @@ El proyecto está en etapa **híbrida transicional**:
 - Captura y visualización administrativa de `gender` y `birthDate` en pacientes (alta, edición y detalle).
 - Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - En `/admin/patients/[id]/administrative` las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse en forma mínima (fecha, motivo y datos básicos de quién consulta: relación + nombre) y resolverse administrativamente (aceptar, cancelar y cerrar como No inició con motivo).
-- Resolver o registrar solicitudes de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
-- En el flujo normal, una solicitud `in_review` se resuelve con `Aceptar e iniciar tratamiento` desde `/administrative`, marcando la solicitud como `accepted` y creando el `EpisodeOfCare` vinculado.
+- Registrar solicitudes de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
+- La resolución general de solicitudes puede cerrarlas o cancelarlas sin iniciar tratamiento.
+- La acción específica `Aceptar e iniciar tratamiento` desde `/administrative` sí marca la solicitud como `accepted` y crea el `EpisodeOfCare` vinculado.
+- El formulario de solicitud mantiene sus campos propios mínimos (fecha, motivo y datos básicos de quién consulta) y puede completar en contexto domicilio/teléfonos administrativos cuando faltan.
+- Esos datos contextuales se guardan en `Patient` (no en `ServiceRequest`) para anticipar faltantes antes de `Aceptar e iniciar tratamiento`.
 - Al iniciar tratamiento desde ese contexto, el `EpisodeOfCare` se crea vinculado a la solicitud mediante `referralRequest` (`ServiceRequest/{id}`), siempre que la solicitud accepted sea válida, pertenezca al paciente y no haya sido usada previamente; sin `serviceRequestId` no se permite iniciar tratamiento.
 - Política vigente `single-use`: una solicitud `accepted` ya vinculada a algún `EpisodeOfCare` no puede reutilizarse para iniciar otro ciclo; se requiere nueva solicitud.
 - Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad para pacientes con `EpisodeOfCare` activo o finalizado basadas en `birthDate` válido.

@@ -97,6 +97,31 @@ export function hasMinimumOperationalDataForTreatment(
   return { ok: true };
 }
 
+export function getMissingTreatmentStartRequirements(
+  patient: Pick<Patient, "firstName" | "lastName" | "address" | "phone" | "mainContact">,
+): MinimumOperationalDataForTreatmentFailureReason[] {
+  const missing: MinimumOperationalDataForTreatmentFailureReason[] = [];
+  const firstName = patient.firstName?.trim();
+  const lastName = patient.lastName?.trim();
+
+  if (!firstName || !lastName) {
+    missing.push("missing_patient_name");
+  }
+
+  if (!patient.address?.trim()) {
+    missing.push("missing_patient_address");
+  }
+
+  const hasPatientPhone = Boolean(patient.phone?.trim());
+  const hasMainContactPhone = Boolean(patient.mainContact?.phone?.trim());
+
+  if (!hasPatientPhone && !hasMainContactPhone) {
+    missing.push("missing_contact_phone");
+  }
+
+  return missing;
+}
+
 export function getPatientOperationalStatus(options: {
   patient: Pick<Patient, "firstName" | "lastName" | "address" | "phone" | "mainContact">;
   hasActiveEpisode: boolean;
