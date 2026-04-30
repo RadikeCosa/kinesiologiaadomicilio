@@ -29,22 +29,16 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
     vi.clearAllMocks();
   });
 
-  it("keeps legacy flow without serviceRequestId", async () => {
+  it("blocks creation when serviceRequestId is missing", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", dni: "30111222" });
     getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
-    createEpisodeOfCareMock.mockResolvedValueOnce({ id: "ep-1" });
-
     const result = await startEpisodeOfCareAction({ patientId: "pat-1", startDate: "2026-04-16" });
 
     expect(getServiceRequestByIdMock).not.toHaveBeenCalled();
     expect(listEpisodeOfCareByIncomingReferralMock).not.toHaveBeenCalled();
-    expect(createEpisodeOfCareMock).toHaveBeenCalledWith({
-      patientId: "pat-1",
-      startDate: "2026-04-16",
-      serviceRequestId: undefined,
-    });
-    expect(result).toEqual({ ok: true, message: "Tratamiento iniciado correctamente." });
+    expect(createEpisodeOfCareMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ ok: false, message: "Para iniciar un tratamiento primero debe existir una solicitud de atención aceptada." });
   });
 
   it("creates episode when serviceRequestId is accepted, belongs to patient and has no prior links", async () => {

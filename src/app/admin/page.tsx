@@ -58,12 +58,20 @@ export default async function AdminHomePage() {
               <p className="text-xs uppercase tracking-wide text-amber-700">Sin tratamiento iniciado</p>
               <p className="mt-1 text-lg font-semibold text-amber-900">{dashboard.operationalSummary.withoutStartedTreatment}</p>
             </article>
+            <article className="rounded-md border border-sky-200 bg-sky-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-sky-700">Solicitudes en evaluación</p>
+              <p className="mt-1 text-lg font-semibold text-sky-900">{dashboard.serviceRequestSummary.inReview}</p>
+            </article>
+            <article className="rounded-md border border-indigo-200 bg-indigo-50 p-3">
+              <p className="text-xs uppercase tracking-wide text-indigo-700">Aceptadas pendientes de tratamiento</p>
+              <p className="mt-1 text-lg font-semibold text-indigo-900">{dashboard.serviceRequestSummary.acceptedPendingTreatment}</p>
+            </article>
           </div>
         </article>
 
         <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-            Edad de pacientes
+            Edad de pacientes en tratamiento
           </h2>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">

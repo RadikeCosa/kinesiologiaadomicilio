@@ -29,6 +29,7 @@ describe("/admin page", () => {
         preliminary: 2,
         readyToStart: 3,
       },
+      serviceRequestSummary: { inReview: 4, acceptedPendingTreatment: 2 },
       ageSummary: {
         youngest: 18,
         oldest: 87,
@@ -40,7 +41,7 @@ describe("/admin page", () => {
           denominator: 10,
           percentage: 80,
         },
-        note: "La edad se calcula únicamente sobre pacientes con fecha de nacimiento válida.",
+        note: "La edad se calcula sobre pacientes con tratamiento activo y fecha de nacimiento válida.",
       },
     });
 
@@ -49,13 +50,15 @@ describe("/admin page", () => {
 
     expect(html).toContain("Panel operativo");
     expect(html).toContain("Resumen operativo");
-    expect(html).toContain("Edad de pacientes");
+    expect(html).toContain("Edad de pacientes en tratamiento");
     expect(html).toContain("Pacientes totales");
     expect(html).toContain("Sin tratamiento iniciado");
+    expect(html).toContain("Solicitudes en evaluación");
+    expect(html).toContain("Aceptadas pendientes de tratamiento");
     expect(html).toContain("Con fecha válida");
     expect(html).toContain("Sin fecha válida");
     expect(html).toContain("8/10 (80%)");
-    expect(html).toContain("La edad se calcula únicamente sobre pacientes con fecha de nacimiento válida.");
+    expect(html).toContain("La edad se calcula sobre pacientes con tratamiento activo y fecha de nacimiento válida.");
     expect(html).toContain("href=\"/admin/patients\"");
     expect(html).toContain("href=\"/admin/patients/new\"");
   });
@@ -71,6 +74,7 @@ describe("/admin page", () => {
         preliminary: 1,
         readyToStart: 1,
       },
+      serviceRequestSummary: { inReview: 1, acceptedPendingTreatment: 0 },
       ageSummary: {
         youngest: 36,
         oldest: 36,
@@ -82,7 +86,7 @@ describe("/admin page", () => {
           denominator: 3,
           percentage: 33,
         },
-        note: "La edad se calcula únicamente sobre pacientes con fecha de nacimiento válida.",
+        note: "La edad se calcula sobre pacientes con tratamiento activo y fecha de nacimiento válida.",
       },
     });
 
@@ -109,6 +113,7 @@ describe("/admin page", () => {
         preliminary: 0,
         readyToStart: 0,
       },
+      serviceRequestSummary: { inReview: 0, acceptedPendingTreatment: 0 },
       ageSummary: {
         youngest: null,
         oldest: null,
@@ -120,7 +125,7 @@ describe("/admin page", () => {
           denominator: 0,
           percentage: null,
         },
-        note: "La edad se calcula únicamente sobre pacientes con fecha de nacimiento válida.",
+        note: "La edad se calcula sobre pacientes con tratamiento activo y fecha de nacimiento válida.",
       },
     });
 

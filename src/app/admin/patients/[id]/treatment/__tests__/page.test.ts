@@ -81,6 +81,26 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain("StartEpisodeOfCareForm:sr-1");
   });
 
+
+  it("does not show start form without serviceRequestId", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: undefined,
+      isValid: false,
+      state: "none",
+      message: undefined,
+      serviceRequest: undefined,
+    });
+
+    const element = await AdminPatientTreatmentPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.");
+    expect(html).not.toContain("StartEpisodeOfCareForm");
+  });
   it("shows warning and keeps legacy start when serviceRequestId is invalid", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(basePatient);
     loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
@@ -98,8 +118,8 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("No se pudo usar la solicitud indicada para iniciar tratamiento.");
-    expect(html).toContain("StartEpisodeOfCareForm");
-    expect(html).not.toContain("StartEpisodeOfCareForm:sr-bad");
+    expect(html).toContain("Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.");
+    expect(html).not.toContain("StartEpisodeOfCareForm");
   });
 
 
@@ -120,8 +140,8 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Esta solicitud ya fue utilizada para iniciar un tratamiento. Para un nuevo ciclo, registrá una nueva solicitud.");
-    expect(html).toContain("StartEpisodeOfCareForm");
-    expect(html).not.toContain("StartEpisodeOfCareForm:sr-2");
+    expect(html).toContain("Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.");
+    expect(html).not.toContain("StartEpisodeOfCareForm");
   });
   it("keeps active treatment block and no start form when active episode exists", async () => {
     loadPatientDetailMock.mockResolvedValueOnce({

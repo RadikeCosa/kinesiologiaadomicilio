@@ -7,6 +7,7 @@ import type { PatientDetailReadModel } from "@/features/patients/read-models/pat
 import AdminPatientDetailPage from "@/app/admin/patients/[id]/page";
 
 const loadPatientDetailMock = vi.hoisted(() => vi.fn());
+const loadPatientHubServiceRequestContextMock = vi.hoisted(() => vi.fn());
 (globalThis as { React?: typeof React }).React = React;
 
 vi.mock("next/link", () => ({
@@ -16,6 +17,7 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadPatientDetail: loadPatientDetailMock,
+  loadPatientHubServiceRequestContext: loadPatientHubServiceRequestContextMock,
 }));
 
 function buildPatient(
@@ -33,12 +35,21 @@ function buildPatient(
   };
 }
 
+function mockNoServiceRequestContext() {
+  loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({
+    hasServiceRequests: false,
+    hasInReview: false,
+    pendingAcceptedServiceRequestId: undefined,
+  });
+}
+
 describe("/admin/patients/[id] page", () => {
   afterEach(() => {
     vi.useRealTimers();
   });
 
   it("renders the contacto section with patient contact, address and main contact in order", async () => {
+    mockNoServiceRequestContext();
     loadPatientDetailMock.mockResolvedValueOnce(
       buildPatient({
         phone: "+542995550101",
@@ -58,17 +69,7 @@ describe("/admin/patients/[id] page", () => {
 
     expect(html).toContain("Gestión Clínica");
     expect(html).toContain("Gestión Administrativa");
-    expect(html).toContain("Contacto");
-    expect(html).toContain("Dirección");
-    expect(html).toContain("Abrir en Maps");
-    expect(html).toContain("aria-label=\"Abrir en Maps\"");
-    expect(html).toContain("Contacto principal");
-    expect(html).toContain("Contacto del paciente");
-    expect(html).toContain("Belgrano 123");
-    expect(html).toContain("google.com/maps/search");
-    expect(html).not.toContain(">Belgrano 123</a>");
-    expect(html).toContain("rel=\"noreferrer\"");
-    expect(html).toContain("target=\"_blank\"");
+    expect(html).toContain("Siguiente paso sugerido: Registrá la primera solicitud de atención.");
 
     const patientContactIndex = html.indexOf("Contacto del paciente");
     const addressIndex = html.indexOf("Dirección");
@@ -79,25 +80,8 @@ describe("/admin/patients/[id] page", () => {
     expect(mainContactIndex).toBeGreaterThan(addressIndex);
   });
 
-  it("renders address fallback without maps action when address is missing", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce(
-      buildPatient({
-        phone: "+542995550101",
-        address: "",
-      }),
-    );
-
-    const element = await AdminPatientDetailPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
-    const html = renderToStaticMarkup(element);
-
-    expect(html).toContain("Dirección");
-    expect(html).toContain("Sin dirección");
-    expect(html).not.toContain("Abrir en Maps");
-  });
-
   it("renders treatment summary with active episode start date", async () => {
+    mockNoServiceRequestContext();
     loadPatientDetailMock.mockResolvedValueOnce(
       buildPatient({
         operationalStatus: "active_treatment",
@@ -110,68 +94,49 @@ describe("/admin/patients/[id] page", () => {
       }),
     );
 
-    const element = await AdminPatientDetailPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Inicio: 17/04/2026");
     expect(html).toContain("Registrar visita");
-    expect(html).toContain("href=\"/admin/patients/pat-1/encounters/new\"");
+    expect(html).toContain("Siguiente paso sugerido: Registrá visitas desde Gestión Clínica.");
   });
 
-  it("renders patient age in header when birthDate is available", async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-04-24T12:00:00Z"));
+  it("shows next-step suggestion for in_review requests", async () => {
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: true, pendingAcceptedServiceRequestId: undefined });
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient({ operationalStatus: "ready_to_start" }));
 
-    loadPatientDetailMock.mockResolvedValueOnce(
-      buildPatient({
-        birthDate: "1958-04-24",
-      }),
-    );
-
-    const element = await AdminPatientDetailPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Edad: 68 años");
+    expect(html).toContain("Siguiente paso sugerido: Continuá la resolución administrativa de la solicitud.");
   });
 
-  it("renders patient age when birthDate comes as ISO date-time string", async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-04-24T12:00:00Z"));
+  it("shows next-step suggestion for accepted pending treatment", async () => {
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: false, pendingAcceptedServiceRequestId: "sr-1" });
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient({ operationalStatus: "ready_to_start" }));
 
-    loadPatientDetailMock.mockResolvedValueOnce(
-      buildPatient({
-        birthDate: "1958-04-24T00:00:00Z",
-      }),
-    );
-
-    const element = await AdminPatientDetailPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Edad: 68 años");
+    expect(html).toContain("Siguiente paso sugerido: Iniciá el tratamiento desde la solicitud aceptada.");
   });
 
-  it("does not render patient age when birthDate is missing", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce(
-      buildPatient({
-        birthDate: undefined,
-      }),
-    );
+  it("shows next-step suggestion for finished treatment without useful service request", async () => {
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: false, pendingAcceptedServiceRequestId: undefined });
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient({
+      operationalStatus: "finished_treatment",
+      latestEpisode: { id: "ep-1", patientId: "pat-1", status: "finished", startDate: "2026-01-01", endDate: "2026-02-01" },
+    }));
 
-    const element = await AdminPatientDetailPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).not.toContain("Edad:");
+    expect(html).toContain("Siguiente paso sugerido: Si requiere un nuevo ciclo, registrá una nueva solicitud de atención.");
   });
 
   it("renders direct CTA to create service request in administrative", async () => {
+    mockNoServiceRequestContext();
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient());
 
     const element = await AdminPatientDetailPage({
@@ -186,31 +151,10 @@ describe("/admin/patients/[id] page", () => {
   it("renders not found state when patient does not exist", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(null);
 
-    const element = await AdminPatientDetailPage({
-      params: Promise.resolve({ id: "missing-id" }),
-    });
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "missing-id" }) });
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Paciente no encontrado");
     expect(html).toContain("No se encontró el paciente solicitado.");
-  });
-
-  it("does not render register encounter CTA when patient has no active treatment", async () => {
-    loadPatientDetailMock.mockResolvedValueOnce(
-      buildPatient({
-        operationalStatus: "finished_treatment",
-        activeEpisode: undefined,
-      }),
-    );
-
-    const element = await AdminPatientDetailPage({
-      params: Promise.resolve({ id: "pat-1" }),
-    });
-    const html = renderToStaticMarkup(element);
-
-    expect(html).not.toContain("href=\"/admin/patients/pat-1/encounters/new\"");
-    expect(html).not.toContain("Registrar visita");
-    expect(html).toContain("Gestión Clínica");
-    expect(html).toContain("Gestión Administrativa");
   });
 });

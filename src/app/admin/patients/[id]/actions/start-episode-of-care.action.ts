@@ -53,7 +53,14 @@ export async function startEpisodeOfCareAction(
       };
     }
 
-    if (parsedInput.serviceRequestId) {
+    if (!parsedInput.serviceRequestId) {
+      return {
+        ok: false,
+        message: "Para iniciar un tratamiento primero debe existir una solicitud de atención aceptada.",
+      };
+    }
+
+    {
       const serviceRequest = await getServiceRequestById(parsedInput.serviceRequestId);
 
       if (!serviceRequest || serviceRequest.patientId !== patient.id) {

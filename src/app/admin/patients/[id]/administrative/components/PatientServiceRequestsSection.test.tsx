@@ -50,7 +50,7 @@ describe("PatientServiceRequestsSection", () => {
     expect(getServiceRequestCreateFormVisibility("cancel")).toBe(false);
   });
 
-  it("shows treatment CTA only for accepted requests", () => {
+  it("shows treatment CTA and pending helper only for accepted requests", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-9",
@@ -66,6 +66,7 @@ describe("PatientServiceRequestsSection", () => {
 
     expect(html).toContain("href=\"/admin/patients/pat-9/treatment?serviceRequestId=sr-a\"");
     expect(html).toContain("Iniciar tratamiento");
+    expect(html).toContain("Pendiente de iniciar tratamiento.");
     expect(html).toContain("Se realiza en la pantalla de Tratamiento.");
     expect(html).not.toContain("serviceRequestId=sr-r");
     expect(html).not.toContain("serviceRequestId=sr-cw");
@@ -73,6 +74,36 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).not.toContain("serviceRequestId=sr-e");
   });
 
+
+  it("highlights closed_without_treatment and cancelled reasons", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-10",
+        serviceRequests: [
+          { id: "sr-cw", patientId: "pat-10", requestedAt: "2026-04-21", reasonText: "CW", status: "closed_without_treatment", closedReasonText: "No contesta llamadas" },
+          { id: "sr-c", patientId: "pat-10", requestedAt: "2026-04-21", reasonText: "C", status: "cancelled", closedReasonText: "Derivó por otra cobertura" },
+        ],
+      }),
+    );
+
+    expect(html).toContain("Motivo por el que no inició");
+    expect(html).toContain("No contesta llamadas");
+    expect(html).toContain("Derivó por otra cobertura");
+    expect(html).not.toContain("serviceRequestId=sr-cw");
+    expect(html).not.toContain("serviceRequestId=sr-c");
+  });
+
+  it("renders contextual message when provided", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-context",
+        serviceRequests: [],
+        contextualMessage: "El próximo paso operativo es registrar o aceptar una solicitud de atención.",
+      }),
+    );
+
+    expect(html).toContain("El próximo paso operativo es registrar o aceptar una solicitud de atención.");
+  });
   it("renders action-oriented empty state copy", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { MapsLinkAction } from "@/app/admin/patients/components/MapsLinkAction";
 import { PhoneContactBlock } from "@/app/admin/patients/components/PhoneContactBlock";
-import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
+import { loadPatientDetail, loadPatientHubServiceRequestContext } from "@/app/admin/patients/[id]/data";
 import {
   buildGoogleMapsSearchHref,
   formatAddressDisplay,
@@ -69,6 +69,35 @@ function getPrimaryPatientAction(
   return patient.activeEpisode ? "clinical" : "administrative";
 }
 
+
+
+function getNextStepSuggestion(input: {
+  hasActiveEpisode: boolean;
+  latestEpisodeFinished: boolean;
+  serviceRequestContext: Awaited<ReturnType<typeof loadPatientHubServiceRequestContext>> | null;
+}) {
+  if (input.hasActiveEpisode) {
+    return "Registrá visitas desde Gestión Clínica.";
+  }
+
+  if (input.serviceRequestContext?.pendingAcceptedServiceRequestId) {
+    return "Iniciá el tratamiento desde la solicitud aceptada.";
+  }
+
+  if (input.serviceRequestContext?.hasInReview) {
+    return "Continuá la resolución administrativa de la solicitud.";
+  }
+
+  if (!input.serviceRequestContext?.hasServiceRequests) {
+    return "Registrá la primera solicitud de atención.";
+  }
+
+  if (input.latestEpisodeFinished) {
+    return "Si requiere un nuevo ciclo, registrá una nueva solicitud de atención.";
+  }
+
+  return "Registrá la primera solicitud de atención.";
+}
 export default async function AdminPatientDetailPage({
   params,
 }: AdminPatientDetailPageProps) {
@@ -76,11 +105,21 @@ export default async function AdminPatientDetailPage({
   const patient = await loadPatientDetail(id);
 
   const treatmentSummary = patient ? getTreatmentSummary(patient) : null;
+  const serviceRequestContext = patient
+    ? await loadPatientHubServiceRequestContext(patient.id)
+    : null;
   const primaryAction = patient ? getPrimaryPatientAction(patient) : null;
   const isClinicalPrimary = primaryAction === "clinical";
   const mapsHref = patient ? buildGoogleMapsSearchHref(patient.address) : null;
   const addressLabel = patient ? formatAddressDisplay(patient.address) : null;
   const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
+  const nextStepSuggestion = patient
+    ? getNextStepSuggestion({
+        hasActiveEpisode: Boolean(patient.activeEpisode),
+        latestEpisodeFinished: patient.latestEpisode?.status === "finished",
+        serviceRequestContext,
+      })
+    : null;
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -120,6 +159,12 @@ export default async function AdminPatientDetailPage({
                 {treatmentSummary?.detail ? (
                   <p className="text-xs text-slate-500">
                     {treatmentSummary.detail}
+                  </p>
+                ) : null}
+
+                {nextStepSuggestion ? (
+                  <p className="mt-2 rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1.5 text-xs font-medium text-sky-900">
+                    Siguiente paso sugerido: {nextStepSuggestion}
                   </p>
                 ) : null}
               </div>

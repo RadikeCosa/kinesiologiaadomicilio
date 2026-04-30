@@ -25,4 +25,10 @@ export type AdminDashboardReadModel = {
   generatedAt: string;
   operationalSummary: AdminOperationalSummary;
   ageSummary: AdminAgeSummary;
+  serviceRequestSummary: AdminServiceRequestSummary;
+};
+
+export type AdminServiceRequestSummary = {
+  inReview: number;
+  acceptedPendingTreatment: number;
 };
