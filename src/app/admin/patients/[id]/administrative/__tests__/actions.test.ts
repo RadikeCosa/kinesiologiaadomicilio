@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  acceptAndStartTreatmentFromServiceRequestAction,
   createPatientServiceRequestAction,
   updatePatientServiceRequestStatusAction,
 } from "@/app/admin/patients/[id]/administrative/actions";
@@ -18,6 +19,11 @@ vi.mock("@/infrastructure/repositories/service-request.repository", () => ({
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
   createEpisodeOfCare: vi.fn(),
   getActiveEpisodeByPatientId: vi.fn(),
+  listEpisodeOfCareByIncomingReferral: vi.fn(),
+}));
+vi.mock("@/infrastructure/repositories/patient.repository", () => ({
+  getPatientById: vi.fn(),
+  existsAnotherPatientWithDni: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
@@ -25,7 +31,8 @@ vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
 }));
 
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
-import { createEpisodeOfCare } from "@/infrastructure/repositories/episode-of-care.repository";
+import { createEpisodeOfCare, getActiveEpisodeByPatientId, listEpisodeOfCareByIncomingReferral } from "@/infrastructure/repositories/episode-of-care.repository";
+import { existsAnotherPatientWithDni, getPatientById } from "@/infrastructure/repositories/patient.repository";
 import {
   createServiceRequest,
   getServiceRequestById,
@@ -76,9 +83,6 @@ describe("createPatientServiceRequestAction", () => {
       reasonText: "Dolor lumbar",
       requesterDisplay: undefined,
       requesterType: "physician",
-      requesterContact: undefined,
-      reportedDiagnosisText: undefined,
-      notes: undefined,
     });
     expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/administrative");
   });
@@ -410,5 +414,42 @@ describe("updatePatientServiceRequestStatusAction", () => {
 
     expect(createEpisodeOfCare).not.toHaveBeenCalled();
     expect(createEncounter).not.toHaveBeenCalled();
+  });
+});
+
+describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
+  it("accepts in_review request, creates episode and returns encounters redirect", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-1", patientId: "pat-1", requestedAt: "2026-04-28", reasonText: "Dolor", status: "in_review",
+    });
+    vi.mocked(getPatientById).mockResolvedValueOnce({
+      id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "299-1111111",
+    } as never);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValueOnce(null);
+    vi.mocked(existsAnotherPatientWithDni).mockResolvedValueOnce(false);
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([]);
+    vi.mocked(updateServiceRequestStatus).mockResolvedValueOnce({} as never);
+    vi.mocked(createEpisodeOfCare).mockResolvedValueOnce({ id: "ep-1" } as never);
+
+    const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-1" }));
+    expect(result).toEqual({
+      ok: true,
+      message: "Solicitud aceptada y tratamiento iniciado correctamente.",
+      redirectTo: "/admin/patients/pat-1/encounters",
+    });
+  });
+
+  it("fails when patient is missing operational address/phone", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-2", patientId: "pat-1", requestedAt: "2026-04-28", reasonText: "Dolor", status: "in_review",
+    });
+    vi.mocked(getPatientById).mockResolvedValueOnce({
+      id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "", phone: "",
+    } as never);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValueOnce(null);
+    vi.mocked(existsAnotherPatientWithDni).mockResolvedValueOnce(false);
+
+    const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-2" }));
+    expect(result.ok).toBe(false);
   });
 });

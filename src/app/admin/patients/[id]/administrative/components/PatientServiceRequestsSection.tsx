@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { ServiceRequest } from "@/domain/service-request/service-request.types";
@@ -141,18 +140,6 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, init
                     </div>
                   ) : null}
                 </dl>
-
-                {isAccepted ? (
-                  <div className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3">
-                    <Link
-                      className="inline-flex items-center justify-center rounded bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-800"
-                      href={`/admin/patients/${patientId}/treatment?serviceRequestId=${serviceRequest.id}`}
-                    >
-                      Iniciar tratamiento
-                    </Link>
-                    <p className="mt-2 text-xs text-emerald-800">Se realiza en la pantalla de Tratamiento.</p>
-                  </div>
-                ) : null}
 
                 <ServiceRequestStatusActions
                   currentStatus={serviceRequest.status}

@@ -7,8 +7,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 const updatePatientServiceRequestStatusActionMock = vi.hoisted(() => vi.fn());
+const acceptAndStartTreatmentFromServiceRequestActionMock = vi.hoisted(() => vi.fn());
 vi.mock("@/app/admin/patients/[id]/administrative/actions", () => ({
   updatePatientServiceRequestStatusAction: updatePatientServiceRequestStatusActionMock,
+  acceptAndStartTreatmentFromServiceRequestAction: acceptAndStartTreatmentFromServiceRequestActionMock,
 }));
 
 import {
@@ -34,14 +36,14 @@ describe("ServiceRequestStatusActions", () => {
       }),
     );
 
-    expect(html).toContain("Aceptar");
+    expect(html).toContain("Aceptar e iniciar tratamiento");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
     expect(html).not.toContain("Registrar visita");
     expect(html).not.toContain("Iniciar tratamiento");
   });
 
-  it("accepted exposes No inició y Cancelar, but not Aceptar", () => {
+  it("accepted exposes No inició y Cancelar, but not Aceptar e iniciar tratamiento", () => {
     const html = renderToStaticMarkup(
       createElement(ServiceRequestStatusActions, {
         patientId: "pat-1",
@@ -50,7 +52,7 @@ describe("ServiceRequestStatusActions", () => {
       }),
     );
 
-    expect(html).not.toContain("Aceptar");
+    expect(html).not.toContain("Aceptar e iniciar tratamiento");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
   });
@@ -85,7 +87,7 @@ describe("ServiceRequestStatusActions", () => {
 
   it("helper returns expected actions by status", () => {
     expect(getServiceRequestStatusActions("in_review")).toEqual([
-      "accept",
+      "accept_and_start_treatment",
       "close_without_treatment",
       "cancel",
     ]);
@@ -98,7 +100,7 @@ describe("ServiceRequestStatusActions", () => {
   it("maps close actions to close-like statuses", () => {
     expect(getCloseLikeStatusFromAction("close_without_treatment")).toBe("closed_without_treatment");
     expect(getCloseLikeStatusFromAction("cancel")).toBe("cancelled");
-    expect(getCloseLikeStatusFromAction("accept")).toBeNull();
+    expect(getCloseLikeStatusFromAction("accept_and_start_treatment")).toBeNull();
     expect(getCloseLikeStatusFromAction(null)).toBeNull();
   });
 

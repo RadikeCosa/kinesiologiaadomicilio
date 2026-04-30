@@ -73,13 +73,10 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("Aceptar");
+    expect(html).toContain("Aceptar e iniciar tratamiento");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
-    expect(html).toContain("Iniciar tratamiento");
-    expect(html).toContain("Pendiente de iniciar tratamiento.");
-    expect(html).toContain("Se realiza en la pantalla de Tratamiento.");
-    expect(html).toContain("href=\"/admin/patients/pat-1/treatment?serviceRequestId=sr-3\"");
+        expect(html).toContain("Pendiente de iniciar tratamiento.");
   });
 
   it("renders closedReasonText when present", () => {
@@ -104,7 +101,7 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).not.toContain("Iniciar tratamiento");
   });
 
-  it("shows treatment CTA and pending helper only for accepted requests", () => {
+  it("shows pending helper only for accepted requests", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-9",
@@ -118,13 +115,6 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("href=\"/admin/patients/pat-9/treatment?serviceRequestId=sr-a\"");
-    expect(html).toContain("Iniciar tratamiento");
-    expect(html).toContain("Pendiente de iniciar tratamiento.");
-    expect(html).toContain("Se realiza en la pantalla de Tratamiento.");
-    expect(html).not.toContain("serviceRequestId=sr-r");
-    expect(html).not.toContain("serviceRequestId=sr-cw");
-    expect(html).not.toContain("serviceRequestId=sr-c");
-    expect(html).not.toContain("serviceRequestId=sr-e");
-  });
+        expect(html).toContain("Pendiente de iniciar tratamiento.");
+                      });
 });

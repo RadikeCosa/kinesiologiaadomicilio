@@ -32,13 +32,14 @@ describe("ServiceRequestCreateForm", () => {
     expect(html).toContain("Nombre de quien consulta");
     expect(html).toContain("name=\"requesterDisplay\"");
 
-    expect(html).toContain("Más detalles");
-    expect(html).toContain("Diagnóstico informado");
-    expect(html).toContain("name=\"reportedDiagnosisText\"");
-    expect(html).toContain("Contacto de quien consulta");
-    expect(html).toContain("name=\"requesterContact\"");
-    expect(html).toContain("Notas internas");
-    expect(html).toContain("name=\"notes\"");
+    expect(html).toContain("El teléfono y el domicilio de atención se completan en los datos administrativos del paciente.");
+    expect(html).not.toContain("Más detalles");
+    expect(html).not.toContain("Diagnóstico informado");
+    expect(html).not.toContain("name=\"reportedDiagnosisText\"");
+    expect(html).not.toContain("Contacto de quien consulta");
+    expect(html).not.toContain("name=\"requesterContact\"");
+    expect(html).not.toContain("Notas internas");
+    expect(html).not.toContain("name=\"notes\"");
 
     expect(html).toContain("Registrar solicitud");
     expect(html).toContain("Cancelar");
@@ -58,9 +59,6 @@ describe("ServiceRequestCreateForm", () => {
       "reasonText",
       "requesterType",
       "requesterDisplay",
-      "reportedDiagnosisText",
-      "requesterContact",
-      "notes",
     ].forEach((fieldName) => {
       expect(html).toContain(`name=\"${fieldName}\"`);
     });

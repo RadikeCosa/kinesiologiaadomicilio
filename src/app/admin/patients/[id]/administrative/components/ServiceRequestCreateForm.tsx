@@ -114,48 +114,10 @@ export function ServiceRequestCreateForm({
         </div>
       </section>
 
-      <details className="rounded border border-slate-200 bg-slate-50 p-3">
-        <summary className="cursor-pointer text-sm font-semibold text-slate-900">Más detalles</summary>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          <div>
-            <label className="block text-sm font-medium text-slate-800" htmlFor="reportedDiagnosisText">
-              Diagnóstico informado
-            </label>
-            <input
-              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-              id="reportedDiagnosisText"
-              name="reportedDiagnosisText"
-              type="text"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-800" htmlFor="requesterContact">
-              Contacto de quien consulta
-            </label>
-            <input
-              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-              id="requesterContact"
-              name="requesterContact"
-              type="text"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-slate-800" htmlFor="notes">
-              Notas internas
-            </label>
-            <input
-              className="mt-1 w-full rounded border border-slate-300 bg-white p-2 text-sm"
-              id="notes"
-              name="notes"
-              type="text"
-            />
-          </div>
-        </div>
-      </details>
-
       <p className="text-xs text-slate-500">El estado inicial se registra automáticamente como En evaluación.</p>
+      <p className="text-xs text-slate-500">
+        El teléfono y el domicilio de atención se completan en los datos administrativos del paciente.
+      </p>
 
       <div className="flex flex-wrap items-center gap-2">
         <button
