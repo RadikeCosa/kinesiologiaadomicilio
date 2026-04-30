@@ -98,6 +98,9 @@ export async function acceptAndStartTreatmentFromServiceRequestAction(
     }
 
     revalidatePath(`/admin/patients/${patientId}/administrative`);
+    revalidatePath("/admin/patients");
+    revalidatePath(`/admin/patients/${patientId}`);
+    revalidatePath(`/admin/patients/${patientId}/treatment`);
     revalidatePath(`/admin/patients/${patientId}/encounters`);
 
     return {

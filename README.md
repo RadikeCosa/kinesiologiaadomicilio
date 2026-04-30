@@ -65,7 +65,14 @@ El proyecto está en etapa **híbrida transicional**:
 - Al iniciar tratamiento desde ese contexto, el `EpisodeOfCare` se crea vinculado a la solicitud mediante `referralRequest` (`ServiceRequest/{id}`), siempre que la solicitud accepted sea válida, pertenezca al paciente y no haya sido usada previamente; sin `serviceRequestId` no se permite iniciar tratamiento.
 - Política vigente `single-use`: una solicitud `accepted` ya vinculada a algún `EpisodeOfCare` no puede reutilizarse para iniciar otro ciclo; se requiere nueva solicitud.
 - `/admin/patients/[id]/administrative` separa solicitud activa a resolver (si existe) e histórico compacto de solicitudes con resultado operativo y vínculo a tratamiento cuando aplica.
+- Regla operacional única de solicitudes:
+  - `in_review` => pendiente operativa;
+  - `accepted` + vínculo `incoming-referral` => `Aceptada — tratamiento iniciado` (histórica, sin acciones de resolución);
+  - `accepted` sin vínculo => `Pendiente de iniciar tratamiento` (compatibilidad transicional);
+  - `closed_without_treatment`/`cancelled` => históricas terminales, no compiten como pendientes.
+- Durante tratamiento activo, crear una nueva solicitud se mantiene como acción administrativa secundaria (no CTA clínico principal del hub).
 - `/admin/patients/[id]/treatment` mantiene el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen si existe).
+- `/admin/patients/[id]/treatment` funciona como superficie de gestión del tratamiento actual y también de historial compacto de ciclos cerrados; sin tratamiento activo pero con ciclos finalizados, prioriza el historial y ofrece acceso directo al historial de solicitudes en `/administrative#service-requests`.
 - Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad para pacientes con `EpisodeOfCare` activo o finalizado basadas en `birthDate` válido.
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.

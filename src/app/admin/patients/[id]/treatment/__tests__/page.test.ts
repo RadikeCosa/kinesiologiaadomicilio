@@ -103,7 +103,9 @@ describe("/admin/patients/[id]/treatment page", () => {
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.");
+    expect(html).toContain("No hay tratamientos registrados");
+    expect(html).toContain("Para iniciar un tratamiento, primero registrá o resolvé una solicitud de atención.");
+    expect(html).toContain('href="/admin/patients/pat-1/administrative#service-requests"');
     expect(html).not.toContain("StartEpisodeOfCareForm");
   });
   it("shows warning and keeps legacy start when serviceRequestId is invalid", async () => {
@@ -124,7 +126,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("No se pudo usar la solicitud indicada para iniciar tratamiento.");
-    expect(html).toContain("Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.");
+    expect(html).toContain("Para iniciar un tratamiento, primero registrá o resolvé una solicitud de atención.");
     expect(html).not.toContain("StartEpisodeOfCareForm");
   });
 
@@ -147,7 +149,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Esta solicitud ya fue utilizada para iniciar un tratamiento. Para un nuevo ciclo, registrá una nueva solicitud.");
-    expect(html).toContain("Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.");
+    expect(html).toContain("Para iniciar un tratamiento, primero registrá o resolvé una solicitud de atención.");
     expect(html).not.toContain("StartEpisodeOfCareForm");
   });
   it("keeps active treatment block and no start form when active episode exists", async () => {
@@ -193,5 +195,51 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain("FinishEpisodeOfCareForm");
     expect(html).not.toContain("StartEpisodeOfCareForm");
     expect(html).not.toContain("Registrar visita");
+  });
+
+  it("shows closed episodes history and requests link when no active treatment but finished cycles exist", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce({
+      ...basePatient,
+      operationalStatus: "finished_treatment",
+      latestEpisode: {
+        id: "epi-2",
+        patientId: "pat-1",
+        status: "finished",
+        startDate: "2026-03-01",
+        endDate: "2026-03-20",
+      },
+    });
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([
+      {
+        id: "epi-2",
+        startDate: "2026-03-01",
+        endDate: "2026-03-20",
+        closureReason: "treatment_completed",
+        closureDetail: "Alta funcional",
+        serviceRequestId: "sr-22",
+      },
+    ]);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: undefined,
+      isValid: false,
+      state: "none",
+      message: undefined,
+      serviceRequest: undefined,
+    });
+
+    const element = await AdminPatientTreatmentPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("No hay tratamiento activo");
+    expect(html).toContain("Historial de ciclos cerrados");
+    expect(html).toContain("Motivo: Tratamiento completado");
+    expect(html).toContain("Detalle: Alta funcional");
+    expect(html).toContain("Solicitud de origen: sr-22");
+    expect(html).toContain("Ver historial de solicitudes");
+    expect(html).toContain('href="/admin/patients/pat-1/administrative#service-requests"');
+    expect(html).not.toContain("No hay tratamientos registrados");
   });
 });

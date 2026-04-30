@@ -4,17 +4,19 @@ import { type FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import type { ServiceRequestStatus } from "@/domain/service-request/service-request.types";
+import type { ServiceRequestDisplayStatus } from "@/app/admin/patients/[id]/data";
 
 import { updatePatientServiceRequestStatusAction } from "@/app/admin/patients/[id]/administrative/actions";
 import { acceptAndStartTreatmentFromServiceRequestAction } from "@/app/admin/patients/[id]/administrative/actions";
 
 type CloseLikeStatus = "closed_without_treatment" | "cancelled";
-type ActionKind = "accept_and_start_treatment" | "close_without_treatment" | "cancel";
+type ActionKind = "accept_and_start_treatment" | "close_without_treatment" | "cancel" | "start_treatment_legacy";
 
 interface ServiceRequestStatusActionsProps {
   patientId: string;
   serviceRequestId: string;
   currentStatus: ServiceRequestStatus;
+  displayStatus: ServiceRequestDisplayStatus;
   missingTreatmentRequirements?: string[];
 }
 
@@ -23,12 +25,12 @@ interface ActionFeedback {
   text: string;
 }
 
-export function getServiceRequestStatusActions(status: ServiceRequestStatus): ActionKind[] {
-  switch (status) {
+export function getServiceRequestStatusActions(displayStatus: ServiceRequestDisplayStatus): ActionKind[] {
+  switch (displayStatus) {
     case "in_review":
       return ["accept_and_start_treatment", "close_without_treatment", "cancel"];
-    case "accepted":
-      return ["close_without_treatment", "cancel"];
+    case "accepted_pending_treatment":
+      return ["start_treatment_legacy"];
     default:
       return [];
   }
@@ -71,6 +73,8 @@ function getActionLabel(action: ActionKind): string {
       return "No inició";
     case "cancel":
       return "Cancelar";
+    case "start_treatment_legacy":
+      return "Iniciar tratamiento";
     default:
       return "";
   }
@@ -80,6 +84,7 @@ export function ServiceRequestStatusActions({
   patientId,
   serviceRequestId,
   currentStatus,
+  displayStatus,
   missingTreatmentRequirements = [],
 }: ServiceRequestStatusActionsProps) {
   const router = useRouter();
@@ -88,7 +93,7 @@ export function ServiceRequestStatusActions({
   const [closeReasonText, setCloseReasonText] = useState("");
   const [feedback, setFeedback] = useState<ActionFeedback | null>(null);
 
-  const availableActions = getServiceRequestStatusActions(currentStatus);
+  const availableActions = getServiceRequestStatusActions(displayStatus);
   const closeStatus = getCloseLikeStatusFromAction(activeCloseAction);
 
   if (availableActions.length === 0) {
@@ -174,6 +179,17 @@ export function ServiceRequestStatusActions({
               >
                 {getActionLabel(action)}
               </button>
+            );
+          }
+          if (action === "start_treatment_legacy") {
+            return (
+              <a
+                className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                href={`/admin/patients/${patientId}/treatment?serviceRequestId=${serviceRequestId}`}
+                key={action}
+              >
+                {getActionLabel(action)}
+              </a>
             );
           }
 

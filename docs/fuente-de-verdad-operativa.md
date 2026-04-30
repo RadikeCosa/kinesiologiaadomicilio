@@ -103,7 +103,13 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - solicitudes inválidas/no aceptadas/no pertenecientes no originan inicio; sin `serviceRequestId` válido tampoco se permite iniciar tratamiento;
 - visitas siguen dependiendo solo de `EpisodeOfCare` activo y `PatientOperationalStatus` no deriva de `ServiceRequest`.
 - en `/admin/patients/[id]/administrative` la UI separa solicitud activa a resolver e histórico compacto de solicitudes previas (incluye resultado operativo y señal de inicio de tratamiento cuando corresponde);
+- clasificación operacional SR unificada en UI privada:
+  - `in_review` y `accepted` sin vínculo `incoming-referral` son pendientes operativas (esta última como compatibilidad transicional);
+  - `accepted` con vínculo `incoming-referral` se muestra como `Aceptada — tratamiento iniciado` y no compite como pendiente;
+  - `closed_without_treatment` y `cancelled` son terminales históricas (sin acciones de resolución ni peso operativo);
+- en tratamiento activo, `Nueva solicitud` permanece disponible como acción administrativa secundaria y no como CTA clínico principal;
 - en `/admin/patients/[id]/treatment` la UI conserva el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen cuando existe);
+- en `/admin/patients/[id]/treatment`, si no hay tratamiento activo pero existen ciclos finalizados, la pantalla prioriza el historial de ciclos cerrados y brinda acceso directo al historial de solicitudes en `/administrative#service-requests`;
 - gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
   - inicio de tratamiento;
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo) con motivo obligatorio y detalle opcional;
