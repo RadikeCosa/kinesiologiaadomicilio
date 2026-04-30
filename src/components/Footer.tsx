@@ -87,6 +87,14 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/evaluar"
+                  className="rounded-md transition-colors hover:text-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 dark:hover:text-sky-400"
+                >
+                  Evaluar mi situación
+                </Link>
+              </li>
             </ul>
           </nav>
 
