@@ -75,11 +75,13 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - Open Graph/Twitter;
   - JSON-LD `MedicalBusiness`;
   - `robots.txt` y `sitemap.xml`;
-- analítica con GA4 directo (sin GTM):
+- analítica con GA4 directo (sin GTM) limitada a la shell pública (`src/app/(public)/layout.tsx`):
   - `generate_lead`
   - `phone_click`
   - `scroll_50`
   - `scroll_90`
+- `/admin` excluido del tracking público (sin carga de script GA4).
+- `/admin` marcado como noindex/nofollow (metadata + header `X-Robots-Tag`) y desautorizado en `robots.txt`.
 
 #### Superficie privada clínica mínima
 - listado de pacientes;
@@ -214,7 +216,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 
 ## 5) Observaciones técnicas relevantes
 
-1. `sitemap.ts` actualmente publica solo `/` y `/services` (no incluye `/evaluar`).
+1. `sitemap.ts` publica rutas públicas indexables: `/`, `/services` y `/evaluar` (sin rutas `/admin`).
 2. Header/Footer público comparten `NAV_LINKS`; `/evaluar` no figura en esa navegación global (acceso principal desde CTA de Home).
 3. El root layout (`src/app/layout.tsx`) no inyecta header/footer; la shell pública vive en `src/app/(public)/layout.tsx` y la shell privada en `src/app/admin/layout.tsx`.
 4. La dirección del paciente se persiste como `Patient.address` simple (`text`) sin modelado postal rico.

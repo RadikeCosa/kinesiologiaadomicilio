@@ -11,7 +11,7 @@ Implementa:
 ## Integración técnica
 
 - Componente: `GoogleAnalytics` de `@next/third-parties/google`.
-- Ubicación de carga GA: `src/app/layout.tsx`.
+- Ubicación de carga GA: `src/app/(public)/layout.tsx` (solo superficie pública).
 - Condición de carga: existe `NEXT_PUBLIC_GA_ID`.
 - API de envío: `sendGAEvent`.
 
@@ -75,6 +75,7 @@ Valores usados en superficies actuales:
 - Evaluar: CTA WhatsApp según rama seleccionada.
 - Footer: WhatsApp + teléfono.
 - ScrollDepthTracker en `src/app/(public)/layout.tsx` (aplica a superficie pública).
+- `/admin` no carga `GoogleAnalytics` y queda fuera del tracking público por layout.
 
 Nota documental: `/evaluar` está instrumentada como superficie activa aunque hoy no figure en navegación global ni en el sitemap.
 
