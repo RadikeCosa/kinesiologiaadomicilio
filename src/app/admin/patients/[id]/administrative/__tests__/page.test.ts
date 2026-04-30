@@ -1,11 +1,13 @@
 import React, { createElement } from "react";
 import type { ReactNode } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import AdminPatientAdministrativePage from "@/app/admin/patients/[id]/administrative/page";
 
 const loadPatientAdministrativeContextMock = vi.hoisted(() => vi.fn());
+const loadPatientHubServiceRequestContextMock = vi.hoisted(() => vi.fn());
+const loadPatientServiceRequestHistoryContextMock = vi.hoisted(() => vi.fn());
 (globalThis as { React?: typeof React }).React = React;
 
 vi.mock("next/navigation", () => ({
@@ -20,11 +22,19 @@ vi.mock("next/link", () => ({
 vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadPatientDetail: vi.fn(),
   loadPatientAdministrativeContext: loadPatientAdministrativeContextMock,
+  loadPatientHubServiceRequestContext: loadPatientHubServiceRequestContextMock,
+  loadPatientServiceRequestHistoryContext: loadPatientServiceRequestHistoryContextMock,
 }));
 
 describe("/admin/patients/[id]/administrative page", () => {
+  beforeEach(() => {
+    loadPatientServiceRequestHistoryContextMock.mockResolvedValue({ activeServiceRequest: null, historicalServiceRequests: [] });
+  });
+
   afterEach(() => {
     vi.useRealTimers();
+    vi.clearAllMocks();
+    loadPatientServiceRequestHistoryContextMock.mockResolvedValue({ activeServiceRequest: null, historicalServiceRequests: [] });
   });
 
   it("renders reading-first admin summary, service request section and explicit edit action", async () => {

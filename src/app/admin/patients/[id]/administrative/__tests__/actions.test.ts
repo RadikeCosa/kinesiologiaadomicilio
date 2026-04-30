@@ -210,7 +210,10 @@ describe("updatePatientServiceRequestStatusAction", () => {
       status: "accepted",
       closedReasonText: undefined,
     });
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients");
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1");
     expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/administrative");
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/treatment");
   });
 
   it("updates to closed_without_treatment with reason and revalidates route", async () => {
@@ -298,10 +301,7 @@ describe("updatePatientServiceRequestStatusAction", () => {
       }),
     );
 
-    expect(result).toEqual({
-      ok: false,
-      message: "No se pudo actualizar la solicitud de atención.",
-    });
+    expect(result).toEqual({ ok: false, message: "closedReasonText: es obligatorio para closed_without_treatment/cancelled." });
     expect(getServiceRequestById).not.toHaveBeenCalled();
     expect(updateServiceRequestStatus).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
@@ -316,10 +316,7 @@ describe("updatePatientServiceRequestStatusAction", () => {
       }),
     );
 
-    expect(result).toEqual({
-      ok: false,
-      message: "No se pudo actualizar la solicitud de atención.",
-    });
+    expect(result).toEqual({ ok: false, message: "closedReasonText: es obligatorio para closed_without_treatment/cancelled." });
     expect(getServiceRequestById).not.toHaveBeenCalled();
     expect(updateServiceRequestStatus).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
@@ -334,10 +331,7 @@ describe("updatePatientServiceRequestStatusAction", () => {
       }),
     );
 
-    expect(result).toEqual({
-      ok: false,
-      message: "No se pudo actualizar la solicitud de atención.",
-    });
+    expect(result).toEqual({ ok: false, message: "status: valor inválido." });
     expect(getServiceRequestById).not.toHaveBeenCalled();
     expect(updateServiceRequestStatus).not.toHaveBeenCalled();
   });
@@ -355,7 +349,7 @@ describe("updatePatientServiceRequestStatusAction", () => {
 
     expect(result).toEqual({
       ok: false,
-      message: "No se pudo actualizar la solicitud de atención.",
+      message: "boom",
     });
     expect(updateServiceRequestStatus).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
@@ -425,7 +419,7 @@ describe("updatePatientServiceRequestStatusAction", () => {
 
     expect(result).toEqual({
       ok: false,
-      message: "No se pudo actualizar la solicitud de atención.",
+      message: "boom",
     });
     expect(revalidatePath).not.toHaveBeenCalled();
   });

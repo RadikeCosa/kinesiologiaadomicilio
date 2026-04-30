@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  isOperationalPendingServiceRequest,
   loadPatientAdministrativeContext,
   loadPatientHubServiceRequestContext,
   loadPatientServiceRequestContext,
@@ -205,4 +206,21 @@ describe("patient detail service-request technical composition", () => {
     expect(context.latestClosedRequestReason).toBe("Motivos económicos");
   });
 
+});
+
+describe("isOperationalPendingServiceRequest", () => {
+  it("returns true for in_review", () => {
+    expect(isOperationalPendingServiceRequest({ status: "in_review", hasIncomingReferralLink: false })).toBe(true);
+  });
+
+  it("returns true for accepted without incoming-referral", () => {
+    expect(isOperationalPendingServiceRequest({ status: "accepted", hasIncomingReferralLink: false })).toBe(true);
+  });
+
+  it("returns false for accepted with incoming-referral and terminal statuses", () => {
+    expect(isOperationalPendingServiceRequest({ status: "accepted", hasIncomingReferralLink: true })).toBe(false);
+    expect(isOperationalPendingServiceRequest({ status: "closed_without_treatment", hasIncomingReferralLink: false })).toBe(false);
+    expect(isOperationalPendingServiceRequest({ status: "cancelled", hasIncomingReferralLink: false })).toBe(false);
+    expect(isOperationalPendingServiceRequest({ status: "entered_in_error", hasIncomingReferralLink: false })).toBe(false);
+  });
 });
