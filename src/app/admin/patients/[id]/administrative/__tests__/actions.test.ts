@@ -24,6 +24,7 @@ vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
 vi.mock("@/infrastructure/repositories/patient.repository", () => ({
   getPatientById: vi.fn(),
   existsAnotherPatientWithDni: vi.fn(),
+  updatePatient: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
@@ -32,7 +33,7 @@ vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
 
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
 import { createEpisodeOfCare, getActiveEpisodeByPatientId, listEpisodeOfCareByIncomingReferral } from "@/infrastructure/repositories/episode-of-care.repository";
-import { existsAnotherPatientWithDni, getPatientById } from "@/infrastructure/repositories/patient.repository";
+import { existsAnotherPatientWithDni, getPatientById, updatePatient } from "@/infrastructure/repositories/patient.repository";
 import {
   createServiceRequest,
   getServiceRequestById,
@@ -52,6 +53,13 @@ function buildFormData(values: Record<string, string>): FormData {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(getPatientById).mockResolvedValue({
+    id: "pat-1",
+    firstName: "Ana",
+    lastName: "Pérez",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  } as never);
 });
 
 describe("createPatientServiceRequestAction", () => {
@@ -138,6 +146,32 @@ describe("createPatientServiceRequestAction", () => {
 
     expect(createEpisodeOfCare).not.toHaveBeenCalled();
     expect(createEncounter).not.toHaveBeenCalled();
+  });
+
+  it("updates patient administrative fields before creating request when contextual data is provided", async () => {
+    vi.mocked(createServiceRequest).mockResolvedValueOnce({
+      id: "sr-1",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "in_review",
+    });
+
+    await createPatientServiceRequestAction(
+      "pat-1",
+      buildFormData({
+        requestedAt: "2026-04-28",
+        reasonText: "Dolor lumbar",
+        administrativeAddress: "Calle 123",
+        administrativePhone: "+54 11 5555 1111",
+      }),
+    );
+
+    expect(updatePatient).toHaveBeenCalledWith(expect.objectContaining({
+      id: "pat-1",
+      address: "Calle 123",
+      phone: "+54 11 5555 1111",
+    }));
   });
 });
 

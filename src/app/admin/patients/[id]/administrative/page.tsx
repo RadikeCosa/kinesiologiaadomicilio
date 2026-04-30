@@ -9,10 +9,11 @@ import {
   calculateAgeFromBirthDate,
   formatDniDisplay,
 } from "@/lib/patient-admin-display";
+import { getMissingTreatmentStartRequirements } from "@/domain/patient/patient.rules";
 
 interface AdminPatientAdministrativePageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ newServiceRequest?: string }>;
+  searchParams?: Promise<{ newServiceRequest?: string; editAdministrative?: string }>;
 }
 
 export async function generateMetadata({
@@ -35,6 +36,7 @@ export default async function AdminPatientAdministrativePage({
   const { id } = await params;
   const resolvedSearchParams = await searchParams;
   const initialCreateOpen = resolvedSearchParams?.newServiceRequest === "1";
+  const initialAdministrativeEditing = resolvedSearchParams?.editAdministrative === "1";
   const { patient, serviceRequests } = await loadPatientAdministrativeContext(id);
   const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
   const treatmentBadge = patient
@@ -44,6 +46,18 @@ export default async function AdminPatientAdministrativePage({
   const serviceRequestContextMessage = hasActiveTreatment
     ? "Las solicitudes quedan como antecedente administrativo; las visitas se gestionan desde Visitas."
     : "El próximo paso operativo es registrar o aceptar una solicitud de atención.";
+  const missingTreatmentRequirements = patient
+    ? getMissingTreatmentStartRequirements(patient).map((reason) => {
+      switch (reason) {
+        case "missing_patient_address":
+          return "Domicilio de atención";
+        case "missing_contact_phone":
+          return "Teléfono del paciente o del contacto principal";
+        default:
+          return "Nombre y apellido del paciente";
+      }
+    })
+    : [];
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -112,13 +126,19 @@ export default async function AdminPatientAdministrativePage({
                     Resumen administrativo
                   </h2>
                   <div className="mt-3">
-                    <PatientAdministrativeEditor patient={patient} />
+                    <PatientAdministrativeEditor initialEditing={initialAdministrativeEditing} patient={patient} />
                   </div>
                 </section>
               </div>
               <PatientServiceRequestsSection
                 contextualMessage={serviceRequestContextMessage}
                 initialCreateOpen={initialCreateOpen}
+                missingTreatmentRequirements={missingTreatmentRequirements}
+                patientAdministrativeSnapshot={{
+                  address: patient.address,
+                  phone: patient.phone,
+                  mainContactPhone: patient.mainContact?.phone,
+                }}
                 patientId={patient.id}
                 serviceRequests={serviceRequests}
               />
@@ -128,6 +148,12 @@ export default async function AdminPatientAdministrativePage({
               <PatientServiceRequestsSection
                 contextualMessage={serviceRequestContextMessage}
                 initialCreateOpen={initialCreateOpen}
+                missingTreatmentRequirements={missingTreatmentRequirements}
+                patientAdministrativeSnapshot={{
+                  address: patient.address,
+                  phone: patient.phone,
+                  mainContactPhone: patient.mainContact?.phone,
+                }}
                 patientId={patient.id}
                 serviceRequests={serviceRequests}
               />
@@ -137,7 +163,7 @@ export default async function AdminPatientAdministrativePage({
                     Resumen administrativo
                   </h2>
                   <div className="mt-3">
-                    <PatientAdministrativeEditor patient={patient} />
+                    <PatientAdministrativeEditor initialEditing={initialAdministrativeEditing} patient={patient} />
                   </div>
                 </section>
               </div>

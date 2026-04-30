@@ -32,7 +32,10 @@ describe("ServiceRequestCreateForm", () => {
     expect(html).toContain("Nombre de quien consulta");
     expect(html).toContain("name=\"requesterDisplay\"");
 
-    expect(html).toContain("El teléfono y el domicilio de atención se completan en los datos administrativos del paciente.");
+    expect(html).toContain("Datos necesarios para iniciar tratamiento");
+    expect(html).toContain("name=\"administrativeAddress\"");
+    expect(html).toContain("name=\"administrativePhone\"");
+    expect(html).toContain("name=\"administrativeMainContactPhone\"");
     expect(html).not.toContain("Más detalles");
     expect(html).not.toContain("Diagnóstico informado");
     expect(html).not.toContain("name=\"reportedDiagnosisText\"");
@@ -59,6 +62,9 @@ describe("ServiceRequestCreateForm", () => {
       "reasonText",
       "requesterType",
       "requesterDisplay",
+      "administrativeAddress",
+      "administrativePhone",
+      "administrativeMainContactPhone",
     ].forEach((fieldName) => {
       expect(html).toContain(`name=\"${fieldName}\"`);
     });

@@ -101,7 +101,7 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(html).toContain("Nueva solicitud");
     expect(html).not.toContain("<form");
-    expect(html).toContain("Aceptar");
+    expect(html).toContain("Aceptar e iniciar tratamiento");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
     expect(html).not.toContain("Registrar visita");

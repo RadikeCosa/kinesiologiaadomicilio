@@ -15,6 +15,7 @@ interface ServiceRequestStatusActionsProps {
   patientId: string;
   serviceRequestId: string;
   currentStatus: ServiceRequestStatus;
+  missingTreatmentRequirements?: string[];
 }
 
 interface ActionFeedback {
@@ -79,6 +80,7 @@ export function ServiceRequestStatusActions({
   patientId,
   serviceRequestId,
   currentStatus,
+  missingTreatmentRequirements = [],
 }: ServiceRequestStatusActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -143,6 +145,22 @@ export function ServiceRequestStatusActions({
   return (
     <div className="mt-3 rounded border border-slate-200 bg-slate-50 p-3">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Acciones</p>
+      {currentStatus === "in_review" && missingTreatmentRequirements.length > 0 ? (
+        <div className="mt-2 rounded border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+          <p className="font-semibold">Faltan datos para iniciar tratamiento.</p>
+          <ul className="ml-4 mt-1 list-disc">
+            {missingTreatmentRequirements.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <a
+            className="mt-2 inline-flex underline-offset-2 hover:underline"
+            href={`/admin/patients/${patientId}/administrative?editAdministrative=1#patient-edit-form`}
+          >
+            Completar datos administrativos
+          </a>
+        </div>
+      ) : null}
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {availableActions.map((action) => {
           if (action === "accept_and_start_treatment") {
