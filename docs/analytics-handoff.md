@@ -77,7 +77,7 @@ Valores usados en superficies actuales:
 - ScrollDepthTracker en `src/app/(public)/layout.tsx` (aplica a superficie pública).
 - `/admin` no carga `GoogleAnalytics` y queda fuera del tracking público por layout.
 
-Nota documental: `/evaluar` está instrumentada como superficie activa aunque hoy no figure en navegación global ni en el sitemap.
+Nota documental: `/evaluar` está instrumentada como superficie activa; hoy figura en el sitemap público (`/`, `/services`, `/evaluar`) aunque no esté en la navegación global principal.
 
 ## Límites
 
