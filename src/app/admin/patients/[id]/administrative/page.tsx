@@ -40,7 +40,10 @@ export default async function AdminPatientAdministrativePage({
   const treatmentBadge = patient
     ? getTreatmentBadgePresentation(patient.operationalStatus)
     : null;
-  const hasActiveTreatment = Boolean(patient?.activeEpisode);
+  const hasActiveTreatment = patient?.operationalStatus === "active_treatment" || Boolean(patient?.activeEpisode);
+  const serviceRequestContextMessage = hasActiveTreatment
+    ? "Las solicitudes quedan como antecedente administrativo; las visitas se gestionan desde Visitas."
+    : "El próximo paso operativo es registrar o aceptar una solicitud de atención.";
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -101,21 +104,45 @@ export default async function AdminPatientAdministrativePage({
             ) : null}
           </div>
 
-          <div className="mt-4">
-            <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                Resumen administrativo
-              </h2>
-              <div className="mt-3">
-                <PatientAdministrativeEditor patient={patient} />
+          {hasActiveTreatment ? (
+            <>
+              <div className="mt-4">
+                <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                    Resumen administrativo
+                  </h2>
+                  <div className="mt-3">
+                    <PatientAdministrativeEditor patient={patient} />
+                  </div>
+                </section>
               </div>
-            </section>
-          </div>
-          <PatientServiceRequestsSection
-            initialCreateOpen={initialCreateOpen}
-            patientId={patient.id}
-            serviceRequests={serviceRequests}
-          />
+              <PatientServiceRequestsSection
+                contextualMessage={serviceRequestContextMessage}
+                initialCreateOpen={initialCreateOpen}
+                patientId={patient.id}
+                serviceRequests={serviceRequests}
+              />
+            </>
+          ) : (
+            <>
+              <PatientServiceRequestsSection
+                contextualMessage={serviceRequestContextMessage}
+                initialCreateOpen={initialCreateOpen}
+                patientId={patient.id}
+                serviceRequests={serviceRequests}
+              />
+              <div className="mt-4">
+                <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                    Resumen administrativo
+                  </h2>
+                  <div className="mt-3">
+                    <PatientAdministrativeEditor patient={patient} />
+                  </div>
+                </section>
+              </div>
+            </>
+          )}
         </>
       ) : (
         <>

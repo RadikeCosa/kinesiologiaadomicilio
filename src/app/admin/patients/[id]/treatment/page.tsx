@@ -50,6 +50,7 @@ export default async function AdminPatientTreatmentPage({
   const activeEpisode = patient?.activeEpisode ?? null;
   const hasActiveTreatment = Boolean(activeEpisode);
   const hasFinishedTreatment = !hasActiveTreatment && patient?.latestEpisode?.status === "finished";
+  const canStartTreatmentFromCurrentContext = treatmentServiceRequestContext.state === "valid" && Boolean(treatmentServiceRequestContext.serviceRequestId);
 
   if (!patient) {
     return (
@@ -158,12 +159,18 @@ export default async function AdminPatientTreatmentPage({
             <p className="mt-2 text-sm text-slate-700">
               Este tratamiento ya está cerrado. Si hace falta continuar, podés iniciar un nuevo tratamiento.
             </p>
-            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-              <StartEpisodeOfCareForm
-                patient={patient}
-                serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
-              />
-            </div>
+            {canStartTreatmentFromCurrentContext ? (
+              <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+                <StartEpisodeOfCareForm
+                  patient={patient}
+                  serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
+                />
+              </div>
+            ) : (
+              <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.
+              </p>
+            )}
           </>
         ) : (
           <>
@@ -173,12 +180,18 @@ export default async function AdminPatientTreatmentPage({
             <p className="mt-3 text-sm text-slate-700">
               Iniciá un tratamiento para habilitar el registro de visitas.
             </p>
-            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-              <StartEpisodeOfCareForm
-                patient={patient}
-                serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
-              />
-            </div>
+            {canStartTreatmentFromCurrentContext ? (
+              <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
+                <StartEpisodeOfCareForm
+                  patient={patient}
+                  serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
+                />
+              </div>
+            ) : (
+              <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.
+              </p>
+            )}
           </>
         )}
       </section>

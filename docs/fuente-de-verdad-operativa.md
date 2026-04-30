@@ -94,7 +94,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `/treatment` conserva ownership de inicio/cierre y valida contexto de solicitud antes de iniciar;
 - al iniciar con solicitud válida, `EpisodeOfCare` se vincula por `referralRequest = ServiceRequest/{id}`;
 - política vigente `single-use`: una SR `accepted` ya vinculada por `incoming-referral` no puede iniciar otro tratamiento y `/treatment` solicita nueva solicitud para nuevo ciclo;
-- solicitudes inválidas/no aceptadas/no pertenecientes no originan inicio;
+- solicitudes inválidas/no aceptadas/no pertenecientes no originan inicio; sin `serviceRequestId` válido tampoco se permite iniciar tratamiento;
 - visitas siguen dependiendo solo de `EpisodeOfCare` activo y `PatientOperationalStatus` no deriva de `ServiceRequest`.
 - gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
   - inicio de tratamiento;
@@ -121,12 +121,23 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - en `/admin`, las métricas son derivadas de lectura (no persistidas):
   - resumen operativo por estado de paciente;
-  - edad de pacientes calculada solo sobre `birthDate` válido (con cobertura explícita);
+  - edad de pacientes en tratamiento activo calculada solo sobre `birthDate` válido (con cobertura explícita);
 - en `/admin`, la edad se mantiene como dato derivado y no se persiste;
 - en `/admin`, las métricas globales de visitas (`Encounter`) permanecen fuera de Fase 1 por falta de consulta agregada eficiente;
 - en `/admin`, Fase 1 no introduce nuevas rutas ni gráficos.
 - no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
 - en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`, Fase 2 para `Identifier.type` + tests/fixtures de identidad y Fase 3 queda cerrada con `telecom`, `contact.relationship` y `name` resueltos incrementalmente, más deuda/trigger explícitos de `address` documentados en FHIR-018.
+
+
+#### Plan de performance (deuda explícita) — DASHBOARD-SR-001
+- Estrategia actual: métricas SR del dashboard por composición per-patient (`listServiceRequestsByPatientId` por paciente + `incoming-referral` por SR accepted).
+- Riesgo: crecimiento N+1 y degradación perceptible de `/admin` con mayor volumen.
+- Estrategia objetivo (futuro):
+  - read-model agregado para dashboard SR;
+  - consulta agregada por estado SR (`in_review`, `accepted`);
+  - resolución de `acceptedPendingTreatment` sin consultar `incoming-referral` por cada SR (preagregado/materializado);
+  - opcional índice/cache de lectura según patrón de carga.
+- Umbral sugerido para migración: revisar implementación al superar ~50-100 pacientes activos o ante latencia perceptible en `/admin`.
 
 #### Cierre documental — Fase 1 dashboard `/admin`
 
@@ -138,10 +149,12 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - CTAs principales `Ver pacientes` y `Nuevo paciente`.
 - **Métricas incluidas en Fase 1**:
   - resumen operativo: pacientes totales, en tratamiento activo, tratamiento finalizado y sin tratamiento iniciado (`preliminary + ready_to_start`);
-  - edad: menor, mayor, promedio, con/sin fecha válida y cobertura.
+  - embudo de solicitudes: `in_review` (en evaluación) y `accepted` pendientes de tratamiento;
+  - edad (pacientes en tratamiento): menor, mayor, promedio, con/sin fecha válida y cobertura.
 - **Reglas vigentes de edad/cobertura**:
-  - edad derivada de lectura desde `birthDate`, no persistida;
+  - edad derivada de lectura desde `birthDate` en población de tratamiento activo, no persistida;
   - solo fechas válidas/calculables cuentan como `con fecha válida`;
+  - `accepted` ya vinculada por `incoming-referral` no cuenta como pendiente de tratamiento;
   - ausentes o inválidas cuentan como `sin fecha válida`;
   - sin edades calculables: UI muestra `—`;
   - cobertura sin porcentaje calculable: UI muestra `—` y evita `0/0 (0%)`.

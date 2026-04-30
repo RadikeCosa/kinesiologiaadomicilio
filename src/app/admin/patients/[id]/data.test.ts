@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   loadPatientAdministrativeContext,
+  loadPatientHubServiceRequestContext,
   loadPatientServiceRequestContext,
   sortServiceRequestsByRequestedAtDesc,
 } from "@/app/admin/patients/[id]/data";
@@ -17,6 +18,7 @@ vi.mock("@/infrastructure/repositories/patient.repository", () => ({
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
   getActiveEpisodeByPatientId: vi.fn(),
   getMostRecentEpisodeByPatientId: vi.fn(),
+  listEpisodeOfCareByIncomingReferral: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper", () => ({
@@ -38,7 +40,7 @@ vi.mock("@/infrastructure/mappers/patient/patient-read.mapper", () => ({
   })),
 }));
 
-import { getActiveEpisodeByPatientId, getMostRecentEpisodeByPatientId } from "@/infrastructure/repositories/episode-of-care.repository";
+import { getActiveEpisodeByPatientId, getMostRecentEpisodeByPatientId, listEpisodeOfCareByIncomingReferral } from "@/infrastructure/repositories/episode-of-care.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
 import { listServiceRequestsByPatientId } from "@/infrastructure/repositories/service-request.repository";
 
@@ -120,6 +122,37 @@ describe("patient detail service-request technical composition", () => {
     expect(sorted.map((item) => item.id)).toEqual(["sr-11", "sr-10"]);
   });
 
+
+  it("builds hub SR context with accepted pending and in_review", async () => {
+    vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([
+      { id: "sr-accepted", patientId: "pat-1", requestedAt: "2026-04-22", reasonText: "Motivo", status: "accepted" },
+      { id: "sr-review", patientId: "pat-1", requestedAt: "2026-04-21", reasonText: "Otro", status: "in_review" },
+    ] as never);
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([]);
+
+    const context = await loadPatientHubServiceRequestContext("pat-1");
+
+    expect(context).toEqual({
+      hasServiceRequests: true,
+      hasInReview: true,
+      pendingAcceptedServiceRequestId: "sr-accepted",
+    });
+  });
+
+  it("builds hub SR context without pending accepted when all accepted are used", async () => {
+    vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([
+      { id: "sr-used", patientId: "pat-1", requestedAt: "2026-04-22", reasonText: "Motivo", status: "accepted" },
+    ] as never);
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([{ id: "ep-1" }] as never);
+
+    const context = await loadPatientHubServiceRequestContext("pat-1");
+
+    expect(context).toEqual({
+      hasServiceRequests: true,
+      hasInReview: false,
+      pendingAcceptedServiceRequestId: undefined,
+    });
+  });
   it("loads administrative context with patient + serviceRequests without changing operationalStatus", async () => {
     vi.mocked(getPatientById).mockResolvedValueOnce({ id: "pat-1" } as never);
     vi.mocked(getActiveEpisodeByPatientId).mockResolvedValueOnce({ id: "ep-1", status: "active" } as never);

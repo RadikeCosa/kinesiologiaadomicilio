@@ -89,6 +89,7 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(html).toContain("Solicitudes de atención");
     expect(html).toContain("Registro administrativo de demandas o consultas");
+    expect(html).toContain("Las solicitudes quedan como antecedente administrativo; las visitas se gestionan desde Visitas.");
     expect(html).toContain("Motivo de consulta");
     expect(html).toContain("Dolor lumbar");
     expect(html).toContain("Diagnóstico informado");
@@ -132,6 +133,8 @@ describe("/admin/patients/[id]/administrative page", () => {
     expect(html).not.toContain("Edad:");
     expect(html).toContain("Solicitudes de atención");
     expect(html).toContain("Registrá la primera solicitud para dejar asentado el motivo de consulta y avanzar con la evaluación.");
+    expect(html).toContain("El próximo paso operativo es registrar o aceptar una solicitud de atención.");
+    expect(html.indexOf("Solicitudes de atención")).toBeLessThan(html.indexOf("Resumen administrativo"));
   });
 
   it("keeps back link before page title", async () => {

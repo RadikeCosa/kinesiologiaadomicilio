@@ -29,6 +29,13 @@ export function StartEpisodeOfCareForm({
       };
     }
 
+    if (!serviceRequestId) {
+      return {
+        enabled: false,
+        reason: "Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.",
+      };
+    }
+
     if (patient.activeEpisode) {
       return {
         enabled: false,
@@ -37,7 +44,7 @@ export function StartEpisodeOfCareForm({
     }
 
     return { enabled: true, reason: null as string | null };
-  }, [patient.activeEpisode, patient.dni]);
+  }, [patient.activeEpisode, patient.dni, serviceRequestId]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -16,6 +16,10 @@
 >
 > Actualización de estado (2026-04-28): **PRODUCT-SR-HARDENING-2 cerrado**: política `single-use` para SR accepted implementada (si ya tiene vínculo con `EpisodeOfCare`, debe registrarse nueva solicitud para otro ciclo).
 
+> Actualización de decisión de producto (2026-04-29): **se elimina flujo legacy de inicio sin solicitud**. Desde esta fecha, iniciar tratamiento requiere `ServiceRequest` `accepted`, del paciente, no usada previamente (single-use).
+
+> Actualización dashboard (2026-04-29): **DASHBOARD-SR-001 cerrado**. `/admin` refleja embudo operativo mínimo SR→Tratamiento con métricas de `in_review` y `accepted` pendiente (sin vínculo `incoming-referral`), manteniendo estado clínico derivado de `EpisodeOfCare`.
+
 ## 1) Propósito del documento
 
 Este documento actualiza la hipótesis funcional para pasar de una lógica de **“solicitud inicial única”** a un modelo operativo de **solicitudes de atención**.

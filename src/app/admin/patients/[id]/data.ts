@@ -30,6 +30,45 @@ export interface TreatmentServiceRequestContext {
   message?: string;
 }
 
+
+export interface PatientHubServiceRequestContext {
+  hasServiceRequests: boolean;
+  hasInReview: boolean;
+  pendingAcceptedServiceRequestId?: string;
+}
+
+export async function loadPatientHubServiceRequestContext(patientId: string): Promise<PatientHubServiceRequestContext> {
+  const { serviceRequests } = await loadPatientServiceRequestContext(patientId);
+
+  if (serviceRequests.length === 0) {
+    return {
+      hasServiceRequests: false,
+      hasInReview: false,
+      pendingAcceptedServiceRequestId: undefined,
+    };
+  }
+
+  const hasInReview = serviceRequests.some((serviceRequest) => serviceRequest.status === "in_review");
+  const acceptedServiceRequests = serviceRequests.filter((serviceRequest) => serviceRequest.status === "accepted");
+
+  for (const serviceRequest of acceptedServiceRequests) {
+    const linkedEpisodes = await listEpisodeOfCareByIncomingReferral(serviceRequest.id);
+
+    if (linkedEpisodes.length === 0) {
+      return {
+        hasServiceRequests: true,
+        hasInReview,
+        pendingAcceptedServiceRequestId: serviceRequest.id,
+      };
+    }
+  }
+
+  return {
+    hasServiceRequests: true,
+    hasInReview,
+    pendingAcceptedServiceRequestId: undefined,
+  };
+}
 export function sortServiceRequestsByRequestedAtDesc(serviceRequests: ServiceRequest[]): ServiceRequest[] {
   return [...serviceRequests].sort((a, b) => {
     if (a.requestedAt !== b.requestedAt) {

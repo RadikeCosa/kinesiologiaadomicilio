@@ -84,7 +84,7 @@ describe("startEpisodeOfCareAction", () => {
     });
   });
 
-  it("creates episode when conditions are met", async () => {
+  it("fails when serviceRequestId is missing even if patient can start treatment", async () => {
     const created = await createPatient({
       firstName: "Luis",
       lastName: "Nuevo",
@@ -97,8 +97,9 @@ describe("startEpisodeOfCareAction", () => {
     });
 
     expect(result).toEqual({
-      ok: true,
-      message: "Tratamiento iniciado correctamente.",
+      ok: false,
+      message: "Para iniciar un tratamiento primero debe existir una solicitud de atención aceptada.",
     });
   });
+
 });
