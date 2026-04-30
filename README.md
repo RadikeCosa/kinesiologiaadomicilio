@@ -44,6 +44,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (header interno con CTA primario `Registrar visita` **solo** con tratamiento activo, navegación secundaria compacta a tratamiento, metadata compacta, estadísticas clínicas mínimas derivadas y diferenciación de estado entre sin inicio/finalizado).
 - Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.
 - Gestión específica de tratamiento (`EpisodeOfCare`) en `/admin/patients/[id]/treatment` (inicio/finalización con motivo de cierre y detalle opcional, estado finalizado explícito y navegación secundaria a visitas).
+- En `EpisodeOfCare`, motivo y detalle de cierre se persisten en `extension[]` (URLs versionables con `valueCode`/`valueString`); `note[]` queda solo como fallback legacy de lectura por compatibilidad.
 - La gestión de tratamiento ya no vive inline en `/admin/patients/[id]/encounters`.
 - El DNI es un dato administrativo opcional: se normaliza y persiste cuando existe, pero no bloquea el inicio de tratamiento.
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.

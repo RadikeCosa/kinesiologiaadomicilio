@@ -138,6 +138,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas, con navegación secundaria a visitas;
 - en `/treatment`, cuando el tratamiento está finalizado se presenta estado explícito de cierre antes de cualquier reinicio;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
+- en `EpisodeOfCare`, el motivo/detalle de cierre se persisten en `extension[]` (URLs propias versionables para reason/detail); `note[]` no es canal principal por pérdida en roundtrip HAPI y se mantiene solo como fallback legacy de lectura.
 - en `/admin`, las métricas son derivadas de lectura (no persistidas):
   - resumen operativo por estado de paciente;
   - edad de pacientes con tratamiento activo o finalizado calculada solo sobre `birthDate` válido;

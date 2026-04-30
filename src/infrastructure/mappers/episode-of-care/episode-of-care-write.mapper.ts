@@ -4,41 +4,42 @@ import type {
 } from "@/domain/episode-of-care/episode-of-care.types";
 import { buildPatientReference } from "@/lib/fhir/references";
 
-import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care/episode-of-care-fhir.types";
+import { type FhirEpisodeOfCare, type FhirExtension } from "@/infrastructure/mappers/episode-of-care/episode-of-care-fhir.types";
 
-const CLOSURE_REASON_PREFIX = "closure-reason:v1:";
-const CLOSURE_DETAIL_PREFIX = "closure-detail:v1:";
+const EPISODE_OF_CARE_CLOSURE_REASON_EXTENSION_URL =
+  "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason";
+const EPISODE_OF_CARE_CLOSURE_DETAIL_EXTENSION_URL =
+  "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-detail";
 
 function normalizeOptionalString(value?: string): string | undefined {
   const normalized = value?.trim();
   return normalized || undefined;
 }
 
-function buildClosureNotes(input: Pick<FinishEpisodeOfCareInput, "closureReason" | "closureDetail">): Array<{ text: string }> {
-  if (!input.closureReason) {
-    return [];
-  }
-
-  const notes: Array<{ text: string }> = [{ text: `${CLOSURE_REASON_PREFIX}${input.closureReason}` }];
+function buildClosureExtensions(input: Pick<FinishEpisodeOfCareInput, "closureReason" | "closureDetail">): FhirExtension[] {
+  const extensions: FhirExtension[] = [{
+    url: EPISODE_OF_CARE_CLOSURE_REASON_EXTENSION_URL,
+    valueCode: input.closureReason,
+  }];
   const detail = normalizeOptionalString(input.closureDetail);
 
   if (detail) {
-    notes.push({ text: `${CLOSURE_DETAIL_PREFIX}${detail}` });
+    extensions.push({
+      url: EPISODE_OF_CARE_CLOSURE_DETAIL_EXTENSION_URL,
+      valueString: detail,
+    });
   }
 
-  return notes;
+  return extensions;
 }
 
-function removeClosureNotes(note?: FhirEpisodeOfCare["note"]): Array<{ text?: string }> {
-  if (!note?.length) {
+function removeClosureExtensions(extension?: FhirEpisodeOfCare["extension"]): FhirExtension[] {
+  if (!extension?.length) {
     return [];
   }
 
-  return note.filter((entry) => {
-    const text = normalizeOptionalString(entry.text);
-
-    return !(text && (text.startsWith(CLOSURE_REASON_PREFIX) || text.startsWith(CLOSURE_DETAIL_PREFIX)));
-  });
+  return extension.filter((entry) => entry.url !== EPISODE_OF_CARE_CLOSURE_REASON_EXTENSION_URL
+      && entry.url !== EPISODE_OF_CARE_CLOSURE_DETAIL_EXTENSION_URL);
 }
 
 export function mapStartEpisodeOfCareInputToFhir(input: StartEpisodeOfCareInput): FhirEpisodeOfCare {
@@ -63,10 +64,9 @@ export function applyFinishEpisodeOfCareToFhir(
   existing: FhirEpisodeOfCare,
   input: Pick<FinishEpisodeOfCareInput, "endDate" | "closureReason" | "closureDetail">,
 ): FhirEpisodeOfCare {
-  const notesWithoutClosure = removeClosureNotes(existing.note);
-  const closureNotes = buildClosureNotes(input);
-
-  const nextNote = [...notesWithoutClosure, ...closureNotes];
+  const extensionsWithoutClosure = removeClosureExtensions(existing.extension);
+  const closureExtensions = buildClosureExtensions(input);
+  const nextExtension = [...extensionsWithoutClosure, ...closureExtensions];
 
   return {
     ...existing,
@@ -75,6 +75,6 @@ export function applyFinishEpisodeOfCareToFhir(
       ...existing.period,
       end: input.endDate,
     },
-    note: nextNote.length ? nextNote : undefined,
+    extension: nextExtension.length ? nextExtension : undefined,
   };
 }
