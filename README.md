@@ -70,7 +70,7 @@ El proyecto está en etapa **híbrida transicional**:
   - `in_review` sin vínculo => pendiente operativa;
   - `accepted` sin vínculo => `Pendiente de iniciar tratamiento` (compatibilidad transicional);
   - `closed_without_treatment`/`cancelled` => históricas terminales, no compiten como pendientes.
-- Los motivos de `No inició`/`Cancelar` se leen primero desde `statusReason.text` y usan fallback controlado del `CodeableConcept` disponible (por ejemplo `statusReason.coding[].display`), y se muestran en el historial operativo junto al detalle de cierre del tratamiento cuando aplica.
+- Los motivos de `No inició`/`Cancelar` se intentan persistir en `statusReason.text` y, por compatibilidad con HAPI local, también se guardan en `ServiceRequest.note[]` como `resolution-reason:v1:<texto>`; la lectura prioriza `statusReason` (incluyendo fallback de `coding[].display/text`) y usa `note[]` como fallback final, y se muestran en el historial operativo junto al detalle de cierre del tratamiento cuando aplica.
 - Durante tratamiento activo, crear una nueva solicitud se mantiene como acción administrativa secundaria (no CTA clínico principal del hub).
 - `/admin/patients/[id]/treatment` mantiene el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen si existe).
 - `/admin/patients/[id]/treatment` funciona como superficie de gestión del tratamiento actual y también de historial compacto de ciclos cerrados; sin tratamiento activo pero con ciclos finalizados, prioriza el historial y ofrece acceso directo al historial de solicitudes en `/administrative#service-requests`.

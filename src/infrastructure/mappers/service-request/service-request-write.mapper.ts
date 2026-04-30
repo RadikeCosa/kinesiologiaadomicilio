@@ -12,6 +12,7 @@ const NOTE_PREFIXES = {
   requesterContact: "requester-contact:v1:",
   generalNote: "general-note:v1:",
   workflowStatus: "workflow-status:v1:",
+  resolutionReason: "resolution-reason:v1:",
 } as const;
 
 function normalizeOptionalString(value?: string): string | undefined {
@@ -94,19 +95,24 @@ export function applyServiceRequestStatusUpdateToFhir(
   input: UpdateServiceRequestStatusInput,
 ): FhirServiceRequest {
   const nextStatus = mapServiceRequestStatusToFhirStatus(input.status);
-  const notesWithoutWorkflowStatus = (resource.note ?? []).filter((entry) => {
+  const notesWithoutWorkflowStatusOrResolutionReason = (resource.note ?? []).filter((entry) => {
     const text = normalizeOptionalString(entry.text);
-    return !(text && text.startsWith(NOTE_PREFIXES.workflowStatus));
+    return !(text && (text.startsWith(NOTE_PREFIXES.workflowStatus) || text.startsWith(NOTE_PREFIXES.resolutionReason)));
   });
+
+  const closedReasonText = normalizeOptionalString(input.closedReasonText);
+
   const nextNote = input.status === "accepted"
-    ? [...notesWithoutWorkflowStatus, { text: `${NOTE_PREFIXES.workflowStatus}accepted` }]
-    : notesWithoutWorkflowStatus;
+    ? [...notesWithoutWorkflowStatusOrResolutionReason, { text: `${NOTE_PREFIXES.workflowStatus}accepted` }]
+    : shouldSetStatusReason(input.status) && closedReasonText
+      ? [...notesWithoutWorkflowStatusOrResolutionReason, { text: `${NOTE_PREFIXES.resolutionReason}${closedReasonText}` }]
+      : notesWithoutWorkflowStatusOrResolutionReason;
 
   return {
     ...resource,
     status: nextStatus,
-    statusReason: shouldSetStatusReason(input.status) && input.closedReasonText
-      ? { text: input.closedReasonText }
+    statusReason: shouldSetStatusReason(input.status) && closedReasonText
+      ? { text: closedReasonText }
       : undefined,
     note: nextNote.length ? nextNote : undefined,
   };

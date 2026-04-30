@@ -8,6 +8,7 @@ const NOTE_PREFIXES = {
   requesterContact: "requester-contact:v1:",
   generalNote: "general-note:v1:",
   workflowStatus: "workflow-status:v1:",
+  resolutionReason: "resolution-reason:v1:",
 } as const;
 
 function normalizeOptionalString(value?: string): string | undefined {
@@ -53,30 +54,31 @@ function findFirstReasonText(reasonCode?: FhirServiceRequest["reasonCode"]): str
   return "";
 }
 
-function extractClosedReasonText(statusReason?: FhirServiceRequest["statusReason"]): string | undefined {
+function extractClosedReasonText(
+  statusReason?: FhirServiceRequest["statusReason"],
+  note?: FhirServiceRequest["note"],
+): string | undefined {
   const statusReasonText = normalizeOptionalString(statusReason?.text);
   if (statusReasonText) {
     return statusReasonText;
   }
 
   const coding = statusReason?.coding;
-  if (!coding?.length) {
-    return undefined;
-  }
+  if (coding?.length) {
+    for (const item of coding) {
+      const displayText = normalizeOptionalString(item.display);
+      if (displayText) {
+        return displayText;
+      }
 
-  for (const item of coding) {
-    const displayText = normalizeOptionalString(item.display);
-    if (displayText) {
-      return displayText;
-    }
-
-    const codedText = normalizeOptionalString(item.text);
-    if (codedText) {
-      return codedText;
+      const codedText = normalizeOptionalString(item.text);
+      if (codedText) {
+        return codedText;
+      }
     }
   }
 
-  return undefined;
+  return extractTaggedNoteValue(note, NOTE_PREFIXES.resolutionReason);
 }
 
 function resolveRevokedDomainStatus(resource: Pick<FhirServiceRequest, "statusReason" | "note">): ServiceRequest["status"] {
@@ -149,7 +151,7 @@ export function mapFhirServiceRequestToDomain(resource: FhirServiceRequest): Ser
     requesterDisplay: normalizeOptionalString(resource.requester?.display),
     reasonText: findFirstReasonText(resource.reasonCode),
     status: mapFhirServiceRequestStatusToDomainStatus(resource),
-    closedReasonText: extractClosedReasonText(resource.statusReason),
+    closedReasonText: extractClosedReasonText(resource.statusReason, resource.note),
     reportedDiagnosisText: noteFields.reportedDiagnosisText,
     requesterContact: noteFields.requesterContact,
     notes: noteFields.notes,
