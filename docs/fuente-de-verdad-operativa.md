@@ -12,7 +12,7 @@ En paralelo, existe una **superficie privada clínica mínima transicional** baj
 - ciclo básico de tratamiento (`EpisodeOfCare`);
 - registro/listado simple de visitas realizadas (`Encounter` base).
 
-Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrative` (lectura + alta mínima + resolución administrativa: aceptar, no inició/cerrar y cancelar con motivo), preservando no-alcances clínicos.
+Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrative` (lectura + alta mínima: fecha, motivo y datos básicos de quién consulta; más resolución administrativa: aceptar, no inició/cerrar y cancelar con motivo), preservando no-alcances clínicos.
 
 ## 1.1) Dirección evolutiva del proyecto
 
@@ -89,10 +89,11 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - alta mínima de paciente (incluye dirección operativa opcional, `gender` y `birthDate` opcionales);
 - ficha consolidada de paciente en `/admin/patients/[id]` como hub (incluye visualización de dirección, `gender`, `birthDate` y navegación a gestión clínica/administrativa);
 - superficie administrativa acotada en `/admin/patients/[id]/administrative` con lectura + acciones (incluye edición explícita de dirección, `gender`, `birthDate` y datos no clínicos);
-- en `/admin/patients/[id]/administrative`, las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse con formulario mínimo embebido y resolverse administrativamente (`Aceptar`, `No inició`, `Cancelar`);
+- en `/admin/patients/[id]/administrative`, las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse con formulario mínimo embebido (fecha, motivo y datos básicos de quién consulta: relación + nombre) y resolverse administrativamente (`Aceptar`, `No inició`, `Cancelar`);
 - al cerrar como `No inició` o `Cancelar`, la UI administrativa exige motivo y lo muestra en listado cuando existe;
-- registrar o resolver solicitudes no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`;
-- una solicitud `accepted` en `/administrative` puede derivar a `/treatment` con `serviceRequestId`;
+- el teléfono operativo y el domicilio de atención pertenecen a los datos administrativos del paciente (no al formulario normal de alta de solicitud);
+- registrar solicitudes no inicia tratamiento por sí mismo; en el flujo normal, `Aceptar e iniciar tratamiento` crea el episodio vinculado y luego la navegación recomendada continúa en `/encounters`;
+- la solicitud `accepted` sin tratamiento iniciado queda como compatibilidad/transición y no como camino principal;
 - `/treatment` conserva ownership de inicio/cierre y valida contexto de solicitud antes de iniciar;
 - al iniciar con solicitud válida, `EpisodeOfCare` se vincula por `referralRequest = ServiceRequest/{id}`;
 - política vigente `single-use`: una SR `accepted` ya vinculada por `incoming-referral` no puede iniciar otro tratamiento y `/treatment` solicita nueva solicitud para nuevo ciclo;

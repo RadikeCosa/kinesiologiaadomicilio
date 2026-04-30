@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 import type { ServiceRequestStatus } from "@/domain/service-request/service-request.types";
 
 import { updatePatientServiceRequestStatusAction } from "@/app/admin/patients/[id]/administrative/actions";
+import { acceptAndStartTreatmentFromServiceRequestAction } from "@/app/admin/patients/[id]/administrative/actions";
 
 type CloseLikeStatus = "closed_without_treatment" | "cancelled";
-type ActionKind = "accept" | "close_without_treatment" | "cancel";
+type ActionKind = "accept_and_start_treatment" | "close_without_treatment" | "cancel";
 
 interface ServiceRequestStatusActionsProps {
   patientId: string;
@@ -24,7 +25,7 @@ interface ActionFeedback {
 export function getServiceRequestStatusActions(status: ServiceRequestStatus): ActionKind[] {
   switch (status) {
     case "in_review":
-      return ["accept", "close_without_treatment", "cancel"];
+      return ["accept_and_start_treatment", "close_without_treatment", "cancel"];
     case "accepted":
       return ["close_without_treatment", "cancel"];
     default:
@@ -63,8 +64,8 @@ export async function submitServiceRequestStatusAction(input: {
 
 function getActionLabel(action: ActionKind): string {
   switch (action) {
-    case "accept":
-      return "Aceptar";
+    case "accept_and_start_treatment":
+      return "Aceptar e iniciar tratamiento";
     case "close_without_treatment":
       return "No inició";
     case "cancel":
@@ -92,13 +93,17 @@ export function ServiceRequestStatusActions({
     return null;
   }
 
-  function handleDirectAccept() {
+  function handleDirectAcceptAndStartTreatment() {
     startTransition(async () => {
-      const result = await submitServiceRequestStatusAction({
-        patientId,
-        serviceRequestId,
-        status: "accepted",
-      });
+      const formData = new FormData();
+      formData.set("id", serviceRequestId);
+      const result = await acceptAndStartTreatmentFromServiceRequestAction(patientId, formData);
+
+      if (result.ok && result.redirectTo) {
+        router.push(result.redirectTo);
+        router.refresh();
+        return;
+      }
 
       if (result.ok) {
         setFeedback({ tone: "success", text: result.message });
@@ -127,8 +132,6 @@ export function ServiceRequestStatusActions({
 
       if (result.ok) {
         setFeedback({ tone: "success", text: result.message });
-        setActiveCloseAction(null);
-        setCloseReasonText("");
         router.refresh();
         return;
       }
@@ -142,13 +145,13 @@ export function ServiceRequestStatusActions({
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Acciones</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {availableActions.map((action) => {
-          if (action === "accept") {
+          if (action === "accept_and_start_treatment") {
             return (
               <button
                 className="rounded border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-100 disabled:opacity-50"
                 disabled={isPending}
                 key={action}
-                onClick={handleDirectAccept}
+                onClick={handleDirectAcceptAndStartTreatment}
                 type="button"
               >
                 {getActionLabel(action)}
