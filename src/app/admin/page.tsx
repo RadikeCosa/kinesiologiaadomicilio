@@ -15,13 +15,6 @@ function formatMetricValue(value: number | null): string {
   return String(value);
 }
 
-function formatCoverage(value: { numerator: number; denominator: number; percentage: number | null }): string {
-  if (value.percentage === null) {
-    return "—";
-  }
-
-  return `${value.numerator}/${value.denominator} (${value.percentage}%)`;
-}
 
 export default async function AdminHomePage() {
   const dashboard = await loadAdminDashboard();
@@ -71,33 +64,21 @@ export default async function AdminHomePage() {
 
         <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-            Edad de pacientes en tratamiento
+            Edad de pacientes
           </h2>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <article className="rounded-md border border-slate-200 bg-white p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Menor edad</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Paciente más joven</p>
               <p className="mt-1 text-lg font-semibold text-slate-900">{formatMetricValue(dashboard.ageSummary.youngest)}</p>
             </article>
             <article className="rounded-md border border-slate-200 bg-white p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Mayor edad</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Paciente más viejo</p>
               <p className="mt-1 text-lg font-semibold text-slate-900">{formatMetricValue(dashboard.ageSummary.oldest)}</p>
             </article>
             <article className="rounded-md border border-slate-200 bg-white p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Edad promedio</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Promedio de edad</p>
               <p className="mt-1 text-lg font-semibold text-slate-900">{formatMetricValue(dashboard.ageSummary.average)}</p>
-            </article>
-            <article className="rounded-md border border-slate-200 bg-white p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Cobertura fecha de nacimiento</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">{formatCoverage(dashboard.ageSummary.coverage)}</p>
-            </article>
-            <article className="rounded-md border border-slate-200 bg-white p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Con fecha válida</p>
-              <p className="mt-1 text-lg font-semibold text-slate-900">{dashboard.ageSummary.withValidBirthDate}</p>
-            </article>
-            <article className="rounded-md border border-slate-200 bg-white p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Sin fecha válida</p>
-              <p className="mt-1 text-lg font-semibold text-slate-900">{dashboard.ageSummary.withoutValidBirthDate}</p>
             </article>
           </div>
 

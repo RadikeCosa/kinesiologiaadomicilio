@@ -123,7 +123,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - en `/admin`, las métricas son derivadas de lectura (no persistidas):
   - resumen operativo por estado de paciente;
-  - edad de pacientes en tratamiento activo calculada solo sobre `birthDate` válido (con cobertura explícita);
+  - edad de pacientes con tratamiento activo o finalizado calculada solo sobre `birthDate` válido;
 - en `/admin`, la edad se mantiene como dato derivado y no se persiste;
 - en `/admin`, las métricas globales de visitas (`Encounter`) permanecen fuera de Fase 1 por falta de consulta agregada eficiente;
 - en `/admin`, Fase 1 no introduce nuevas rutas ni gráficos.
@@ -152,14 +152,14 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Métricas incluidas en Fase 1**:
   - resumen operativo: pacientes totales, en tratamiento activo, tratamiento finalizado y sin tratamiento iniciado (`preliminary + ready_to_start`);
   - embudo de solicitudes: `in_review` (en evaluación) y `accepted` pendientes de tratamiento;
-  - edad (pacientes en tratamiento): menor, mayor, promedio, con/sin fecha válida y cobertura.
-- **Reglas vigentes de edad/cobertura**:
-  - edad derivada de lectura desde `birthDate` en población de tratamiento activo, no persistida;
+  - edad (pacientes con tratamiento activo o finalizado): paciente más joven, paciente más viejo y promedio.
+- **Reglas vigentes de edad**:
+  - edad derivada de lectura desde `birthDate` en población con `EpisodeOfCare` activo o finalizado, no persistida;
   - solo fechas válidas/calculables cuentan como `con fecha válida`;
   - `accepted` ya vinculada por `incoming-referral` no cuenta como pendiente de tratamiento;
   - ausentes o inválidas cuentan como `sin fecha válida`;
   - sin edades calculables: UI muestra `—`;
-  - cobertura sin porcentaje calculable: UI muestra `—` y evita `0/0 (0%)`.
+  
 - **Arquitectura vigente**:
   - `src/app/admin/page.tsx` no calcula estadísticas inline;
   - `loadAdminDashboard()` centraliza composición de `/admin`;
@@ -170,7 +170,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - tests unitarios de métricas;
   - tests del loader;
   - tests de render de `/admin`;
-  - micro-patch de borde para mezcla de fechas válidas/inválidas/ausentes, cobertura visible `1/3 (33%)` y fallback cuando `coverage.percentage === null`.
+  - micro-patch de borde para mezcla de fechas válidas/inválidas/ausentes y fallback cuando no hay edades calculables.
 - **Fuera de alcance preservado**:
   - métricas globales de visitas, visitas recientes, última visita global, pacientes activos sin visitas;
   - gráficos;
