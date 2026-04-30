@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   canCreatePatient,
   getPatientOperationalStatus,
-  hasRequiredIdentityForEpisode,
+  hasMinimumOperationalDataForTreatment,
 } from "@/domain/patient/patient.rules";
 
 describe("patient.rules", () => {
@@ -21,17 +21,28 @@ describe("patient.rules", () => {
     expect(missingLastName).toMatchObject({ ok: false, reason: "missing_last_name" });
   });
 
-  it("requires DNI to start treatment episode", () => {
-    const withoutDni = hasRequiredIdentityForEpisode({ dni: "  " });
-    const withDni = hasRequiredIdentityForEpisode({ dni: "32123456" });
+  it("validates minimum operational data for treatment start", () => {
+    const withoutAddress = hasMinimumOperationalDataForTreatment({
+      firstName: "Ana",
+      lastName: "Pérez",
+      address: " ",
+      phone: "2995550101",
+    });
+    const withMainContactPhone = hasMinimumOperationalDataForTreatment({
+      firstName: "Ana",
+      lastName: "Pérez",
+      address: "Calle 123",
+      phone: undefined,
+      mainContact: { phone: "2995550102" },
+    });
 
-    expect(withoutDni).toMatchObject({ ok: false, reason: "missing_dni" });
-    expect(withDni).toEqual({ ok: true });
+    expect(withoutAddress).toMatchObject({ ok: false, reason: "missing_patient_address" });
+    expect(withMainContactPhone).toEqual({ ok: true });
   });
 
   it("resolves operational status as preliminary", () => {
     const status = getPatientOperationalStatus({
-      patient: { dni: undefined },
+      patient: { firstName: "", lastName: "", address: undefined, phone: undefined, mainContact: undefined },
       hasActiveEpisode: false,
     });
 
@@ -40,7 +51,7 @@ describe("patient.rules", () => {
 
   it("resolves operational status as ready_to_start", () => {
     const status = getPatientOperationalStatus({
-      patient: { dni: "32123456" },
+      patient: { firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101" },
       hasActiveEpisode: false,
     });
 
@@ -50,7 +61,7 @@ describe("patient.rules", () => {
 
   it("resolves operational status as finished_treatment", () => {
     const status = getPatientOperationalStatus({
-      patient: { dni: "32123456" },
+      patient: { firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101" },
       hasActiveEpisode: false,
       hasFinishedEpisode: true,
     });
@@ -60,7 +71,7 @@ describe("patient.rules", () => {
 
   it("resolves operational status as active_treatment", () => {
     const status = getPatientOperationalStatus({
-      patient: { dni: "32123456" },
+      patient: { firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101" },
       hasActiveEpisode: true,
     });
 

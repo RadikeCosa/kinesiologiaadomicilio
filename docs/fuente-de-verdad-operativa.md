@@ -102,7 +102,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - inicio de tratamiento;
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
 - la gestión de tratamiento no vive inline en `/admin/patients/[id]/encounters`;
-- validación de DNI requerida para iniciar tratamiento;
+- el DNI es un dato administrativo opcional: se normaliza y persiste como identificador cuando está disponible, pero no bloquea el inicio de tratamiento;
+- para iniciar tratamiento se requiere una solicitud de atención aceptada, perteneciente al paciente y no usada previamente;
+- además, el paciente debe contar con datos mínimos operativos: nombre, apellido, domicilio de atención y al menos un teléfono de contacto operativo, ya sea del paciente o del contacto principal;
 - bloqueo simple por duplicado de DNI para iniciar tratamiento;
 - estado operativo consistente entre listado y detalle para episodio activo/finalizado/sin tratamiento;
 - representación visual del badge de tratamiento centralizada en helper compartido (`src/app/admin/patients/treatment-badge.ts`), separada de la lógica de estado operativo de dominio;

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { startEpisodeOfCareAction } from "@/app/admin/patients/[id]/actions/start-episode-of-care.action";
+import { hasMinimumOperationalDataForTreatment } from "@/domain/patient/patient.rules";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
 import { formatLocalDateInputValue } from "@/lib/date-input";
 
@@ -22,17 +23,31 @@ export function StartEpisodeOfCareForm({
   const { message, setMessage } = useFormFeedback();
 
   const availability = useMemo(() => {
-    if (!patient.dni) {
+    const minimumDataValidation = hasMinimumOperationalDataForTreatment(patient);
+    if (!minimumDataValidation.ok) {
+      const missingRequirements = [];
+      if (minimumDataValidation.reason === "missing_patient_name") {
+        missingRequirements.push("Nombre y apellido");
+      }
+      if (minimumDataValidation.reason === "missing_patient_address") {
+        missingRequirements.push("Domicilio de atención");
+      }
+      if (minimumDataValidation.reason === "missing_contact_phone") {
+        missingRequirements.push("Teléfono del paciente o del contacto principal");
+      }
+
       return {
         enabled: false,
-        reason: "Identidad incompleta: cargá DNI para iniciar tratamiento.",
+        reason: "Para iniciar tratamiento necesitás completar los datos mínimos operativos del paciente.",
+        details: missingRequirements,
       };
     }
 
     if (!serviceRequestId) {
       return {
         enabled: false,
-        reason: "Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.",
+        reason: "Para iniciar tratamiento necesitás una solicitud de atención aceptada.",
+        details: ["Solicitud de atención aceptada"],
       };
     }
 
@@ -40,11 +55,12 @@ export function StartEpisodeOfCareForm({
       return {
         enabled: false,
         reason: "Este paciente ya tiene un tratamiento activo.",
+        details: [],
       };
     }
 
-    return { enabled: true, reason: null as string | null };
-  }, [patient.activeEpisode, patient.dni, serviceRequestId]);
+    return { enabled: true, reason: null as string | null, details: [] as string[] };
+  }, [patient, serviceRequestId]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -82,7 +98,16 @@ export function StartEpisodeOfCareForm({
       </h3>
 
       {availability.reason ? (
-        <p className="mt-2 text-sm text-slate-700">{availability.reason}</p>
+        <>
+          <p className="mt-2 text-sm text-slate-700">{availability.reason}</p>
+          {availability.details.length > 0 ? (
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+              {availability.details.map((detail) => (
+                <li key={detail}>{detail}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : null}
 
       <form className="mt-4 space-y-4" onSubmit={handleSubmit}>

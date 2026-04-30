@@ -48,8 +48,57 @@ export function hasRequiredIdentityForEpisode(patient: Pick<Patient, "dni">): Pa
   return { ok: true };
 }
 
+export type MinimumOperationalDataForTreatmentFailureReason =
+  | "missing_patient_name"
+  | "missing_patient_address"
+  | "missing_contact_phone";
+
+export type MinimumOperationalDataForTreatmentResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason: MinimumOperationalDataForTreatmentFailureReason;
+      message: string;
+    };
+
+export function hasMinimumOperationalDataForTreatment(
+  patient: Pick<Patient, "firstName" | "lastName" | "address" | "phone" | "mainContact">,
+): MinimumOperationalDataForTreatmentResult {
+  const firstName = patient.firstName?.trim();
+  const lastName = patient.lastName?.trim();
+
+  if (!firstName || !lastName) {
+    return {
+      ok: false,
+      reason: "missing_patient_name",
+      message: "Para iniciar tratamiento necesitás completar nombre y apellido del paciente.",
+    };
+  }
+
+  if (!patient.address?.trim()) {
+    return {
+      ok: false,
+      reason: "missing_patient_address",
+      message: "Para iniciar tratamiento necesitás registrar el domicilio de atención del paciente.",
+    };
+  }
+
+  const hasPatientPhone = Boolean(patient.phone?.trim());
+  const hasMainContactPhone = Boolean(patient.mainContact?.phone?.trim());
+
+  if (!hasPatientPhone && !hasMainContactPhone) {
+    return {
+      ok: false,
+      reason: "missing_contact_phone",
+      message: "Para iniciar tratamiento necesitás registrar un teléfono de contacto del paciente o del contacto principal.",
+    };
+  }
+
+  return { ok: true };
+}
+
 export function getPatientOperationalStatus(options: {
-  patient: Pick<Patient, "dni">;
+  patient: Pick<Patient, "firstName" | "lastName" | "address" | "phone" | "mainContact">;
   hasActiveEpisode: boolean;
   hasFinishedEpisode?: boolean;
 }): PatientOperationalStatus {
@@ -61,7 +110,7 @@ export function getPatientOperationalStatus(options: {
     return PATIENT_OPERATIONAL_STATUSES.FINISHED_TREATMENT;
   }
 
-  if (options.patient.dni?.trim()) {
+  if (hasMinimumOperationalDataForTreatment(options.patient).ok) {
     return PATIENT_OPERATIONAL_STATUSES.READY_TO_START;
   }
 

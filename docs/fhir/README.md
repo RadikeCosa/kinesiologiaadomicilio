@@ -78,7 +78,7 @@ Centralizar la documentación de trabajo para la remediación técnica del model
 
 ## Flujo recomendado de trabajo
 
-1. Leer la ADR antes de tocar identidad, DNI o semántica de `Identifier`.
+1. Leer la ADR antes de tocar identidad, DNI o semántica de `Identifier` (DNI opcional, no gate de inicio de tratamiento).
 2. Usar el plan de remediación para decidir orden y alcance.
 3. Ejecutar tickets del backlog en PRs chicos.
 4. Validar cada PR con el checklist específico.

@@ -18,15 +18,22 @@ describe("startEpisodeOfCareAction", () => {
     });
   });
 
-  it("fails when patient has no DNI", async () => {
+  it("does not fail by DNI absence and fails by missing accepted service request", async () => {
+    const created = await createPatient({
+      firstName: "Paciente",
+      lastName: "SinDni",
+      address: "Calle 100",
+      phone: "2995550000",
+    });
+
     const result = await startEpisodeOfCareAction({
-      patientId: "pat-001",
+      patientId: created.id,
       startDate: "2026-04-16",
     });
 
     expect(result).toEqual({
       ok: false,
-      message: "No se puede iniciar tratamiento sin DNI.",
+      message: "Para iniciar tratamiento necesitás una solicitud de atención aceptada.",
     });
   });
 
@@ -35,6 +42,8 @@ describe("startEpisodeOfCareAction", () => {
       firstName: "Paciente",
       lastName: "Duplicado",
       dni: "32123456",
+      address: "Calle 101",
+      phone: "2995550001",
     });
 
     const result = await startEpisodeOfCareAction({
@@ -53,12 +62,16 @@ describe("startEpisodeOfCareAction", () => {
       firstName: "Paciente",
       lastName: "ConType",
       dni: "30555111",
+      address: "Calle 102",
+      phone: "2995550002",
     });
 
     await createPatient({
       firstName: "Paciente",
       lastName: "DuplicadoConType",
       dni: "30555111",
+      address: "Calle 103",
+      phone: "2995550003",
     });
 
     const result = await startEpisodeOfCareAction({
@@ -89,6 +102,8 @@ describe("startEpisodeOfCareAction", () => {
       firstName: "Luis",
       lastName: "Nuevo",
       dni: "30111999",
+      address: "Calle 104",
+      phone: "2995550004",
     });
 
     const result = await startEpisodeOfCareAction({
@@ -98,7 +113,7 @@ describe("startEpisodeOfCareAction", () => {
 
     expect(result).toEqual({
       ok: false,
-      message: "Para iniciar un tratamiento primero debe existir una solicitud de atención aceptada.",
+      message: "Para iniciar tratamiento necesitás una solicitud de atención aceptada.",
     });
   });
 

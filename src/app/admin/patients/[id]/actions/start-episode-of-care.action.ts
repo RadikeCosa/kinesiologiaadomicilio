@@ -34,10 +34,10 @@ export async function startEpisodeOfCareAction(
 
     const existingActiveEpisode = await getActiveEpisodeByPatientId(patient.id);
 
-    const duplicatePatientByDni = patient.dni
+    const duplicatePatientByDni = patient.dni?.trim()
       ? await existsAnotherPatientWithDni({
-          dni: patient.dni,
-          excludePatientId: patient.id,
+        dni: patient.dni,
+        excludePatientId: patient.id,
         })
       : false;
 
@@ -56,7 +56,7 @@ export async function startEpisodeOfCareAction(
     if (!parsedInput.serviceRequestId) {
       return {
         ok: false,
-        message: "Para iniciar un tratamiento primero debe existir una solicitud de atención aceptada.",
+        message: "Para iniciar tratamiento necesitás una solicitud de atención aceptada.",
       };
     }
 
