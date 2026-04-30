@@ -19,7 +19,7 @@ interface DashboardServiceRequestSnapshot {
   status: ServiceRequestStatus;
 }
 
-const AGE_SUMMARY_NOTE = "La edad se calcula sobre pacientes con tratamiento activo y fecha de nacimiento válida.";
+const AGE_SUMMARY_NOTE = "Calculada sobre pacientes con tratamiento iniciado o finalizado.";
 
 export function buildOperationalSummary(
   patients: DashboardPatientSnapshot[],
@@ -43,14 +43,16 @@ export function buildPatientAgeSummary(
   patients: DashboardPatientSnapshot[],
   referenceDate: Date = new Date(),
 ): AdminAgeSummary {
-  const activePatients = patients.filter((patient) => patient.operationalStatus === "active_treatment");
+  const patientsWithStartedOrFinishedTreatment = patients.filter((patient) => (
+    patient.operationalStatus === "active_treatment" || patient.operationalStatus === "finished_treatment"
+  ));
 
-  const validAges = activePatients
+  const validAges = patientsWithStartedOrFinishedTreatment
     .map((patient) => calculateAgeFromBirthDate(patient.birthDate, referenceDate))
     .filter((age): age is number => age !== null);
 
   const withValidBirthDate = validAges.length;
-  const withoutValidBirthDate = activePatients.length - withValidBirthDate;
+  const withoutValidBirthDate = patientsWithStartedOrFinishedTreatment.length - withValidBirthDate;
 
   const youngest = withValidBirthDate > 0 ? Math.min(...validAges) : null;
   const oldest = withValidBirthDate > 0 ? Math.max(...validAges) : null;
@@ -66,9 +68,9 @@ export function buildPatientAgeSummary(
     withoutValidBirthDate,
     coverage: {
       numerator: withValidBirthDate,
-      denominator: activePatients.length,
-      percentage: activePatients.length > 0
-        ? Math.round((withValidBirthDate / activePatients.length) * 100)
+      denominator: patientsWithStartedOrFinishedTreatment.length,
+      percentage: patientsWithStartedOrFinishedTreatment.length > 0
+        ? Math.round((withValidBirthDate / patientsWithStartedOrFinishedTreatment.length) * 100)
         : null,
     },
     note: AGE_SUMMARY_NOTE,

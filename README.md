@@ -60,33 +60,32 @@ El proyecto está en etapa **híbrida transicional**:
 - Una solicitud `accepted` puede derivar desde `/administrative` a `/admin/patients/[id]/treatment?serviceRequestId={id}` para iniciar tratamiento desde la superficie clínica correspondiente.
 - Al iniciar tratamiento desde ese contexto, el `EpisodeOfCare` se crea vinculado a la solicitud mediante `referralRequest` (`ServiceRequest/{id}`), siempre que la solicitud accepted sea válida, pertenezca al paciente y no haya sido usada previamente; sin `serviceRequestId` no se permite iniciar tratamiento.
 - Política vigente `single-use`: una solicitud `accepted` ya vinculada a algún `EpisodeOfCare` no puede reutilizarse para iniciar otro ciclo; se requiere nueva solicitud.
-- Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad para pacientes con tratamiento activo basadas en `birthDate` válido.
+- Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad para pacientes con `EpisodeOfCare` activo o finalizado basadas en `birthDate` válido.
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
 
 ##### Cierre DASHBOARD-SR-001 (abril 2026)
 - **Estado**: cerrado (PR1+PR2+PR3).
-- **Resultado**: `/admin` muestra embudo SR (`in_review` y `accepted` pendiente sin vínculo `incoming-referral`) y mantiene resumen operativo + edad de pacientes en tratamiento.
+- **Resultado**: `/admin` muestra embudo SR (`in_review` y `accepted` pendiente sin vínculo `incoming-referral`) y mantiene resumen operativo + card simplificada de edad clínica.
 - **Deuda técnica vigente**: métricas SR por composición per-patient (N+1 potencial). Migrar a read-model agregado cuando aumente volumen.
 
 ##### Cierre Fase 1 dashboard `/admin` (abril 2026)
 - **Estado**: fase cerrada/aprobada para `/admin` como dashboard operativo mínimo.
 - **Comportamiento vigente**:
   - card `Resumen operativo`;
-  - card `Edad de pacientes en tratamiento`;
+  - card `Edad de pacientes`;
   - CTAs principales preservados: `Ver pacientes` y `Nuevo paciente`.
 - **Métricas incluidas**:
   - resumen operativo: total, en tratamiento activo, tratamiento finalizado, sin tratamiento iniciado;
   - embudo de solicitudes: solicitudes en evaluación y aceptadas pendientes de tratamiento;
   - regla: `sin tratamiento iniciado = preliminary + ready_to_start`;
-  - edad (pacientes en tratamiento): menor, mayor, promedio, con/sin fecha válida y cobertura.
-- **Reglas de edad/cobertura**:
-  - dato derivado de lectura (no persistido), calculado desde `birthDate` sobre pacientes en tratamiento activo;
-  - solo fechas válidas/calculables cuentan como `con fecha válida`;
-  - fechas ausentes o inválidas cuentan como `sin fecha válida`;
-  - cuando no hay edades calculables la UI muestra `—`;
-  - cuando la cobertura no puede calcular porcentaje la UI muestra fallback `—` y evita un `0/0 (0%)` engañoso.
+  - edad (pacientes con tratamiento activo o finalizado): paciente más joven, paciente más viejo y promedio.
+- **Reglas de edad**:
+  - dato derivado de lectura (no persistido), calculado desde `birthDate` sobre pacientes con `EpisodeOfCare` activo o finalizado;
+  - fechas válidas/calculables participan del cálculo;
+  - fechas ausentes o inválidas no participan;
+  - cuando no hay edades calculables la UI muestra `—`.
 - **Arquitectura vigente**:
   - `src/app/admin/page.tsx` sin cálculos inline;
   - `loadAdminDashboard()` centraliza composición;
@@ -97,7 +96,7 @@ El proyecto está en etapa **híbrida transicional**:
   - tests unitarios de métricas;
   - tests del loader;
   - tests de render de `/admin`;
-  - micro-patch final de borde en render (`birthDate` válido + inválido + ausente, cobertura visible `1/3 (33%)`, fallback con `percentage === null`).
+  - micro-patch final de borde en render (`birthDate` válido + inválido + ausente, fallback cuando no hay edades calculables).
 
 ### Estado del frente FHIR Patient
 

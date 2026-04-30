@@ -27,20 +27,21 @@ describe("dashboard-metrics", () => {
     });
   });
 
-  it("builds age summary using only active_treatment patients with valid birthDate", () => {
+  it("builds age summary using only patients with active or finished treatment and valid birthDate", () => {
     const summary = buildPatientAgeSummary([
       { operationalStatus: "active_treatment", birthDate: "2000-01-01" },
       { operationalStatus: "active_treatment", birthDate: "1990-01-01" },
       { operationalStatus: "active_treatment", birthDate: "invalid-date" },
-      { operationalStatus: "ready_to_start", birthDate: "1980-01-01" },
+      { operationalStatus: "finished_treatment", birthDate: "1980-01-01" },
+      { operationalStatus: "ready_to_start", birthDate: "1970-01-01" },
     ], new Date("2026-04-26T12:00:00.000Z"));
 
     expect(summary.youngest).toBe(26);
-    expect(summary.oldest).toBe(36);
-    expect(summary.average).toBe(31);
-    expect(summary.withValidBirthDate).toBe(2);
+    expect(summary.oldest).toBe(46);
+    expect(summary.average).toBe(36);
+    expect(summary.withValidBirthDate).toBe(3);
     expect(summary.withoutValidBirthDate).toBe(1);
-    expect(summary.coverage).toEqual({ numerator: 2, denominator: 3, percentage: 67 });
+    expect(summary.coverage).toEqual({ numerator: 3, denominator: 4, percentage: 75 });
   });
 
   it("builds service request summary from in_review and accepted-not-used rules", () => {
@@ -58,7 +59,7 @@ describe("dashboard-metrics", () => {
     });
   });
 
-  it("returns null age metrics when there are no active_treatment patients", () => {
+  it("returns null age metrics when there are no patients with active or finished treatment", () => {
     const summary = buildPatientAgeSummary([
       { operationalStatus: "preliminary", birthDate: "2000-01-01" },
       { operationalStatus: "ready_to_start", birthDate: "1990-01-01" },
