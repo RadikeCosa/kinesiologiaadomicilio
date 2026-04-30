@@ -119,10 +119,12 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, pati
                     <dd className="mt-1">{serviceRequest.reasonText}</dd>
                   </div>
 
-                  {isClosedState && serviceRequest.closedReasonText ? (
-                    <div className="sm:col-span-2 rounded-md border border-amber-200 bg-amber-50 p-2.5">
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-amber-800">Motivo por el que no inició</dt>
-                      <dd className="mt-1 text-amber-900">{serviceRequest.closedReasonText}</dd>
+                  {isClosedState ? (
+                    <div className="sm:col-span-2">
+                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                        {serviceRequest.status === "closed_without_treatment" ? "Motivo de no inicio" : "Motivo de cancelación"}
+                      </dt>
+                      <dd className="mt-1 text-slate-700">{serviceRequest.closedReasonText ?? "Motivo no registrado"}</dd>
                     </div>
                   ) : null}
 

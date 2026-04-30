@@ -13,6 +13,7 @@ import {
   formatDateDisplay,
   formatDniDisplay,
 } from "@/lib/patient-admin-display";
+import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
 
 interface AdminPatientTreatmentPageProps {
   params: Promise<{ id: string }>;
@@ -154,8 +155,18 @@ export default async function AdminPatientTreatmentPage({
               Tratamiento finalizado
             </h2>
             <p className="mt-3 text-sm text-slate-700">
-              Finalización: {formatDateDisplay(patient.latestEpisode?.endDate)}
+              Tratamiento finalizado el {formatDateDisplay(patient.latestEpisode?.endDate)}
             </p>
+            {patient.latestEpisode?.closureReason ? (
+              <p className="mt-1 text-sm text-slate-700">
+                Motivo: {EPISODE_OF_CARE_CLOSURE_REASON_LABELS[patient.latestEpisode.closureReason]}
+              </p>
+            ) : null}
+            {patient.latestEpisode?.closureDetail ? (
+              <p className="mt-1 text-sm text-slate-700">
+                Detalle: {patient.latestEpisode.closureDetail}
+              </p>
+            ) : null}
             <p className="mt-2 text-sm text-slate-700">
               Este tratamiento ya está cerrado. Si hace falta continuar, podés iniciar un nuevo tratamiento.
             </p>

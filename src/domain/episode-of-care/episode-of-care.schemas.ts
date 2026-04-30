@@ -1,7 +1,9 @@
 import type {
+  EpisodeOfCareClosureReason,
   FinishEpisodeOfCareInput,
   StartEpisodeOfCareInput,
 } from "@/domain/episode-of-care/episode-of-care.types";
+import { EPISODE_OF_CARE_CLOSURE_REASONS } from "@/domain/episode-of-care/episode-of-care.types";
 
 function assertObject(input: unknown, schemaName: string): Record<string, unknown> {
   if (typeof input !== "object" || input === null) {
@@ -74,13 +76,33 @@ export const startEpisodeOfCareSchema = {
     };
   },
 };
+function normalizeRequiredClosureReason(value: unknown): EpisodeOfCareClosureReason {
+  const normalized = normalizeRequiredString(value, "closureReason");
+
+  if (!EPISODE_OF_CARE_CLOSURE_REASONS.includes(normalized as EpisodeOfCareClosureReason)) {
+    throw new Error("closureReason: seleccioná un motivo de finalización.");
+  }
+
+  return normalized as EpisodeOfCareClosureReason;
+}
+
 export const finishEpisodeOfCareSchema = {
   parse(input: unknown): FinishEpisodeOfCareInput {
     const record = assertObject(input, "finishEpisodeOfCareSchema");
+    const closureReason = normalizeRequiredClosureReason(record.closureReason);
+    const closureDetail = normalizeOptionalString(record.closureDetail);
+
+    if (closureReason === "other" && !closureDetail) {
+      throw new Error('closureDetail: indicá un detalle para el motivo "Otro".');
+    }
 
     return {
       patientId: normalizeRequiredString(record.patientId, "patientId"),
       endDate: normalizeRequiredIsoDate(record.endDate, "endDate"),
+      closureReason,
+      closureDetail,
     };
   },
 };
+
+

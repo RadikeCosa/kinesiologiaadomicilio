@@ -16,6 +16,7 @@ import {
 } from "@/lib/patient-admin-display";
 
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
+import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
 
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
@@ -98,6 +99,28 @@ function getNextStepSuggestion(input: {
 
   return "Registrá la primera solicitud de atención.";
 }
+
+function getLatestServiceRequestSummary(serviceRequestContext: Awaited<ReturnType<typeof loadPatientHubServiceRequestContext>> | null): string | null {
+  if (!serviceRequestContext?.latestClosedRequestStatus || !serviceRequestContext.latestClosedRequestReason) {
+    return null;
+  }
+
+  const statusLabel = serviceRequestContext.latestClosedRequestStatus === "closed_without_treatment"
+    ? "No inició"
+    : "Cancelada";
+
+  return `Última solicitud: ${statusLabel} — Motivo: ${serviceRequestContext.latestClosedRequestReason}`;
+}
+
+function getLatestEpisodeSummary(patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>): string | null {
+  if (patient.latestEpisode?.status !== "finished" || !patient.latestEpisode.closureReason) {
+    return null;
+  }
+
+  const reasonLabel = EPISODE_OF_CARE_CLOSURE_REASON_LABELS[patient.latestEpisode.closureReason];
+
+  return `Último tratamiento: finalizado — Motivo: ${reasonLabel}`;
+}
 export default async function AdminPatientDetailPage({
   params,
 }: AdminPatientDetailPageProps) {
@@ -113,6 +136,8 @@ export default async function AdminPatientDetailPage({
   const mapsHref = patient ? buildGoogleMapsSearchHref(patient.address) : null;
   const addressLabel = patient ? formatAddressDisplay(patient.address) : null;
   const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
+  const latestServiceRequestSummary = getLatestServiceRequestSummary(serviceRequestContext);
+  const latestEpisodeSummary = patient ? getLatestEpisodeSummary(patient) : null;
   const nextStepSuggestion = patient
     ? getNextStepSuggestion({
         hasActiveEpisode: Boolean(patient.activeEpisode),
@@ -162,6 +187,14 @@ export default async function AdminPatientDetailPage({
                   </p>
                 ) : null}
 
+                {latestEpisodeSummary ? (
+                  <p className="text-xs text-slate-500">{latestEpisodeSummary}</p>
+                ) : null}
+
+                {latestServiceRequestSummary ? (
+                  <p className="text-xs text-slate-500">{latestServiceRequestSummary}</p>
+                ) : null}
+
                 {nextStepSuggestion ? (
                   <p className="mt-2 rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1.5 text-xs font-medium text-sky-900">
                     Siguiente paso sugerido: {nextStepSuggestion}
@@ -179,7 +212,7 @@ export default async function AdminPatientDetailPage({
                     }`}
                     href={`/admin/patients/${patient.id}/encounters`}
                   >
-                    Gestión Clínica
+                    Visitas
                   </Link>
                   <Link
                     className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${

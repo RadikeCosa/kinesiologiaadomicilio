@@ -35,6 +35,8 @@ export interface PatientHubServiceRequestContext {
   hasServiceRequests: boolean;
   hasInReview: boolean;
   pendingAcceptedServiceRequestId?: string;
+  latestClosedRequestStatus?: "closed_without_treatment" | "cancelled";
+  latestClosedRequestReason?: string;
 }
 
 export async function loadPatientHubServiceRequestContext(patientId: string): Promise<PatientHubServiceRequestContext> {
@@ -45,10 +47,15 @@ export async function loadPatientHubServiceRequestContext(patientId: string): Pr
       hasServiceRequests: false,
       hasInReview: false,
       pendingAcceptedServiceRequestId: undefined,
+      latestClosedRequestStatus: undefined,
+      latestClosedRequestReason: undefined,
     };
   }
 
   const hasInReview = serviceRequests.some((serviceRequest) => serviceRequest.status === "in_review");
+  const latestClosedRequest = serviceRequests.find((serviceRequest) =>
+    serviceRequest.status === "closed_without_treatment" || serviceRequest.status === "cancelled",
+  );
   const acceptedServiceRequests = serviceRequests.filter((serviceRequest) => serviceRequest.status === "accepted");
 
   for (const serviceRequest of acceptedServiceRequests) {
@@ -59,6 +66,10 @@ export async function loadPatientHubServiceRequestContext(patientId: string): Pr
         hasServiceRequests: true,
         hasInReview,
         pendingAcceptedServiceRequestId: serviceRequest.id,
+        latestClosedRequestStatus: latestClosedRequest?.status === "closed_without_treatment" || latestClosedRequest?.status === "cancelled"
+          ? latestClosedRequest.status
+          : undefined,
+        latestClosedRequestReason: latestClosedRequest?.closedReasonText,
       };
     }
   }
@@ -67,6 +78,10 @@ export async function loadPatientHubServiceRequestContext(patientId: string): Pr
     hasServiceRequests: true,
     hasInReview,
     pendingAcceptedServiceRequestId: undefined,
+    latestClosedRequestStatus: latestClosedRequest?.status === "closed_without_treatment" || latestClosedRequest?.status === "cancelled"
+      ? latestClosedRequest.status
+      : undefined,
+    latestClosedRequestReason: latestClosedRequest?.closedReasonText,
   };
 }
 export function sortServiceRequestsByRequestedAtDesc(serviceRequests: ServiceRequest[]): ServiceRequest[] {

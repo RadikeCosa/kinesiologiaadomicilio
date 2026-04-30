@@ -40,6 +40,8 @@ function mockNoServiceRequestContext() {
     hasServiceRequests: false,
     hasInReview: false,
     pendingAcceptedServiceRequestId: undefined,
+    latestClosedRequestStatus: undefined,
+    latestClosedRequestReason: undefined,
   });
 }
 
@@ -67,7 +69,7 @@ describe("/admin/patients/[id] page", () => {
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Gestión Clínica");
+    expect(html).toContain("Visitas");
     expect(html).toContain("Gestión Administrativa");
     expect(html).toContain("Siguiente paso sugerido: Registrá la primera solicitud de atención.");
 
@@ -103,7 +105,7 @@ describe("/admin/patients/[id] page", () => {
   });
 
   it("shows next-step suggestion for in_review requests", async () => {
-    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: true, pendingAcceptedServiceRequestId: undefined });
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: true, pendingAcceptedServiceRequestId: undefined, latestClosedRequestStatus: undefined, latestClosedRequestReason: undefined });
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient({ operationalStatus: "ready_to_start" }));
 
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
@@ -113,7 +115,7 @@ describe("/admin/patients/[id] page", () => {
   });
 
   it("shows next-step suggestion for accepted pending treatment", async () => {
-    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: false, pendingAcceptedServiceRequestId: "sr-1" });
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: false, pendingAcceptedServiceRequestId: "sr-1", latestClosedRequestStatus: undefined, latestClosedRequestReason: undefined });
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient({ operationalStatus: "ready_to_start" }));
 
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
@@ -123,7 +125,7 @@ describe("/admin/patients/[id] page", () => {
   });
 
   it("shows next-step suggestion for finished treatment without useful service request", async () => {
-    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: false, pendingAcceptedServiceRequestId: undefined });
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: false, pendingAcceptedServiceRequestId: undefined, latestClosedRequestStatus: undefined, latestClosedRequestReason: undefined });
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient({
       operationalStatus: "finished_treatment",
       latestEpisode: { id: "ep-1", patientId: "pat-1", status: "finished", startDate: "2026-01-01", endDate: "2026-02-01" },
@@ -157,4 +159,33 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Paciente no encontrado");
     expect(html).toContain("No se encontró el paciente solicitado.");
   });
+
+
+  it("renders compact operational reasons for latest finished treatment and latest closed request", async () => {
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({
+      hasServiceRequests: true,
+      hasInReview: false,
+      pendingAcceptedServiceRequestId: undefined,
+      latestClosedRequestStatus: "closed_without_treatment",
+      latestClosedRequestReason: "Motivos económicos",
+    });
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient({
+      operationalStatus: "finished_treatment",
+      latestEpisode: {
+        id: "ep-1",
+        patientId: "pat-1",
+        status: "finished",
+        startDate: "2026-01-01",
+        endDate: "2026-02-01",
+        closureReason: "treatment_completed",
+      },
+    }));
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Último tratamiento: finalizado — Motivo: Tratamiento completado");
+    expect(html).toContain("Última solicitud: No inició — Motivo: Motivos económicos");
+  });
+
 });

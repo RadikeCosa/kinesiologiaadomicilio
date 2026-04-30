@@ -46,11 +46,15 @@ describe("episode-of-care.schemas", () => {
     const parsed = finishEpisodeOfCareSchema.parse({
       patientId: " pat-001 ",
       endDate: " 2026-04-20 ",
+      closureReason: " treatment_completed ",
+      closureDetail: "  Alta funcional  ",
     });
 
     expect(parsed).toEqual({
       patientId: "pat-001",
       endDate: "2026-04-20",
+      closureReason: "treatment_completed",
+      closureDetail: "Alta funcional",
     });
   });
 
@@ -66,6 +70,7 @@ describe("episode-of-care.schemas", () => {
       finishEpisodeOfCareSchema.parse({
         patientId: "pat-001",
         endDate: "2026-02-31",
+        closureReason: "treatment_completed",
       }),
     ).toThrow("endDate: formato inválido (YYYY-MM-DD).");
 
@@ -89,6 +94,7 @@ describe("episode-of-care.schemas", () => {
       finishEpisodeOfCareSchema.parse({
         patientId: "pat-001",
         endDate: "",
+        closureReason: "treatment_completed",
       }),
     ).toThrow("endDate: es obligatorio.");
   });
@@ -98,4 +104,21 @@ describe("episode-of-care.schemas", () => {
       "startEpisodeOfCareSchema: se esperaba un objeto.",
     );
   });
+});
+
+
+it("requires closureDetail for other", () => {
+  expect(() => finishEpisodeOfCareSchema.parse({
+    patientId: "pat-001",
+    endDate: "2026-04-20",
+    closureReason: "other",
+  })).toThrow('closureDetail: indicá un detalle para el motivo "Otro".');
+});
+
+it("rejects invalid closureReason", () => {
+  expect(() => finishEpisodeOfCareSchema.parse({
+    patientId: "pat-001",
+    endDate: "2026-04-20",
+    closureReason: "invalid",
+  })).toThrow("closureReason: seleccioná un motivo de finalización.");
 });

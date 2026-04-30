@@ -53,7 +53,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (listado y corrección rápida).
 - El registro de visita se realiza en `/admin/patients/[id]/encounters/new`.
 - El acceso desde `/encounters` hacia `/treatment` es secundario y compacto (navegación de apoyo, no CTA principal).
-- En `/admin/patients/[id]/treatment` domina la gestión de tratamiento (inicio o finalización según estado).
+- En `/admin/patients/[id]/treatment` domina la gestión de tratamiento (inicio o finalización según estado), y el motivo de cierre se presenta como contexto operativo compacto.
 - El lenguaje visible al usuario prioriza términos operativos de producto (“tratamiento”, “visitas”).
 - Los tecnicismos (`EpisodeOfCare`, `Encounter`) se reservan para soporte/aclaración cuando aportan contexto.
 - En `/encounters` se permite contexto de tratamiento **compacto** (solo informativo), sin gestión inline.
@@ -90,7 +90,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - ficha consolidada de paciente en `/admin/patients/[id]` como hub (incluye visualización de dirección, `gender`, `birthDate` y navegación a gestión clínica/administrativa);
 - superficie administrativa acotada en `/admin/patients/[id]/administrative` con lectura + acciones (incluye edición explícita de dirección, `gender`, `birthDate` y datos no clínicos);
 - en `/admin/patients/[id]/administrative`, las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse con formulario mínimo embebido (fecha, motivo y datos básicos de quién consulta: relación + nombre) y resolverse administrativamente (`Aceptar`, `No inició`, `Cancelar`);
-- al cerrar como `No inició` o `Cancelar`, la UI administrativa exige motivo y lo muestra en listado cuando existe;
+- al cerrar como `No inició` o `Cancelar`, la UI administrativa exige motivo y lo muestra en listado cuando existe, con copy específico por estado y jerarquía visual compacta;
 - el teléfono operativo y el domicilio de atención pertenecen a los datos administrativos del paciente (no al formulario normal de alta de solicitud);
 - registrar solicitudes no inicia tratamiento por sí mismo; en el flujo normal, `Aceptar e iniciar tratamiento` crea el episodio vinculado y luego la navegación recomendada continúa en `/encounters`;
 - el formulario de solicitud conserva campos propios mínimos (fecha, motivo y datos básicos de quién consulta) y puede mostrar/completar en contexto datos administrativos requeridos para iniciar tratamiento (domicilio y teléfonos);
@@ -103,7 +103,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - visitas siguen dependiendo solo de `EpisodeOfCare` activo y `PatientOperationalStatus` no deriva de `ServiceRequest`.
 - gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
   - inicio de tratamiento;
-  - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo);
+  - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo) con motivo obligatorio y detalle opcional;
+  - los motivos de finalización se muestran como contexto operativo del ciclo (no historia clínica longitudinal rica).
 - la gestión de tratamiento no vive inline en `/admin/patients/[id]/encounters`;
 - el DNI es un dato administrativo opcional: se normaliza y persiste como identificador cuando está disponible, pero no bloquea el inicio de tratamiento;
 - para iniciar tratamiento se requiere una solicitud de atención aceptada, perteneciente al paciente y no usada previamente;

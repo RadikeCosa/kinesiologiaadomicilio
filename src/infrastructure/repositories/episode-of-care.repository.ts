@@ -109,6 +109,8 @@ export async function finishActiveEpisodeOfCare(input: FinishEpisodeOfCareInput)
   const existing = await fhirClient.get<FhirEpisodeOfCare>(`EpisodeOfCare/${activeEpisode.id}`);
   const payload = applyFinishEpisodeOfCareToFhir(existing, {
     endDate: input.endDate,
+    closureReason: input.closureReason,
+    closureDetail: input.closureDetail,
   });
   const updated = await fhirClient.put<FhirEpisodeOfCare>(`EpisodeOfCare/${activeEpisode.id}`, payload);
 

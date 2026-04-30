@@ -96,7 +96,7 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("Motivo por el que no inició");
+    expect(html).toContain("Motivo de no inicio");
     expect(html).toContain("No requiere tratamiento");
     expect(html).not.toContain("Iniciar tratamiento");
   });
