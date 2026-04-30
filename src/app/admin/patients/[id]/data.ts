@@ -32,6 +32,15 @@ export interface TreatmentServiceRequestContext {
 }
 export interface ServiceRequestHistoryItem {
   serviceRequest: ServiceRequest;
+  linkedEpisode?: {
+    id: string;
+    status: string;
+    startDate?: string;
+    endDate?: string;
+    closureReason?: string;
+    closureReasonLabel?: string;
+    closureDetail?: string;
+  };
   linkedEpisodeOfCareId?: string;
   linkedEpisodeOfCareStartDate?: string;
   linkedEpisodeOfCareEndDate?: string;
@@ -63,8 +72,9 @@ export interface PatientHubServiceRequestContext {
 }
 export type ServiceRequestDisplayStatus =
   | "in_review"
-  | "accepted_linked_to_treatment"
   | "accepted_pending_treatment"
+  | "accepted_linked_active_treatment"
+  | "accepted_linked_finished_treatment"
   | "closed_without_treatment"
   | "cancelled"
   | "entered_in_error";
@@ -90,10 +100,14 @@ export function isOperationalPendingServiceRequest(input: {
 
 export function getServiceRequestDisplayStatus(input: {
   status: ServiceRequest["status"];
-  hasIncomingReferralLink: boolean;
+  linkedEpisodeStatus?: string;
 }): ServiceRequestDisplayStatus {
-  if (input.hasIncomingReferralLink) {
-    return "accepted_linked_to_treatment";
+  if (input.status === "accepted" && input.linkedEpisodeStatus === "finished") {
+    return "accepted_linked_finished_treatment";
+  }
+
+  if (input.status === "accepted" && input.linkedEpisodeStatus) {
+    return "accepted_linked_active_treatment";
   }
 
   if (input.status === "accepted") {
@@ -201,9 +215,20 @@ export async function loadPatientServiceRequestHistoryContext(patientId: string)
       linkedEpisodeOfCareId: linkedEpisode?.id,
       linkedEpisodeOfCareStartDate: linkedEpisode?.startDate,
       linkedEpisodeOfCareEndDate: linkedEpisode?.endDate,
+      linkedEpisode: linkedEpisode
+        ? {
+            id: linkedEpisode.id,
+            status: linkedEpisode.status,
+            startDate: linkedEpisode.startDate,
+            endDate: linkedEpisode.endDate,
+            closureReason: linkedEpisode.closureReason,
+            closureReasonLabel: linkedEpisode.closureReason,
+            closureDetail: linkedEpisode.closureDetail,
+          }
+        : undefined,
       displayStatus: getServiceRequestDisplayStatus({
         status: serviceRequest.status,
-        hasIncomingReferralLink: linkedEpisodes.length > 0,
+        linkedEpisodeStatus: linkedEpisode?.status,
       }),
       startedTreatment: linkedEpisodes.length > 0,
       isPendingOperational: isOperationalPendingServiceRequest({

@@ -99,7 +99,8 @@ describe("ServiceRequestStatusActions", () => {
       "cancel",
     ]);
     expect(getServiceRequestStatusActions("accepted_pending_treatment")).toEqual(["start_treatment_legacy"]);
-    expect(getServiceRequestStatusActions("accepted_linked_to_treatment")).toEqual([]);
+    expect(getServiceRequestStatusActions("accepted_linked_active_treatment")).toEqual([]);
+    expect(getServiceRequestStatusActions("accepted_linked_finished_treatment")).toEqual([]);
     expect(getServiceRequestStatusActions("closed_without_treatment")).toEqual([]);
     expect(getServiceRequestStatusActions("cancelled")).toEqual([]);
     expect(getServiceRequestStatusActions("entered_in_error")).toEqual([]);
