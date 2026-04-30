@@ -53,6 +53,32 @@ function findFirstReasonText(reasonCode?: FhirServiceRequest["reasonCode"]): str
   return "";
 }
 
+function extractClosedReasonText(statusReason?: FhirServiceRequest["statusReason"]): string | undefined {
+  const statusReasonText = normalizeOptionalString(statusReason?.text);
+  if (statusReasonText) {
+    return statusReasonText;
+  }
+
+  const coding = statusReason?.coding;
+  if (!coding?.length) {
+    return undefined;
+  }
+
+  for (const item of coding) {
+    const displayText = normalizeOptionalString(item.display);
+    if (displayText) {
+      return displayText;
+    }
+
+    const codedText = normalizeOptionalString(item.text);
+    if (codedText) {
+      return codedText;
+    }
+  }
+
+  return undefined;
+}
+
 function resolveRevokedDomainStatus(resource: Pick<FhirServiceRequest, "statusReason" | "note">): ServiceRequest["status"] {
   const statusReasonText = normalizeOptionalString(resource.statusReason?.text)?.toLowerCase();
   const noteText = resource.note
@@ -123,7 +149,7 @@ export function mapFhirServiceRequestToDomain(resource: FhirServiceRequest): Ser
     requesterDisplay: normalizeOptionalString(resource.requester?.display),
     reasonText: findFirstReasonText(resource.reasonCode),
     status: mapFhirServiceRequestStatusToDomainStatus(resource),
-    closedReasonText: normalizeOptionalString(resource.statusReason?.text),
+    closedReasonText: extractClosedReasonText(resource.statusReason),
     reportedDiagnosisText: noteFields.reportedDiagnosisText,
     requesterContact: noteFields.requesterContact,
     notes: noteFields.notes,

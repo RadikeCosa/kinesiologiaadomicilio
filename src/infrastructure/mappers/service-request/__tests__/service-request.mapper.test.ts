@@ -370,6 +370,30 @@ describe("service-request mappers", () => {
     expect(mapped.requesterType).toBeUndefined();
   });
 
+  it("falls back to statusReason.coding display/text when statusReason.text is missing", () => {
+    const mappedFromDisplay = mapFhirServiceRequestToDomain({
+      resourceType: "ServiceRequest",
+      id: "sr-coding-display",
+      status: "revoked",
+      subject: { reference: "Patient/pat-2" },
+      authoredOn: "2026-04-28",
+      reasonCode: [{ text: "Dolor de rodilla" }],
+      statusReason: { coding: [{ display: "Paciente derivado a otra cobertura" }] },
+    });
+    const mappedFromText = mapFhirServiceRequestToDomain({
+      resourceType: "ServiceRequest",
+      id: "sr-coding-text",
+      status: "revoked",
+      subject: { reference: "Patient/pat-2" },
+      authoredOn: "2026-04-28",
+      reasonCode: [{ text: "Dolor de rodilla" }],
+      statusReason: { coding: [{ text: "Motivo alternativo" }] },
+    });
+
+    expect(mappedFromDisplay.closedReasonText).toBe("Paciente derivado a otra cobertura");
+    expect(mappedFromText.closedReasonText).toBe("Motivo alternativo");
+  });
+
   it("maps entered-in-error to entered_in_error", () => {
     expect(
       mapFhirServiceRequestStatusToDomainStatus({

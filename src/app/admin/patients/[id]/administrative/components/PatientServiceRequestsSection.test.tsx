@@ -160,4 +160,31 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("Motivo no registrado");
   });
 
+  it("renders linked treatment state and hides pending/actions for linked in_review safeguard", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientServiceRequestsSection, {
+        patientId: "pat-12",
+        serviceRequests: [
+          { id: "sr-linked", patientId: "pat-12", requestedAt: "2026-04-21", reasonText: "C", status: "in_review" },
+        ],
+        activeServiceRequest: null,
+        historicalServiceRequests: [
+          {
+            serviceRequest: { id: "sr-linked", patientId: "pat-12", requestedAt: "2026-04-21", reasonText: "C", status: "in_review" },
+            displayStatus: "accepted_linked_to_treatment",
+            startedTreatment: true,
+            isPendingOperational: false,
+            linkedEpisodeOfCareId: "ep-1",
+          },
+        ],
+      }),
+    );
+
+    expect(html).toContain("Aceptada — tratamiento iniciado.");
+    expect(html).not.toContain("Pendiente de iniciar tratamiento.");
+    expect(html).not.toContain("Aceptar e iniciar tratamiento");
+    expect(html).not.toContain("No inició");
+    expect(html).not.toContain("Cancelar");
+  });
+
 });

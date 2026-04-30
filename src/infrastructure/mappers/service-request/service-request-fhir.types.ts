@@ -13,6 +13,10 @@ export interface FhirServiceRequest extends FhirResource {
   }>;
   statusReason?: {
     text?: string;
+    coding?: Array<{
+      display?: string;
+      text?: string;
+    }>;
   };
   requester?: {
     display?: string;

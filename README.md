@@ -66,10 +66,11 @@ El proyecto está en etapa **híbrida transicional**:
 - Política vigente `single-use`: una solicitud `accepted` ya vinculada a algún `EpisodeOfCare` no puede reutilizarse para iniciar otro ciclo; se requiere nueva solicitud.
 - `/admin/patients/[id]/administrative` separa solicitud activa a resolver (si existe) e histórico compacto de solicitudes con resultado operativo y vínculo a tratamiento cuando aplica.
 - Regla operacional única de solicitudes:
-  - `in_review` => pendiente operativa;
-  - `accepted` + vínculo `incoming-referral` => `Aceptada — tratamiento iniciado` (histórica, sin acciones de resolución);
+  - si existe vínculo real `incoming-referral` con `EpisodeOfCare`, la solicitud se clasifica como `Aceptada — tratamiento iniciado` (histórica, sin acciones de resolución), incluso con normalización defensiva del status leído;
+  - `in_review` sin vínculo => pendiente operativa;
   - `accepted` sin vínculo => `Pendiente de iniciar tratamiento` (compatibilidad transicional);
   - `closed_without_treatment`/`cancelled` => históricas terminales, no compiten como pendientes.
+- Los motivos de `No inició`/`Cancelar` se leen primero desde `statusReason.text` y usan fallback controlado del `CodeableConcept` disponible (por ejemplo `statusReason.coding[].display`).
 - Durante tratamiento activo, crear una nueva solicitud se mantiene como acción administrativa secundaria (no CTA clínico principal del hub).
 - `/admin/patients/[id]/treatment` mantiene el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen si existe).
 - `/admin/patients/[id]/treatment` funciona como superficie de gestión del tratamiento actual y también de historial compacto de ciclos cerrados; sin tratamiento activo pero con ciclos finalizados, prioriza el historial y ofrece acceso directo al historial de solicitudes en `/administrative#service-requests`.

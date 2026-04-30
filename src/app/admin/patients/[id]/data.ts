@@ -73,6 +73,10 @@ export function isOperationalPendingServiceRequest(input: {
   status: ServiceRequest["status"];
   hasIncomingReferralLink: boolean;
 }): boolean {
+  if (input.hasIncomingReferralLink) {
+    return false;
+  }
+
   if (input.status === "in_review") {
     return true;
   }
@@ -88,8 +92,12 @@ export function getServiceRequestDisplayStatus(input: {
   status: ServiceRequest["status"];
   hasIncomingReferralLink: boolean;
 }): ServiceRequestDisplayStatus {
+  if (input.hasIncomingReferralLink) {
+    return "accepted_linked_to_treatment";
+  }
+
   if (input.status === "accepted") {
-    return input.hasIncomingReferralLink ? "accepted_linked_to_treatment" : "accepted_pending_treatment";
+    return "accepted_pending_treatment";
   }
 
   return input.status;
@@ -183,7 +191,7 @@ export async function loadPatientServiceRequestContext(patientId: string): Promi
 export async function loadPatientServiceRequestHistoryContext(patientId: string): Promise<PatientServiceRequestHistoryContext> {
   const { serviceRequests } = await loadPatientServiceRequestContext(patientId);
   const enriched = await Promise.all(serviceRequests.map(async (serviceRequest) => {
-    const linkedEpisodes = serviceRequest.status === "accepted"
+    const linkedEpisodes = serviceRequest.status === "accepted" || serviceRequest.status === "in_review"
       ? await listEpisodeOfCareByIncomingReferral(serviceRequest.id)
       : [];
     const linkedEpisode = linkedEpisodes[0];
