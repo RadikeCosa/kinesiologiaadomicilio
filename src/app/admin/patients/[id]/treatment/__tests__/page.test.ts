@@ -7,6 +7,7 @@ import AdminPatientTreatmentPage from "@/app/admin/patients/[id]/treatment/page"
 
 const loadPatientDetailMock = vi.hoisted(() => vi.fn());
 const loadTreatmentServiceRequestContextMock = vi.hoisted(() => vi.fn());
+const loadTreatmentEpisodeHistoryContextMock = vi.hoisted(() => vi.fn());
 (globalThis as { React?: typeof React }).React = React;
 
 vi.mock("next/link", () => ({
@@ -17,6 +18,7 @@ vi.mock("next/link", () => ({
 vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadPatientDetail: loadPatientDetailMock,
   loadTreatmentServiceRequestContext: loadTreatmentServiceRequestContextMock,
+  loadTreatmentEpisodeHistoryContext: loadTreatmentEpisodeHistoryContextMock,
 }));
 
 vi.mock("@/app/admin/patients/[id]/components/StartEpisodeOfCareForm", () => ({
@@ -46,10 +48,12 @@ describe("/admin/patients/[id]/treatment page", () => {
   afterEach(() => {
     vi.useRealTimers();
     loadTreatmentServiceRequestContextMock.mockReset();
+    loadTreatmentEpisodeHistoryContextMock.mockReset();
   });
 
   it("shows contextual block when serviceRequestId is valid", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
     loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
       serviceRequestId: "sr-1",
       isValid: true,
@@ -84,6 +88,7 @@ describe("/admin/patients/[id]/treatment page", () => {
 
   it("does not show start form without serviceRequestId", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
     loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
       serviceRequestId: undefined,
       isValid: false,
@@ -103,6 +108,7 @@ describe("/admin/patients/[id]/treatment page", () => {
   });
   it("shows warning and keeps legacy start when serviceRequestId is invalid", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
     loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
       serviceRequestId: undefined,
       isValid: false,
@@ -125,6 +131,7 @@ describe("/admin/patients/[id]/treatment page", () => {
 
   it("shows already-used warning and does not pass serviceRequestId to start form", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
     loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
       serviceRequestId: undefined,
       isValid: false,
@@ -160,6 +167,7 @@ describe("/admin/patients/[id]/treatment page", () => {
         startDate: "2026-04-01",
       },
     });
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
     loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
       serviceRequestId: "sr-1",
       isValid: true,

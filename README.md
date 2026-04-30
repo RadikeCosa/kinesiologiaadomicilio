@@ -59,10 +59,13 @@ El proyecto está en etapa **híbrida transicional**:
 - Registrar solicitudes de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
 - La resolución general de solicitudes puede cerrarlas o cancelarlas sin iniciar tratamiento.
 - La acción específica `Aceptar e iniciar tratamiento` desde `/administrative` sí marca la solicitud como `accepted` y crea el `EpisodeOfCare` vinculado.
+- Los cambios de estado de solicitud revalidan `/admin/patients`, `/admin/patients/[id]`, `/admin/patients/[id]/administrative` y `/admin/patients/[id]/treatment` para evitar vistas stale.
 - El formulario de solicitud mantiene sus campos propios mínimos (fecha, motivo y datos básicos de quién consulta) y puede completar en contexto domicilio/teléfonos administrativos cuando faltan.
 - Esos datos contextuales se guardan en `Patient` (no en `ServiceRequest`) para anticipar faltantes antes de `Aceptar e iniciar tratamiento`.
 - Al iniciar tratamiento desde ese contexto, el `EpisodeOfCare` se crea vinculado a la solicitud mediante `referralRequest` (`ServiceRequest/{id}`), siempre que la solicitud accepted sea válida, pertenezca al paciente y no haya sido usada previamente; sin `serviceRequestId` no se permite iniciar tratamiento.
 - Política vigente `single-use`: una solicitud `accepted` ya vinculada a algún `EpisodeOfCare` no puede reutilizarse para iniciar otro ciclo; se requiere nueva solicitud.
+- `/admin/patients/[id]/administrative` separa solicitud activa a resolver (si existe) e histórico compacto de solicitudes con resultado operativo y vínculo a tratamiento cuando aplica.
+- `/admin/patients/[id]/treatment` mantiene el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen si existe).
 - Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad para pacientes con `EpisodeOfCare` activo o finalizado basadas en `birthDate` válido.
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
@@ -81,7 +84,7 @@ El proyecto está en etapa **híbrida transicional**:
   - CTAs principales preservados: `Ver pacientes` y `Nuevo paciente`.
 - **Métricas incluidas**:
   - resumen operativo: total, en tratamiento activo, tratamiento finalizado, sin tratamiento iniciado;
-  - embudo de solicitudes: solicitudes en evaluación y aceptadas pendientes de tratamiento;
+  - embudo de solicitudes: solicitudes en evaluación y aceptadas pendientes de tratamiento (solo si no están vinculadas por incoming-referral);
   - regla: `sin tratamiento iniciado = preliminary + ready_to_start`;
   - edad (pacientes con tratamiento activo o finalizado): paciente más joven, paciente más viejo y promedio.
 - **Reglas de edad**:

@@ -207,16 +207,23 @@ export async function updatePatientServiceRequestStatusAction(
     }
 
     await updateServiceRequestStatus(parsedInput);
+    revalidatePath("/admin/patients");
+    revalidatePath(`/admin/patients/${patientId}`);
     revalidatePath(`/admin/patients/${patientId}/administrative`);
+    revalidatePath(`/admin/patients/${patientId}/treatment`);
 
     return {
       ok: true,
       message: buildUpdateServiceRequestStatusSuccessMessage(parsedInput.status),
     };
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error && error.message
+      ? error.message
+      : "No se pudo actualizar la solicitud de atención.";
+
     return {
       ok: false,
-      message: "No se pudo actualizar la solicitud de atención.",
+      message,
     };
   }
 }

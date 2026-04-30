@@ -99,8 +99,11 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `/treatment` conserva ownership de inicio/cierre y valida contexto de solicitud antes de iniciar;
 - al iniciar con solicitud válida, `EpisodeOfCare` se vincula por `referralRequest = ServiceRequest/{id}`;
 - política vigente `single-use`: una SR `accepted` ya vinculada por `incoming-referral` no puede iniciar otro tratamiento y `/treatment` solicita nueva solicitud para nuevo ciclo;
+- cambios de estado de solicitud revalidan superficies dependientes: listado (`/admin/patients`), hub (`/admin/patients/[id]`), administrativa y tratamiento;
 - solicitudes inválidas/no aceptadas/no pertenecientes no originan inicio; sin `serviceRequestId` válido tampoco se permite iniciar tratamiento;
 - visitas siguen dependiendo solo de `EpisodeOfCare` activo y `PatientOperationalStatus` no deriva de `ServiceRequest`.
+- en `/admin/patients/[id]/administrative` la UI separa solicitud activa a resolver e histórico compacto de solicitudes previas (incluye resultado operativo y señal de inicio de tratamiento cuando corresponde);
+- en `/admin/patients/[id]/treatment` la UI conserva el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen cuando existe);
 - gestión de tratamiento en superficie específica (`/admin/patients/[id]/treatment`):
   - inicio de tratamiento;
   - cierre formal de tratamiento (finalización de `EpisodeOfCare` activo) con motivo obligatorio y detalle opcional;

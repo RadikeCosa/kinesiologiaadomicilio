@@ -62,6 +62,18 @@ export async function getMostRecentEpisodeByPatientId(patientId: string): Promis
   return mostRecent ? mapFhirEpisodeOfCareToDomain(mostRecent) : null;
 }
 
+export async function listEpisodeOfCareByPatientId(patientId: string): Promise<EpisodeOfCare[]> {
+  if (!patientId.trim()) {
+    return [];
+  }
+
+  const query = buildEpisodeOfCareByPatientQuery(patientId);
+  const bundle = await fhirClient.get<FhirBundle<FhirEpisodeOfCare>>(buildSearchPath("EpisodeOfCare", query));
+  const episodes = extractResourcesByType<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
+
+  return episodes.map(mapFhirEpisodeOfCareToDomain);
+}
+
 
 export async function listEpisodeOfCareByIncomingReferral(serviceRequestId: string): Promise<EpisodeOfCare[]> {
   if (!serviceRequestId.trim()) {

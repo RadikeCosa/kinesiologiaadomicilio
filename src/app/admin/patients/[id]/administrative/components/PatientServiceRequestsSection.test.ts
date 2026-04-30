@@ -54,6 +54,7 @@ describe("PatientServiceRequestsSection", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-1",
+        pendingAcceptedServiceRequestId: "sr-3",
         serviceRequests: [
           {
             id: "sr-2",
@@ -105,8 +106,10 @@ describe("PatientServiceRequestsSection", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-9",
+        pendingAcceptedServiceRequestId: "sr-a",
         serviceRequests: [
           { id: "sr-a", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "A", status: "accepted" },
+          { id: "sr-a-used", patientId: "pat-9", requestedAt: "2026-04-20", reasonText: "AU", status: "accepted" },
           { id: "sr-r", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "R", status: "in_review" },
           { id: "sr-cw", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "CW", status: "closed_without_treatment" },
           { id: "sr-c", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "C", status: "cancelled" },
@@ -115,6 +118,7 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-        expect(html).toContain("Pendiente de iniciar tratamiento.");
-                      });
+    expect(html).toContain("Pendiente de iniciar tratamiento.");
+    expect(html).toContain("Aceptada — tratamiento iniciado.");
+  });
 });

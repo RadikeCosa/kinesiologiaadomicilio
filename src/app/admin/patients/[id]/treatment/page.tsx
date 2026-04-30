@@ -5,6 +5,7 @@ import { FinishEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/Fi
 import { StartEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/StartEpisodeOfCareForm";
 import {
   loadPatientDetail,
+  loadTreatmentEpisodeHistoryContext,
   loadTreatmentServiceRequestContext,
 } from "@/app/admin/patients/[id]/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
@@ -44,6 +45,7 @@ export default async function AdminPatientTreatmentPage({
         serviceRequestId: resolvedSearchParams?.serviceRequestId,
       })
     : { serviceRequestId: undefined, isValid: false, serviceRequest: undefined, state: "none", message: undefined };
+  const treatmentEpisodeHistory = patient ? await loadTreatmentEpisodeHistoryContext(patient.id) : [];
   const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
   const treatmentBadge = patient
     ? getTreatmentBadgePresentation(patient.operationalStatus)
@@ -206,6 +208,25 @@ export default async function AdminPatientTreatmentPage({
           </>
         )}
       </section>
+
+      {treatmentEpisodeHistory.length > 0 ? (
+        <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Historial de ciclos cerrados</h2>
+          <ul className="mt-3 space-y-2">
+            {treatmentEpisodeHistory.map((episode) => (
+              <li className="rounded border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" key={episode.id}>
+                <p>Inicio: {formatDateDisplay(episode.startDate)}</p>
+                <p>Fin: {episode.endDate ? formatDateDisplay(episode.endDate) : "Sin fecha registrada"}</p>
+                {episode.closureReason ? (
+                  <p>Motivo: {EPISODE_OF_CARE_CLOSURE_REASON_LABELS[episode.closureReason as keyof typeof EPISODE_OF_CARE_CLOSURE_REASON_LABELS] ?? episode.closureReason}</p>
+                ) : null}
+                {episode.closureDetail ? <p>Detalle: {episode.closureDetail}</p> : null}
+                {episode.serviceRequestId ? <p>Solicitud de origen: {episode.serviceRequestId}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </section>
   );
 }

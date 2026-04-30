@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { ServiceRequest } from "@/domain/service-request/service-request.types";
+import type { ServiceRequestHistoryItem } from "@/app/admin/patients/[id]/data";
 import { formatDateDisplay } from "@/lib/patient-admin-display";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
@@ -22,13 +23,16 @@ interface PatientServiceRequestsSectionProps {
   missingTreatmentRequirements?: string[];
   initialCreateOpen?: boolean;
   contextualMessage?: string;
+  pendingAcceptedServiceRequestId?: string;
+  activeServiceRequest?: ServiceRequestHistoryItem | null;
+  historicalServiceRequests?: ServiceRequestHistoryItem[];
 }
 
 export function getServiceRequestCreateFormVisibility(action: "open" | "cancel"): boolean {
   return action === "open";
 }
 
-export function PatientServiceRequestsSection({ patientId, serviceRequests, patientAdministrativeSnapshot, missingTreatmentRequirements = [], initialCreateOpen = false, contextualMessage }: PatientServiceRequestsSectionProps) {
+export function PatientServiceRequestsSection({ patientId, serviceRequests, patientAdministrativeSnapshot, missingTreatmentRequirements = [], initialCreateOpen = false, contextualMessage, pendingAcceptedServiceRequestId, activeServiceRequest = null, historicalServiceRequests = [] }: PatientServiceRequestsSectionProps) {
   const router = useRouter();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(initialCreateOpen);
   const { message, setMessage } = useFormFeedback();
@@ -95,9 +99,15 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, pati
           Registrá la primera solicitud para dejar asentado el motivo de consulta y avanzar con la evaluación.
         </p>
       ) : (
+        <>
+          {activeServiceRequest ? (
+            <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-900">
+              Solicitud activa a resolver: {formatDateDisplay(activeServiceRequest.serviceRequest.requestedAt)}.
+            </p>
+          ) : null}
         <ul className="mt-3 space-y-3">
           {serviceRequests.map((serviceRequest) => {
-            const isAccepted = serviceRequest.status === "accepted";
+            const isAcceptedPending = serviceRequest.status === "accepted" && serviceRequest.id === pendingAcceptedServiceRequestId;
             const isClosedState = serviceRequest.status === "closed_without_treatment" || serviceRequest.status === "cancelled";
 
             return (
@@ -109,8 +119,10 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, pati
                   <p className="text-xs text-slate-500">Solicitud del {formatDateDisplay(serviceRequest.requestedAt)}</p>
                 </div>
 
-                {isAccepted ? (
+                {isAcceptedPending ? (
                   <p className="mt-2 text-xs font-medium text-emerald-700">Pendiente de iniciar tratamiento.</p>
+                ) : serviceRequest.status === "accepted" ? (
+                  <p className="mt-2 text-xs font-medium text-emerald-700">Aceptada — tratamiento iniciado.</p>
                 ) : null}
 
                 <dl className="mt-2 grid gap-2 text-sm text-slate-800 sm:grid-cols-2">
@@ -160,6 +172,10 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, pati
             );
           })}
         </ul>
+          {historicalServiceRequests.length > 0 ? (
+            <p className="mt-2 text-xs text-slate-500">Histórico de solicitudes: {historicalServiceRequests.length}</p>
+          ) : null}
+        </>
       )}
     </section>
   );

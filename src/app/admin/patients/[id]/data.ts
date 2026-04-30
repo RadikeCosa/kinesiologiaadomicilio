@@ -4,6 +4,7 @@ import { mapEpisodeOfCareRead } from "@/infrastructure/mappers/episode-of-care/e
 import { mapPatientToDetailReadModel } from "@/infrastructure/mappers/patient/patient-read.mapper";
 import {
   getActiveEpisodeByPatientId,
+  listEpisodeOfCareByPatientId,
   getMostRecentEpisodeByPatientId,
   listEpisodeOfCareByIncomingReferral,
 } from "@/infrastructure/repositories/episode-of-care.repository";
@@ -29,6 +30,26 @@ export interface TreatmentServiceRequestContext {
   state: "none" | "invalid" | "valid" | "already_used";
   message?: string;
 }
+export interface ServiceRequestHistoryItem {
+  serviceRequest: ServiceRequest;
+  linkedEpisodeId?: string;
+  linkedEpisodeStartDate?: string;
+  linkedEpisodeEndDate?: string;
+  isPendingOperational: boolean;
+}
+export interface PatientServiceRequestHistoryContext {
+  activeServiceRequest: ServiceRequestHistoryItem | null;
+  historicalServiceRequests: ServiceRequestHistoryItem[];
+}
+
+export interface TreatmentEpisodeHistoryItem {
+  id: string;
+  startDate: string;
+  endDate?: string;
+  closureReason?: string;
+  closureDetail?: string;
+  serviceRequestId?: string;
+}
 
 
 export interface PatientHubServiceRequestContext {
@@ -37,6 +58,21 @@ export interface PatientHubServiceRequestContext {
   pendingAcceptedServiceRequestId?: string;
   latestClosedRequestStatus?: "closed_without_treatment" | "cancelled";
   latestClosedRequestReason?: string;
+}
+
+export function isOperationalPendingServiceRequest(input: {
+  status: ServiceRequest["status"];
+  hasIncomingReferralLink: boolean;
+}): boolean {
+  if (input.status === "in_review") {
+    return true;
+  }
+
+  if (input.status === "accepted") {
+    return !input.hasIncomingReferralLink;
+  }
+
+  return false;
 }
 
 export async function loadPatientHubServiceRequestContext(patientId: string): Promise<PatientHubServiceRequestContext> {
@@ -61,7 +97,10 @@ export async function loadPatientHubServiceRequestContext(patientId: string): Pr
   for (const serviceRequest of acceptedServiceRequests) {
     const linkedEpisodes = await listEpisodeOfCareByIncomingReferral(serviceRequest.id);
 
-    if (linkedEpisodes.length === 0) {
+    if (isOperationalPendingServiceRequest({
+      status: serviceRequest.status,
+      hasIncomingReferralLink: linkedEpisodes.length > 0,
+    })) {
       return {
         hasServiceRequests: true,
         hasInReview,
@@ -109,6 +148,48 @@ export async function loadPatientServiceRequestContext(patientId: string): Promi
     serviceRequests: orderedServiceRequests,
     latestServiceRequest: orderedServiceRequests[0] ?? null,
   };
+}
+
+export async function loadPatientServiceRequestHistoryContext(patientId: string): Promise<PatientServiceRequestHistoryContext> {
+  const { serviceRequests } = await loadPatientServiceRequestContext(patientId);
+  const enriched = await Promise.all(serviceRequests.map(async (serviceRequest) => {
+    const linkedEpisodes = serviceRequest.status === "accepted"
+      ? await listEpisodeOfCareByIncomingReferral(serviceRequest.id)
+      : [];
+    const linkedEpisode = linkedEpisodes[0];
+
+    return {
+      serviceRequest,
+      linkedEpisodeId: linkedEpisode?.id,
+      linkedEpisodeStartDate: linkedEpisode?.startDate,
+      linkedEpisodeEndDate: linkedEpisode?.endDate,
+      isPendingOperational: isOperationalPendingServiceRequest({
+        status: serviceRequest.status,
+        hasIncomingReferralLink: linkedEpisodes.length > 0,
+      }),
+    } satisfies ServiceRequestHistoryItem;
+  }));
+
+  const activeIndex = enriched.findIndex((item) => item.isPendingOperational);
+  const activeServiceRequest = activeIndex >= 0 ? enriched[activeIndex] : null;
+  const historicalServiceRequests = enriched.filter((_, index) => index !== activeIndex);
+
+  return { activeServiceRequest, historicalServiceRequests };
+}
+
+export async function loadTreatmentEpisodeHistoryContext(patientId: string): Promise<TreatmentEpisodeHistoryItem[]> {
+  const episodes = await listEpisodeOfCareByPatientId(patientId);
+  const finishedEpisodes = episodes.filter((episode) => episode.status === "finished");
+  return finishedEpisodes
+    .sort((a, b) => (b.endDate ?? b.startDate).localeCompare(a.endDate ?? a.startDate))
+    .map((episode) => ({
+      id: episode.id,
+      startDate: episode.startDate,
+      endDate: episode.endDate,
+      closureReason: episode.closureReason,
+      closureDetail: episode.closureDetail,
+      serviceRequestId: episode.serviceRequestId,
+    }));
 }
 
 export async function loadPatientAdministrativeContext(patientId: string): Promise<PatientAdministrativeReadContext> {
