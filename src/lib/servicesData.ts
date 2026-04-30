@@ -18,7 +18,7 @@ export const servicesData: Service[] = [
     title: "Adultos Mayores",
     shortTitle: "Adultos mayores",
     description:
-      "Atención kinesiológica para personas mayores que necesitan recuperar o mantener su movilidad, fuerza e independencia. Un acompañamiento pensado también para dar tranquilidad a la familia.",
+      "Atención kinesiológica y de fisioterapia a domicilio para personas mayores que necesitan recuperar o mantener su movilidad, fuerza e independencia. Un acompañamiento pensado también para dar tranquilidad a la familia.",
     whatsappMessage:
       "Hola Ramiro, quisiera consultar sobre kinesiología para adultos mayores a domicilio",
   },
@@ -34,7 +34,7 @@ export const servicesData: Service[] = [
     title: "Recuperación Funcional",
     shortTitle: "Recuperación funcional",
     description:
-      "Sesiones de kinesiología para adultos con dolor crónico, movilidad reducida o que buscan recuperar funcionalidad en su vida cotidiana.",
+      "Sesiones de kinesiología y rehabilitación a domicilio para adultos con dolor crónico, movilidad reducida o que buscan recuperar funcionalidad en su vida cotidiana.",
     whatsappMessage:
       "Hola Ramiro, quisiera consultar sobre kinesiología a domicilio",
   },

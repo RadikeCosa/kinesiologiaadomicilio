@@ -1,8 +1,8 @@
 export const SERVICES_PAGE_CONTENT = {
   intro: {
-    title: "Atención kinésica domiciliaria para recuperación, movilidad y autonomía",
+    title: "Servicios de kinesiología a domicilio en Neuquén",
     description:
-      "Brindamos atención kinésica en domicilio para adultos que necesitan recuperar funcionalidad, mejorar su movilidad y sostener su autonomía. Cada plan se define con evaluación inicial, seguimiento personalizado y criterio profesional en cada etapa.",
+      "Brindamos kinesiología a domicilio en Neuquén con un enfoque de rehabilitación a domicilio y fisioterapia a domicilio como complemento terapéutico. La atención está orientada a adultos y adultos mayores en postoperatorios, cuidados paliativos y recuperación funcional, con evaluación inicial y seguimiento personalizado en cada etapa.",
   },
   consultationCta: {
     title: "¿Tenés dudas sobre qué servicio necesitás?",
