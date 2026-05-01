@@ -60,6 +60,9 @@ El proyecto está en etapa **híbrida transicional**:
 - Registrar solicitudes de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
 - La resolución general de solicitudes puede cerrarlas o cancelarlas sin iniciar tratamiento.
 - La acción específica `Aceptar e iniciar tratamiento` desde `/administrative` sí marca la solicitud como `accepted` y crea el `EpisodeOfCare` vinculado.
+- Las acciones que cambian de contexto hacia `/encounters` usan feedback liviano por query param (`status`) para mantener confirmación en la pantalla destino.
+- `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/encounters?status=treatment-started`.
+- `Registrar visita` navega a `/admin/patients/[id]/encounters?status=encounter-created`.
 - Los cambios de estado de solicitud revalidan `/admin/patients`, `/admin/patients/[id]`, `/admin/patients/[id]/administrative` y `/admin/patients/[id]/treatment` para evitar vistas stale.
 - El formulario de solicitud mantiene sus campos propios mínimos (fecha, motivo y datos básicos de quién consulta) y puede completar en contexto domicilio/teléfonos administrativos cuando faltan.
 - Esos datos contextuales se guardan en `Patient` (no en `ServiceRequest`) para anticipar faltantes antes de `Aceptar e iniciar tratamiento`.

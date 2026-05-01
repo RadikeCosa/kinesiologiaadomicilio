@@ -135,7 +135,7 @@ describe("ServiceRequestStatusActions", () => {
   it("submit helper sends closed_without_treatment + reason payload", async () => {
     updatePatientServiceRequestStatusActionMock.mockResolvedValueOnce({
       ok: true,
-      message: "Solicitud cerrada sin iniciar tratamiento.",
+      message: "La solicitud se cerró como No inició.",
     });
 
     await submitServiceRequestStatusAction({
@@ -154,7 +154,7 @@ describe("ServiceRequestStatusActions", () => {
   it("submit helper sends cancelled + reason payload", async () => {
     updatePatientServiceRequestStatusActionMock.mockResolvedValueOnce({
       ok: true,
-      message: "Solicitud cancelada correctamente.",
+      message: "La solicitud fue cancelada.",
     });
 
     await submitServiceRequestStatusAction({
