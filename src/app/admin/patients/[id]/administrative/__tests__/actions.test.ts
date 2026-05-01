@@ -244,7 +244,7 @@ describe("updatePatientServiceRequestStatusAction", () => {
 
     expect(result).toEqual({
       ok: true,
-      message: "Solicitud cerrada sin iniciar tratamiento.",
+      message: "La solicitud se cerró como No inició.",
     });
     expect(updateServiceRequestStatus).toHaveBeenCalledWith({
       id: "sr-2",
@@ -282,7 +282,7 @@ describe("updatePatientServiceRequestStatusAction", () => {
 
     expect(result).toEqual({
       ok: true,
-      message: "Solicitud cancelada correctamente.",
+      message: "La solicitud fue cancelada.",
     });
     expect(updateServiceRequestStatus).toHaveBeenCalledWith({
       id: "sr-3",
@@ -463,7 +463,7 @@ describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
     expect(result).toEqual({
       ok: true,
       message: "Solicitud aceptada y tratamiento iniciado correctamente.",
-      redirectTo: "/admin/patients/pat-1/encounters",
+      redirectTo: "/admin/patients/pat-1/encounters?status=treatment-started",
     });
   });
 

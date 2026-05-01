@@ -84,7 +84,7 @@ describe("/admin/patients/[id]/encounters/new page", () => {
     expect(html).toContain("href=\"/admin/patients/pat-1/encounters\"");
     expect(html).toContain("EncounterCreateForm");
     expect(html).toContain("data-active-episode=\"epi-1\"");
-    expect(html).toContain("data-success-redirect=\"/admin/patients/pat-1/encounters\"");
+    expect(html).toContain("data-success-redirect=\"/admin/patients/pat-1/encounters?status=encounter-created\"");
     expect(html).toContain("data-treatment-href=\"/admin/patients/pat-1/treatment\"");
   });
 

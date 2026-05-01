@@ -14,6 +14,7 @@ import {
 
 interface AdminPatientEncountersPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ status?: string }>;
 }
 
 export async function generateMetadata({
@@ -61,8 +62,14 @@ function buildTreatmentMetadata(params: {
   };
 }
 
-export default async function AdminPatientEncountersPage({ params }: AdminPatientEncountersPageProps) {
+const ENCOUNTERS_STATUS_MESSAGES = {
+  "treatment-started": "Tratamiento iniciado. Ya podés registrar visitas.",
+  "encounter-created": "Visita registrada.",
+} as const;
+
+export default async function AdminPatientEncountersPage({ params, searchParams }: AdminPatientEncountersPageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
   const pageData = await loadPatientEncountersPageData(id);
   const patientAge = pageData
     ? calculateAgeFromBirthDate(pageData.patient.birthDate)
@@ -92,6 +99,9 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
     latestEpisodeStatus: pageData.mostRecentEpisode?.status,
     latestEpisodeEndDate: pageData.mostRecentEpisode?.endDate,
   });
+  const statusMessage = resolvedSearchParams?.status
+    ? ENCOUNTERS_STATUS_MESSAGES[resolvedSearchParams.status as keyof typeof ENCOUNTERS_STATUS_MESSAGES]
+    : undefined;
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -134,6 +144,11 @@ export default async function AdminPatientEncountersPage({ params }: AdminPatien
       </div>
 
       <p className="mt-2 text-sm text-slate-600">Registro y seguimiento de visitas del paciente.</p>
+      {statusMessage ? (
+        <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-2 text-sm text-emerald-900">
+          {statusMessage}
+        </p>
+      ) : null}
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">
         {pageData.patient.dni ? <span>DNI: {formatDniDisplay(pageData.patient.dni)}</span> : null}

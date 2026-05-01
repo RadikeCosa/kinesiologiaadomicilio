@@ -87,7 +87,7 @@ export default async function AdminPatientEncounterCreatePage({ params }: AdminP
       <EncounterCreateForm
         activeEpisodeId={pageData.activeEpisode?.id ?? null}
         patientId={pageData.patient.id}
-        successRedirectPath={`/admin/patients/${pageData.patient.id}/encounters`}
+        successRedirectPath={`/admin/patients/${pageData.patient.id}/encounters?status=encounter-created`}
         treatmentHref={`/admin/patients/${pageData.patient.id}/treatment`}
       />
     </section>

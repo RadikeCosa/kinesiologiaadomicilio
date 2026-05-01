@@ -93,6 +93,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - al cerrar como `No inició` o `Cancelar`, la UI administrativa exige motivo y lo muestra en listado cuando existe, con copy específico por estado y jerarquía visual compacta;
 - el teléfono operativo y el domicilio de atención pertenecen a los datos administrativos del paciente (no al formulario normal de alta de solicitud);
 - registrar solicitudes no inicia tratamiento por sí mismo; en el flujo normal, `Aceptar e iniciar tratamiento` crea el episodio vinculado y luego la navegación recomendada continúa en `/encounters`;
+- las acciones que redirigen a `/encounters` usan feedback liviano por query param (`status`) para preservar confirmación cross-route;
+- `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/encounters?status=treatment-started`;
+- `Registrar visita` navega a `/admin/patients/[id]/encounters?status=encounter-created`;
 - el formulario de solicitud conserva campos propios mínimos (fecha, motivo y datos básicos de quién consulta) y puede mostrar/completar en contexto datos administrativos requeridos para iniciar tratamiento (domicilio y teléfonos);
 - esos datos contextuales se persisten en `Patient` y no en `ServiceRequest`;
 - la solicitud `accepted` sin tratamiento iniciado queda como compatibilidad/transición y no como camino principal;

@@ -106,7 +106,7 @@ export async function acceptAndStartTreatmentFromServiceRequestAction(
     return {
       ok: true,
       message: "Solicitud aceptada y tratamiento iniciado correctamente.",
-      redirectTo: `/admin/patients/${patientId}/encounters`,
+      redirectTo: `/admin/patients/${patientId}/encounters?status=treatment-started`,
     };
   } catch {
     return { ok: false, message: "No se pudo iniciar tratamiento desde esta solicitud." };
@@ -118,9 +118,9 @@ function buildUpdateServiceRequestStatusSuccessMessage(status: string): string {
     case "accepted":
       return "Solicitud aceptada correctamente.";
     case "closed_without_treatment":
-      return "Solicitud cerrada sin iniciar tratamiento.";
+      return "La solicitud se cerró como No inició.";
     case "cancelled":
-      return "Solicitud cancelada correctamente.";
+      return "La solicitud fue cancelada.";
     default:
       return "Solicitud actualizada correctamente.";
   }

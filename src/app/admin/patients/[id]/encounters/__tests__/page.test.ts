@@ -27,6 +27,69 @@ vi.mock("@/app/admin/patients/[id]/encounters/components/EncountersList", () => 
 }));
 
 describe("/admin/patients/[id]/encounters page", () => {
+  it("shows success banner for known status params and hides unknown ones", async () => {
+    loadPatientEncountersPageDataMock.mockResolvedValue({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        operationalStatus: "active_treatment",
+      },
+      activeEpisode: {
+        id: "epi-1",
+        patientId: "pat-1",
+        status: "active",
+        startDate: "2026-04-01",
+      },
+      mostRecentEpisode: null,
+      encounters: [],
+      encounterStats: {
+        totalCount: 0,
+        treatmentCount: 0,
+        lastStartedAt: null,
+        averageDurationMinutes: null,
+        totalDurationMinutes: null,
+        durationEligibleCount: 0,
+        durationExcludedCount: 0,
+        isDurationPartial: false,
+        daysToFirstVisitFromEpisodeStart: null,
+        isFirstVisitBeforeEpisodeStart: false,
+        averageDaysBetweenEpisodeVisits: null,
+        frequencyEligibleVisitCount: 0,
+        frequencyIntervalCount: 0,
+      },
+    });
+
+    const treatmentStartedElement = await AdminPatientEncountersPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ status: "treatment-started" }),
+    });
+    const treatmentStartedHtml = renderToStaticMarkup(treatmentStartedElement);
+    expect(treatmentStartedHtml).toContain("Tratamiento iniciado. Ya podés registrar visitas.");
+
+    const encounterCreatedElement = await AdminPatientEncountersPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ status: "encounter-created" }),
+    });
+    const encounterCreatedHtml = renderToStaticMarkup(encounterCreatedElement);
+    expect(encounterCreatedHtml).toContain("Visita registrada.");
+
+    const unknownStatusElement = await AdminPatientEncountersPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ status: "unknown-status" }),
+    });
+    const unknownStatusHtml = renderToStaticMarkup(unknownStatusElement);
+    expect(unknownStatusHtml).not.toContain("Tratamiento iniciado. Ya podés registrar visitas.");
+    expect(unknownStatusHtml).not.toContain("Visita registrada.");
+
+    const noStatusElement = await AdminPatientEncountersPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({}),
+    });
+    const noStatusHtml = renderToStaticMarkup(noStatusElement);
+    expect(noStatusHtml).not.toContain("Tratamiento iniciado. Ya podés registrar visitas.");
+    expect(noStatusHtml).not.toContain("Visita registrada.");
+  });
+
   it("uses standardized back labels, renders primary encounter CTA once and secondary treatment navigation", async () => {
     loadPatientEncountersPageDataMock.mockResolvedValueOnce(null);
 
