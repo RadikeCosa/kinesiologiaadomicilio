@@ -1,6 +1,11 @@
 import type { CreatePatientInput, MainContact, PatientGender, UpdatePatientInput } from "@/domain/patient/patient.types";
 import { normalizeMainContactRelationship } from "@/domain/patient/contact-relationship";
-import { normalizeDni, normalizePhone } from "@/lib/patient-admin-display";
+import {
+  normalizeAddressText,
+  normalizeDni,
+  normalizePersonName,
+  normalizePhone,
+} from "@/lib/patient-admin-display";
 
 const VALID_PATIENT_GENDERS: PatientGender[] = ["male", "female", "other", "unknown"];
 
@@ -47,7 +52,10 @@ function normalizeMainContact(value: unknown): MainContact | undefined {
   const record = assertObject(value, "mainContact");
 
   return {
-    name: normalizeOptionalString(record.name, "mainContact.name"),
+    name: (() => {
+      const normalizedName = normalizeOptionalString(record.name, "mainContact.name");
+      return normalizedName === undefined ? undefined : normalizePersonName(normalizedName);
+    })(),
     relationship: normalizeMainContactRelationship(normalizeOptionalString(record.relationship, "mainContact.relationship")),
     phone: normalizeOptionalString(record.phone, "mainContact.phone"),
   };
@@ -147,13 +155,16 @@ export const createPatientSchema = {
     const record = assertObject(input, "createPatientSchema");
 
     return {
-      firstName: normalizeRequiredString(record.firstName, "firstName"),
-      lastName: normalizeRequiredString(record.lastName, "lastName"),
+      firstName: normalizePersonName(normalizeRequiredString(record.firstName, "firstName")),
+      lastName: normalizePersonName(normalizeRequiredString(record.lastName, "lastName")),
       dni: normalizeOptionalDni(record.dni, "dni"),
       phone: normalizeOptionalPhone(record.phone, "phone"),
       gender: normalizeOptionalPatientGender(record.gender, "gender"),
       birthDate: normalizeOptionalBirthDate(record.birthDate, "birthDate"),
-      address: normalizeOptionalString(record.address, "address"),
+      address: (() => {
+        const normalizedAddress = normalizeOptionalString(record.address, "address");
+        return normalizedAddress === undefined ? undefined : normalizeAddressText(normalizedAddress);
+      })(),
       mainContact: normalizeMainContact(record.mainContact),
     };
   },
@@ -165,13 +176,22 @@ export const updatePatientSchema = {
 
     return {
       id: normalizeRequiredString(record.id, "id"),
-      firstName: normalizeOptionalString(record.firstName, "firstName"),
-      lastName: normalizeOptionalString(record.lastName, "lastName"),
+      firstName: (() => {
+        const normalizedFirstName = normalizeOptionalString(record.firstName, "firstName");
+        return normalizedFirstName === undefined ? undefined : normalizePersonName(normalizedFirstName);
+      })(),
+      lastName: (() => {
+        const normalizedLastName = normalizeOptionalString(record.lastName, "lastName");
+        return normalizedLastName === undefined ? undefined : normalizePersonName(normalizedLastName);
+      })(),
       dni: normalizeOptionalDni(record.dni, "dni"),
       phone: normalizeOptionalPhone(record.phone, "phone"),
       gender: normalizeOptionalPatientGender(record.gender, "gender"),
       birthDate: normalizeOptionalBirthDate(record.birthDate, "birthDate"),
-      address: normalizeOptionalString(record.address, "address"),
+      address: (() => {
+        const normalizedAddress = normalizeOptionalString(record.address, "address");
+        return normalizedAddress === undefined ? undefined : normalizeAddressText(normalizedAddress);
+      })(),
       mainContact: normalizeMainContact(record.mainContact),
     };
   },

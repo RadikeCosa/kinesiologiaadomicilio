@@ -1,3 +1,4 @@
+import { normalizePersonName } from "@/lib/patient-admin-display";
 import type {
   CreateServiceRequestInput,
   ServiceRequestRequesterType,
@@ -119,7 +120,10 @@ export const createServiceRequestSchema = {
     return {
       patientId: normalizeRequiredString(record.patientId, "patientId"),
       requestedAt: normalizeRequiredIsoDate(record.requestedAt, "requestedAt"),
-      requesterDisplay: normalizeOptionalString(record.requesterDisplay, "requesterDisplay"),
+      requesterDisplay: (() => {
+        const normalizedRequesterDisplay = normalizeOptionalString(record.requesterDisplay, "requesterDisplay");
+        return normalizedRequesterDisplay === undefined ? undefined : normalizePersonName(normalizedRequesterDisplay);
+      })(),
       requesterType: normalizeOptionalRequesterType(record.requesterType, "requesterType"),
       requesterContact: normalizeOptionalString(record.requesterContact, "requesterContact"),
       reasonText: normalizeRequiredString(record.reasonText, "reasonText"),

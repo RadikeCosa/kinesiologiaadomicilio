@@ -266,6 +266,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - Gender se muestra traducido en UI, manteniendo códigos FHIR internos.
 - DNI se almacena como solo dígitos y se usa así para duplicados.
 - Teléfono se normaliza antes de persistir y se reutiliza para links.
+- Los nombres de paciente, contacto principal, `requesterDisplay` de solicitudes y direcciones se normalizan antes de persistir con capitalización administrativa consistente; no se aplica a textos clínicos/libres ni a códigos/enums.
 - `Patient.birthDate` se trata como fecha calendario administrativa (`YYYY-MM-DD`) en escritura; para lectura legacy de detalle se tolera `YYYY-MM-DDT...` solo para cálculo de edad en display.
 - La edad del paciente es **dato derivado de UI** (calculada desde `birthDate`) y **no se persiste**.
 - `EpisodeOfCare.startDate` / `endDate` se tratan como fechas calendario (`YYYY-MM-DD`) con validación de formato y calendario real.

@@ -53,6 +53,42 @@ export function formatGenderLabel(gender?: PatientGender): string {
   return GENDER_LABELS[gender];
 }
 
+
+function capitalizeToken(token: string): string {
+  return token.charAt(0).toLocaleUpperCase("es-AR") + token.slice(1).toLocaleLowerCase("es-AR");
+}
+
+function normalizeAdministrativeToken(token: string): string {
+  return token
+    .split("-")
+    .map((hyphenPart) => hyphenPart
+      .split("'")
+      .map((apostrophePart) => capitalizeToken(apostrophePart))
+      .join("'"))
+    .join("-");
+}
+
+export function normalizeAdministrativeText(value: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return "";
+  }
+
+  return trimmed
+    .split(/\s+/)
+    .map((token) => normalizeAdministrativeToken(token))
+    .join(" ");
+}
+
+export function normalizePersonName(value: string): string {
+  return normalizeAdministrativeText(value);
+}
+
+export function normalizeAddressText(value: string): string {
+  return normalizeAdministrativeText(value);
+}
+
 export function normalizeDni(raw: string | null | undefined): string {
   return (raw ?? "").replace(/\D+/g, "");
 }
