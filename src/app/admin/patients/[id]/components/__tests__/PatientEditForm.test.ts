@@ -41,6 +41,10 @@ describe("PatientEditForm", () => {
     expect(html).toContain('<option value="sibling" selected="">Hermano/a</option>');
     expect(html).toContain('<option value="caregiver">Cuidador/a</option>');
     expect(html).toContain('<option value="other">Otro</option>');
+    expect(html).toContain('for="phone"');
+    expect(html).toContain("Teléfono de contacto");
+    expect(html).toContain('placeholder="Ej: 299 15 521-7189"');
+    expect(html).toContain("Preferentemente un número con WhatsApp para coordinar horarios y seguimiento. También podés ingresar un teléfono fijo.");
     expect(html).toContain("Cancelar edición");
   });
 });

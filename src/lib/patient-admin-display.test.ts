@@ -97,8 +97,11 @@ describe("patient-admin-display", () => {
   });
 
   it("formats phone display with fallback", () => {
+    expect(formatPhoneDisplay("0299155217189")).toBe("0299 15 521-7189");
+    expect(formatPhoneDisplay("299155217189")).toBe("299 15 521-7189");
+    expect(formatPhoneDisplay("2995217189")).toBe("299 521-7189");
+    expect(formatPhoneDisplay("+5492995217189")).toBe("+54 9 299 521-7189");
     expect(formatPhoneDisplay("+542995550101")).toBe("+54 299 555-0101");
-    expect(formatPhoneDisplay("2995550101")).toBe("2995550101");
     expect(formatPhoneDisplay(undefined)).toBe("No informado");
   });
 
