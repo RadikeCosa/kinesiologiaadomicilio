@@ -297,16 +297,52 @@ export function formatPhoneDisplay(phone: string | null | undefined): string {
     return "No informado";
   }
 
-  if (normalized.startsWith("+54")) {
-    const nationalDigits = normalized.slice(3);
+  if (normalized.startsWith("+549") && normalized.length === 14) {
+    const areaCode = normalized.slice(4, 7);
+    const subscriber = normalized.slice(7);
+    return `+54 9 ${areaCode} ${subscriber.slice(0, 3)}-${subscriber.slice(3)}`;
+  }
 
-    if (nationalDigits.length === 10) {
-      return `+54 ${nationalDigits.slice(0, 3)} ${nationalDigits.slice(3, 6)}-${nationalDigits.slice(6)}`;
-    }
+  if (normalized.startsWith("+54") && normalized.length === 13) {
+    const areaCode = normalized.slice(3, 6);
+    const subscriber = normalized.slice(6);
+    return `+54 ${areaCode} ${subscriber.slice(0, 3)}-${subscriber.slice(3)}`;
+  }
 
-    if (nationalDigits.length === 11) {
-      return `+54 ${nationalDigits.slice(0, 4)} ${nationalDigits.slice(4, 7)}-${nationalDigits.slice(7)}`;
-    }
+  if (normalized.length === 13 && normalized.startsWith("0") && normalized.slice(4, 6) === "15") {
+    const areaCode = normalized.slice(0, 4);
+    const subscriber = normalized.slice(6);
+    return `${areaCode} 15 ${subscriber.slice(0, 3)}-${subscriber.slice(3)}`;
+  }
+
+  if (normalized.length === 11 && normalized.startsWith("0") && normalized.slice(4, 6) === "15") {
+    const areaCode = normalized.slice(0, 4);
+    const subscriber = normalized.slice(6);
+    return `${areaCode} 15 ${subscriber.slice(0, 3)}-${subscriber.slice(3)}`;
+  }
+
+  if (normalized.length === 12 && normalized.slice(3, 5) === "15") {
+    const areaCode = normalized.slice(0, 3);
+    const subscriber = normalized.slice(5);
+    return `${areaCode} 15 ${subscriber.slice(0, 3)}-${subscriber.slice(3)}`;
+  }
+
+  if (normalized.length === 10 && normalized.slice(3, 5) === "15") {
+    const areaCode = normalized.slice(0, 3);
+    const subscriber = normalized.slice(5);
+    return `${areaCode} 15 ${subscriber.slice(0, 3)}-${subscriber.slice(3)}`;
+  }
+
+  if (normalized.length === 10 && normalized.startsWith("0") && normalized.slice(4, 5) === "9") {
+    const areaCode = normalized.slice(1, 4);
+    const subscriber = normalized.slice(5);
+    return `+54 9 ${areaCode} ${subscriber.slice(0, 3)}-${subscriber.slice(3)}`;
+  }
+
+  if (normalized.length === 10) {
+    const areaCode = normalized.slice(0, 3);
+    const subscriber = normalized.slice(3);
+    return `${areaCode} ${subscriber.slice(0, 3)}-${subscriber.slice(3)}`;
   }
 
   return normalized;

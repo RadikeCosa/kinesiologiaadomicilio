@@ -108,7 +108,7 @@ export function PatientEditForm({
 
         <div>
           <label className="block text-sm font-medium" htmlFor="phone">
-            Teléfono
+            Teléfono de contacto
           </label>
           <input
             className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
@@ -117,7 +117,9 @@ export function PatientEditForm({
             inputMode="tel"
             name="phone"
             type="tel"
+            placeholder="Ej: 299 15 521-7189"
           />
+          <p className="mt-1 text-xs text-slate-600">Preferentemente un número con WhatsApp para coordinar horarios y seguimiento. También podés ingresar un teléfono fijo.</p>
         </div>
 
         <div>
@@ -207,7 +209,7 @@ export function PatientEditForm({
               className="block text-sm font-medium"
               htmlFor="mainContactPhone"
             >
-              Teléfono
+              Teléfono de contacto
             </label>
             <input
               className="mt-1 w-full rounded border border-slate-300 bg-white p-2"
@@ -216,7 +218,9 @@ export function PatientEditForm({
               inputMode="tel"
               name="mainContactPhone"
               type="tel"
+              placeholder="Ej: 299 15 521-7189"
             />
+            <p className="mt-1 text-xs text-slate-600">Preferentemente un número con WhatsApp para coordinar horarios y seguimiento. También podés ingresar un teléfono fijo.</p>
           </div>
         </fieldset>
 
