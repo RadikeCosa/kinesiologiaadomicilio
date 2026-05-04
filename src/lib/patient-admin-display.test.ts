@@ -13,8 +13,11 @@ import {
   formatGenderLabel,
   formatPhoneDisplay,
   formatTimeDisplay,
+  normalizeAdministrativeText,
   normalizeDni,
+  normalizePersonName,
   normalizePhone,
+  normalizeAddressText,
 } from "@/lib/patient-admin-display";
 
 describe("patient-admin-display", () => {
@@ -75,6 +78,22 @@ describe("patient-admin-display", () => {
     expect(normalizePhone("0054 299 555 0101")).toBe("+542995550101");
     expect(normalizePhone("(299) 555-0101")).toBe("2995550101");
     expect(normalizePhone("")).toBe("");
+  });
+
+  it("normalizes administrative text with capitalization and collapsed spaces", () => {
+    expect(normalizeAdministrativeText("juan")).toBe("Juan");
+    expect(normalizeAdministrativeText("juan carlos")).toBe("Juan Carlos");
+    expect(normalizeAdministrativeText("pérez gómez")).toBe("Pérez Gómez");
+    expect(normalizeAdministrativeText("maría-josé")).toBe("María-José");
+    expect(normalizeAdministrativeText("o'connor")).toBe("O'Connor");
+    expect(normalizeAdministrativeText("las heras 123")).toBe("Las Heras 123");
+    expect(normalizeAdministrativeText("  juan   perez  ")).toBe("Juan Perez");
+    expect(normalizeAdministrativeText("   ")).toBe("");
+  });
+
+  it("exposes person and address wrappers over administrative normalization", () => {
+    expect(normalizePersonName("mArÍa-jOsÉ")).toBe("María-José");
+    expect(normalizeAddressText("  avENIDA   argentina 123 ")).toBe("Avenida Argentina 123");
   });
 
   it("formats phone display with fallback", () => {

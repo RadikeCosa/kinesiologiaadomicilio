@@ -25,27 +25,27 @@ describe("service-request.schemas", () => {
     });
   });
 
-  it("parses create input with optional fields", () => {
+  it("normalizes requesterDisplay and preserves free-text fields", () => {
     const parsed = createServiceRequestSchema.parse({
       patientId: "pat-001",
       requestedAt: "2026-04-28",
-      reasonText: "Dolor de rodilla",
-      requesterDisplay: " Dra. Pérez ",
+      reasonText: "dolor LUMBAR libre",
+      requesterDisplay: "  maría-josé   o'connor ",
       requesterType: "physician",
       requesterContact: " +54 9 299 123 4567 ",
-      reportedDiagnosisText: " Gonalgia ",
-      notes: " Derivación externa ",
+      reportedDiagnosisText: " Gonalgia LIBRE ",
+      notes: "  nota CLÍNICA Libre  ",
     });
 
     expect(parsed).toEqual({
       patientId: "pat-001",
       requestedAt: "2026-04-28",
-      reasonText: "Dolor de rodilla",
-      requesterDisplay: "Dra. Pérez",
+      reasonText: "dolor LUMBAR libre",
+      requesterDisplay: "María-José O'Connor",
       requesterType: "physician",
       requesterContact: "+54 9 299 123 4567",
-      reportedDiagnosisText: "Gonalgia",
-      notes: "Derivación externa",
+      reportedDiagnosisText: "Gonalgia LIBRE",
+      notes: "nota CLÍNICA Libre",
     });
   });
 
@@ -111,6 +111,20 @@ describe("service-request.schemas", () => {
     });
   });
 
+  it("accepts closedReasonText for cancelled without extra normalization", () => {
+    const parsed = updateServiceRequestStatusSchema.parse({
+      id: "sr-001",
+      status: "cancelled",
+      closedReasonText: " No responde EN MAYUS ",
+    });
+
+    expect(parsed).toEqual({
+      id: "sr-001",
+      status: "cancelled",
+      closedReasonText: "No responde EN MAYUS",
+    });
+  });
+
   it("fails with invalid status", () => {
     expect(() =>
       updateServiceRequestStatusSchema.parse({
@@ -136,20 +150,6 @@ describe("service-request.schemas", () => {
         status: "cancelled",
       }),
     ).toThrow("closedReasonText: es obligatorio para closed_without_treatment/cancelled.");
-  });
-
-  it("accepts closedReasonText for cancelled", () => {
-    const parsed = updateServiceRequestStatusSchema.parse({
-      id: "sr-001",
-      status: "cancelled",
-      closedReasonText: " No responde ",
-    });
-
-    expect(parsed).toEqual({
-      id: "sr-001",
-      status: "cancelled",
-      closedReasonText: "No responde",
-    });
   });
 
   it("fails with invalid shape", () => {

@@ -10,32 +10,51 @@ describe("patient.schemas", () => {
 
   it("accepts optional fields and normalizes values", () => {
     const result = createPatientSchema.parse({
-      firstName: "  Ana ",
-      lastName: " Pérez  ",
+      firstName: "  juan   carlos ",
+      lastName: " pérez  gómez ",
       dni: " 32123456 ",
       phone: " +54 (299) 555-0101 ",
       gender: " female ",
       birthDate: " 1990-10-03 ",
+      address: "  las   heras  123 ",
       mainContact: {
-        name: "  Marta ",
+        name: "  maría-josé o'connor ",
         relationship: " Madre ",
         phone: " 555 ",
       },
     });
 
     expect(result).toMatchObject({
-      firstName: "Ana",
-      lastName: "Pérez",
+      firstName: "Juan Carlos",
+      lastName: "Pérez Gómez",
       dni: "32123456",
       phone: "+542995550101",
       gender: "female",
       birthDate: "1990-10-03",
+      address: "Las Heras 123",
       mainContact: {
-        name: "Marta",
+        name: "María-José O'Connor",
         relationship: "parent",
         phone: "555",
       },
     });
+  });
+
+  it("normalizes person and address fields in update schema when present", () => {
+    const result = updatePatientSchema.parse({
+      id: "pat-001",
+      firstName: "  juan   perez  ",
+      lastName: "  o'connor  ",
+      address: "  las   heras  123 ",
+      mainContact: {
+        name: "  maría-josé   o'connor  ",
+      },
+    });
+
+    expect(result.firstName).toBe("Juan Perez");
+    expect(result.lastName).toBe("O'Connor");
+    expect(result.address).toBe("Las Heras 123");
+    expect(result.mainContact?.name).toBe("María-José O'Connor");
   });
 
   it("normalizes dni with separators in create schema", () => {
@@ -111,7 +130,7 @@ describe("patient.schemas", () => {
       gender: " other ",
       birthDate: " 1988-01-15 ",
       mainContact: {
-        name: "  Marta ",
+        name: "  marta ",
       },
     });
 
