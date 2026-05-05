@@ -266,6 +266,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - Gender se muestra traducido en UI, manteniendo códigos FHIR internos.
 - DNI se almacena como solo dígitos y se usa así para duplicados.
 - Teléfono se normaliza antes de persistir y se reutiliza para links.
+- Los teléfonos se muestran en UI privada mediante helper central de display, con formato argentino amigable cuando el patrón es reconocible (por ejemplo, `299 15 521-7189`, `0299 15 521-7189`, `+54 9 299 521-7189`).
+- El texto visible del teléfono se mantiene separado de los links de llamada/WhatsApp, que siguen saliendo de helpers de enlaces.
+- En formularios privados, el copy de carga de teléfono indica que se prefiere un número con WhatsApp para coordinar horarios y seguimiento, pero no es obligatorio y permite teléfonos fijos.
 - Los nombres de paciente, contacto principal, `requesterDisplay` de solicitudes y direcciones se normalizan antes de persistir con capitalización administrativa consistente; no se aplica a textos clínicos/libres ni a códigos/enums.
 - `Patient.birthDate` se trata como fecha calendario administrativa (`YYYY-MM-DD`) en escritura; para lectura legacy de detalle se tolera `YYYY-MM-DDT...` solo para cálculo de edad en display.
 - La edad del paciente es **dato derivado de UI** (calculada desde `birthDate`) y **no se persiste**.
