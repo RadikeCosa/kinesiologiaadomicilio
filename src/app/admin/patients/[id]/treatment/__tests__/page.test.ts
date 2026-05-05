@@ -104,7 +104,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("No hay tratamientos registrados");
-    expect(html).toContain("Para iniciar un tratamiento, primero registrá o resolvé una solicitud de atención.");
+    expect(html).toContain("Iniciá un tratamiento desde una solicitud aceptada.");
     expect(html).toContain('href="/admin/patients/pat-1/administrative#service-requests"');
     expect(html).not.toContain("StartEpisodeOfCareForm");
   });
@@ -126,7 +126,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("No se pudo usar la solicitud indicada para iniciar tratamiento.");
-    expect(html).toContain("Para iniciar un tratamiento, primero registrá o resolvé una solicitud de atención.");
+    expect(html).toContain("Iniciá un tratamiento desde una solicitud aceptada.");
     expect(html).not.toContain("StartEpisodeOfCareForm");
   });
 
@@ -149,7 +149,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Esta solicitud ya fue utilizada para iniciar un tratamiento. Para un nuevo ciclo, registrá una nueva solicitud.");
-    expect(html).toContain("Para iniciar un tratamiento, primero registrá o resolvé una solicitud de atención.");
+    expect(html).toContain("Iniciá un tratamiento desde una solicitud aceptada.");
     expect(html).not.toContain("StartEpisodeOfCareForm");
   });
   it("keeps active treatment block and no start form when active episode exists", async () => {
@@ -234,6 +234,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("No hay tratamiento activo");
+    expect(html).toContain("Si corresponde continuar la atención, registrá una nueva solicitud para iniciar otro ciclo.");
     expect(html).toContain("Historial de ciclos cerrados");
     expect(html).toContain("Motivo: Tratamiento completado");
     expect(html).toContain("Detalle: Alta funcional");

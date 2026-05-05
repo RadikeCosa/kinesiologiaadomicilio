@@ -47,7 +47,7 @@ export default async function AdminPatientAdministrativePage({
     : null;
   const hasActiveTreatment = patient?.operationalStatus === "active_treatment" || Boolean(patient?.activeEpisode);
   const serviceRequestContextMessage = hasActiveTreatment
-    ? "Las solicitudes quedan como antecedente administrativo; las visitas se gestionan desde Visitas."
+    ? "Las solicitudes quedan como antecedente administrativo; las visitas se gestionan desde Gestión clínica."
     : "El próximo paso operativo es registrar o aceptar una solicitud de atención.";
   const missingTreatmentRequirements = patient
     ? getMissingTreatmentStartRequirements(patient).map((reason) => {
@@ -72,7 +72,7 @@ export default async function AdminPatientAdministrativePage({
           ← Volver al paciente
         </Link>
         <h1 className="mt-3 text-xl font-semibold text-slate-900">
-          Administración del paciente
+          Gestión administrativa
         </h1>
         {patient ? (
           <p className="mt-1 text-sm text-slate-600">
@@ -106,13 +106,13 @@ export default async function AdminPatientAdministrativePage({
               className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
               href={`/admin/patients/${patient.id}/treatment`}
             >
-              Gestión de tratamiento
+              Gestionar tratamiento
             </Link>
             <Link
               className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
               href={`/admin/patients/${patient.id}/encounters`}
             >
-              Ver visitas
+              Ir a gestión clínica
             </Link>
             {hasActiveTreatment ? (
               <span className="text-xs text-slate-500">

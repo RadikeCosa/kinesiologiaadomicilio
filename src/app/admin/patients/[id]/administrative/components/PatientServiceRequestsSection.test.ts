@@ -77,7 +77,7 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("Aceptar e iniciar tratamiento");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
-        expect(html).toContain("Pendiente de iniciar tratamiento.");
+        expect(html).toContain("Estado clínico vinculado: Pendiente de iniciar tratamiento");
   });
 
   it("renders closedReasonText when present", () => {
@@ -117,6 +117,6 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("Pendiente de iniciar tratamiento.");
+    expect(html).toContain("Estado clínico vinculado: Pendiente de iniciar tratamiento");
   });
 });

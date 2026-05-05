@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-04-28 (UTC)
+> Última actualización: 2026-05-05 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -48,6 +48,35 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (header con acción primaria `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento y listado de visitas con corrección inline rápida).
 - `/admin/patients/[id]/encounters/new`: pantalla específica para registrar una visita.
 - `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
+
+#### Naming vigente de superficies privadas de paciente
+- `/admin/patients/[id]/administrative` → **Gestión administrativa**
+- `/admin/patients/[id]/encounters` → **Gestión clínica**
+- `/admin/patients/[id]/treatment` → **Tratamiento**
+
+#### Convención conceptual operativa vigente
+- **Solicitud de atención**: pedido inicial para evaluar si corresponde iniciar atención.
+- **Tratamiento**: ciclo de atención profesional del paciente, activo o finalizado.
+- **Gestión clínica / visitas**: registro y consulta de visitas realizadas durante el tratamiento.
+- **Flujo operativo**: primero se resuelve la solicitud, luego se inicia tratamiento, con tratamiento activo se registran visitas.
+
+#### Convención vigente de CTAs
+- `Ir a gestión clínica` para navegar a `/admin/patients/[id]/encounters`.
+- `Registrar visita` solo para la acción puntual de carga de visita.
+- `Gestionar tratamiento` para navegar a `/admin/patients/[id]/treatment`.
+- `Gestión administrativa` para navegación a `/admin/patients/[id]/administrative`.
+
+#### Nota de cierre documental — Iteración UX/UI + copy (2026-05-05)
+- **Estado:** cerrada / aprobada.
+- **Resumen de cambios aplicados:**
+  - Patch 1: naming de superficies y CTAs;
+  - Patch 2: jerarquía visual de solicitudes y convención de tonos;
+  - Patch 3: helper texts y microcopy operativo unificado;
+  - Patch 4: tests de regresión + documentación.
+- **Validación ejecutada en la iteración:** lint + tests relevantes de superficies privadas de paciente (copy visible, estados y empty states).
+- **Documentos actualizados:** `docs/fuente-de-verdad-operativa.md`, `README.md`.
+- **Documentos revisados sin cambios:** `docs/checklist-sincronizacion-doc-codigo.md`.
+- **Fuera de alcance preservado:** sin cambios de dominio, recursos FHIR, mapping, contratos, repositorios ni persistencia.
 
 #### Criterio vigente de presentación UI entre `encounters` y `treatment`
 - En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (listado y corrección rápida).
@@ -111,6 +140,12 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - si una solicitud tiene tratamiento vinculado, se muestra como `Aceptada — tratamiento activo` o `Aceptada — tratamiento finalizado` según el estado del episodio, aunque el status leído requiera normalización defensiva;
   - `in_review` y `accepted` sin vínculo `incoming-referral` son pendientes operativas (esta última como compatibilidad transicional);
   - `closed_without_treatment` y `cancelled` son terminales históricas (sin acciones de resolución ni peso operativo);
+  - la UI separa explícitamente `Estado de solicitud` y `Estado clínico vinculado` en cada card;
+  - `accepted` + tratamiento activo puede mostrarse en tono `emerald`;
+  - `accepted` + tratamiento finalizado se muestra en tono `amber` (no como vigente);
+  - `closed_without_treatment` y `cancelled` se muestran en tono `slate` como histórico/no accionable;
+  - `entered_in_error` usa tono `red` por tratarse de error real;
+  - los casos no accionables muestran `Sin acción pendiente.`;
 - los motivos de cierre/cancelación se intentan persistir en `statusReason.text` y también en `ServiceRequest.note[]` con prefijo `resolution-reason:v1:` por compatibilidad con HAPI local; la lectura prioriza `statusReason.text`, luego `statusReason.coding[].display/text`, y por último `note[]` etiquetada, mostrándose en el historial operativo junto al motivo/detalle de cierre del ciclo cuando existe episodio finalizado vinculado.
 - en tratamiento activo, `Nueva solicitud` permanece disponible como acción administrativa secundaria y no como CTA clínico principal;
 - en `/admin/patients/[id]/treatment` la UI conserva el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen cuando existe);

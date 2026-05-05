@@ -18,6 +18,7 @@ describe("EncountersList", () => {
       createElement(EncountersList, {
         patientId: "pat-1",
         hasActiveTreatment: true,
+        hasFinishedTreatment: false,
         encounters: [
           {
             id: "enc-1",
@@ -48,5 +49,37 @@ describe("EncountersList", () => {
     expect(html).not.toContain("Estado: finished");
     expect(html).not.toContain("AM");
     expect(html).not.toContain("PM");
+  });
+
+  it("renders updated empty-state copy for active, finished and no-treatment contexts", () => {
+    const activeHtml = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [],
+      }),
+    );
+    expect(activeHtml).toContain("Todavía no hay visitas registradas para este tratamiento.");
+
+    const finishedHtml = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: false,
+        hasFinishedTreatment: true,
+        encounters: [],
+      }),
+    );
+    expect(finishedHtml).toContain("Tratamiento finalizado. Las visitas quedan disponibles como historial.");
+
+    const noTreatmentHtml = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: false,
+        hasFinishedTreatment: false,
+        encounters: [],
+      }),
+    );
+    expect(noTreatmentHtml).toContain("No hay visitas registradas por el momento.");
   });
 });

@@ -132,9 +132,9 @@ export function EncountersList({
       {encounters.length === 0 ? (
           <p className="mt-3 rounded border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
           {hasActiveTreatment
-            ? "Todavía no hay visitas. Registrá la primera."
+            ? "Todavía no hay visitas registradas para este tratamiento."
             : hasFinishedTreatment
-              ? "No hay visitas registradas en este tratamiento."
+              ? "Tratamiento finalizado. Las visitas quedan disponibles como historial."
               : "No hay visitas registradas por el momento."}
         </p>
       ) : (

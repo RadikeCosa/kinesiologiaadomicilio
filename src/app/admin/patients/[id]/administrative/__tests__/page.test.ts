@@ -96,8 +96,9 @@ describe("/admin/patients/[id]/administrative page", () => {
     expect(html).toContain("Datos administrativos y de contacto");
 
     expect(html).toContain("Solicitudes de atención");
-    expect(html).toContain("Registro administrativo de demandas o consultas");
-    expect(html).toContain("Las solicitudes quedan como antecedente administrativo; las visitas se gestionan desde Visitas.");
+    expect(html).toContain("Pedido inicial para evaluar si corresponde iniciar atención.");
+    expect(html).toContain("La solicitud ordena el pedido inicial. Al aceptarla, se puede iniciar un tratamiento.");
+    expect(html).toContain("Las solicitudes quedan como antecedente administrativo; las visitas se gestionan desde Gestión clínica.");
     expect(html).toContain("Motivo de consulta");
     expect(html).toContain("Dolor lumbar");
     expect(html).toContain("Diagnóstico informado");
@@ -140,7 +141,7 @@ describe("/admin/patients/[id]/administrative page", () => {
     expect(html).toContain("DNI: 30.111.222");
     expect(html).not.toContain("Edad:");
     expect(html).toContain("Solicitudes de atención");
-    expect(html).toContain("Registrá la primera solicitud para dejar asentado el motivo de consulta y avanzar con la evaluación.");
+    expect(html).toContain("Todavía no hay solicitudes. Registrá la primera para iniciar la evaluación.");
     expect(html).toContain("El próximo paso operativo es registrar o aceptar una solicitud de atención.");
     expect(html.indexOf("Solicitudes de atención")).toBeLessThan(html.indexOf("Resumen administrativo"));
   });
@@ -166,7 +167,7 @@ describe("/admin/patients/[id]/administrative page", () => {
     const html = renderToStaticMarkup(element);
 
     const backLinkIndex = html.indexOf("← Volver al paciente");
-    const titleIndex = html.indexOf("Administración del paciente");
+    const titleIndex = html.indexOf("Gestión administrativa");
 
     expect(backLinkIndex).toBeGreaterThan(-1);
     expect(titleIndex).toBeGreaterThan(backLinkIndex);

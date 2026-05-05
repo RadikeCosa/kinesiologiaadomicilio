@@ -10,6 +10,7 @@ import {
   formatDateDisplay,
   formatDniDisplay,
 } from "@/lib/patient-admin-display";
+import { PATIENT_SURFACE_COPY } from "@/app/admin/patients/[id]/patient-surface-copy";
 
 interface AdminPatientEncounterCreatePageProps {
   params: Promise<{ id: string }>;
@@ -60,7 +61,7 @@ export default async function AdminPatientEncounterCreatePage({ params }: AdminP
           className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline"
           href={`/admin/patients/${pageData.patient.id}/encounters`}
         >
-          ← Volver a visitas
+          ← Volver a gestión clínica
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-semibold text-slate-900">{pageData.patient.fullName}</h1>
@@ -72,7 +73,8 @@ export default async function AdminPatientEncounterCreatePage({ params }: AdminP
             </span>
           ) : null}
         </div>
-        <p className="mt-2 text-sm text-slate-600">Completá la fecha y hora de la visita realizada.</p>
+        <p className="mt-2 text-sm text-slate-600">Cargá el inicio y cierre de la visita realizada.</p>
+        <p className="mt-1 text-xs text-slate-500">{PATIENT_SURFACE_COPY.clinicalDefinition}</p>
         {patientDetail ? (
           <p className="mt-1 text-xs text-slate-500">
             DNI: {formatDniDisplay(patientDetail.dni)}

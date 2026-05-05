@@ -11,6 +11,7 @@ import {
   formatDateDisplay,
   formatDniDisplay,
 } from "@/lib/patient-admin-display";
+import { PATIENT_SURFACE_COPY } from "@/app/admin/patients/[id]/patient-surface-copy";
 
 interface AdminPatientEncountersPageProps {
   params: Promise<{ id: string }>;
@@ -24,7 +25,7 @@ export async function generateMetadata({
   const patient = await loadPatientDetail(id);
 
   return {
-    title: patient ? `Visitas — ${patient.fullName}` : "Visitas",
+    title: patient ? `Gestión clínica — ${patient.fullName}` : "Gestión clínica",
   };
 }
 
@@ -85,7 +86,7 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
           ← Volver a pacientes
         </Link>
 
-        <h2 className="mt-3 text-xl font-semibold text-slate-900">Visitas del paciente</h2>
+        <h2 className="mt-3 text-xl font-semibold text-slate-900">Gestión clínica</h2>
 
         <p className="mt-4 rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
           No se encontró el paciente solicitado.
@@ -143,7 +144,7 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
         </div>
       </div>
 
-      <p className="mt-2 text-sm text-slate-600">Registro y seguimiento de visitas del paciente.</p>
+      <p className="mt-2 text-sm text-slate-600">{PATIENT_SURFACE_COPY.clinicalDefinition}</p>
       {statusMessage ? (
         <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-2 text-sm text-emerald-900">
           {statusMessage}
@@ -163,8 +164,8 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
           <span>
             {pageData.mostRecentEpisode?.status === "finished"
-              ? "El tratamiento está finalizado. Revisá la gestión de tratamiento para continuar."
-              : "Necesitás un tratamiento activo para registrar visitas."}
+              ? "Tratamiento finalizado. Las visitas quedan disponibles como historial."
+              : "No podés registrar visitas hasta tener un tratamiento activo."}
           </span>
           <Link
             className="inline-flex items-center justify-center rounded border border-amber-300 bg-white px-3 py-1.5 text-sm font-medium text-amber-900 hover:bg-amber-100"

@@ -83,6 +83,12 @@ El proyecto está en etapa **híbrida transicional**:
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
 
+#### Mapa corto de superficies privadas de paciente (UI vigente)
+- **Gestión administrativa** (`/admin/patients/[id]/administrative`): datos del paciente y solicitudes de atención.
+- **Gestión clínica** (`/admin/patients/[id]/encounters`): registro y consulta de visitas del tratamiento.
+- **Tratamiento** (`/admin/patients/[id]/treatment`): inicio, estado y cierre del ciclo de atención.
+- Flujo operativo esperado: primero se resuelve la solicitud, luego se inicia tratamiento, y con tratamiento activo se registra la visita.
+
 ##### Cierre DASHBOARD-SR-001 (abril 2026)
 - **Estado**: cerrado (PR1+PR2+PR3).
 - **Resultado**: `/admin` muestra embudo SR (`in_review` y `accepted` pendiente sin vínculo `incoming-referral`) y mantiene resumen operativo + card simplificada de edad clínica.
