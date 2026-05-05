@@ -69,8 +69,11 @@ describe("/admin/patients/[id] page", () => {
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Visitas");
-    expect(html).toContain("Gestión Administrativa");
+    expect(html).toContain("Gestión clínica");
+    expect(html).toContain("Gestión administrativa");
+    expect(html).toContain("Visitas y seguimiento operativo del tratamiento.");
+    expect(html).toContain("Datos del paciente y solicitudes de atención.");
+    expect(html).toContain("Primero se resuelve la solicitud; luego se inicia tratamiento; con tratamiento activo se registran visitas.");
     expect(html).toContain("Siguiente paso sugerido: Registrá la primera solicitud de atención.");
 
     const patientContactIndex = html.indexOf("Contacto del paciente");

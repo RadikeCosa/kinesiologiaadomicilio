@@ -15,6 +15,7 @@ import {
   formatDniDisplay,
 } from "@/lib/patient-admin-display";
 import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
+import { PATIENT_SURFACE_COPY } from "@/app/admin/patients/[id]/patient-surface-copy";
 
 interface AdminPatientTreatmentPageProps {
   params: Promise<{ id: string }>;
@@ -63,7 +64,7 @@ export default async function AdminPatientTreatmentPage({
           ← Volver a pacientes
         </Link>
 
-        <h2 className="mt-3 text-xl font-semibold text-slate-900">Gestión de tratamiento</h2>
+        <h2 className="mt-3 text-xl font-semibold text-slate-900">Tratamiento</h2>
 
         <p className="mt-4 rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
           No se encontró el paciente solicitado.
@@ -94,10 +95,11 @@ export default async function AdminPatientTreatmentPage({
             className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
             href={`/admin/patients/${patient.id}/encounters`}
           >
-            Ver visitas
+            Ir a gestión clínica
           </Link>
         </div>
-        <p className="mt-2 text-sm text-slate-600">Inicio y cierre del tratamiento del paciente.</p>
+        <p className="mt-2 text-sm text-slate-600">El tratamiento representa el ciclo de atención profesional del paciente.</p>
+        <p className="mt-1 text-xs text-slate-500">{PATIENT_SURFACE_COPY.treatmentDefinition}</p>
         <p className="mt-1 text-xs text-slate-500">
           DNI: {formatDniDisplay(patient.dni)}
           {patientAge !== null ? ` · Edad: ${patientAge} años` : ""}
@@ -156,7 +158,7 @@ export default async function AdminPatientTreatmentPage({
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">No hay tratamiento activo</h2>
             <p className="mt-3 text-sm text-slate-700">
-              Este paciente tiene tratamientos finalizados registrados. Podés revisar los ciclos cerrados y sus motivos de cierre.
+              Si corresponde continuar la atención, registrá una nueva solicitud para iniciar otro ciclo.
             </p>
             <Link
               className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
@@ -173,7 +175,7 @@ export default async function AdminPatientTreatmentPage({
               </div>
             ) : (
               <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-                Para iniciar un tratamiento, primero aceptá una solicitud de atención desde Administración.
+                Iniciá un tratamiento desde una solicitud aceptada.
               </p>
             )}
           </>
@@ -181,7 +183,7 @@ export default async function AdminPatientTreatmentPage({
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">No hay tratamientos registrados</h2>
             <p className="mt-3 text-sm text-slate-700">
-              Para iniciar un tratamiento, primero registrá o resolvé una solicitud de atención.
+              Iniciá un tratamiento desde una solicitud aceptada.
             </p>
             <Link
               className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"

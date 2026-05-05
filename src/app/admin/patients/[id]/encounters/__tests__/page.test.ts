@@ -141,7 +141,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("← Volver al paciente");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1\"");
     expect(foundHtml).toContain("Ana Pérez");
-    expect(foundHtml).toContain("Registro y seguimiento de visitas del paciente.");
+    expect(foundHtml).toContain("Registrá y consultá las visitas realizadas durante el tratamiento.");
     expect(foundHtml).toContain("DNI: 30.111.222");
     expect(foundHtml).toContain("Tratamiento activo");
     expect(foundHtml).toContain("Inicio: 01/04/2026");
@@ -323,7 +323,7 @@ describe("/admin/patients/[id]/encounters page", () => {
 
     expect(foundHtml).toContain("Sin tratamiento iniciado");
     expect(foundHtml).toContain("No hay un tratamiento iniciado para este paciente.");
-    expect(foundHtml).toContain("Necesitás un tratamiento activo para registrar visitas.");
+    expect(foundHtml).toContain("No podés registrar visitas hasta tener un tratamiento activo.");
     expect(foundHtml).toContain("Ir a gestión de tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
     expect(foundHtml).not.toContain("href=\"/admin/patients/pat-1/encounters/new\"");

@@ -66,7 +66,7 @@ describe("PatientServiceRequestsSection", () => {
 
     expect(html).toContain("href=\"/admin/patients/pat-9/treatment?serviceRequestId=sr-a\"");
     expect(html).toContain("Iniciar tratamiento");
-    expect(html).toContain("Pendiente de iniciar tratamiento.");
+    expect(html).toContain("Estado clínico vinculado: Pendiente de iniciar tratamiento");
     expect(html).toContain("Se realiza en la pantalla de Tratamiento.");
     expect(html).not.toContain("serviceRequestId=sr-r");
     expect(html).not.toContain("serviceRequestId=sr-cw");
@@ -90,7 +90,7 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("Motivo de cancelación");
     expect(html).toContain("No contesta llamadas");
     expect(html).toContain("Derivó por otra cobertura");
-    expect(html).not.toContain("bg-amber-50");
+    expect(html).toContain("Sin acción pendiente.");
     expect(html).not.toContain("serviceRequestId=sr-cw");
     expect(html).not.toContain("serviceRequestId=sr-c");
   });
@@ -114,7 +114,7 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("Registrá la primera solicitud para dejar asentado el motivo de consulta y avanzar con la evaluación.");
+    expect(html).toContain("Todavía no hay solicitudes. Registrá la primera para iniciar la evaluación.");
     expect(html).toContain("Nueva solicitud");
   });
 
@@ -181,9 +181,10 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("Aceptada — tratamiento activo.");
+    expect(html).toContain("Estado de solicitud: En evaluación");
+    expect(html).toContain("Estado clínico vinculado: Tratamiento activo");
     expect(html).toContain("Tratamiento iniciado");
-    expect(html).not.toContain("Pendiente de iniciar tratamiento.");
+    expect(html).not.toContain("Estado clínico vinculado: Pendiente de iniciar tratamiento");
     expect(html).not.toContain("Aceptar e iniciar tratamiento");
     expect(html).not.toContain("No inició");
     expect(html).not.toContain("Cancelar");
@@ -216,7 +217,11 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("Aceptada — tratamiento finalizado.");
+    expect(html).toContain("Estado de solicitud: Aceptada");
+    expect(html).toContain("Estado clínico vinculado: Tratamiento finalizado");
+    expect(html).toContain("bg-amber-50");
+    expect(html).not.toContain("text-emerald-700");
+    expect(html).toContain("Sin acción pendiente.");
     expect(html).toContain("Tratamiento finalizado");
     expect(html).toContain("Motivo de cierre");
     expect(html).toContain("Alta clínica");

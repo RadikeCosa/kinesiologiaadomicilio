@@ -4,14 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { ServiceRequest } from "@/domain/service-request/service-request.types";
-import type { ServiceRequestDisplayStatus, ServiceRequestHistoryItem } from "@/app/admin/patients/[id]/data";
+import type { ServiceRequestHistoryItem } from "@/app/admin/patients/[id]/data";
 import { formatDateDisplay } from "@/lib/patient-admin-display";
 import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { ServiceRequestCreateForm } from "@/app/admin/patients/[id]/administrative/components/ServiceRequestCreateForm";
 import { ServiceRequestStatusActions } from "@/app/admin/patients/[id]/administrative/components/ServiceRequestStatusActions";
-import { getServiceRequestStatusLabel } from "@/app/admin/patients/[id]/administrative/service-request-status-label";
+import {
+  getServiceRequestCardPresentation,
+} from "@/app/admin/patients/[id]/administrative/service-request-status-label";
+import { PATIENT_SURFACE_COPY } from "@/app/admin/patients/[id]/patient-surface-copy";
 
 interface PatientServiceRequestsSectionProps {
   patientId: string;
@@ -32,42 +35,33 @@ export function getServiceRequestCreateFormVisibility(action: "open" | "cancel")
   return action === "open";
 }
 
-function getDisplayStatusLabel(displayStatus: ServiceRequestDisplayStatus): string {
-  switch (displayStatus) {
-    case "accepted_linked_active_treatment":
-      return "Aceptada — tratamiento activo";
-    case "accepted_linked_finished_treatment":
-      return "Aceptada — tratamiento finalizado";
-    case "accepted_pending_treatment":
-      return "Pendiente de iniciar tratamiento";
-    case "in_review":
-      return "En evaluación";
-    case "closed_without_treatment":
-      return "No inició";
-    case "cancelled":
-      return "Cancelada";
-    case "entered_in_error":
-      return "Error administrativo";
-    default:
-      return "En evaluación";
-  }
-}
-
 function renderServiceRequestCard({ item, patientId, missingTreatmentRequirements }: { item: ServiceRequestHistoryItem; patientId: string; missingTreatmentRequirements: string[]; }) {
   const serviceRequest = item.serviceRequest;
   const isClosedState = serviceRequest.status === "closed_without_treatment" || serviceRequest.status === "cancelled";
   const linkedEpisode = item.linkedEpisode;
+  const presentation = getServiceRequestCardPresentation(item.displayStatus, serviceRequest.status);
 
   return (
     <li className="rounded-md border border-slate-200 bg-white p-3" key={serviceRequest.id}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="inline-flex items-center rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-          {getServiceRequestStatusLabel(serviceRequest.status)}
+        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${presentation.requestStatus.className}`}>
+          Estado de solicitud: {presentation.requestStatus.label}
         </span>
         <p className="text-xs text-slate-500">Solicitud del {formatDateDisplay(serviceRequest.requestedAt)}</p>
       </div>
 
-      <p className="mt-2 text-xs font-medium text-emerald-700">{getDisplayStatusLabel(item.displayStatus)}.</p>
+      {presentation.clinicalStatus ? (
+        <p className="mt-2">
+          <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${presentation.clinicalStatus.className}`}>
+            Estado clínico vinculado: {presentation.clinicalStatus.label}
+          </span>
+        </p>
+      ) : null}
+      {item.displayStatus === "accepted_pending_treatment" ? (
+        <p className="mt-2 text-xs text-amber-800">
+          Solicitud aceptada. Falta iniciar tratamiento para habilitar visitas.
+        </p>
+      ) : null}
 
       <dl className="mt-2 grid gap-2 text-sm text-slate-800 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -129,6 +123,9 @@ function renderServiceRequestCard({ item, patientId, missingTreatmentRequirement
         patientId={patientId}
         serviceRequestId={serviceRequest.id}
       />
+      {!presentation.isActionable ? (
+        <p className="mt-2 text-xs text-slate-500">Sin acción pendiente.</p>
+      ) : null}
     </li>
   );
 }
@@ -170,7 +167,10 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, pati
       </div>
 
       <p className="mt-2 text-sm text-slate-600">
-        Registro administrativo de demandas o consultas. No reemplaza tratamiento ni visitas.
+        {PATIENT_SURFACE_COPY.requestDefinition}
+      </p>
+      <p className="mt-1 text-xs text-slate-500">
+        La solicitud ordena el pedido inicial. Al aceptarla, se puede iniciar un tratamiento.
       </p>
 
       {contextualMessage ? (
@@ -210,8 +210,8 @@ export function PatientServiceRequestsSection({ patientId, serviceRequests, pati
       ) : null}
 
       {serviceRequests.length === 0 ? (
-        <p className="mt-3 rounded border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
-          Registrá la primera solicitud para dejar asentado el motivo de consulta y avanzar con la evaluación.
+          <p className="mt-3 rounded border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
+          Todavía no hay solicitudes. Registrá la primera para iniciar la evaluación.
         </p>
       ) : (
         <>

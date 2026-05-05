@@ -14,6 +14,7 @@ import {
   formatDateDisplay,
   formatDniDisplay,
 } from "@/lib/patient-admin-display";
+import { PATIENT_SURFACE_COPY } from "@/app/admin/patients/[id]/patient-surface-copy";
 
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
@@ -200,6 +201,9 @@ export default async function AdminPatientDetailPage({
                     Siguiente paso sugerido: {nextStepSuggestion}
                   </p>
                 ) : null}
+                <p className="mt-2 text-xs text-slate-500">
+                  {PATIENT_SURFACE_COPY.flowDefinition}
+                </p>
               </div>
 
               <div className="flex shrink-0 flex-col gap-2 sm:items-end">
@@ -212,8 +216,9 @@ export default async function AdminPatientDetailPage({
                     }`}
                     href={`/admin/patients/${patient.id}/encounters`}
                   >
-                    Visitas
+                    Gestión clínica
                   </Link>
+                  <p className="text-xs text-slate-500">Visitas y seguimiento operativo del tratamiento.</p>
                   <Link
                     className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
                       !isClinicalPrimary
@@ -222,8 +227,9 @@ export default async function AdminPatientDetailPage({
                     }`}
                     href={`/admin/patients/${patient.id}/administrative`}
                   >
-                    Gestión Administrativa
+                    Gestión administrativa
                   </Link>
+                  <p className="text-xs text-slate-500">Datos del paciente y solicitudes de atención.</p>
                 </div>
 
                 {!patient.activeEpisode ? (
