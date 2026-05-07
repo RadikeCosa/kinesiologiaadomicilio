@@ -30,6 +30,10 @@ describe("EncountersList", () => {
             clinicalNote: {
               subjective: "Refiere menor dolor",
             },
+            functionalObservations: [
+              { id: "o1", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "tug_seconds", value: 18.5, unit: "s", status: "final" },
+              { id: "o2", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "pain_nrs_0_10", value: 4, unit: "/10", status: "final" },
+            ],
           },
           {
             id: "enc-2",
@@ -57,6 +61,11 @@ describe("EncountersList", () => {
     expect((html.match(/Duración:/g) ?? []).length).toBe(1);
     expect(html).toContain("Estado: Registrada");
     expect(html).toContain("Registro clínico");
+    expect(html).toContain("Métricas funcionales");
+    expect(html).toContain("TUG:");
+    expect(html).toContain("18.5 s");
+    expect(html).toContain("Dolor:");
+    expect(html).toContain("4/10");
     expect(html).toContain("Refiere menor dolor");
     expect(html).toContain("aria-label=\"Editar horario\"");
     expect(html).not.toContain("Estado: finished");
@@ -84,6 +93,7 @@ describe("EncountersList", () => {
     );
 
     expect(html).not.toContain("Registro clínico");
+    expect(html).not.toContain("Métricas funcionales");
   });
 
   it("renders updated empty-state copy for active, finished and no-treatment contexts", () => {

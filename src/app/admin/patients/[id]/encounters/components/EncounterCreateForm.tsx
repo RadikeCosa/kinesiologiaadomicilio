@@ -67,6 +67,9 @@ export function EncounterCreateForm({
   const [homeInstructions, setHomeInstructions] = useState("");
   const [nextPlan, setNextPlan] = useState("");
   const [isClinicalNoteExpanded, setIsClinicalNoteExpanded] = useState(false);
+  const [tugSeconds, setTugSeconds] = useState("");
+  const [painNrs010, setPainNrs010] = useState("");
+  const [standingToleranceMinutes, setStandingToleranceMinutes] = useState("");
 
   const canCreateEncounter = Boolean(activeEpisodeId);
 
@@ -125,6 +128,9 @@ export function EncounterCreateForm({
         homeInstructions,
         nextPlan,
       },
+      tugSeconds: tugSeconds.trim() === "" ? undefined : Number(tugSeconds),
+      painNrs010: painNrs010.trim() === "" ? undefined : Number(painNrs010),
+      standingToleranceMinutes: standingToleranceMinutes.trim() === "" ? undefined : Number(standingToleranceMinutes),
     };
 
     startTransition(async () => {
@@ -264,6 +270,28 @@ export function EncounterCreateForm({
             </label>
               </div>
             </section>
+          </div>
+        </details>
+        <details className="rounded-md border border-slate-200 bg-white p-3">
+          <summary className="cursor-pointer list-none">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-medium text-slate-900">Métricas funcionales</h3>
+              <span className="rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">Opcional</span>
+            </div>
+          </summary>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <label className="text-sm">
+              <span className="block text-slate-700">TUG (segundos)</span>
+              <input className="mt-1 w-full rounded border border-slate-300 p-2" name="tugSeconds" type="number" min="0" max="300" step="0.1" value={tugSeconds} onChange={(event) => setTugSeconds(event.target.value)} />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Dolor actual (0-10): {painNrs010 === "" ? "—" : painNrs010}</span>
+              <input className="mt-1 w-full" name="painNrs010" type="number" min="0" max="10" step="1" value={painNrs010} onChange={(event) => setPainNrs010(event.target.value)} />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Bipedestación (min)</span>
+              <input className="mt-1 w-full rounded border border-slate-300 p-2" name="standingToleranceMinutes" type="number" min="0" max="240" step="0.1" value={standingToleranceMinutes} onChange={(event) => setStandingToleranceMinutes(event.target.value)} />
+            </label>
           </div>
         </details>
 

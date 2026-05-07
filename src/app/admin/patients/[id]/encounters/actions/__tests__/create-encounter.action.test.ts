@@ -13,8 +13,12 @@ vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
 vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
   createEncounter: vi.fn(),
 }));
+vi.mock("@/infrastructure/repositories/observation.repository", () => ({
+  createFunctionalObservation: vi.fn(),
+}));
 
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
+import { createFunctionalObservation } from "@/infrastructure/repositories/observation.repository";
 import { getActiveEpisodeByPatientId } from "@/infrastructure/repositories/episode-of-care.repository";
 import { revalidatePath } from "next/cache";
 
@@ -180,5 +184,22 @@ describe("createEncounterAction", () => {
         subjective: "Refiere dolor leve",
       },
     }));
+  });
+
+  it("creates 3 functional observations when all metrics are sent", async () => {
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({ id: "epi-1", patientId: "pat-1", status: "active", startDate: "2026-04-01" });
+    vi.mocked(createEncounter).mockResolvedValue({ id: "enc-1", patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30:00Z", endedAt: "2026-04-17T11:00:00Z", status: "finished" });
+    vi.mocked(createFunctionalObservation).mockResolvedValue({ id: "obs-1", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "tug_seconds", value: 18.5, unit: "s", status: "final" });
+    const result = await createEncounterAction({ patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30", endedAt: "2026-04-17T11:00", tugSeconds: 18.5, painNrs010: 4, standingToleranceMinutes: 6 });
+    expect(result.ok).toBe(true);
+    expect(createFunctionalObservation).toHaveBeenCalledTimes(3);
+  });
+
+  it("keeps pain 0 and creates one observation", async () => {
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({ id: "epi-1", patientId: "pat-1", status: "active", startDate: "2026-04-01" });
+    vi.mocked(createEncounter).mockResolvedValue({ id: "enc-1", patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30:00Z", endedAt: "2026-04-17T11:00:00Z", status: "finished" });
+    vi.mocked(createFunctionalObservation).mockResolvedValue({ id: "obs-1", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "pain_nrs_0_10", value: 0, unit: "/10", status: "final" });
+    await createEncounterAction({ patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30", endedAt: "2026-04-17T11:00", painNrs010: 0 });
+    expect(createFunctionalObservation).toHaveBeenCalledWith(expect.objectContaining({ value: 0, code: "pain_nrs_0_10" }));
   });
 });

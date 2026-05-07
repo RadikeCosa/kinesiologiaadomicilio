@@ -55,6 +55,10 @@ describe("EncounterCreateForm", () => {
     expect(html).toContain("Continuidad del tratamiento");
     expect(html).toContain("Qué refiere el paciente o familia");
     expect(html).toContain("Plan para próxima sesión");
+    expect(html).toContain("Métricas funcionales");
+    expect(html).toContain("name=\"tugSeconds\"");
+    expect(html).toContain("name=\"painNrs010\"");
+    expect(html).toContain("name=\"standingToleranceMinutes\"");
   });
 
   it("syncs endedAt with startedAt when user has not edited endedAt", () => {

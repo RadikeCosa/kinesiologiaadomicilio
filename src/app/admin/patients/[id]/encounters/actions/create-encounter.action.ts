@@ -6,6 +6,7 @@ import { canCreateEncounter, canUseEncounterTimeRangeWithinEpisode } from "@/dom
 import { createEncounterSchema } from "@/domain/encounter/encounter.schemas";
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
 import { getActiveEpisodeByPatientId } from "@/infrastructure/repositories/episode-of-care.repository";
+import { createFunctionalObservation } from "@/infrastructure/repositories/observation.repository";
 
 export interface CreateEncounterActionResult {
   ok: boolean;
@@ -51,7 +52,22 @@ export async function createEncounterAction(input: unknown): Promise<CreateEncou
       };
     }
 
-    await createEncounter(parsedInput);
+    const createdEncounter = await createEncounter(parsedInput);
+    const functionalObservations = parsedInput.functionalObservations ?? [];
+
+    try {
+      await Promise.all(functionalObservations.map((observation) => createFunctionalObservation({
+        ...observation,
+        patientId: parsedInput.patientId,
+        encounterId: createdEncounter.id,
+        effectiveDateTime: parsedInput.startedAt,
+      })));
+    } catch {
+      return {
+        ok: false,
+        message: "La visita se registró, pero falló la carga de métricas funcionales. Reintentá cargar métricas en una nueva visita o contactar soporte.",
+      };
+    }
     revalidatePath(`/admin/patients/${parsedInput.patientId}/encounters`);
 
     return {
