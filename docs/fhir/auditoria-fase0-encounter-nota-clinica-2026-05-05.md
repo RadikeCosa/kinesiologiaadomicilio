@@ -12,6 +12,19 @@ Alcance: Encounter clínico estructurado. Sin `Condition`, `Observation`, `Proce
 - Validación ejecutada: tests de schemas, mappers, action de creación y componentes de alta/listado de visitas; además verificación de preservación de extensiones clínicas en actualización inline de período.
 - No-alcances preservados: sin IA, sin prompts/modelos, sin `Condition`, sin `Observation`, sin `Procedure`, sin rediseño global de `/encounters`.
 
+
+### Addendum de hardening/regresión (2026-05-07)
+
+- Se aplicó patch de regresión acotado posterior a Fase 0 para asegurar consistencia operativa en `/admin/patients/[id]/encounters`.
+- Alcance del hardening:
+  - listado protagonista y métricas derivados **solo** de visitas del episodio efectivo (activo si existe; si no, último episodio registrado);
+  - no mezclar visitas de episodios cerrados en el listado protagonista cuando existe nuevo episodio activo sin visitas;
+  - metadata temporal de visita (`fecha`, `inicio`, `cierre`, `duración`) priorizada visualmente antes de la nota clínica;
+  - duración visible únicamente con `startedAt` y `endedAt` válidos y `endedAt > startedAt`;
+  - la nota clínica estructurada se preserva y no altera scoping ni cálculo de duración.
+- Validación de hardening: tests de regresión en loader y listado de visitas (render/scoping/duración + preservación de nota clínica).
+- No-alcances preservados: sin IA, sin `Condition`, sin `Observation`, sin `Procedure`, sin cambios de reglas de inicio/cierre de tratamiento.
+
 ## 1) Hallazgos del estado actual
 
 ## 1.1 Modelo de dominio y validación
