@@ -103,6 +103,17 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **No-alcances preservados:** sin IA, sin `Observation`, sin `Procedure`, sin `Goal`, sin cambios de reglas de inicio/cierre de tratamiento y sin cambios de scoping de `/encounters`.
 - **Checklist ejecutado:** `docs/checklist-sincronizacion-doc-codigo.md`.
 
+
+#### Nota de cierre documental — Fase 2A PR3 métricas funcionales en visitas (2026-05-07)
+- **Estado:** cerrada / aprobada.
+- **Alcance confirmado:** flujo conectado UI → schema/action → persistencia FHIR `Observation` → loader de `/encounters` → card de visita.
+- **Métricas soportadas actuales (opcionales por visita):** `TUG` (segundos), `Dolor` (`NRS` 0–10), `Bipedestación` (minutos).
+- **Modelado/vínculos:** `Observation` asociada a `Patient` + `Encounter`; no existe vínculo directo `Observation` → `EpisodeOfCare` en FHIR R4.
+- **Scoping por episodio:** en `/encounters` se deriva por visitas scoped al episodio efectivo y luego se adjuntan métricas por `encounterId`.
+- **Render UI:** la card muestra bloque `Métricas funcionales` solo cuando existen datos; sin métricas no se renderiza bloque vacío.
+- **Deudas explícitas:** (1) consistencia transaccional parcial si falla Observation luego de crear Encounter; (2) N+1 en loader por consulta de observations por `encounterId`.
+- **No-alcances preservados:** sin dashboard/tendencias avanzadas, sin IA, sin `Procedure`, sin `Goal`, sin interpretación automática, sin predicción ni recomendación clínica automatizada.
+
 #### Criterio vigente de presentación UI entre `encounters` y `treatment`
 - En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (listado y corrección rápida).
 - El registro de visita se realiza en `/admin/patients/[id]/encounters/new`.
@@ -195,7 +206,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - registro clínico estructurado mínimo por `Encounter` (opcional) con campos: subjective, objective, intervention, assessment, tolerance, homeInstructions y nextPlan;
 - la nota clínica de `Encounter` se persiste en `Encounter.extension[]` (URLs propias versionables) y `Encounter.note[]` se usa solo como fallback legacy/transicional de lectura;
 - si los campos clínicos llegan vacíos, no se persisten extensiones clínicas vacías;
-- esta Fase 0 no introduce IA, ni cambios en `Condition`, `Observation` o `Procedure`;
+- la Fase 0 no introdujo IA ni cambios en `Condition`/`Procedure`; posteriormente Fase 2A agregó `Observation` funcional mínima por visita.
 - en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), incluyendo acceso rápido también durante tratamiento activo;
 - en `/encounters`, se muestran estadísticas clínicas mínimas derivadas de visitas (sin persistir nuevos datos), en bloque compacto previo al listado;
 - en `/encounters`, el bloque de contexto de tratamiento fue reducido visualmente para no competir con la operación de visitas;
@@ -293,7 +304,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - detalle clínico profundo por encuentro;
 - notas clínicas longitudinales / notas generales persistidas en UI;
 - resolución clínica o inicio de tratamiento desde `ServiceRequest` (la implementación vigente es resolución **administrativa** en `/administrative`, sin iniciar tratamiento);
-- `Observation` / `Procedure`;
+- `Procedure` (las `Observation` funcionales mínimas de visita ya están implementadas en Fase 2A);
 - agenda;
 - pagos;
 - self-booking;

@@ -4,7 +4,9 @@ Fecha: 2026-05-07
 
 ## Resultado ejecutivo
 
-El flujo **UI → action → FHIR → loader → card** para métricas funcionales **no está conectado en el código actual**. Por eso hoy no se ven en `/admin/patients/[id]/encounters`.
+> Nota histórica: los hallazgos iniciales de esta auditoría (brecha de conexión) quedaron superados en el mismo día, 2026-05-07, por el cierre PR3 real incluido al final del documento.
+
+Estado vigente: el flujo **UI → action → FHIR → loader → card** de métricas funcionales está implementado.
 
 En particular:
 
