@@ -46,6 +46,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
 - `/admin/patients/[id]/administrative`: administración no clínica con lectura + acciones (edición explícita de identidad, contacto y datos operativos) + sección de solicitudes de atención (listado/empty state y alta mínima).
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (header con acción primaria `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento y listado de visitas con corrección inline rápida).
+- Convención UX en Gestión clínica (`/encounters`): evitar badges verdes duplicadas con semántica equivalente de tratamiento activo; mantener una única badge dominante para el estado principal (paciente/tratamiento) y degradar estados secundarios del bloque contextual a metadata textual.
+- Feedback de éxito transitorio en Gestión clínica: confirmaciones por query param `status` reconocido (por ejemplo `encounter-created`, `treatment-started`) se muestran al volver, se ocultan automáticamente (~5s) y limpian `status` del URL para evitar reaparición al refrescar.
+- Esta convención de autolimpieza aplica a feedback de éxito transitorio; mensajes de error relevantes en otros flujos no se autohocultan por defecto salvo decisión explícita de producto/UX.
 - `/admin/patients/[id]/encounters/new`: pantalla específica para registrar una visita.
 - `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
 
