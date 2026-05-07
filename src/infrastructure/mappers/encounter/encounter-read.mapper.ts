@@ -5,6 +5,10 @@ import {
   ENCOUNTER_CLINICAL_NOTE_EXTENSION_URLS,
   ENCOUNTER_CLINICAL_NOTE_LEGACY_NOTE_PREFIXES,
 } from "@/infrastructure/mappers/encounter/encounter-clinical-note.constants";
+import {
+  ENCOUNTER_OPERATIONAL_PUNCTUALITY_EXTENSION_URL,
+  isEncounterVisitStartPunctuality,
+} from "@/infrastructure/mappers/encounter/encounter-operational-punctuality.constants";
 import { type FhirEncounter } from "@/infrastructure/mappers/encounter/encounter-fhir.types";
 
 function extractClinicalNoteFromExtensions(resource: FhirEncounter): Encounter["clinicalNote"] {
@@ -44,6 +48,14 @@ function extractClinicalNoteFromLegacyNotes(resource: FhirEncounter): Encounter[
   return Object.values(clinicalNote).some(Boolean) ? clinicalNote : undefined;
 }
 
+function extractVisitStartPunctuality(resource: FhirEncounter): Encounter["visitStartPunctuality"] {
+  const matchingExtension = (resource.extension ?? []).find((item) => item.url === ENCOUNTER_OPERATIONAL_PUNCTUALITY_EXTENSION_URL);
+  if (!matchingExtension || !isEncounterVisitStartPunctuality(matchingExtension.valueCode)) {
+    return undefined;
+  }
+  return matchingExtension.valueCode;
+}
+
 export function mapFhirEncounterToDomain(resource: FhirEncounter): Encounter {
   const startedAt = resource.period?.start ?? resource.period?.end ?? "";
   const endedAt = resource.period?.end;
@@ -63,6 +75,7 @@ export function mapFhirEncounterToDomain(resource: FhirEncounter): Encounter {
     // Tolerant read for external invalid data: if end < start we keep startedAt and hide endedAt.
     && hasValidChronologicalPeriod;
   const clinicalNote = extractClinicalNoteFromExtensions(resource) ?? extractClinicalNoteFromLegacyNotes(resource);
+  const visitStartPunctuality = extractVisitStartPunctuality(resource);
 
   return {
     id: resource.id ?? "",
@@ -71,6 +84,7 @@ export function mapFhirEncounterToDomain(resource: FhirEncounter): Encounter {
     startedAt,
     ...(shouldExposeEndedAt ? { endedAt } : {}),
     status: "finished",
+    ...(visitStartPunctuality ? { visitStartPunctuality } : {}),
     ...(clinicalNote ? { clinicalNote } : {}),
   };
 }

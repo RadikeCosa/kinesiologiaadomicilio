@@ -232,6 +232,12 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - en `/admin`, las métricas globales de visitas (`Encounter`) permanecen fuera de Fase 1 por falta de consulta agregada eficiente;
 - en `/admin`, Fase 1 no introduce nuevas rutas ni gráficos.
 - no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
+- puntualidad operativa de inicio de visita (`visitStartPunctuality`) disponible como metadata manual/transicional opcional de `Encounter`;
+- `visitStartPunctuality` se persiste en `Encounter.extension[]` con URL versionada `encounter-operational-punctuality-status-v1` y `valueCode` cerrado (`on_time_or_minor_delay`, `delayed`, `severely_delayed`);
+- la puntualidad operativa no es dato clínico, no vive en `clinicalNote`, no vive en `Observation` y no altera `startedAt`/`endedAt`;
+- en `/admin/patients/[id]/encounters/new` la captura es opcional, ubicada en bloque compacto entre Inicio/Cierre y métricas funcionales;
+- en `/admin/patients/[id]/encounters` se renderiza en la card solo cuando existe (`Puntualidad: ...`);
+- esta iteración no introduce `Appointment`, `scheduledStartAt`, `delayMinutes` calculado ni KPI/dashboard operativo.
 - en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`, Fase 2 para `Identifier.type` + tests/fixtures de identidad y Fase 3 queda cerrada con `telecom`, `contact.relationship` y `name` resueltos incrementalmente, más deuda/trigger explícitos de `address` documentados en FHIR-018.
 
 

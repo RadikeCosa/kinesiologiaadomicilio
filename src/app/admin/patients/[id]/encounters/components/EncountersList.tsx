@@ -17,6 +17,7 @@ import {
   startEncounterInlineEdit,
 } from "@/app/admin/patients/[id]/encounters/components/encounters-inline-edit.state";
 import type { Encounter } from "@/domain/encounter/encounter.types";
+import { ENCOUNTER_OPERATIONAL_PUNCTUALITY_LABEL } from "@/infrastructure/mappers/encounter/encounter-operational-punctuality.constants";
 import {
   formatDateTimeDisplay,
   formatEncounterStatusLabel,
@@ -187,6 +188,9 @@ export function EncountersList({
             );
             const isClinicalExpanded = expandedClinicalEncounterIds[encounter.id] ?? false;
             const functionalObservations = encounter.functionalObservations ?? [];
+            const punctualityLabel = encounter.visitStartPunctuality
+              ? ENCOUNTER_OPERATIONAL_PUNCTUALITY_LABEL[encounter.visitStartPunctuality]
+              : null;
             const orderedFunctionalObservations = FUNCTIONAL_OBSERVATION_ORDER
               .map((code) => functionalObservations.find((metric) => metric.code === code))
               .filter((metric): metric is NonNullable<typeof metric> => Boolean(metric));
@@ -285,6 +289,7 @@ export function EncountersList({
                           : <span>Cierre: Sin cierre registrado</span>}
                         {durationLabel ? <span>Duración: {durationLabel}</span> : <span>Duración: No calculable</span>}
                         <span>Estado: {formatEncounterStatusLabel(encounter.status)}</span>
+                        {punctualityLabel ? <span>Puntualidad: {punctualityLabel}</span> : null}
                       </div>
                       {clinicalEntries.length > 0 ? (
                         <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
