@@ -148,7 +148,7 @@ export default async function AdminPatientDetailPage({
     : null;
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+    <section className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
       <Link
         className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline"
         href="/admin/patients"
@@ -159,7 +159,7 @@ export default async function AdminPatientDetailPage({
       {patient ? (
         <div className="mt-3">
           <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <header className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-2xl font-semibold text-slate-900">
@@ -172,21 +172,18 @@ export default async function AdminPatientDetailPage({
                   </span>
                 </div>
 
-                <p className="text-sm font-medium text-slate-700">
-                  DNI: {formatDniDisplay(patient.dni)}
-                </p>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-700">
+                  <p className="font-medium">DNI: {formatDniDisplay(patient.dni)}</p>
+                  {patientAge !== null ? (
+                    <p className="text-slate-600">Edad: {patientAge} años</p>
+                  ) : null}
+                  {treatmentSummary?.detail ? (
+                    <p className="text-slate-600">{treatmentSummary.detail}</p>
+                  ) : null}
+                </div>
                 <p className="text-sm text-slate-600">
                   Resumen general del estado y contacto del paciente.
                 </p>
-                {patientAge !== null ? (
-                  <p className="text-xs text-slate-500">Edad: {patientAge} años</p>
-                ) : null}
-
-                {treatmentSummary?.detail ? (
-                  <p className="text-xs text-slate-500">
-                    {treatmentSummary.detail}
-                  </p>
-                ) : null}
 
                 {latestEpisodeSummary ? (
                   <p className="text-xs text-slate-500">{latestEpisodeSummary}</p>
@@ -206,8 +203,8 @@ export default async function AdminPatientDetailPage({
                 </p>
               </div>
 
-              <div className="flex shrink-0 flex-col gap-2 sm:items-end">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+              <div className="flex min-w-0 flex-col gap-3">
+                <div className="grid gap-2 sm:grid-cols-2">
                   <Link
                     className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
                       isClinicalPrimary
@@ -218,7 +215,6 @@ export default async function AdminPatientDetailPage({
                   >
                     Gestión clínica
                   </Link>
-                  <p className="text-xs text-slate-500">Visitas y seguimiento operativo del tratamiento.</p>
                   <Link
                     className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
                       !isClinicalPrimary
@@ -229,12 +225,17 @@ export default async function AdminPatientDetailPage({
                   >
                     Gestión administrativa
                   </Link>
-                  <p className="text-xs text-slate-500">Datos del paciente y solicitudes de atención.</p>
                 </div>
+                <p className="text-xs text-slate-500">
+                  Gestión clínica: visitas y seguimiento operativo del tratamiento.
+                </p>
+                <p className="text-xs text-slate-500">
+                  Gestión administrativa: datos del paciente y solicitudes de atención.
+                </p>
 
                 {!patient.activeEpisode ? (
                   <Link
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    className="inline-flex items-center justify-center self-start whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                     href={`/admin/patients/${patient.id}/administrative?newServiceRequest=1#service-requests`}
                   >
                     Crear solicitud de atención
@@ -243,7 +244,7 @@ export default async function AdminPatientDetailPage({
 
                 {patient.activeEpisode ? (
                   <Link
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    className="inline-flex items-center justify-center self-start whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                     href={`/admin/patients/${patient.id}/encounters/new`}
                   >
                     Registrar visita

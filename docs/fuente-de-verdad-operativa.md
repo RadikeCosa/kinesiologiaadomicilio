@@ -85,6 +85,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Documentos revisados sin cambios:** `docs/product/auditoria-preimplementacion-ai-clinica-2026-05-05.md`, `docs/checklist-sincronizacion-doc-codigo.md`.
 - **Fuera de alcance preservado:** sin IA, sin `Condition`, sin `Observation`, sin `Procedure`, sin cambios en `ServiceRequest`/`EpisodeOfCare`, sin rediseño global de `/encounters`.
 - **Hardening/regresión confirmado:** el patch posterior mantiene clinicalNote estructurada y corrige scoping/listado/métricas de `/encounters` al episodio efectivo; además ratifica que clinicalNote no altera duración ni pertenencia de visitas al episodio.
+- **Hardening visual adicional (hub paciente `/admin/patients/[id]`):** se refuerza layout legible del hub (ancho cómodo, metadata compacta y bloque de acciones con wrap/grilla responsive) para evitar compresión extrema del resumen y del bloque `Siguiente paso sugerido`.
 
 #### Criterio vigente de presentación UI entre `encounters` y `treatment`
 - En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (listado y corrección rápida).
