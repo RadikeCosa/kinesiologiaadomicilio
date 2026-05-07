@@ -188,3 +188,21 @@ Se implementó un patch UI acotado y reversible con estas decisiones:
 - `encounters/page`: resumen longitudinal read-only en formato compacto colapsable, solo cuando hay contenido, manteniendo link secundario a `/treatment`.
 
 No-alcances mantenidos: sin cambios de dominio, FHIR, mappers, repos, schemas, server actions, scoping ni reglas clínicas.
+
+
+## Nota de cierre documental (2026-05-07)
+
+- **Estado:** cerrado / aprobado (patch UX/UI clínico post Fase 0/Fase 1).
+- **Qué se implementó (UI-only):**
+  - `/admin/patients/[id]/encounters/new`: se mantuvo la metadata temporal obligatoria en primer plano y se movió “Registro clínico de la visita” a bloque opcional colapsable, con agrupación visual por secciones.
+  - `/admin/patients/[id]/encounters`: se preservó la prioridad de metadata temporal y se compactó la lectura de notas clínicas extensas con toggle por card.
+  - `/admin/patients/[id]/treatment`: se reforzó la agrupación visual de “Diagnósticos” y “Contexto funcional / plan terapéutico”.
+  - `/admin/patients/[id]/encounters`: el resumen longitudinal read-only quedó compacto/colapsable y condicionado a contenido.
+- **Superficies tocadas:** `EncounterCreateForm`, `EncountersList`, `TreatmentClinicalContextForm`, `encounters/page.tsx` (presentación y microcopy visual).
+- **No se tocó:** dominio clínico, recursos FHIR, mappers, repositorios, schemas, server actions, persistencia ni reglas operativas de tratamiento/visitas.
+- **Validación ejecutada:**
+  - checklist documental aplicado: `docs/checklist-sincronizacion-doc-codigo.md`;
+  - verificación de calidad: `npm run lint` (ok) y `npm run test` (falla en entorno por resolución de `zod` en `src/domain/treatment-context/treatment-context.schemas.ts`).
+- **Resultado de revisión documental:**
+  - actualizado: este documento de auditoría UX/UI;
+  - revisados sin cambios: `docs/fuente-de-verdad-operativa.md`, `README.md`, `docs/checklist-sincronizacion-doc-codigo.md`.
