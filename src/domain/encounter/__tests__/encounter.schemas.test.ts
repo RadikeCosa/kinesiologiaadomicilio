@@ -114,4 +114,23 @@ describe("encounter.schemas", () => {
     expect(parsed.startedAt).toMatch(/^2026-04-17T10:30:00(?:Z|[+-]\d{2}:\d{2})$/);
     expect(parsed.endedAt).toMatch(/^2026-04-17T11:10:00(?:Z|[+-]\d{2}:\d{2})$/);
   });
+
+  it("trims only outer spaces and preserves case/new lines in clinical note", () => {
+    const parsed = createEncounterSchema.parse({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:15",
+      clinicalNote: {
+        assessment: `  Primera Línea
+segunda línea MIXTA  `,
+      },
+    });
+
+    expect(parsed.clinicalNote).toEqual({
+      assessment: `Primera Línea
+segunda línea MIXTA`,
+    });
+  });
+
 });

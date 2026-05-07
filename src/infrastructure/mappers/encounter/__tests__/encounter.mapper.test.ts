@@ -170,4 +170,45 @@ describe("encounter mappers", () => {
 
     expect(mapped.clinicalNote).toEqual({ subjective: "Refiere mejora" });
   });
+
+  it("falls back to legacy note prefixes only and ignores free note text", () => {
+    const mapped = mapFhirEncounterToDomain({
+      resourceType: "Encounter",
+      id: "enc-legacy-1",
+      status: "finished",
+      subject: { reference: "Patient/pat-1" },
+      episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
+      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T11:30:00Z" },
+      note: [
+        { text: "Evolución espontánea del paciente" },
+        { text: "clinical-subjective:v1:Refiere dolor leve" },
+      ],
+    });
+
+    expect(mapped.clinicalNote).toEqual({ subjective: "Refiere dolor leve" });
+  });
+
+  it("reads clinical extensions only on exact URL match", () => {
+    const mapped = mapFhirEncounterToDomain({
+      resourceType: "Encounter",
+      id: "enc-ext-1",
+      status: "finished",
+      subject: { reference: "Patient/pat-1" },
+      episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
+      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T11:30:00Z" },
+      extension: [
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective/v2",
+          valueString: "No debe mapear",
+        },
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective",
+          valueString: "Sí debe mapear",
+        },
+      ],
+    });
+
+    expect(mapped.clinicalNote).toEqual({ subjective: "Sí debe mapear" });
+  });
+
 });

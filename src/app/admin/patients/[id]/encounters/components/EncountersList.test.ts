@@ -117,4 +117,34 @@ describe("EncountersList", () => {
     );
     expect(noTreatmentHtml).toContain("No hay visitas registradas por el momento.");
   });
+
+  it("renders only clinical fields with content", () => {
+    const html = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [
+          {
+            id: "enc-1",
+            patientId: "pat-1",
+            episodeOfCareId: "ep-1",
+            status: "finished",
+            startedAt: "2026-04-17T10:30:00Z",
+            endedAt: "2026-04-17T11:00:00Z",
+            clinicalNote: {
+              subjective: "Refiere menor dolor",
+              objective: "",
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(html).toContain("Registro clínico");
+    expect(html).toContain("Refiere:");
+    expect(html).toContain("Refiere menor dolor");
+    expect(html).not.toContain("Se observa:");
+  });
+
 });
