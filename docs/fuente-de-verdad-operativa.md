@@ -84,6 +84,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Documentos actualizados:** `docs/fuente-de-verdad-operativa.md`, `README.md`, `docs/fhir/auditoria-fase0-encounter-nota-clinica-2026-05-05.md`.
 - **Documentos revisados sin cambios:** `docs/product/auditoria-preimplementacion-ai-clinica-2026-05-05.md`, `docs/checklist-sincronizacion-doc-codigo.md`.
 - **Fuera de alcance preservado:** sin IA, sin `Condition`, sin `Observation`, sin `Procedure`, sin cambios en `ServiceRequest`/`EpisodeOfCare`, sin rediseño global de `/encounters`.
+- **Hardening/regresión confirmado:** el patch posterior mantiene clinicalNote estructurada y corrige scoping/listado/métricas de `/encounters` al episodio efectivo; además ratifica que clinicalNote no altera duración ni pertenencia de visitas al episodio.
 
 #### Criterio vigente de presentación UI entre `encounters` y `treatment`
 - En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (listado y corrección rápida).
@@ -348,6 +349,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - El listado de visitas ordena por timestamp real parseado (más recientes primero), no por comparación lexicográfica de strings.
 - Fechas se muestran en formato local consistente.
 - Horas se muestran en formato 24h.
+- Hardening regresión Fase 0 (Encounter clínico estructurado): el listado protagonista de `/encounters` se scopea estrictamente al episodio efectivo y la nota clínica no altera ni el cálculo de duración (`startedAt`/`endedAt`) ni el scoping.
 
 ## Convenciones UX/UI privadas (pacientes)
 

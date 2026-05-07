@@ -75,8 +75,11 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     listEncountersByPatientId(patient.id),
   ]);
 
-  const sortedEncounters = sortByMostRecentEncounter(encounters);
   const effectiveEpisode = resolveEffectiveEpisode({ activeEpisode, mostRecentEpisode });
+  const scopedEncounters = effectiveEpisode
+    ? encounters.filter((encounter) => encounter.episodeOfCareId === effectiveEpisode.id)
+    : [];
+  const sortedEncounters = sortByMostRecentEncounter(scopedEncounters);
 
   return {
     patient: {

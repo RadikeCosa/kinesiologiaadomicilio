@@ -13,7 +13,7 @@ vi.mock("@/app/admin/patients/[id]/encounters/actions/update-encounter-period.ac
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 
 describe("EncountersList", () => {
-  it("renders start always and shows finalization/duration only when endedAt exists", () => {
+  it("renders temporal metadata first and shows duration only with valid start/end", () => {
     const html = renderToStaticMarkup(
       createElement(EncountersList, {
         patientId: "pat-1",
@@ -38,14 +38,22 @@ describe("EncountersList", () => {
             status: "finished",
             startedAt: "2026-04-16T10:30:00Z",
           },
+          {
+            id: "enc-3",
+            patientId: "pat-1",
+            episodeOfCareId: "ep-1",
+            status: "finished",
+            startedAt: "2026-04-15T10:30:00Z",
+            endedAt: "2026-04-15T10:30:00Z",
+          },
         ],
       }),
     );
 
-    expect(html).toContain("17/04/2026");
+    expect(html).toContain("Fecha: 17/04/2026");
     expect(html).toContain("16/04/2026");
     expect(html).toMatch(/\d{2}:\d{2}/);
-    expect((html.match(/Finalización:/g) ?? []).length).toBe(1);
+    expect((html.match(/Cierre:/g) ?? []).length).toBe(2);
     expect((html.match(/Duración:/g) ?? []).length).toBe(1);
     expect(html).toContain("Estado: Registrada");
     expect(html).toContain("Registro clínico");

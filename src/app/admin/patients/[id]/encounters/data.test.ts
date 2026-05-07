@@ -83,8 +83,8 @@ describe("loadPatientEncountersPageData", () => {
     expect(data?.patient.operationalStatus).toBe("active_treatment");
     expect(data?.activeEpisode?.id).toBe("epi-1");
     expect(data?.mostRecentEpisode?.id).toBe("epi-1");
-    expect(data?.encounters.map((item) => item.id)).toEqual(["enc-2", "enc-1"]);
-    expect(data?.encounterStats.totalCount).toBe(2);
+    expect(data?.encounters.map((item) => item.id)).toEqual(["enc-1"]);
+    expect(data?.encounterStats.totalCount).toBe(1);
     expect(data?.encounterStats.treatmentCount).toBe(1);
     expect(data?.encounterStats.daysToFirstVisitFromEpisodeStart).toBe(14 + (10.5 / 24));
     expect(data?.encounterStats.averageDaysBetweenEpisodeVisits).toBeNull();
@@ -103,7 +103,13 @@ describe("loadPatientEncountersPageData", () => {
       updatedAt: "2026-04-17T12:00:00.000Z",
     });
     vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue(null);
-    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue(null);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue({
+      id: "epi-1",
+      patientId: "pat-1",
+      status: "finished",
+      startDate: "2026-04-01",
+      endDate: "2026-04-30",
+    });
 
     vi.mocked(listEncountersByPatientId).mockResolvedValue([
       {
@@ -147,7 +153,13 @@ describe("loadPatientEncountersPageData", () => {
       updatedAt: "2026-04-17T12:00:00.000Z",
     });
     vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue(null);
-    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue(null);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue({
+      id: "epi-1",
+      patientId: "pat-1",
+      status: "finished",
+      startDate: "2026-04-01",
+      endDate: "2026-04-30",
+    });
 
     vi.mocked(listEncountersByPatientId).mockResolvedValue([
       {
@@ -272,6 +284,37 @@ describe("loadPatientEncountersPageData", () => {
     expect(data?.encounterStats.averageDaysBetweenEpisodeVisits).toBeNull();
     expect(data?.encounterStats.totalDurationMinutes).toBeNull();
     expect(data?.encounterStats.durationExcludedCount).toBe(1);
+  });
+
+  it("scopes protagonist encounters strictly to effective episode", async () => {
+    vi.mocked(getPatientById).mockResolvedValue({
+      id: "pat-1",
+      firstName: "Ana",
+      lastName: "Pérez",
+      createdAt: "2026-04-17T12:00:00.000Z",
+      updatedAt: "2026-04-17T12:00:00.000Z",
+    });
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({
+      id: "epi-active",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-04-10",
+    });
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue({
+      id: "epi-finished",
+      patientId: "pat-1",
+      status: "finished",
+      startDate: "2026-03-01",
+      endDate: "2026-03-30",
+    });
+    vi.mocked(listEncountersByPatientId).mockResolvedValue([
+      { id: "enc-old", patientId: "pat-1", episodeOfCareId: "epi-finished", startedAt: "2026-03-20T10:00:00Z", status: "finished" },
+    ]);
+
+    const data = await loadPatientEncountersPageData("pat-1");
+
+    expect(data?.encounters).toEqual([]);
+    expect(data?.encounterStats.treatmentCount).toBe(0);
   });
 
   it("returns treatmentCount 0 when patient has no treatment", async () => {

@@ -42,7 +42,7 @@ function getDurationLabel(startedAt?: string, endedAt?: string): string | null {
   const startTimestamp = new Date(startedAt).getTime();
   const endTimestamp = new Date(endedAt).getTime();
 
-  if (Number.isNaN(startTimestamp) || Number.isNaN(endTimestamp) || endTimestamp < startTimestamp) {
+  if (Number.isNaN(startTimestamp) || Number.isNaN(endTimestamp) || endTimestamp <= startTimestamp) {
     return null;
   }
 
@@ -241,19 +241,14 @@ export function EncountersList({
                   </div>
                 ) : (
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium">{formatOccurrenceDate(encounter.startedAt)}</p>
-                      {encounter.endedAt ? (
-                        <p className="mt-1 text-xs text-slate-600">
-                          Finalización: {formatTimeDisplay(encounter.endedAt)}
-                        </p>
-                      ) : null}
-                      {durationLabel ? (
-                        <p className="mt-1 text-xs text-slate-600">
-                          Duración: {durationLabel}
-                        </p>
-                      ) : null}
-                      <p className="mt-1 text-xs text-slate-600">Estado: {formatEncounterStatusLabel(encounter.status)}</p>
+                    <div className="min-w-0">
+                      <p className="font-medium">Fecha: {formatOccurrenceDate(encounter.startedAt)}</p>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                        <span>Inicio: {formatTimeDisplay(encounter.startedAt)}</span>
+                        {encounter.endedAt ? <span>Cierre: {formatTimeDisplay(encounter.endedAt)}</span> : null}
+                        {durationLabel ? <span>Duración: {durationLabel}</span> : null}
+                        <span>Estado: {formatEncounterStatusLabel(encounter.status)}</span>
+                      </div>
                       {clinicalEntries.length > 0 ? (
                         <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
                           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Registro clínico</p>
