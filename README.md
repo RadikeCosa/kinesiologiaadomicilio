@@ -84,7 +84,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
 - En Fase 1, el contexto clínico longitudinal del tratamiento se edita en `/admin/patients/[id]/treatment` y se resume en modo read-only en `/admin/patients/[id]/encounters` (diagnósticos en `Condition` vinculados desde `EpisodeOfCare.diagnosis[]`).
-- Esta fase no incorpora IA ni modelado adicional de `Observation` o `Procedure`.
+- En Fase 2A ya se incorporó modelado mínimo de `Observation` funcional por visita (TUG, dolor 0–10, bipedestación) con captura opcional; continúan fuera de alcance `Procedure`, `Goal`, IA y tendencia avanzada/dashboard clínico.
 
 #### Mapa corto de superficies privadas de paciente (UI vigente)
 - **Gestión administrativa** (`/admin/patients/[id]/administrative`): datos del paciente y solicitudes de atención.

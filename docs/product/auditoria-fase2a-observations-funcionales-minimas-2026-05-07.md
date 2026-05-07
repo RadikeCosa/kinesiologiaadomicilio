@@ -1,7 +1,7 @@
 # Auditoría Fase 2A: Observations funcionales mínimas para seguimiento kinésico (sin IA)
 
 **Fecha:** 2026-05-07  
-**Estado:** Propuesta de alcance mínimo (sin implementación)
+**Estado:** Implementado (PR1+PR2+PR3 real completados)
 
 ## 1) Diagnóstico de necesidad real
 
@@ -195,3 +195,13 @@ Con captura opcional por visita y lectura de tendencia básica (último + previo
 ## Estado de implementación
 
 - PR1 (dominio, schemas y mappers FHIR de Observation funcional mínima, sin UI): implementado en código.
+
+
+## Actualización de cierre (PR3 real)
+
+- Estado final: flujo end-to-end implementado (`/encounters/new` → schema/action → `Observation` FHIR → loader `/encounters` → card).
+- Las métricas siguen siendo opcionales por visita y se renderizan solo cuando existen.
+- Vínculo de datos: `Observation.subject = Patient` + `Observation.encounter = Encounter`; sin vínculo directo a `EpisodeOfCare`.
+- El scoping por episodio se deriva desde las visitas del episodio efectivo.
+- Deudas vigentes: consistencia transaccional parcial en createEncounterAction y N+1 en loader por encounter.
+- Continúa fuera de alcance: dashboard/tendencias avanzadas, IA, `Procedure`, `Goal`, interpretación automática y recomendación/predicción clínica.
