@@ -61,6 +61,16 @@ function getDurationLabel(startedAt?: string, endedAt?: string): string | null {
   return `${hours} h ${minutes} min`;
 }
 
+const CLINICAL_NOTE_LABELS: Array<{ key: keyof NonNullable<Encounter["clinicalNote"]>; label: string }> = [
+  { key: "subjective", label: "Refiere" },
+  { key: "objective", label: "Se observa" },
+  { key: "intervention", label: "Se trabajó" },
+  { key: "assessment", label: "Evolución" },
+  { key: "tolerance", label: "Tolerancia" },
+  { key: "homeInstructions", label: "Indicaciones" },
+  { key: "nextPlan", label: "Próximo plan" },
+];
+
 export function EncountersList({
   patientId,
   encounters,
@@ -142,6 +152,9 @@ export function EncountersList({
           {encounters.map((encounter) => {
             const isEditing = inlineEditState.editingEncounterId === encounter.id;
             const durationLabel = getDurationLabel(encounter.startedAt, encounter.endedAt);
+            const clinicalEntries = CLINICAL_NOTE_LABELS
+              .map(({ key, label }) => ({ label, value: encounter.clinicalNote?.[key] }))
+              .filter((entry) => Boolean(entry.value));
 
             return (
               <li key={encounter.id} className="rounded border border-slate-200 bg-white p-3 text-sm text-slate-800">
@@ -241,6 +254,18 @@ export function EncountersList({
                         </p>
                       ) : null}
                       <p className="mt-1 text-xs text-slate-600">Estado: {formatEncounterStatusLabel(encounter.status)}</p>
+                      {clinicalEntries.length > 0 ? (
+                        <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Registro clínico</p>
+                          <ul className="mt-1 space-y-1 text-xs text-slate-700">
+                            {clinicalEntries.map((entry) => (
+                              <li key={entry.label}>
+                                <span className="font-medium">{entry.label}:</span> {entry.value}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
                     </div>
                     <button
                       aria-label="Editar horario"

@@ -49,6 +49,7 @@ El proyecto está en etapa **híbrida transicional**:
 - El DNI es un dato administrativo opcional: se normaliza y persiste cuando existe, pero no bloquea el inicio de tratamiento.
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
 - Registro y listado de visitas realizadas (`Encounter` base): alta en `/encounters/new` y listado operativo en `/encounters`.
+- En Fase 0 clínica, cada `Encounter` puede incluir una nota clínica estructurada mínima opcional (`subjective`, `objective`, `intervention`, `assessment`, `tolerance`, `homeInstructions`, `nextPlan`).
 - En `/admin/patients/[id]/encounters` se muestran estadísticas clínicas mínimas derivadas (sin persistencia nueva) con scope de episodio efectivo (activo si existe; si no, último registrado): visitas del tratamiento, última visita, primera visita, frecuencia promedio, duración promedio y tiempo total registrado.
 - Las métricas de duración en `/encounters` pueden ser parciales por datos legacy (ej. `start===end`) o encuentros sin cierre; la UI explicita cobertura como helper (`Duración calculada sobre X de Y visitas del tratamiento`).
 - Estas estadísticas viven en `/encounters` y no en el hub `/admin/patients/[id]` en esta fase.
@@ -82,6 +83,7 @@ El proyecto está en etapa **híbrida transicional**:
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
+- Esta fase no incorpora IA ni modelado adicional de `Condition`, `Observation` o `Procedure`.
 
 #### Mapa corto de superficies privadas de paciente (UI vigente)
 - **Gestión administrativa** (`/admin/patients/[id]/administrative`): datos del paciente y solicitudes de atención.

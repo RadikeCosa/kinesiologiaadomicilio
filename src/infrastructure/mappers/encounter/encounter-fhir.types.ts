@@ -13,4 +13,11 @@ export interface FhirEncounter extends FhirResource {
     start?: string;
     end?: string;
   };
+  extension?: Array<{
+    url?: string;
+    valueString?: string;
+  }>;
+  note?: Array<{
+    text?: string;
+  }>;
 }

@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-05 (UTC)
+> Última actualización: 2026-05-07 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -77,6 +77,13 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Documentos actualizados:** `docs/fuente-de-verdad-operativa.md`, `README.md`.
 - **Documentos revisados sin cambios:** `docs/checklist-sincronizacion-doc-codigo.md`.
 - **Fuera de alcance preservado:** sin cambios de dominio, recursos FHIR, mapping, contratos, repositorios ni persistencia.
+
+#### Nota de cierre documental — Fase 0 Encounter clínico estructurado (2026-05-07)
+- **Estado:** cerrada / aprobada.
+- **Checklist ejecutado:** `docs/checklist-sincronizacion-doc-codigo.md` (README, fuente operativa y auditoría FHIR alineadas con implementación vigente).
+- **Documentos actualizados:** `docs/fuente-de-verdad-operativa.md`, `README.md`, `docs/fhir/auditoria-fase0-encounter-nota-clinica-2026-05-05.md`.
+- **Documentos revisados sin cambios:** `docs/product/auditoria-preimplementacion-ai-clinica-2026-05-05.md`, `docs/checklist-sincronizacion-doc-codigo.md`.
+- **Fuera de alcance preservado:** sin IA, sin `Condition`, sin `Observation`, sin `Procedure`, sin cambios en `ServiceRequest`/`EpisodeOfCare`, sin rediseño global de `/encounters`.
 
 #### Criterio vigente de presentación UI entre `encounters` y `treatment`
 - En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (listado y corrección rápida).
@@ -164,7 +171,11 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `finished_treatment` se representa con badge amarillo en la UI privada de pacientes;
 - pantalla de gestión clínica operativa por paciente (`/admin/patients/[id]/encounters`);
 - pantalla específica para registrar visita realizada (`/admin/patients/[id]/encounters/new`) con gate de tratamiento activo;
-- listado de visitas del paciente ordenadas por fecha más reciente, con corrección inline acotada de fecha/hora de la visita, sin edición clínica completa del `Encounter`;
+- listado de visitas del paciente ordenadas por fecha más reciente, con corrección inline acotada de fecha/hora de la visita;
+- registro clínico estructurado mínimo por `Encounter` (opcional) con campos: subjective, objective, intervention, assessment, tolerance, homeInstructions y nextPlan;
+- la nota clínica de `Encounter` se persiste en `Encounter.extension[]` (URLs propias versionables) y `Encounter.note[]` se usa solo como fallback legacy/transicional de lectura;
+- si los campos clínicos llegan vacíos, no se persisten extensiones clínicas vacías;
+- esta Fase 0 no introduce IA, ni cambios en `Condition`, `Observation` o `Procedure`;
 - en `/encounters`, la gestión de tratamiento se presenta como acceso secundario compacto (link/CTA secundario), incluyendo acceso rápido también durante tratamiento activo;
 - en `/encounters`, se muestran estadísticas clínicas mínimas derivadas de visitas (sin persistir nuevos datos), en bloque compacto previo al listado;
 - en `/encounters`, el bloque de contexto de tratamiento fue reducido visualmente para no competir con la operación de visitas;

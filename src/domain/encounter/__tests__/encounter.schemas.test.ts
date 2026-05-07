@@ -52,6 +52,34 @@ describe("encounter.schemas", () => {
     expect(parsed.endedAt).toMatch(/^2026-04-17T11:15:00(?:Z|[+-]\d{2}:\d{2})$/);
   });
 
+  it("accepts encounter creation without clinical note", () => {
+    const parsed = createEncounterSchema.parse({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:15",
+    });
+
+    expect(parsed.clinicalNote).toBeUndefined();
+  });
+
+  it("normalizes and keeps partial clinical note", () => {
+    const parsed = createEncounterSchema.parse({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:15",
+      clinicalNote: {
+        subjective: "  Refiere dolor  ",
+        objective: "   ",
+      },
+    });
+
+    expect(parsed.clinicalNote).toEqual({
+      subjective: "Refiere dolor",
+    });
+  });
+
   it("fails when endedAt is before startedAt", () => {
     expect(() =>
       createEncounterSchema.parse({
