@@ -1,4 +1,4 @@
-import { z } from "next/dist/compiled/zod";
+import { z } from "zod";
 
 import type { EpisodeDiagnosisInput, UpsertEpisodeClinicalContextInput } from "@/domain/treatment-context/treatment-context.types";
 
