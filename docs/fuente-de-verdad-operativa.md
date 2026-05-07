@@ -87,6 +87,22 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Hardening/regresión confirmado:** el patch posterior mantiene clinicalNote estructurada y corrige scoping/listado/métricas de `/encounters` al episodio efectivo; además ratifica que clinicalNote no altera duración ni pertenencia de visitas al episodio.
 - **Hardening visual adicional (hub paciente `/admin/patients/[id]`):** se refuerza layout legible del hub (ancho cómodo, metadata compacta y bloque de acciones con wrap/grilla responsive) para evitar compresión extrema del resumen y del bloque `Siguiente paso sugerido`.
 
+#### Nota de cierre documental — Fase 1 contexto clínico longitudinal (2026-05-07)
+- **Estado:** cerrada / aprobada.
+- **Alcance confirmado:**
+  - edición principal del contexto longitudinal en `/admin/patients/[id]/treatment`;
+  - resumen read-only en `/admin/patients/[id]/encounters` para el episodio efectivo;
+  - diagnóstico médico de referencia + impresión kinésica persistidos como `Condition`;
+  - vínculo desde `EpisodeOfCare.diagnosis[]` con roles locales versionados (`medical_reference`, `kinesiologic_impression`);
+  - situación inicial funcional, objetivos terapéuticos y plan marco en `EpisodeOfCare.extension[]` (URLs versionadas).
+- **Estrategia diagnóstica confirmada:**
+  - editar diagnóstico crea nueva `Condition` y reemplaza referencia por kind en `EpisodeOfCare.diagnosis[]`;
+  - limpiar diagnóstico remueve referencia del `EpisodeOfCare`;
+  - no se borra físicamente la `Condition`;
+  - se preservan roles diagnósticos desconocidos.
+- **No-alcances preservados:** sin IA, sin `Observation`, sin `Procedure`, sin `Goal`, sin cambios de reglas de inicio/cierre de tratamiento y sin cambios de scoping de `/encounters`.
+- **Checklist ejecutado:** `docs/checklist-sincronizacion-doc-codigo.md`.
+
 #### Criterio vigente de presentación UI entre `encounters` y `treatment`
 - En `/admin/patients/[id]/encounters` domina visualmente la operación de visitas (listado y corrección rápida).
 - El registro de visita se realiza en `/admin/patients/[id]/encounters/new`.
@@ -95,6 +111,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - El lenguaje visible al usuario prioriza términos operativos de producto (“tratamiento”, “visitas”).
 - Los tecnicismos (`EpisodeOfCare`, `Encounter`) se reservan para soporte/aclaración cuando aportan contexto.
 - En `/encounters` se permite contexto de tratamiento **compacto** (solo informativo), sin gestión inline.
+- Fase 1 PR3: el contexto clínico longitudinal del ciclo se edita en `/admin/patients/[id]/treatment` y se resume en modo read-only en `/admin/patients/[id]/encounters`; diagnósticos en `Condition` vinculados por `EpisodeOfCare.diagnosis[]`, y baseline/objetivos/plan en `EpisodeOfCare.extension[]` (sin IA).
+- Estrategia diagnóstica vigente en Fase 1: replace por kind (nueva `Condition` + reemplazo de referencia) y cleanup por remoción de referencia en `EpisodeOfCare` sin borrado físico de `Condition`.
 - En `/encounters` el contexto compacto distingue 3 estados semánticos:
   - tratamiento activo (muestra fecha de inicio);
   - tratamiento finalizado (muestra fecha de finalización);

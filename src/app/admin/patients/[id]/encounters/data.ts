@@ -10,6 +10,7 @@ import {
   getMostRecentEpisodeByPatientId,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
+import { loadEpisodeClinicalContextReadModel, type EpisodeClinicalContextReadModel } from "@/app/admin/patients/[id]/clinical-context";
 
 export interface PatientEncountersPageData {
   patient: {
@@ -23,6 +24,7 @@ export interface PatientEncountersPageData {
   mostRecentEpisode: EpisodeOfCare | null;
   encounters: Encounter[];
   encounterStats: EncounterStats;
+  clinicalContext: EpisodeClinicalContextReadModel | null;
 }
 
 function buildFullName(patient: { firstName: string; lastName: string }): string {
@@ -81,6 +83,8 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     : [];
   const sortedEncounters = sortByMostRecentEncounter(scopedEncounters);
 
+  const clinicalContext = await loadEpisodeClinicalContextReadModel(effectiveEpisode);
+
   return {
     patient: {
       id: patient.id,
@@ -101,5 +105,6 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
       episodeOfCareId: effectiveEpisode?.id,
       episodeStartDate: effectiveEpisode?.startDate,
     }),
+    clinicalContext,
   };
 }

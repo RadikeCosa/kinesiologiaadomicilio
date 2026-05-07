@@ -83,7 +83,8 @@ El proyecto está en etapa **híbrida transicional**:
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
-- Esta fase no incorpora IA ni modelado adicional de `Condition`, `Observation` o `Procedure`.
+- En Fase 1, el contexto clínico longitudinal del tratamiento se edita en `/admin/patients/[id]/treatment` y se resume en modo read-only en `/admin/patients/[id]/encounters` (diagnósticos en `Condition` vinculados desde `EpisodeOfCare.diagnosis[]`).
+- Esta fase no incorpora IA ni modelado adicional de `Observation` o `Procedure`.
 
 #### Mapa corto de superficies privadas de paciente (UI vigente)
 - **Gestión administrativa** (`/admin/patients/[id]/administrative`): datos del paciente y solicitudes de atención.
