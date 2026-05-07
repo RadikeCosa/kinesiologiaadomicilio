@@ -46,6 +46,10 @@ export function getNextEndedAtOnStartChange(params: {
   return params.currentEndedAt;
 }
 
+export function getPainValueLabel(painNrs010: string): string {
+  return painNrs010 === "" ? "Sin cargar" : painNrs010;
+}
+
 export function EncounterCreateForm({
   patientId,
   activeEpisodeId,
@@ -210,6 +214,34 @@ export function EncounterCreateForm({
         </div>
 
         <p className="text-xs text-slate-600">Completá inicio y cierre para registrar una visita realizada.</p>
+        <p className="text-xs text-slate-500">* Campos obligatorios · El resto es opcional.</p>
+
+        <details className="rounded-md border border-slate-200 bg-white p-3">
+          <summary className="cursor-pointer list-none">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-medium text-slate-900">Métricas funcionales</h3>
+              <span className="rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">Opcional</span>
+            </div>
+            <p className="mt-1 text-xs text-slate-600">Cargá mediciones rápidas para seguir evolución funcional.</p>
+          </summary>
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <label className="text-sm">
+              <span className="block text-slate-700">TUG (segundos)</span>
+              <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" name="tugSeconds" type="number" min="0" max="300" step="0.1" value={tugSeconds} onChange={(event) => setTugSeconds(event.target.value)} />
+              <span className="mt-1 block text-xs text-slate-500">Ejemplo: 12.4 s</span>
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Dolor actual (0-10)</span>
+              <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" name="painNrs010" type="number" min="0" max="10" step="1" value={painNrs010} onChange={(event) => setPainNrs010(event.target.value)} />
+              <span className="mt-1 block text-xs text-slate-500">Valor actual: {getPainValueLabel(painNrs010)}</span>
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Bipedestación (min)</span>
+              <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" name="standingToleranceMinutes" type="number" min="0" max="240" step="0.1" value={standingToleranceMinutes} onChange={(event) => setStandingToleranceMinutes(event.target.value)} />
+              <span className="mt-1 block text-xs text-slate-500">Tiempo total tolerado</span>
+            </label>
+          </div>
+        </details>
         <details
           className="rounded-md border border-slate-200 bg-white p-3"
           open={isClinicalNoteExpanded}
@@ -230,68 +262,46 @@ export function EncounterCreateForm({
             <section className="rounded border border-slate-200 bg-slate-50 p-3">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Observación clínica</h4>
               <div className="mt-2 grid gap-3">
-            <label className="text-sm">
-              <span className="block text-slate-700">Qué refiere el paciente o familia</span>
-              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={subjective} onChange={(event) => setSubjective(event.target.value)} />
-            </label>
-            <label className="text-sm">
-              <span className="block text-slate-700">Qué se observa</span>
-              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={objective} onChange={(event) => setObjective(event.target.value)} />
-            </label>
+                <label className="text-sm">
+                  <span className="block text-slate-700">Qué refiere el paciente o familia</span>
+                  <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={subjective} onChange={(event) => setSubjective(event.target.value)} />
+                </label>
+                <label className="text-sm">
+                  <span className="block text-slate-700">Qué se observa</span>
+                  <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={objective} onChange={(event) => setObjective(event.target.value)} />
+                </label>
               </div>
             </section>
             <section className="rounded border border-slate-200 bg-slate-50 p-3">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Intervención y respuesta</h4>
               <div className="mt-2 grid gap-3">
-            <label className="text-sm">
-              <span className="block text-slate-700">Qué se trabajó</span>
-              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={intervention} onChange={(event) => setIntervention(event.target.value)} />
-            </label>
-            <label className="text-sm">
-              <span className="block text-slate-700">Respuesta o evolución de la sesión</span>
-              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={assessment} onChange={(event) => setAssessment(event.target.value)} />
-            </label>
-            <label className="text-sm">
-              <span className="block text-slate-700">Tolerancia</span>
-              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={tolerance} onChange={(event) => setTolerance(event.target.value)} />
-            </label>
+                <label className="text-sm">
+                  <span className="block text-slate-700">Qué se trabajó</span>
+                  <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={intervention} onChange={(event) => setIntervention(event.target.value)} />
+                </label>
+                <label className="text-sm">
+                  <span className="block text-slate-700">Respuesta o evolución de la sesión</span>
+                  <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={assessment} onChange={(event) => setAssessment(event.target.value)} />
+                </label>
+                <label className="text-sm">
+                  <span className="block text-slate-700">Tolerancia</span>
+                  <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={tolerance} onChange={(event) => setTolerance(event.target.value)} />
+                </label>
               </div>
             </section>
             <section className="rounded border border-slate-200 bg-slate-50 p-3">
               <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Continuidad del tratamiento</h4>
               <div className="mt-2 grid gap-3">
-            <label className="text-sm">
-              <span className="block text-slate-700">Indicaciones domiciliarias</span>
-              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={homeInstructions} onChange={(event) => setHomeInstructions(event.target.value)} />
-            </label>
-            <label className="text-sm">
-              <span className="block text-slate-700">Plan para próxima sesión</span>
-              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={nextPlan} onChange={(event) => setNextPlan(event.target.value)} />
-            </label>
+                <label className="text-sm">
+                  <span className="block text-slate-700">Indicaciones domiciliarias</span>
+                  <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={homeInstructions} onChange={(event) => setHomeInstructions(event.target.value)} />
+                </label>
+                <label className="text-sm">
+                  <span className="block text-slate-700">Plan para próxima sesión</span>
+                  <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={nextPlan} onChange={(event) => setNextPlan(event.target.value)} />
+                </label>
               </div>
             </section>
-          </div>
-        </details>
-        <details className="rounded-md border border-slate-200 bg-white p-3">
-          <summary className="cursor-pointer list-none">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-medium text-slate-900">Métricas funcionales</h3>
-              <span className="rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">Opcional</span>
-            </div>
-          </summary>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <label className="text-sm">
-              <span className="block text-slate-700">TUG (segundos)</span>
-              <input className="mt-1 w-full rounded border border-slate-300 p-2" name="tugSeconds" type="number" min="0" max="300" step="0.1" value={tugSeconds} onChange={(event) => setTugSeconds(event.target.value)} />
-            </label>
-            <label className="text-sm">
-              <span className="block text-slate-700">Dolor actual (0-10): {painNrs010 === "" ? "—" : painNrs010}</span>
-              <input className="mt-1 w-full" name="painNrs010" type="number" min="0" max="10" step="1" value={painNrs010} onChange={(event) => setPainNrs010(event.target.value)} />
-            </label>
-            <label className="text-sm">
-              <span className="block text-slate-700">Bipedestación (min)</span>
-              <input className="mt-1 w-full rounded border border-slate-300 p-2" name="standingToleranceMinutes" type="number" min="0" max="240" step="0.1" value={standingToleranceMinutes} onChange={(event) => setStandingToleranceMinutes(event.target.value)} />
-            </label>
           </div>
         </details>
 

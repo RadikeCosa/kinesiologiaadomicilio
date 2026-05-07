@@ -12,6 +12,7 @@ vi.mock("@/app/admin/patients/[id]/encounters/actions/create-encounter.action", 
 
 import {
   EncounterCreateForm,
+  getPainValueLabel,
   getNextEndedAtOnStartChange,
   isEncounterEndBeforeStart,
 } from "@/app/admin/patients/[id]/encounters/components/EncounterCreateForm";
@@ -59,6 +60,15 @@ describe("EncounterCreateForm", () => {
     expect(html).toContain("name=\"tugSeconds\"");
     expect(html).toContain("name=\"painNrs010\"");
     expect(html).toContain("name=\"standingToleranceMinutes\"");
+    expect(html).toContain("* Campos obligatorios · El resto es opcional.");
+    expect(html.indexOf("Métricas funcionales")).toBeLessThan(html.indexOf("Registro clínico de la visita"));
+    expect(html).toContain("Valor actual: Sin cargar");
+    expect(html).toContain("name=\"episodeOfCareId\"");
+  });
+
+  it("formats pain helper label for empty and zero values", () => {
+    expect(getPainValueLabel("")).toBe("Sin cargar");
+    expect(getPainValueLabel("0")).toBe("0");
   });
 
   it("syncs endedAt with startedAt when user has not edited endedAt", () => {
