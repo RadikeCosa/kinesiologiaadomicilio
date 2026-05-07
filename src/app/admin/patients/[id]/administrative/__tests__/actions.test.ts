@@ -459,11 +459,16 @@ describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
     vi.mocked(updateServiceRequestStatus).mockResolvedValueOnce({} as never);
     vi.mocked(createEpisodeOfCare).mockResolvedValueOnce({ id: "ep-1" } as never);
 
-    const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-1" }));
+    const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-1", treatmentStartDate: "2026-04-28" }));
     expect(result).toEqual({
       ok: true,
       message: "Solicitud aceptada y tratamiento iniciado correctamente.",
       redirectTo: "/admin/patients/pat-1/encounters?status=treatment-started",
+    });
+    expect(createEpisodeOfCare).toHaveBeenCalledWith({
+      patientId: "pat-1",
+      serviceRequestId: "sr-1",
+      startDate: "2026-04-28",
     });
   });
 
@@ -477,7 +482,20 @@ describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
     vi.mocked(getActiveEpisodeByPatientId).mockResolvedValueOnce(null);
     vi.mocked(existsAnotherPatientWithDni).mockResolvedValueOnce(false);
 
-    const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-2" }));
+    const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-2", treatmentStartDate: "2026-04-28" }));
     expect(result.ok).toBe(false);
+  });
+
+  it("rejects future treatment start date", async () => {
+    const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-1", treatmentStartDate: "2099-01-01" }));
+    expect(result).toEqual({ ok: false, message: "La fecha de inicio del tratamiento no puede ser posterior a hoy." });
+  });
+
+  it("rejects treatment start date earlier than service request date", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-3", patientId: "pat-1", requestedAt: "2026-04-28", reasonText: "Dolor", status: "in_review",
+    });
+    const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-3", treatmentStartDate: "2026-04-20" }));
+    expect(result).toEqual({ ok: false, message: "La fecha de inicio del tratamiento no puede ser anterior a la fecha de la solicitud." });
   });
 });

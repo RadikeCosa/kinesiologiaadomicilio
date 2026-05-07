@@ -48,19 +48,45 @@ function getOptionalFormValue(formData: FormData, key: string): string | undefin
   return value;
 }
 
+function isValidIsoDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) {
+    return false;
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 export async function acceptAndStartTreatmentFromServiceRequestAction(
   patientId: string,
   formData: FormData,
 ): Promise<AcceptAndStartTreatmentFromServiceRequestActionResult> {
   const serviceRequestId = getOptionalFormValue(formData, "id") ?? getOptionalFormValue(formData, "serviceRequestId");
+  const treatmentStartDate = getOptionalFormValue(formData, "treatmentStartDate");
   if (!serviceRequestId?.trim()) {
     return { ok: false, message: "No se pudo iniciar tratamiento desde esta solicitud." };
+  }
+  if (!treatmentStartDate?.trim()) {
+    return { ok: false, message: "La fecha de inicio del tratamiento es obligatoria." };
+  }
+  if (!isValidIsoDate(treatmentStartDate)) {
+    return { ok: false, message: "La fecha de inicio del tratamiento debe tener formato YYYY-MM-DD." };
+  }
+  const today = formatLocalDateInputValue();
+  if (treatmentStartDate > today) {
+    return { ok: false, message: "La fecha de inicio del tratamiento no puede ser posterior a hoy." };
   }
 
   try {
     const serviceRequest = await getServiceRequestById(serviceRequestId);
     if (!serviceRequest || serviceRequest.patientId !== patientId || serviceRequest.status !== "in_review") {
       return { ok: false, message: "No se pudo iniciar tratamiento desde esta solicitud." };
+    }
+    if (isValidIsoDate(serviceRequest.requestedAt) && treatmentStartDate < serviceRequest.requestedAt) {
+      return { ok: false, message: "La fecha de inicio del tratamiento no puede ser anterior a la fecha de la solicitud." };
     }
 
     const patient = await getPatientById(patientId);
@@ -90,7 +116,7 @@ export async function acceptAndStartTreatmentFromServiceRequestAction(
       await createEpisodeOfCare({
         patientId,
         serviceRequestId,
-        startDate: formatLocalDateInputValue(),
+        startDate: treatmentStartDate,
       });
     } catch (error) {
       await updateServiceRequestStatus({ id: serviceRequestId, status: "in_review" });

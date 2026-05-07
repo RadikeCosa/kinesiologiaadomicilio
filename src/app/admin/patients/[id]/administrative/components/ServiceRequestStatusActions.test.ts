@@ -36,10 +36,13 @@ describe("ServiceRequestStatusActions", () => {
         serviceRequestId: "sr-1",
         currentStatus: "in_review",
         displayStatus: "in_review",
+        defaultTreatmentStartDate: "2026-04-28",
       }),
     );
 
     expect(html).toContain("Aceptar e iniciar tratamiento");
+    expect(html).toContain("Fecha de inicio del tratamiento");
+    expect(html).toContain("value=\"2026-04-28\"");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
     expect(html).not.toContain("Registrar visita");

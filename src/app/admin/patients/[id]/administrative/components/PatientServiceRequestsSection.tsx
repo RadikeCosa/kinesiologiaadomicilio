@@ -122,6 +122,7 @@ function renderServiceRequestCard({ item, patientId, missingTreatmentRequirement
         missingTreatmentRequirements={serviceRequest.status === "in_review" ? missingTreatmentRequirements : []}
         patientId={patientId}
         serviceRequestId={serviceRequest.id}
+        defaultTreatmentStartDate={serviceRequest.requestedAt}
       />
       {!presentation.isActionable ? (
         <p className="mt-2 text-xs text-slate-500">Sin acción pendiente.</p>

@@ -18,6 +18,7 @@ interface ServiceRequestStatusActionsProps {
   currentStatus: ServiceRequestStatus;
   displayStatus: ServiceRequestDisplayStatus;
   missingTreatmentRequirements?: string[];
+  defaultTreatmentStartDate?: string;
 }
 
 interface ActionFeedback {
@@ -86,12 +87,18 @@ export function ServiceRequestStatusActions({
   currentStatus,
   displayStatus,
   missingTreatmentRequirements = [],
+  defaultTreatmentStartDate,
 }: ServiceRequestStatusActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [activeCloseAction, setActiveCloseAction] = useState<ActionKind | null>(null);
   const [closeReasonText, setCloseReasonText] = useState("");
   const [feedback, setFeedback] = useState<ActionFeedback | null>(null);
+  const today = new Date().toISOString().slice(0, 10);
+  const initialTreatmentStartDate = defaultTreatmentStartDate && /^\d{4}-\d{2}-\d{2}$/.test(defaultTreatmentStartDate)
+    ? defaultTreatmentStartDate
+    : today;
+  const [treatmentStartDate, setTreatmentStartDate] = useState(initialTreatmentStartDate);
 
   const availableActions = getServiceRequestStatusActions(displayStatus);
   const closeStatus = getCloseLikeStatusFromAction(activeCloseAction);
@@ -104,6 +111,7 @@ export function ServiceRequestStatusActions({
     startTransition(async () => {
       const formData = new FormData();
       formData.set("id", serviceRequestId);
+      formData.set("treatmentStartDate", treatmentStartDate);
       const result = await acceptAndStartTreatmentFromServiceRequestAction(patientId, formData);
 
       if (result.ok && result.redirectTo) {
@@ -169,17 +177,7 @@ export function ServiceRequestStatusActions({
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {availableActions.map((action) => {
           if (action === "accept_and_start_treatment") {
-            return (
-              <button
-                className="rounded border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-100 disabled:opacity-50"
-                disabled={isPending}
-                key={action}
-                onClick={handleDirectAcceptAndStartTreatment}
-                type="button"
-              >
-                {getActionLabel(action)}
-              </button>
-            );
+            return null;
           }
           if (action === "start_treatment_legacy") {
             return (
@@ -209,6 +207,34 @@ export function ServiceRequestStatusActions({
           );
         })}
       </div>
+      {availableActions.includes("accept_and_start_treatment") ? (
+        <div className="mt-3 space-y-2">
+          <label className="block text-sm font-medium text-slate-800" htmlFor={`treatmentStartDate-${serviceRequestId}`}>
+            Fecha de inicio del tratamiento
+          </label>
+          <input
+            className="w-full rounded border border-slate-300 bg-white p-2 text-sm sm:w-auto"
+            id={`treatmentStartDate-${serviceRequestId}`}
+            max={today}
+            name="treatmentStartDate"
+            onChange={(event) => setTreatmentStartDate(event.target.value)}
+            required
+            type="date"
+            value={treatmentStartDate}
+          />
+          <p className="text-xs text-slate-500">
+            Por defecto usamos la fecha de la solicitud. Podés ajustarla si el tratamiento comenzó otro día.
+          </p>
+          <button
+            className="rounded border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-100 disabled:opacity-50"
+            disabled={isPending}
+            onClick={handleDirectAcceptAndStartTreatment}
+            type="button"
+          >
+            {getActionLabel("accept_and_start_treatment")}
+          </button>
+        </div>
+      ) : null}
 
       {activeCloseAction && closeStatus ? (
         <form className="mt-3 space-y-2" onSubmit={handleSubmitCloseLike}>
