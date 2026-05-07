@@ -176,6 +176,24 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
         </div>
       ) : null}
 
+
+
+      {pageData.clinicalContext?.hasAnyContent ? (
+        <section className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Contexto clínico del tratamiento</h2>
+            <Link className="text-xs font-medium text-slate-700 underline-offset-2 hover:underline" href={`/admin/patients/${pageData.patient.id}/treatment`}>Editar en tratamiento</Link>
+          </div>
+          <div className="mt-2 space-y-2 text-sm text-slate-700">
+            {pageData.clinicalContext.medicalReferenceDiagnosisText ? <p><strong>Diagnóstico médico de referencia:</strong> {pageData.clinicalContext.medicalReferenceDiagnosisText}</p> : null}
+            {pageData.clinicalContext.kinesiologicImpressionText ? <p><strong>Impresión kinésica:</strong> {pageData.clinicalContext.kinesiologicImpressionText}</p> : null}
+            {pageData.clinicalContext.initialFunctionalStatus ? <p><strong>Situación inicial funcional:</strong> {pageData.clinicalContext.initialFunctionalStatus}</p> : null}
+            {pageData.clinicalContext.therapeuticGoals ? <p><strong>Objetivos terapéuticos:</strong> {pageData.clinicalContext.therapeuticGoals}</p> : null}
+            {pageData.clinicalContext.frameworkPlan ? <p><strong>Plan marco del tratamiento:</strong> {pageData.clinicalContext.frameworkPlan}</p> : null}
+          </div>
+        </section>
+      ) : null}
+
       <EncounterStatsSummary stats={pageData.encounterStats} />
 
       <EncountersList

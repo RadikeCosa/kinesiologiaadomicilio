@@ -294,6 +294,7 @@ Mitigación:
 
 ### No-alcances reafirmados
 - Sin IA.
+- Estrategia diagnósticos PR3 hardening: ante edición de texto se crea nueva `Condition` y se reemplaza referencia en `EpisodeOfCare.diagnosis[]` para ese kind; ante limpieza, se remueve la referencia del episodio sin borrar físicamente la `Condition` histórica.
 - Sin Goal/Observation/Procedure.
 - Sin rediseño formulario de visitas.
 - Sin rediseño cards de Encounter.
@@ -354,3 +355,25 @@ Mitigación:
 
 7. Suite mínima de tests en verde para dominio/mappers/repos/actions/loaders/UI crítica.
 
+
+
+## Actualización PR3 (2026-05-07)
+
+- Cierre parcial implementado: server action de upsert en `/treatment`, loader/read model consolidado y resumen read-only en `/encounters`.
+- Se mantiene scoping estricto por episodio efectivo en visitas, sin edición inline del contexto longitudinal en `/encounters`.
+- Sin IA.
+- Estrategia diagnósticos PR3 hardening: ante edición de texto se crea nueva `Condition` y se reemplaza referencia en `EpisodeOfCare.diagnosis[]` para ese kind; ante limpieza, se remueve la referencia del episodio sin borrar físicamente la `Condition` histórica.
+
+## Cierre posterior Fase 1 (2026-05-07)
+
+- **Estado final:** Fase 1 cerrada / aprobada.
+- **Secuencia implementada confirmada:**
+  - **PR1:** dominio `treatment-context`, schemas Zod y base `Condition`;
+  - **PR2:** `EpisodeOfCare.diagnosis[]` con roles diagnósticos locales versionados + extensiones longitudinales versionadas;
+  - **PR3:** server action de upsert, loaders/read model y UI (`/treatment` edición, `/encounters` resumen read-only);
+  - **Hardening:** orquestación diagnóstica replace/cleanup, validaciones de action y tolerancia de loader ante `Condition` faltante.
+- **Validación ejecutada en cierre:**
+  - tests de action y loader de contexto clínico longitudinal;
+  - tests de `/encounters` para resumen read-only + scoping del episodio efectivo;
+  - revisión de sincronización documental con `docs/checklist-sincronizacion-doc-codigo.md`.
+- **No-alcances preservados:** sin IA, sin prompts/modelos, sin `Observation`, sin `Procedure`, sin `Goal`, sin rediseño global de formularios clínicos.

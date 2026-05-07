@@ -16,6 +16,8 @@ import {
 } from "@/lib/patient-admin-display";
 import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
 import { PATIENT_SURFACE_COPY } from "@/app/admin/patients/[id]/patient-surface-copy";
+import { loadEpisodeClinicalContextReadModel } from "@/app/admin/patients/[id]/clinical-context";
+import { TreatmentClinicalContextForm } from "@/app/admin/patients/[id]/components/TreatmentClinicalContextForm";
 
 interface AdminPatientTreatmentPageProps {
   params: Promise<{ id: string }>;
@@ -56,6 +58,7 @@ export default async function AdminPatientTreatmentPage({
   const hasClosedEpisodes = treatmentEpisodeHistory.length > 0;
   const hasAnyEpisode = hasActiveTreatment || hasClosedEpisodes;
   const canStartTreatmentFromCurrentContext = treatmentServiceRequestContext.state === "valid" && Boolean(treatmentServiceRequestContext.serviceRequestId);
+  const clinicalContext = activeEpisode ? await loadEpisodeClinicalContextReadModel(activeEpisode) : null;
 
   if (!patient) {
     return (
@@ -202,6 +205,8 @@ export default async function AdminPatientTreatmentPage({
           </>
         )}
       </section>
+
+      {activeEpisode ? (<TreatmentClinicalContextForm patientId={patient.id} episodeOfCareId={activeEpisode.id} initialData={clinicalContext} />) : null}
 
       {hasAnyEpisode && treatmentEpisodeHistory.length > 0 ? (
         <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4">
