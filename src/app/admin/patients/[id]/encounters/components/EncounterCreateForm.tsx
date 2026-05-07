@@ -66,6 +66,7 @@ export function EncounterCreateForm({
   const [tolerance, setTolerance] = useState("");
   const [homeInstructions, setHomeInstructions] = useState("");
   const [nextPlan, setNextPlan] = useState("");
+  const [isClinicalNoteExpanded, setIsClinicalNoteExpanded] = useState(false);
 
   const canCreateEncounter = Boolean(activeEpisodeId);
 
@@ -203,12 +204,26 @@ export function EncounterCreateForm({
         </div>
 
         <p className="text-xs text-slate-600">Completá inicio y cierre para registrar una visita realizada.</p>
-        <div className="rounded-md border border-slate-200 bg-white p-3">
-          <h3 className="text-sm font-medium text-slate-900">Registro clínico de la visita</h3>
-          <p className="mt-1 text-xs text-slate-600">
-            Opcional. Ayuda a dejar trazabilidad clínica de la sesión y preparar futuros informes.
-          </p>
-          <div className="mt-3 grid gap-3">
+        <details
+          className="rounded-md border border-slate-200 bg-white p-3"
+          open={isClinicalNoteExpanded}
+          onToggle={(event) => setIsClinicalNoteExpanded(event.currentTarget.open)}
+        >
+          <summary className="cursor-pointer list-none">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-medium text-slate-900">Registro clínico de la visita</h3>
+              <span className="rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                Opcional
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-slate-600">
+              Ayuda a dejar trazabilidad clínica de la sesión y preparar futuros informes.
+            </p>
+          </summary>
+          <div className="mt-3 space-y-3">
+            <section className="rounded border border-slate-200 bg-slate-50 p-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Observación clínica</h4>
+              <div className="mt-2 grid gap-3">
             <label className="text-sm">
               <span className="block text-slate-700">Qué refiere el paciente o familia</span>
               <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={subjective} onChange={(event) => setSubjective(event.target.value)} />
@@ -217,6 +232,11 @@ export function EncounterCreateForm({
               <span className="block text-slate-700">Qué se observa</span>
               <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={objective} onChange={(event) => setObjective(event.target.value)} />
             </label>
+              </div>
+            </section>
+            <section className="rounded border border-slate-200 bg-slate-50 p-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Intervención y respuesta</h4>
+              <div className="mt-2 grid gap-3">
             <label className="text-sm">
               <span className="block text-slate-700">Qué se trabajó</span>
               <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={intervention} onChange={(event) => setIntervention(event.target.value)} />
@@ -229,6 +249,11 @@ export function EncounterCreateForm({
               <span className="block text-slate-700">Tolerancia</span>
               <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={tolerance} onChange={(event) => setTolerance(event.target.value)} />
             </label>
+              </div>
+            </section>
+            <section className="rounded border border-slate-200 bg-slate-50 p-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Continuidad del tratamiento</h4>
+              <div className="mt-2 grid gap-3">
             <label className="text-sm">
               <span className="block text-slate-700">Indicaciones domiciliarias</span>
               <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={homeInstructions} onChange={(event) => setHomeInstructions(event.target.value)} />
@@ -237,8 +262,10 @@ export function EncounterCreateForm({
               <span className="block text-slate-700">Plan para próxima sesión</span>
               <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={nextPlan} onChange={(event) => setNextPlan(event.target.value)} />
             </label>
+              </div>
+            </section>
           </div>
-        </div>
+        </details>
 
         {timeValidationError ? <p className="text-sm text-red-700">{timeValidationError}</p> : null}
 

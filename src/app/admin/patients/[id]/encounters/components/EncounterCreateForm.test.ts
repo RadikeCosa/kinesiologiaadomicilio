@@ -48,7 +48,11 @@ describe("EncounterCreateForm", () => {
     expect((html.match(/required=\"\"/g) ?? []).length).toBeGreaterThanOrEqual(2);
     expect(html).toContain("grid gap-4 md:grid-cols-2");
     expect(html).toContain("Registro clínico de la visita");
-    expect(html).toContain("Opcional. Ayuda a dejar trazabilidad clínica de la sesión y preparar futuros informes.");
+    expect(html).toContain("Opcional");
+    expect(html).toContain("Ayuda a dejar trazabilidad clínica de la sesión y preparar futuros informes.");
+    expect(html).toContain("Observación clínica");
+    expect(html).toContain("Intervención y respuesta");
+    expect(html).toContain("Continuidad del tratamiento");
     expect(html).toContain("Qué refiere el paciente o familia");
     expect(html).toContain("Plan para próxima sesión");
   });
