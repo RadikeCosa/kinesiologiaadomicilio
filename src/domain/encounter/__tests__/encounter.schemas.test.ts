@@ -133,4 +133,28 @@ segunda línea MIXTA`,
     });
   });
 
+  it("parses optional functional metrics and keeps pain 0", () => {
+    const parsed = createEncounterSchema.parse({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:15",
+      tugSeconds: 18.5,
+      painNrs010: 0,
+      standingToleranceMinutes: 6,
+    });
+    expect(parsed.functionalObservations).toHaveLength(3);
+    expect(parsed.functionalObservations?.find((item) => item.code === "pain_nrs_0_10")?.value).toBe(0);
+  });
+
+  it("rejects invalid functional metrics before create", () => {
+    expect(() => createEncounterSchema.parse({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:15",
+      tugSeconds: 0,
+    })).toThrow();
+  });
+
 });

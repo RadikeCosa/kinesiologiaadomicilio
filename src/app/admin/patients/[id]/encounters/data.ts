@@ -5,6 +5,7 @@ import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.typ
 import { getPatientOperationalStatus } from "@/domain/patient/patient.rules";
 import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
+import { listFunctionalObservationsByEncounterId } from "@/infrastructure/repositories/observation.repository";
 import {
   getActiveEpisodeByPatientId,
   getMostRecentEpisodeByPatientId,
@@ -82,6 +83,22 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     ? encounters.filter((encounter) => encounter.episodeOfCareId === effectiveEpisode.id)
     : [];
   const sortedEncounters = sortByMostRecentEncounter(scopedEncounters);
+  const functionalObservationsByEncounterId = new Map<string, Encounter["functionalObservations"]>();
+  await Promise.all(sortedEncounters.map(async (encounter) => {
+    const observations = await listFunctionalObservationsByEncounterId(encounter.id);
+    const deduped = new Map<string, (typeof observations)[number]>();
+    observations.forEach((observation) => {
+      const existing = deduped.get(observation.code);
+      if (!existing || new Date(observation.effectiveDateTime).getTime() >= new Date(existing.effectiveDateTime).getTime()) {
+        deduped.set(observation.code, observation);
+      }
+    });
+    functionalObservationsByEncounterId.set(encounter.id, Array.from(deduped.values()));
+  }));
+  const encountersWithFunctional = sortedEncounters.map((encounter) => ({
+    ...encounter,
+    functionalObservations: functionalObservationsByEncounterId.get(encounter.id) ?? [],
+  }));
 
   const clinicalContext = await loadEpisodeClinicalContextReadModel(effectiveEpisode);
 
@@ -99,9 +116,9 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     },
     activeEpisode,
     mostRecentEpisode,
-    encounters: sortedEncounters,
+    encounters: encountersWithFunctional,
     encounterStats: calculateEncounterStats({
-      encounters: sortedEncounters,
+      encounters: encountersWithFunctional,
       episodeOfCareId: effectiveEpisode?.id,
       episodeStartDate: effectiveEpisode?.startDate,
     }),

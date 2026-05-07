@@ -1,3 +1,4 @@
+import type { FunctionalObservation, FunctionalObservationInput } from "@/domain/functional-observation/functional-observation.types";
 export type EncounterStatus = "finished";
 
 export interface EncounterClinicalNote {
@@ -18,6 +19,7 @@ export interface Encounter {
   endedAt?: string;
   status: EncounterStatus;
   clinicalNote?: EncounterClinicalNote;
+  functionalObservations?: FunctionalObservation[];
 }
 
 export interface CreateEncounterInput {
@@ -26,6 +28,7 @@ export interface CreateEncounterInput {
   startedAt: string;
   endedAt: string;
   clinicalNote?: EncounterClinicalNote;
+  functionalObservations?: FunctionalObservationInput[];
   /**
    * @deprecated transitional alias while migrating from occurrenceDate to startedAt.
    */

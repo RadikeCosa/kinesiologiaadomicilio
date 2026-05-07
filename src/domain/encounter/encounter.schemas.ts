@@ -5,6 +5,8 @@ import type {
   EncounterClinicalNote,
   UpdateEncounterPeriodInput,
 } from "@/domain/encounter/encounter.types";
+import { functionalObservationInputSchema } from "@/domain/functional-observation/functional-observation.schemas";
+import type { FunctionalObservationInput } from "@/domain/functional-observation/functional-observation.types";
 
 function assertObject(input: unknown, schemaName: string): Record<string, unknown> {
   if (typeof input !== "object" || input === null) {
@@ -78,6 +80,24 @@ function parseClinicalNote(value: unknown): EncounterClinicalNote | undefined {
   return hasAnyField ? clinicalNote : undefined;
 }
 
+function normalizeOptionalNumber(value: unknown, field: string): number | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(parsed)) throw new Error(`${field}: debe ser un número.`);
+  return parsed;
+}
+
+function parseFunctionalObservations(record: Record<string, unknown>, patientId: string, startedAt: string): FunctionalObservationInput[] | undefined {
+  const tugSeconds = normalizeOptionalNumber(record.tugSeconds, "tugSeconds");
+  const painNrs010 = normalizeOptionalNumber(record.painNrs010, "painNrs010");
+  const standingToleranceMinutes = normalizeOptionalNumber(record.standingToleranceMinutes, "standingToleranceMinutes");
+  const observations: FunctionalObservationInput[] = [];
+  if (typeof tugSeconds !== "undefined") observations.push(functionalObservationInputSchema.parse({ patientId, encounterId: "__PENDING__", effectiveDateTime: startedAt, code: "tug_seconds", value: tugSeconds }));
+  if (typeof painNrs010 !== "undefined") observations.push(functionalObservationInputSchema.parse({ patientId, encounterId: "__PENDING__", effectiveDateTime: startedAt, code: "pain_nrs_0_10", value: painNrs010 }));
+  if (typeof standingToleranceMinutes !== "undefined") observations.push(functionalObservationInputSchema.parse({ patientId, encounterId: "__PENDING__", effectiveDateTime: startedAt, code: "standing_tolerance_minutes", value: standingToleranceMinutes }));
+  return observations.length > 0 ? observations : undefined;
+}
+
 export const createEncounterSchema = {
   parse(input: unknown): CreateEncounterInput {
     const record = assertObject(input, "createEncounterSchema");
@@ -107,6 +127,7 @@ export const createEncounterSchema = {
       startedAt,
       endedAt,
       clinicalNote: parseClinicalNote(record.clinicalNote),
+      functionalObservations: parseFunctionalObservations(record, patientId, startedAt),
     };
   },
 };

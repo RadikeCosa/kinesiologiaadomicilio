@@ -71,6 +71,11 @@ const CLINICAL_NOTE_LABELS: Array<{ key: keyof NonNullable<Encounter["clinicalNo
   { key: "nextPlan", label: "Próximo plan" },
 ];
 const CLINICAL_NOTE_PREVIEW_MAX_CHARS = 180;
+const FUNCTIONAL_LABELS = {
+  tug_seconds: "TUG",
+  pain_nrs_0_10: "Dolor",
+  standing_tolerance_minutes: "Bipedestación",
+} as const;
 
 function toCompactClinicalValue(value: string): string {
   const normalized = value.replace(/\s+/g, " ").trim();
@@ -176,6 +181,7 @@ export function EncountersList({
               (entry.value ?? "").replace(/\s+/g, " ").trim().length > CLINICAL_NOTE_PREVIEW_MAX_CHARS,
             );
             const isClinicalExpanded = expandedClinicalEncounterIds[encounter.id] ?? false;
+            const functionalObservations = encounter.functionalObservations ?? [];
 
             return (
               <li key={encounter.id} className="rounded border border-slate-200 bg-white p-3 text-sm text-slate-800">
@@ -290,6 +296,19 @@ export function EncountersList({
                               {isClinicalExpanded ? "Ocultar detalle clínico" : "Ver detalle clínico"}
                             </button>
                           ) : null}
+                        </div>
+                      ) : null}
+                      {functionalObservations.length > 0 ? (
+                        <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Métricas funcionales</p>
+                          <ul className="mt-1 space-y-1 text-xs text-slate-700">
+                            {functionalObservations.map((metric) => (
+                              <li key={`${encounter.id}-${metric.code}`}>
+                                <span className="font-medium">{FUNCTIONAL_LABELS[metric.code]}:</span>{" "}
+                                {metric.code === "pain_nrs_0_10" ? `${metric.value}/10` : metric.code === "tug_seconds" ? `${metric.value} s` : `${metric.value} min`}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       ) : null}
                     </div>
