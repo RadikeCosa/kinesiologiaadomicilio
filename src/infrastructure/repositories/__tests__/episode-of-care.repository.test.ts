@@ -9,6 +9,7 @@ import {
   getActiveEpisodeByPatientId,
   getEpisodeById,
   listEpisodeOfCareByIncomingReferral,
+  updateEpisodeOfCareClinicalContext,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 
 describe("episode-of-care.repository (FHIR)", () => {
@@ -236,5 +237,47 @@ describe("episode-of-care.repository (FHIR)", () => {
 
     const episode = await getEpisodeById("epi-404");
     expect(episode).toBeNull();
+  });
+
+  it("updates clinical context without altering status/period/referralRequest and preserving closure extensions", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "EpisodeOfCare",
+      id: "epi-1",
+      status: "active",
+      period: { start: "2026-04-01" },
+      referralRequest: [{ reference: "ServiceRequest/sr-1" }],
+      extension: [
+        { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason", valueCode: "treatment_completed" },
+      ],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "EpisodeOfCare",
+      id: "epi-1",
+      status: "active",
+      period: { start: "2026-04-01" },
+      referralRequest: [{ reference: "ServiceRequest/sr-1" }],
+      extension: [
+        { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason", valueCode: "treatment_completed" },
+        { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-initial-functional-status-v1", valueString: "baseline" },
+      ],
+    });
+
+    await updateEpisodeOfCareClinicalContext({
+      episodeId: "epi-1",
+      clinicalContext: { initialFunctionalStatus: "baseline" },
+      diagnosisReferences: [{ kind: "medical_reference", conditionId: "cond-1" }],
+    });
+
+    expect(putSpy).toHaveBeenCalledWith(
+      "EpisodeOfCare/epi-1",
+      expect.objectContaining({
+        status: "active",
+        period: { start: "2026-04-01" },
+        referralRequest: [{ reference: "ServiceRequest/sr-1" }],
+      }),
+    );
+    const payload = putSpy.mock.calls[0]?.[1] as { extension?: Array<{ url: string }>; diagnosis?: unknown[] };
+    expect(payload.extension?.some((item) => item.url.includes("closure-reason"))).toBe(true);
+    expect(payload.diagnosis).toHaveLength(1);
   });
 });
