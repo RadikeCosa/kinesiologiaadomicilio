@@ -2,6 +2,7 @@ import type {
   EpisodeOfCare,
   FinishEpisodeOfCareInput,
   StartEpisodeOfCareInput,
+  UpdateEpisodeClinicalContextInput,
 } from "@/domain/episode-of-care/episode-of-care.types";
 import { extractResourcesByType, extractSingleResource } from "@/lib/fhir/bundle-utils";
 import { fhirClient } from "@/lib/fhir/client";
@@ -17,6 +18,7 @@ import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care
 import { mapFhirEpisodeOfCareToDomain } from "@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper";
 import {
   applyFinishEpisodeOfCareToFhir,
+  applyEpisodeClinicalContextToFhir,
   mapStartEpisodeOfCareInputToFhir,
 } from "@/infrastructure/mappers/episode-of-care/episode-of-care-write.mapper";
 
@@ -126,5 +128,20 @@ export async function finishActiveEpisodeOfCare(input: FinishEpisodeOfCareInput)
   });
   const updated = await fhirClient.put<FhirEpisodeOfCare>(`EpisodeOfCare/${activeEpisode.id}`, payload);
 
+  return mapFhirEpisodeOfCareToDomain(updated);
+}
+
+export async function updateEpisodeOfCareClinicalContext(
+  input: UpdateEpisodeClinicalContextInput,
+): Promise<EpisodeOfCare | null> {
+  const episodeId = input.episodeId.trim();
+  if (!episodeId) return null;
+
+  const existing = await fhirClient.get<FhirEpisodeOfCare>(`EpisodeOfCare/${episodeId}`);
+  const payload = applyEpisodeClinicalContextToFhir(existing, {
+    diagnosisReferences: input.diagnosisReferences,
+    clinicalContext: input.clinicalContext,
+  });
+  const updated = await fhirClient.put<FhirEpisodeOfCare>(`EpisodeOfCare/${episodeId}`, payload);
   return mapFhirEpisodeOfCareToDomain(updated);
 }

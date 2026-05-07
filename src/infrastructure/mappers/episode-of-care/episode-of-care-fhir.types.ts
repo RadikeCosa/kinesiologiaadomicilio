@@ -4,6 +4,22 @@ export type FhirExtension = {
   url: string;
   valueCode?: string;
   valueString?: string;
+  valueMarkdown?: string;
+};
+
+export type FhirEpisodeDiagnosisRoleCoding = {
+  system?: string;
+  code?: string;
+  display?: string;
+};
+
+export type FhirEpisodeDiagnosis = {
+  condition?: { reference?: string };
+  role?: {
+    coding?: FhirEpisodeDiagnosisRoleCoding[];
+    text?: string;
+  };
+  rank?: number;
 };
 
 export interface FhirEpisodeOfCare extends FhirResource {
@@ -23,4 +39,5 @@ export interface FhirEpisodeOfCare extends FhirResource {
   referralRequest?: Array<{
     reference?: string;
   }>;
+  diagnosis?: FhirEpisodeDiagnosis[];
 }

@@ -1,5 +1,18 @@
 export type EpisodeOfCareStatus = "active" | "finished";
 
+export type EpisodeDiagnosisKind = "medical_reference" | "kinesiologic_impression";
+
+export interface EpisodeDiagnosisReference {
+  kind: EpisodeDiagnosisKind;
+  conditionId: string;
+}
+
+export interface EpisodeClinicalContext {
+  initialFunctionalStatus?: string;
+  therapeuticGoals?: string;
+  frameworkPlan?: string;
+}
+
 export type EpisodeOfCareClosureReason =
   | "treatment_completed"
   | "goals_reached"
@@ -47,6 +60,14 @@ export interface EpisodeOfCare {
   serviceRequestId?: string;
   closureReason?: EpisodeOfCareClosureReason;
   closureDetail?: string;
+  diagnosisReferences?: EpisodeDiagnosisReference[];
+  clinicalContext?: EpisodeClinicalContext;
+}
+
+export interface UpdateEpisodeClinicalContextInput {
+  episodeId: string;
+  diagnosisReferences?: EpisodeDiagnosisReference[];
+  clinicalContext?: EpisodeClinicalContext;
 }
 
 export interface StartEpisodeOfCareInput {

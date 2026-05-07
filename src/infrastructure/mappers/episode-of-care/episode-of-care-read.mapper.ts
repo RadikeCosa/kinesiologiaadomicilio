@@ -1,8 +1,21 @@
-import type { EpisodeOfCare, EpisodeOfCareClosureReason } from "@/domain/episode-of-care/episode-of-care.types";
+import type {
+  EpisodeDiagnosisKind,
+  EpisodeDiagnosisReference,
+  EpisodeOfCare,
+  EpisodeOfCareClosureReason,
+} from "@/domain/episode-of-care/episode-of-care.types";
 import { EPISODE_OF_CARE_CLOSURE_REASONS } from "@/domain/episode-of-care/episode-of-care.types";
 import { extractIdFromReference } from "@/lib/fhir/references";
 
 import { type FhirEpisodeOfCare } from "@/infrastructure/mappers/episode-of-care/episode-of-care-fhir.types";
+import {
+  EPISODE_CONTEXT_FRAMEWORK_PLAN_EXTENSION_URL,
+  EPISODE_CONTEXT_INITIAL_FUNCTIONAL_STATUS_EXTENSION_URL,
+  EPISODE_CONTEXT_THERAPEUTIC_GOALS_EXTENSION_URL,
+  EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_IMPRESSION,
+  EPISODE_DIAGNOSIS_ROLE_MEDICAL_REFERENCE,
+  EPISODE_DIAGNOSIS_ROLE_SYSTEM,
+} from "@/infrastructure/mappers/episode-of-care/episode-of-care-context.constants";
 
 const CLOSURE_REASON_PREFIX = "closure-reason:v1:";
 const CLOSURE_DETAIL_PREFIX = "closure-detail:v1:";
@@ -88,6 +101,34 @@ function extractFirstServiceRequestId(
   return undefined;
 }
 
+function extractDiagnosisKind(resource: FhirEpisodeOfCare["diagnosis"][number]): EpisodeDiagnosisKind | undefined {
+  const coding = resource.role?.coding;
+  if (!coding?.length) return undefined;
+  for (const item of coding) {
+    if (item.system !== EPISODE_DIAGNOSIS_ROLE_SYSTEM) continue;
+    if (item.code === EPISODE_DIAGNOSIS_ROLE_MEDICAL_REFERENCE) return EPISODE_DIAGNOSIS_ROLE_MEDICAL_REFERENCE;
+    if (item.code === EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_IMPRESSION) return EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_IMPRESSION;
+  }
+  return undefined;
+}
+
+function extractDiagnosisReferences(diagnosis?: FhirEpisodeOfCare["diagnosis"]): EpisodeDiagnosisReference[] | undefined {
+  if (!diagnosis?.length) return undefined;
+  const items = diagnosis.flatMap((entry) => {
+    const kind = extractDiagnosisKind(entry);
+    if (!kind) return [];
+    const conditionId = extractIdFromReference(entry.condition?.reference);
+    if (!conditionId) return [];
+    return [{ kind, conditionId }];
+  });
+  return items.length ? items : undefined;
+}
+
+function readContextExtension(extension: FhirEpisodeOfCare["extension"] | undefined, url: string): string | undefined {
+  const entry = extension?.find((item) => item.url === url);
+  return normalizeOptionalString(entry?.valueString);
+}
+
 export function mapEpisodeOfCareRead(resource: EpisodeOfCare): EpisodeOfCare {
   return {
     id: resource.id,
@@ -104,6 +145,12 @@ export function mapEpisodeOfCareRead(resource: EpisodeOfCare): EpisodeOfCare {
 export function mapFhirEpisodeOfCareToDomain(resource: FhirEpisodeOfCare): EpisodeOfCare {
   const closureReasonFromExtension = extractClosureReasonFromExtension(resource.extension);
   const closureDetailFromExtension = extractClosureDetailFromExtension(resource.extension);
+  const clinicalContext = {
+    initialFunctionalStatus: readContextExtension(resource.extension, EPISODE_CONTEXT_INITIAL_FUNCTIONAL_STATUS_EXTENSION_URL),
+    therapeuticGoals: readContextExtension(resource.extension, EPISODE_CONTEXT_THERAPEUTIC_GOALS_EXTENSION_URL),
+    frameworkPlan: readContextExtension(resource.extension, EPISODE_CONTEXT_FRAMEWORK_PLAN_EXTENSION_URL),
+  };
+  const hasClinicalContext = Object.values(clinicalContext).some(Boolean);
 
   return {
     id: resource.id ?? "",
@@ -114,5 +161,7 @@ export function mapFhirEpisodeOfCareToDomain(resource: FhirEpisodeOfCare): Episo
     serviceRequestId: extractFirstServiceRequestId(resource.referralRequest),
     closureReason: closureReasonFromExtension ?? extractClosureReasonFromNote(resource.note),
     closureDetail: closureDetailFromExtension ?? extractClosureDetail(resource.note),
+    diagnosisReferences: extractDiagnosisReferences(resource.diagnosis),
+    clinicalContext: hasClinicalContext ? clinicalContext : undefined,
   };
 }
