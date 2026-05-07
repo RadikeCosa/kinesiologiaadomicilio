@@ -206,3 +206,13 @@ No-alcances mantenidos: sin cambios de dominio, FHIR, mappers, repos, schemas, s
 - **Resultado de revisión documental:**
   - actualizado: este documento de auditoría UX/UI;
   - revisados sin cambios: `docs/fuente-de-verdad-operativa.md`, `README.md`, `docs/checklist-sincronizacion-doc-codigo.md`.
+
+
+## Addendum patch UX/copy mínimo en cards de visitas (2026-05-07)
+
+- Se aplicó patch de presentación en `EncountersList` para casos legacy sin cierre: la card ahora muestra `Cierre: Sin cierre registrado` y `Duración: No calculable` cuando `endedAt` está ausente.
+- Se mantuvo intacta la regla operativa vigente de alta/edición con inicio+cierre obligatorios; no se habilitó ningún flujo nuevo sin cierre.
+- Se fijó orden canónico de métricas funcionales en card (`TUG → Dolor → Bipedestación`) sin depender del orden de entrada.
+- El bloque conserva título `Métricas funcionales` y agrega helper de lectura puntual: “Valores registrados en esta visita. No representan tendencia.”
+- Visitas sin métricas continúan sin renderizar bloque vacío; métricas parciales muestran solo valores presentes.
+- Backlog futuro (sin implementación): captura y visualización de puntualidad/demora de visita para mejorar interpretación operacional.

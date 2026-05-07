@@ -111,6 +111,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Modelado/vínculos:** `Observation` asociada a `Patient` + `Encounter`; no existe vínculo directo `Observation` → `EpisodeOfCare` en FHIR R4.
 - **Scoping por episodio:** en `/encounters` se deriva por visitas scoped al episodio efectivo y luego se adjuntan métricas por `encounterId`.
 - **Render UI:** la card muestra bloque `Métricas funcionales` solo cuando existen datos; sin métricas no se renderiza bloque vacío.
+- **Orden canónico en card:** cuando hay métricas, se muestran en orden fijo `TUG → Dolor → Bipedestación`, independientemente del orden de entrada.
+- **Copy de lectura puntual:** el bloque incluye helper “Valores registrados en esta visita. No representan tendencia.” para evitar interpretación automática.
+- **Legacy sin cierre:** si una visita histórica llega sin `endedAt`, la card explicita `Cierre: Sin cierre registrado` y `Duración: No calculable` (no habilita alta nueva sin cierre).
 - **Deudas explícitas:** (1) consistencia transaccional parcial si falla Observation luego de crear Encounter; (2) N+1 en loader por consulta de observations por `encounterId`.
 - **No-alcances preservados:** sin dashboard/tendencias avanzadas, sin IA, sin `Procedure`, sin `Goal`, sin interpretación automática, sin predicción ni recomendación clínica automatizada.
 

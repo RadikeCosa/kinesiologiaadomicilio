@@ -76,6 +76,11 @@ const FUNCTIONAL_LABELS = {
   pain_nrs_0_10: "Dolor",
   standing_tolerance_minutes: "Bipedestación",
 } as const;
+const FUNCTIONAL_OBSERVATION_ORDER: Array<keyof typeof FUNCTIONAL_LABELS> = [
+  "tug_seconds",
+  "pain_nrs_0_10",
+  "standing_tolerance_minutes",
+];
 
 function toCompactClinicalValue(value: string): string {
   const normalized = value.replace(/\s+/g, " ").trim();
@@ -182,6 +187,9 @@ export function EncountersList({
             );
             const isClinicalExpanded = expandedClinicalEncounterIds[encounter.id] ?? false;
             const functionalObservations = encounter.functionalObservations ?? [];
+            const orderedFunctionalObservations = FUNCTIONAL_OBSERVATION_ORDER
+              .map((code) => functionalObservations.find((metric) => metric.code === code))
+              .filter((metric): metric is NonNullable<typeof metric> => Boolean(metric));
 
             return (
               <li key={encounter.id} className="rounded border border-slate-200 bg-white p-3 text-sm text-slate-800">
@@ -272,8 +280,10 @@ export function EncountersList({
                       <p className="font-medium">Fecha: {formatOccurrenceDate(encounter.startedAt)}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
                         <span>Inicio: {formatTimeDisplay(encounter.startedAt)}</span>
-                        {encounter.endedAt ? <span>Cierre: {formatTimeDisplay(encounter.endedAt)}</span> : null}
-                        {durationLabel ? <span>Duración: {durationLabel}</span> : null}
+                        {encounter.endedAt
+                          ? <span>Cierre: {formatTimeDisplay(encounter.endedAt)}</span>
+                          : <span>Cierre: Sin cierre registrado</span>}
+                        {durationLabel ? <span>Duración: {durationLabel}</span> : <span>Duración: No calculable</span>}
                         <span>Estado: {formatEncounterStatusLabel(encounter.status)}</span>
                       </div>
                       {clinicalEntries.length > 0 ? (
@@ -298,11 +308,12 @@ export function EncountersList({
                           ) : null}
                         </div>
                       ) : null}
-                      {functionalObservations.length > 0 ? (
+                      {orderedFunctionalObservations.length > 0 ? (
                         <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
                           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Métricas funcionales</p>
+                          <p className="mt-1 text-xs text-slate-600">Valores registrados en esta visita. No representan tendencia.</p>
                           <ul className="mt-1 space-y-1 text-xs text-slate-700">
-                            {functionalObservations.map((metric) => (
+                            {orderedFunctionalObservations.map((metric) => (
                               <li key={`${encounter.id}-${metric.code}`}>
                                 <span className="font-medium">{FUNCTIONAL_LABELS[metric.code]}:</span>{" "}
                                 {metric.code === "pain_nrs_0_10" ? `${metric.value}/10` : metric.code === "tug_seconds" ? `${metric.value} s` : `${metric.value} min`}
