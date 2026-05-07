@@ -147,4 +147,30 @@ describe("EncountersList", () => {
     expect(html).not.toContain("Se observa:");
   });
 
+  it("renders compact clinical toggle when note is long", () => {
+    const html = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [
+          {
+            id: "enc-long",
+            patientId: "pat-1",
+            episodeOfCareId: "ep-1",
+            status: "finished",
+            startedAt: "2026-04-17T10:30:00Z",
+            endedAt: "2026-04-17T11:00:00Z",
+            clinicalNote: {
+              subjective:
+                "Texto largo ".repeat(30),
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(html).toContain("Ver detalle clínico");
+  });
+
 });

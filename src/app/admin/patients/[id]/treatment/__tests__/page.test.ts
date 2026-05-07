@@ -20,7 +20,6 @@ vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadTreatmentServiceRequestContext: loadTreatmentServiceRequestContextMock,
   loadTreatmentEpisodeHistoryContext: loadTreatmentEpisodeHistoryContextMock,
 }));
-
 vi.mock("@/app/admin/patients/[id]/components/StartEpisodeOfCareForm", () => ({
   StartEpisodeOfCareForm: ({ serviceRequestId }: { serviceRequestId?: string }) =>
     createElement("div", null, `StartEpisodeOfCareForm${serviceRequestId ? `:${serviceRequestId}` : ""}`),
@@ -28,6 +27,9 @@ vi.mock("@/app/admin/patients/[id]/components/StartEpisodeOfCareForm", () => ({
 
 vi.mock("@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm", () => ({
   FinishEpisodeOfCareForm: () => createElement("div", null, "FinishEpisodeOfCareForm"),
+}));
+vi.mock("@/app/admin/patients/[id]/components/TreatmentClinicalContextForm", () => ({
+  TreatmentClinicalContextForm: () => createElement("div", null, "TreatmentClinicalContextForm"),
 }));
 
 const basePatient = {
@@ -192,6 +194,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Tratamiento activo");
+    expect(html).toContain("TreatmentClinicalContextForm");
     expect(html).toContain("FinishEpisodeOfCareForm");
     expect(html).not.toContain("StartEpisodeOfCareForm");
     expect(html).not.toContain("Registrar visita");

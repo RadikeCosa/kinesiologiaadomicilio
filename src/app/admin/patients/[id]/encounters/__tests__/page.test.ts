@@ -329,4 +329,52 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).not.toContain("href=\"/admin/patients/pat-1/encounters/new\"");
     expect(foundHtml).toContain("EncountersList");
   });
+
+  it("renders read-only clinical context only when there is content and keeps secondary edit link", async () => {
+    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        operationalStatus: "active_treatment",
+      },
+      activeEpisode: {
+        id: "epi-1",
+        patientId: "pat-1",
+        status: "active",
+        startDate: "2026-04-01",
+      },
+      mostRecentEpisode: null,
+      clinicalContext: {
+        hasAnyContent: true,
+        medicalReferenceDiagnosisText: "Lumbalgia",
+      },
+      encounters: [],
+      encounterStats: {
+        totalCount: 0, treatmentCount: 0, lastStartedAt: null, averageDurationMinutes: null, totalDurationMinutes: null,
+        durationEligibleCount: 0, durationExcludedCount: 0, isDurationPartial: false, daysToFirstVisitFromEpisodeStart: null,
+        isFirstVisitBeforeEpisodeStart: false, averageDaysBetweenEpisodeVisits: null, frequencyEligibleVisitCount: 0, frequencyIntervalCount: 0,
+      },
+    });
+    const withContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
+    expect(withContext).toContain("Contexto clínico del tratamiento");
+    expect(withContext).toContain("Ver contexto longitudinal del episodio");
+    expect(withContext).toContain("Editar en tratamiento");
+    expect(withContext).toContain("href=\"/admin/patients/pat-1/treatment\"");
+    expect(withContext).toContain("Registrar visita");
+
+    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
+      patient: { id: "pat-1", fullName: "Ana Pérez", operationalStatus: "active_treatment" },
+      activeEpisode: { id: "epi-1", patientId: "pat-1", status: "active", startDate: "2026-04-01" },
+      mostRecentEpisode: null,
+      clinicalContext: { hasAnyContent: false },
+      encounters: [],
+      encounterStats: {
+        totalCount: 0, treatmentCount: 0, lastStartedAt: null, averageDurationMinutes: null, totalDurationMinutes: null,
+        durationEligibleCount: 0, durationExcludedCount: 0, isDurationPartial: false, daysToFirstVisitFromEpisodeStart: null,
+        isFirstVisitBeforeEpisodeStart: false, averageDaysBetweenEpisodeVisits: null, frequencyEligibleVisitCount: 0, frequencyIntervalCount: 0,
+      },
+    });
+    const withoutContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
+    expect(withoutContext).not.toContain("Contexto clínico del tratamiento");
+  });
 });

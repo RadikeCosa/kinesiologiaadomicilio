@@ -34,11 +34,32 @@ export function TreatmentClinicalContextForm({ patientId, episodeOfCareId, initi
   return <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4"><h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Contexto clínico del tratamiento</h2><p className="mt-2 text-xs text-slate-600">Información longitudinal del ciclo. No reemplaza el registro de cada visita.</p>
     <form className="mt-3 space-y-3" onSubmit={handleSubmit}>
       {message ? <p className={`text-sm ${message.tone === "success" ? "text-emerald-700" : "text-red-700"}`}>{message.text}</p> : null}
-      <textarea className="w-full rounded border p-2 text-sm" placeholder="Diagnóstico médico de referencia" rows={3} value={medicalReferenceDiagnosisText} onChange={(e) => setMedical(e.target.value)} />
-      <textarea className="w-full rounded border p-2 text-sm" placeholder="Impresión kinésica" rows={3} value={kinesiologicImpressionText} onChange={(e) => setKinesiologic(e.target.value)} />
-      <textarea className="w-full rounded border p-2 text-sm" placeholder="Situación inicial funcional" rows={3} value={initialFunctionalStatus} onChange={(e) => setInitial(e.target.value)} />
-      <textarea className="w-full rounded border p-2 text-sm" placeholder="Objetivos terapéuticos" rows={3} value={therapeuticGoals} onChange={(e) => setGoals(e.target.value)} />
-      <textarea className="w-full rounded border p-2 text-sm" placeholder="Plan marco del tratamiento" rows={3} value={frameworkPlan} onChange={(e) => setPlan(e.target.value)} />
+      <section className="rounded border border-slate-200 bg-white p-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Diagnósticos</h3>
+        <label className="mt-2 block text-sm text-slate-700">
+          Diagnóstico médico de referencia
+          <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Diagnóstico médico de referencia" rows={3} value={medicalReferenceDiagnosisText} onChange={(e) => setMedical(e.target.value)} />
+        </label>
+        <label className="mt-2 block text-sm text-slate-700">
+          Impresión kinésica
+          <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Impresión kinésica" rows={3} value={kinesiologicImpressionText} onChange={(e) => setKinesiologic(e.target.value)} />
+        </label>
+      </section>
+      <section className="rounded border border-slate-200 bg-white p-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Contexto funcional y plan terapéutico</h3>
+        <label className="mt-2 block text-sm text-slate-700">
+          Situación inicial funcional
+          <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Situación inicial funcional" rows={3} value={initialFunctionalStatus} onChange={(e) => setInitial(e.target.value)} />
+        </label>
+        <label className="mt-2 block text-sm text-slate-700">
+          Objetivos terapéuticos
+          <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Objetivos terapéuticos" rows={3} value={therapeuticGoals} onChange={(e) => setGoals(e.target.value)} />
+        </label>
+        <label className="mt-2 block text-sm text-slate-700">
+          Plan marco del tratamiento
+          <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Plan marco del tratamiento" rows={3} value={frameworkPlan} onChange={(e) => setPlan(e.target.value)} />
+        </label>
+      </section>
       <button className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white" disabled={isPending} type="submit">{isPending ? "Guardando..." : "Guardar contexto"}</button>
     </form></section>;
 }

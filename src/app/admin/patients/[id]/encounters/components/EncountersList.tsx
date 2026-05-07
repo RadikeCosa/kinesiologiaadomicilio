@@ -70,6 +70,16 @@ const CLINICAL_NOTE_LABELS: Array<{ key: keyof NonNullable<Encounter["clinicalNo
   { key: "homeInstructions", label: "Indicaciones" },
   { key: "nextPlan", label: "Próximo plan" },
 ];
+const CLINICAL_NOTE_PREVIEW_MAX_CHARS = 180;
+
+function toCompactClinicalValue(value: string): string {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= CLINICAL_NOTE_PREVIEW_MAX_CHARS) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, CLINICAL_NOTE_PREVIEW_MAX_CHARS).trimEnd()}…`;
+}
 
 export function EncountersList({
   patientId,
@@ -81,6 +91,7 @@ export function EncountersList({
   const [isPending, startTransition] = useTransition();
   const { message, setMessage, clearMessage } = useFormFeedback();
   const [inlineEditState, setInlineEditState] = useState(createInitialEncountersInlineEditState);
+  const [expandedClinicalEncounterIds, setExpandedClinicalEncounterIds] = useState<Record<string, boolean>>({});
 
   function handleStartEditing(encounter: Encounter) {
     setInlineEditState(startEncounterInlineEdit(encounter));
@@ -128,6 +139,12 @@ export function EncountersList({
       }
     });
   }
+  function toggleClinicalDetails(encounterId: string) {
+    setExpandedClinicalEncounterIds((previous) => ({
+      ...previous,
+      [encounterId]: !previous[encounterId],
+    }));
+  }
 
   return (
     <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -155,6 +172,10 @@ export function EncountersList({
             const clinicalEntries = CLINICAL_NOTE_LABELS
               .map(({ key, label }) => ({ label, value: encounter.clinicalNote?.[key] }))
               .filter((entry) => Boolean(entry.value));
+            const hasLongClinicalNote = clinicalEntries.some((entry) =>
+              (entry.value ?? "").replace(/\s+/g, " ").trim().length > CLINICAL_NOTE_PREVIEW_MAX_CHARS,
+            );
+            const isClinicalExpanded = expandedClinicalEncounterIds[encounter.id] ?? false;
 
             return (
               <li key={encounter.id} className="rounded border border-slate-200 bg-white p-3 text-sm text-slate-800">
@@ -255,10 +276,20 @@ export function EncountersList({
                           <ul className="mt-1 space-y-1 text-xs text-slate-700">
                             {clinicalEntries.map((entry) => (
                               <li key={entry.label}>
-                                <span className="font-medium">{entry.label}:</span> {entry.value}
+                                <span className="font-medium">{entry.label}:</span>{" "}
+                                {isClinicalExpanded ? entry.value : toCompactClinicalValue(entry.value ?? "")}
                               </li>
                             ))}
                           </ul>
+                          {hasLongClinicalNote ? (
+                            <button
+                              className="mt-2 text-xs font-medium text-slate-700 underline-offset-2 hover:underline"
+                              onClick={() => toggleClinicalDetails(encounter.id)}
+                              type="button"
+                            >
+                              {isClinicalExpanded ? "Ocultar detalle clínico" : "Ver detalle clínico"}
+                            </button>
+                          ) : null}
                         </div>
                       ) : null}
                     </div>
