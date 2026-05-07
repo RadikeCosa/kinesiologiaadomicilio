@@ -69,10 +69,12 @@ describe("/admin/patients/[id] page", () => {
     });
     const html = renderToStaticMarkup(element);
 
+    expect(html).toContain("Ana Pérez");
+    expect(html).toContain("DNI: No informado");
     expect(html).toContain("Gestión clínica");
     expect(html).toContain("Gestión administrativa");
-    expect(html).toContain("Visitas y seguimiento operativo del tratamiento.");
-    expect(html).toContain("Datos del paciente y solicitudes de atención.");
+    expect(html).toContain("Gestión clínica: visitas y seguimiento operativo del tratamiento.");
+    expect(html).toContain("Gestión administrativa: datos del paciente y solicitudes de atención.");
     expect(html).toContain("Primero se resuelve la solicitud; luego se inicia tratamiento; con tratamiento activo se registran visitas.");
     expect(html).toContain("Siguiente paso sugerido: Registrá la primera solicitud de atención.");
 
@@ -96,6 +98,7 @@ describe("/admin/patients/[id] page", () => {
           status: "active",
           startDate: "2026-04-17",
         },
+        birthDate: "1990-01-01",
       }),
     );
 
@@ -103,7 +106,9 @@ describe("/admin/patients/[id] page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Inicio: 17/04/2026");
+    expect(html).toContain("Edad:");
     expect(html).toContain("Registrar visita");
+    expect(html).toContain("DNI: No informado");
     expect(html).toContain("Siguiente paso sugerido: Registrá visitas desde Gestión Clínica.");
   });
 
