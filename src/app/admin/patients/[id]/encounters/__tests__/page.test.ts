@@ -26,6 +26,10 @@ vi.mock("@/app/admin/patients/[id]/encounters/components/EncountersList", () => 
   EncountersList: () => createElement("div", null, "EncountersList"),
 }));
 
+
+vi.mock("@/app/admin/patients/[id]/encounters/components/SuccessStatusMessage", () => ({
+  SuccessStatusMessage: ({ message }: { message: string }) => createElement("p", null, message),
+}));
 describe("/admin/patients/[id]/encounters page", () => {
   it("shows success banner for known status params and hides unknown ones", async () => {
     loadPatientEncountersPageDataMock.mockResolvedValue({
