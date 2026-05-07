@@ -2,6 +2,7 @@ import type { CreateEncounterInput } from "@/domain/encounter/encounter.types";
 import { buildEpisodeOfCareReference, buildPatientReference } from "@/lib/fhir/references";
 
 import { ENCOUNTER_CLINICAL_NOTE_EXTENSION_URLS } from "@/infrastructure/mappers/encounter/encounter-clinical-note.constants";
+import { ENCOUNTER_OPERATIONAL_PUNCTUALITY_EXTENSION_URL } from "@/infrastructure/mappers/encounter/encounter-operational-punctuality.constants";
 import { type FhirEncounter } from "@/infrastructure/mappers/encounter/encounter-fhir.types";
 
 const CLINICAL_NOTE_EXTENSION_URL_SET = new Set(Object.values(ENCOUNTER_CLINICAL_NOTE_EXTENSION_URLS));
@@ -24,9 +25,19 @@ function buildClinicalNoteExtensions(input: CreateEncounterInput): NonNullable<F
   });
 }
 
+function buildOperationalPunctualityExtension(input: CreateEncounterInput): NonNullable<FhirEncounter["extension"]> {
+  if (!input.visitStartPunctuality) return [];
+  return [{
+    url: ENCOUNTER_OPERATIONAL_PUNCTUALITY_EXTENSION_URL,
+    valueCode: input.visitStartPunctuality,
+  }];
+}
+
 export function mapCreateEncounterInputToFhir(input: CreateEncounterInput): FhirEncounter {
   const startedAt = input.startedAt || input.occurrenceDate || "";
   const clinicalExtensions = buildClinicalNoteExtensions(input);
+  const operationalExtensions = buildOperationalPunctualityExtension(input);
+  const extensions = [...clinicalExtensions, ...operationalExtensions];
 
   return {
     resourceType: "Encounter",
@@ -43,7 +54,7 @@ export function mapCreateEncounterInputToFhir(input: CreateEncounterInput): Fhir
       start: startedAt,
       end: input.endedAt,
     },
-    ...(clinicalExtensions.length > 0 ? { extension: clinicalExtensions } : {}),
+    ...(extensions.length > 0 ? { extension: extensions } : {}),
   };
 }
 

@@ -3,6 +3,7 @@ import { normalizeToFhirDateTime } from "@/lib/fhir/date-time";
 import type {
   CreateEncounterInput,
   EncounterClinicalNote,
+  EncounterVisitStartPunctuality,
   UpdateEncounterPeriodInput,
 } from "@/domain/encounter/encounter.types";
 import { functionalObservationInputSchema } from "@/domain/functional-observation/functional-observation.schemas";
@@ -80,6 +81,15 @@ function parseClinicalNote(value: unknown): EncounterClinicalNote | undefined {
   return hasAnyField ? clinicalNote : undefined;
 }
 
+function parseVisitStartPunctuality(value: unknown): EncounterVisitStartPunctuality | undefined {
+  const normalized = normalizeOptionalString(value, "visitStartPunctuality");
+  if (!normalized) return undefined;
+  if (normalized === "on_time_or_minor_delay" || normalized === "delayed" || normalized === "severely_delayed") {
+    return normalized;
+  }
+  throw new Error("visitStartPunctuality: valor inválido.");
+}
+
 function normalizeOptionalNumber(value: unknown, field: string): number | undefined {
   if (value === undefined || value === null || value === "") return undefined;
   const parsed = typeof value === "number" ? value : Number(value);
@@ -126,6 +136,7 @@ export const createEncounterSchema = {
       episodeOfCareId,
       startedAt,
       endedAt,
+      visitStartPunctuality: parseVisitStartPunctuality(record.visitStartPunctuality),
       clinicalNote: parseClinicalNote(record.clinicalNote),
       functionalObservations: parseFunctionalObservations(record, patientId, startedAt),
     };

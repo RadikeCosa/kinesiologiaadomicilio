@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useFormFeedback } from "@/app/admin/hooks/useFormFeedback";
 import { createEncounterAction } from "@/app/admin/patients/[id]/encounters/actions/create-encounter.action";
+import type { EncounterVisitStartPunctuality } from "@/domain/encounter/encounter.types";
 import { formatLocalDateTimeInputValue } from "@/lib/date-input";
 
 interface EncounterCreateFormProps {
@@ -74,6 +75,7 @@ export function EncounterCreateForm({
   const [tugSeconds, setTugSeconds] = useState("");
   const [painNrs010, setPainNrs010] = useState("");
   const [standingToleranceMinutes, setStandingToleranceMinutes] = useState("");
+  const [visitStartPunctuality, setVisitStartPunctuality] = useState<EncounterVisitStartPunctuality | "">("");
 
   const canCreateEncounter = Boolean(activeEpisodeId);
 
@@ -123,6 +125,7 @@ export function EncounterCreateForm({
       episodeOfCareId: activeEpisodeId,
       startedAt,
       endedAt,
+      visitStartPunctuality: visitStartPunctuality || undefined,
       clinicalNote: {
         subjective,
         objective,
@@ -215,6 +218,24 @@ export function EncounterCreateForm({
 
         <p className="text-xs text-slate-600">Completá inicio y cierre para registrar una visita realizada.</p>
         <p className="text-xs text-slate-500">* Campos obligatorios · El resto es opcional.</p>
+        <fieldset className="rounded-md border border-slate-200 bg-white p-3">
+          <legend className="px-1 text-sm font-medium text-slate-900">Puntualidad operativa</legend>
+          <p className="mt-1 text-xs text-slate-600">Dato operativo opcional. No reemplaza una agenda formal.</p>
+          <div className="mt-3 space-y-2 text-sm">
+            <label className="flex items-start gap-2">
+              <input checked={visitStartPunctuality === "on_time_or_minor_delay"} name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("on_time_or_minor_delay")} type="radio" />
+              <span>En horario o demora leve — <span className="text-slate-600">hasta 15 min</span></span>
+            </label>
+            <label className="flex items-start gap-2">
+              <input checked={visitStartPunctuality === "delayed"} name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("delayed")} type="radio" />
+              <span>Con demora — <span className="text-slate-600">15 a 45 min</span></span>
+            </label>
+            <label className="flex items-start gap-2">
+              <input checked={visitStartPunctuality === "severely_delayed"} name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("severely_delayed")} type="radio" />
+              <span>Muy demorada — <span className="text-slate-600">más de 45 min</span></span>
+            </label>
+          </div>
+        </fieldset>
 
         <details className="rounded-md border border-slate-200 bg-white p-3">
           <summary className="cursor-pointer list-none">
