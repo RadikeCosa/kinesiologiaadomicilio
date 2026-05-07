@@ -4,11 +4,19 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/domain/treatment-context/treatment-context.schemas", () => ({
   treatmentContextSchemas: {
     upsertEpisodeClinicalContextSchema: {
-      parse: (input: any) => {
-        if (!input?.patientId || !input?.episodeOfCareId) throw new Error("invalid");
-        const hasPayload = Boolean(input.medicalReferenceDiagnosis || input.kinesiologicImpression || input.initialFunctionalStatus?.trim?.() || input.therapeuticGoals?.trim?.() || input.frameworkPlan?.trim?.());
+      parse: (input: unknown) => {
+        if (!input || typeof input !== "object") throw new Error("invalid");
+        const payload = input as Record<string, unknown>;
+        if (!payload.patientId || !payload.episodeOfCareId) throw new Error("invalid");
+        const hasPayload = Boolean(
+          payload.medicalReferenceDiagnosis
+          || payload.kinesiologicImpression
+          || (typeof payload.initialFunctionalStatus === "string" && payload.initialFunctionalStatus.trim())
+          || (typeof payload.therapeuticGoals === "string" && payload.therapeuticGoals.trim())
+          || (typeof payload.frameworkPlan === "string" && payload.frameworkPlan.trim()),
+        );
         if (!hasPayload) throw new Error("empty");
-        return input;
+        return payload;
       },
     },
   },
@@ -83,11 +91,13 @@ describe("upsertEpisodeClinicalContextAction", () => {
 
     await upsertEpisodeClinicalContextAction({ patientId: "pat-1", episodeOfCareId: "epi-1", medicalReferenceDiagnosisText: "Nuevo" });
 
-    expect(updateEpisodeOfCareClinicalContext).toHaveBeenCalledWith(expect.objectContaining({ diagnosisReferences: [
-      { kind: "other", conditionId: "keep-me" },
-      { kind: "medical_reference", conditionId: "new-m" },
-      { kind: "kinesiologic_impression", conditionId: "old-k" },
-    ] }));
+    expect(updateEpisodeOfCareClinicalContext).toHaveBeenCalledWith(expect.objectContaining({
+      diagnosisReferences: [
+        { kind: "other", conditionId: "keep-me" },
+        { kind: "medical_reference", conditionId: "new-m" },
+        { kind: "kinesiologic_impression", conditionId: "old-k" },
+      ]
+    }));
   });
 
   it("cleans diagnosis by removing episode reference when empty string is sent", async () => {
@@ -100,10 +110,12 @@ describe("upsertEpisodeClinicalContextAction", () => {
     });
     vi.mocked(updateEpisodeOfCareClinicalContext).mockResolvedValue({ id: "epi-1", patientId: "pat-1", status: "active", startDate: "2026-01-01" });
 
-    await upsertEpisodeClinicalContextAction({ patientId: "pat-1", episodeOfCareId: "epi-1", medicalReferenceDiagnosisText: "" , therapeuticGoals: "Goal"});
+    await upsertEpisodeClinicalContextAction({ patientId: "pat-1", episodeOfCareId: "epi-1", medicalReferenceDiagnosisText: "", therapeuticGoals: "Goal" });
 
-    expect(updateEpisodeOfCareClinicalContext).toHaveBeenCalledWith(expect.objectContaining({ diagnosisReferences: [
-      { kind: "kinesiologic_impression", conditionId: "old-k" },
-    ] }));
+    expect(updateEpisodeOfCareClinicalContext).toHaveBeenCalledWith(expect.objectContaining({
+      diagnosisReferences: [
+        { kind: "kinesiologic_impression", conditionId: "old-k" },
+      ]
+    }));
   });
 });
