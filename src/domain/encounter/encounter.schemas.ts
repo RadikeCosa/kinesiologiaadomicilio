@@ -1,6 +1,10 @@
 import { normalizeToFhirDateTime } from "@/lib/fhir/date-time";
 
-import type { CreateEncounterInput, UpdateEncounterPeriodInput } from "@/domain/encounter/encounter.types";
+import type {
+  CreateEncounterInput,
+  EncounterClinicalNote,
+  UpdateEncounterPeriodInput,
+} from "@/domain/encounter/encounter.types";
 
 function assertObject(input: unknown, schemaName: string): Record<string, unknown> {
   if (typeof input !== "object" || input === null) {
@@ -50,6 +54,30 @@ function ensureEndedAtAfterStartedAt(startedAt: string, endedAt: string): void {
   }
 }
 
+function parseClinicalNote(value: unknown): EncounterClinicalNote | undefined {
+  if (typeof value === "undefined" || value === null) {
+    return undefined;
+  }
+
+  if (typeof value !== "object") {
+    throw new Error("clinicalNote: se esperaba un objeto.");
+  }
+
+  const record = value as Record<string, unknown>;
+  const clinicalNote: EncounterClinicalNote = {
+    subjective: normalizeOptionalString(record.subjective, "clinicalNote.subjective"),
+    objective: normalizeOptionalString(record.objective, "clinicalNote.objective"),
+    intervention: normalizeOptionalString(record.intervention, "clinicalNote.intervention"),
+    assessment: normalizeOptionalString(record.assessment, "clinicalNote.assessment"),
+    tolerance: normalizeOptionalString(record.tolerance, "clinicalNote.tolerance"),
+    homeInstructions: normalizeOptionalString(record.homeInstructions, "clinicalNote.homeInstructions"),
+    nextPlan: normalizeOptionalString(record.nextPlan, "clinicalNote.nextPlan"),
+  };
+
+  const hasAnyField = Object.values(clinicalNote).some((field) => Boolean(field));
+  return hasAnyField ? clinicalNote : undefined;
+}
+
 export const createEncounterSchema = {
   parse(input: unknown): CreateEncounterInput {
     const record = assertObject(input, "createEncounterSchema");
@@ -78,6 +106,7 @@ export const createEncounterSchema = {
       episodeOfCareId,
       startedAt,
       endedAt,
+      clinicalNote: parseClinicalNote(record.clinicalNote),
     };
   },
 };

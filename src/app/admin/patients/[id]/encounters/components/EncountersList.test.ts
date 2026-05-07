@@ -27,6 +27,9 @@ describe("EncountersList", () => {
             status: "finished",
             startedAt: "2026-04-17T10:30:00Z",
             endedAt: "2026-04-17T11:00:00Z",
+            clinicalNote: {
+              subjective: "Refiere menor dolor",
+            },
           },
           {
             id: "enc-2",
@@ -45,10 +48,34 @@ describe("EncountersList", () => {
     expect((html.match(/Finalización:/g) ?? []).length).toBe(1);
     expect((html.match(/Duración:/g) ?? []).length).toBe(1);
     expect(html).toContain("Estado: Registrada");
+    expect(html).toContain("Registro clínico");
+    expect(html).toContain("Refiere menor dolor");
     expect(html).toContain("aria-label=\"Editar horario\"");
     expect(html).not.toContain("Estado: finished");
     expect(html).not.toContain("AM");
     expect(html).not.toContain("PM");
+  });
+
+  it("does not render clinical block when encounter has no clinical note", () => {
+    const html = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [
+          {
+            id: "enc-1",
+            patientId: "pat-1",
+            episodeOfCareId: "ep-1",
+            status: "finished",
+            startedAt: "2026-04-17T10:30:00Z",
+            endedAt: "2026-04-17T11:00:00Z",
+          },
+        ],
+      }),
+    );
+
+    expect(html).not.toContain("Registro clínico");
   });
 
   it("renders updated empty-state copy for active, finished and no-treatment contexts", () => {

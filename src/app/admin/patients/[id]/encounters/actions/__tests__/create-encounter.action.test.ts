@@ -146,4 +146,39 @@ describe("createEncounterAction", () => {
     });
     expect(createEncounter).not.toHaveBeenCalled();
   });
+
+  it("accepts partial clinical note and normalizes whitespace", async () => {
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({
+      id: "epi-1",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-04-01",
+    });
+    vi.mocked(createEncounter).mockResolvedValue({
+      id: "enc-1",
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30:00Z",
+      endedAt: "2026-04-17T11:00:00Z",
+      status: "finished",
+      clinicalNote: { subjective: "Refiere dolor leve" },
+    });
+
+    await createEncounterAction({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:00",
+      clinicalNote: {
+        subjective: "  Refiere dolor leve  ",
+        objective: "   ",
+      },
+    });
+
+    expect(createEncounter).toHaveBeenCalledWith(expect.objectContaining({
+      clinicalNote: {
+        subjective: "Refiere dolor leve",
+      },
+    }));
+  });
 });

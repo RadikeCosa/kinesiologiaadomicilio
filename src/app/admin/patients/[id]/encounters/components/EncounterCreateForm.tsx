@@ -59,6 +59,13 @@ export function EncounterCreateForm({
   const [endedAt, setEndedAt] = useState(startedAt);
   const [hasUserEditedEndedAt, setHasUserEditedEndedAt] = useState(false);
   const [timeValidationError, setTimeValidationError] = useState<string | null>(null);
+  const [subjective, setSubjective] = useState("");
+  const [objective, setObjective] = useState("");
+  const [intervention, setIntervention] = useState("");
+  const [assessment, setAssessment] = useState("");
+  const [tolerance, setTolerance] = useState("");
+  const [homeInstructions, setHomeInstructions] = useState("");
+  const [nextPlan, setNextPlan] = useState("");
 
   const canCreateEncounter = Boolean(activeEpisodeId);
 
@@ -108,6 +115,15 @@ export function EncounterCreateForm({
       episodeOfCareId: activeEpisodeId,
       startedAt,
       endedAt,
+      clinicalNote: {
+        subjective,
+        objective,
+        intervention,
+        assessment,
+        tolerance,
+        homeInstructions,
+        nextPlan,
+      },
     };
 
     startTransition(async () => {
@@ -187,6 +203,42 @@ export function EncounterCreateForm({
         </div>
 
         <p className="text-xs text-slate-600">Completá inicio y cierre para registrar una visita realizada.</p>
+        <div className="rounded-md border border-slate-200 bg-white p-3">
+          <h3 className="text-sm font-medium text-slate-900">Registro clínico de la visita</h3>
+          <p className="mt-1 text-xs text-slate-600">
+            Opcional. Ayuda a dejar trazabilidad clínica de la sesión y preparar futuros informes.
+          </p>
+          <div className="mt-3 grid gap-3">
+            <label className="text-sm">
+              <span className="block text-slate-700">Qué refiere el paciente o familia</span>
+              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={subjective} onChange={(event) => setSubjective(event.target.value)} />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Qué se observa</span>
+              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={objective} onChange={(event) => setObjective(event.target.value)} />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Qué se trabajó</span>
+              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={intervention} onChange={(event) => setIntervention(event.target.value)} />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Respuesta o evolución de la sesión</span>
+              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={assessment} onChange={(event) => setAssessment(event.target.value)} />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Tolerancia</span>
+              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={tolerance} onChange={(event) => setTolerance(event.target.value)} />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Indicaciones domiciliarias</span>
+              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={homeInstructions} onChange={(event) => setHomeInstructions(event.target.value)} />
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Plan para próxima sesión</span>
+              <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={nextPlan} onChange={(event) => setNextPlan(event.target.value)} />
+            </label>
+          </div>
+        </div>
 
         {timeValidationError ? <p className="text-sm text-red-700">{timeValidationError}</p> : null}
 
