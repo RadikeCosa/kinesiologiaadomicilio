@@ -24,4 +24,33 @@ describe("encounters data loader", () => {
     const data = await loadPatientEncountersPageData("pat-1");
     expect(data?.encounters[0].functionalObservations).toHaveLength(1);
   });
+
+  it("uses EpisodeOfCare.startDate as baseline for first-visit stats", async () => {
+    vi.mocked(getPatientById).mockResolvedValue({ id: "pat-1", firstName: "A", lastName: "B", operationalStatus: "active" } as never);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({
+      id: "ep-1",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-05-03",
+      serviceRequestId: "sr-1",
+    } as never);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue(null);
+    vi.mocked(listEncountersByPatientId).mockResolvedValue([
+      {
+        id: "enc-1",
+        patientId: "pat-1",
+        episodeOfCareId: "ep-1",
+        startedAt: "2026-05-04T10:00:00Z",
+        endedAt: "2026-05-04T11:00:00Z",
+        status: "finished",
+      },
+    ]);
+    vi.mocked(listFunctionalObservationsByEncounterId).mockResolvedValue([]);
+
+    const data = await loadPatientEncountersPageData("pat-1");
+
+    expect(data?.activeEpisode?.startDate).toBe("2026-05-03");
+    expect(data?.encounterStats.daysToFirstVisitFromEpisodeStart).toBeCloseTo(1.4166666667, 6);
+    expect(data?.encounterStats.isFirstVisitBeforeEpisodeStart).toBe(false);
+  });
 });
