@@ -49,6 +49,16 @@ export function getCloseLikeStatusFromAction(action: ActionKind | null): CloseLi
   return null;
 }
 
+export function buildAcceptAndStartTreatmentFormData(input: {
+  serviceRequestId: string;
+  treatmentStartDate: string;
+}): FormData {
+  const formData = new FormData();
+  formData.set("id", input.serviceRequestId);
+  formData.set("treatmentStartDate", input.treatmentStartDate);
+  return formData;
+}
+
 export async function submitServiceRequestStatusAction(input: {
   patientId: string;
   serviceRequestId: string;
@@ -109,9 +119,10 @@ export function ServiceRequestStatusActions({
 
   function handleDirectAcceptAndStartTreatment() {
     startTransition(async () => {
-      const formData = new FormData();
-      formData.set("id", serviceRequestId);
-      formData.set("treatmentStartDate", treatmentStartDate);
+      const formData = buildAcceptAndStartTreatmentFormData({
+        serviceRequestId,
+        treatmentStartDate,
+      });
       const result = await acceptAndStartTreatmentFromServiceRequestAction(patientId, formData);
 
       if (result.ok && result.redirectTo) {

@@ -194,6 +194,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Tratamiento activo");
+    expect(html).toContain("Inicio: 01/04/2026");
     expect(html).toContain("TreatmentClinicalContextForm");
     expect(html).toContain("FinishEpisodeOfCareForm");
     expect(html).not.toContain("StartEpisodeOfCareForm");

@@ -19,6 +19,7 @@ import {
   getCloseLikeStatusFromAction,
   getServiceRequestStatusActions,
   ServiceRequestStatusActions,
+  buildAcceptAndStartTreatmentFormData,
   submitServiceRequestStatusAction,
 } from "@/app/admin/patients/[id]/administrative/components/ServiceRequestStatusActions";
 
@@ -171,5 +172,15 @@ describe("ServiceRequestStatusActions", () => {
     expect(formData.get("id")).toBe("sr-12");
     expect(formData.get("status")).toBe("cancelled");
     expect(formData.get("closedReasonText")).toBe("Paciente cancela");
+  });
+
+  it("builds accept/start form data with the chosen treatmentStartDate", () => {
+    const formData = buildAcceptAndStartTreatmentFormData({
+      serviceRequestId: "sr-33",
+      treatmentStartDate: "2026-05-03",
+    });
+
+    expect(formData.get("id")).toBe("sr-33");
+    expect(formData.get("treatmentStartDate")).toBe("2026-05-03");
   });
 });
