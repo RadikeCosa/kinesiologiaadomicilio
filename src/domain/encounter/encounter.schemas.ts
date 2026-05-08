@@ -101,10 +101,12 @@ function parseFunctionalObservations(record: Record<string, unknown>, patientId:
   const tugSeconds = normalizeOptionalNumber(record.tugSeconds, "tugSeconds");
   const painNrs010 = normalizeOptionalNumber(record.painNrs010, "painNrs010");
   const standingToleranceMinutes = normalizeOptionalNumber(record.standingToleranceMinutes, "standingToleranceMinutes");
+  const gaitDurationMinutes = normalizeOptionalNumber(record.gaitDurationMinutes, "gaitDurationMinutes");
   const observations: FunctionalObservationInput[] = [];
   if (typeof tugSeconds !== "undefined") observations.push(functionalObservationInputSchema.parse({ patientId, encounterId: "__PENDING__", effectiveDateTime: startedAt, code: "tug_seconds", value: tugSeconds }));
   if (typeof painNrs010 !== "undefined") observations.push(functionalObservationInputSchema.parse({ patientId, encounterId: "__PENDING__", effectiveDateTime: startedAt, code: "pain_nrs_0_10", value: painNrs010 }));
   if (typeof standingToleranceMinutes !== "undefined") observations.push(functionalObservationInputSchema.parse({ patientId, encounterId: "__PENDING__", effectiveDateTime: startedAt, code: "standing_tolerance_minutes", value: standingToleranceMinutes }));
+  if (typeof gaitDurationMinutes !== "undefined") observations.push(functionalObservationInputSchema.parse({ patientId, encounterId: "__PENDING__", effectiveDateTime: startedAt, code: "gait_duration_minutes", value: gaitDurationMinutes }));
   return observations.length > 0 ? observations : undefined;
 }
 

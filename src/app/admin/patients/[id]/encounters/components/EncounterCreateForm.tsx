@@ -75,6 +75,7 @@ export function EncounterCreateForm({
   const [tugSeconds, setTugSeconds] = useState("");
   const [painNrs010, setPainNrs010] = useState("");
   const [standingToleranceMinutes, setStandingToleranceMinutes] = useState("");
+  const [gaitDurationMinutes, setGaitDurationMinutes] = useState("");
   const [visitStartPunctuality, setVisitStartPunctuality] = useState<EncounterVisitStartPunctuality | "">("");
 
   const canCreateEncounter = Boolean(activeEpisodeId);
@@ -138,6 +139,7 @@ export function EncounterCreateForm({
       tugSeconds: tugSeconds.trim() === "" ? undefined : Number(tugSeconds),
       painNrs010: painNrs010.trim() === "" ? undefined : Number(painNrs010),
       standingToleranceMinutes: standingToleranceMinutes.trim() === "" ? undefined : Number(standingToleranceMinutes),
+      gaitDurationMinutes: gaitDurationMinutes.trim() === "" ? undefined : Number(gaitDurationMinutes),
     };
 
     startTransition(async () => {
@@ -245,7 +247,7 @@ export function EncounterCreateForm({
             </div>
             <p className="mt-1 text-xs text-slate-600">Cargá mediciones rápidas para seguir evolución funcional.</p>
           </summary>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
+          <div className="mt-3 grid gap-3 md:grid-cols-4">
             <label className="text-sm">
               <span className="block text-slate-700">TUG (segundos)</span>
               <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" name="tugSeconds" type="number" min="0" max="300" step="0.1" value={tugSeconds} onChange={(event) => setTugSeconds(event.target.value)} />
@@ -260,6 +262,11 @@ export function EncounterCreateForm({
               <span className="block text-slate-700">Bipedestación (min)</span>
               <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" name="standingToleranceMinutes" type="number" min="0" max="240" step="0.1" value={standingToleranceMinutes} onChange={(event) => setStandingToleranceMinutes(event.target.value)} />
               <span className="mt-1 block text-xs text-slate-500">Tiempo total tolerado</span>
+            </label>
+            <label className="text-sm">
+              <span className="block text-slate-700">Marcha</span>
+              <input className="mt-1 w-full rounded border border-slate-300 bg-white p-2" name="gaitDurationMinutes" type="number" min="0" max="180" step="1" placeholder="Ej: 5" value={gaitDurationMinutes} onChange={(event) => setGaitDurationMinutes(event.target.value)} />
+              <span className="mt-1 block text-xs text-slate-500">Minutos de marcha registrados en esta visita. (min)</span>
             </label>
           </div>
         </details>

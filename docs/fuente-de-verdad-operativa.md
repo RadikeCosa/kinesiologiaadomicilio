@@ -111,11 +111,14 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Estado:** cerrada / aprobada.
 - **Alcance confirmado:** flujo conectado UI → schema/action → persistencia FHIR `Observation` → loader de `/encounters` → card de visita.
 - **Métricas soportadas actuales (opcionales por visita):** `TUG` (segundos), `Dolor` (`NRS` 0–10), `Bipedestación` (minutos).
+- **Fase 2B PR1:** se agrega `Marcha` (minutos) como `Observation` funcional opcional por visita (`gait-duration-minutes`), asociada a `Patient` + `Encounter`.
 - **Modelado/vínculos:** `Observation` asociada a `Patient` + `Encounter`; no existe vínculo directo `Observation` → `EpisodeOfCare` en FHIR R4.
 - **Scoping por episodio:** en `/encounters` se deriva por visitas scoped al episodio efectivo y luego se adjuntan métricas por `encounterId`.
 - **Render UI:** la card muestra bloque `Métricas funcionales` solo cuando existen datos; sin métricas no se renderiza bloque vacío.
-- **Orden canónico en card:** cuando hay métricas, se muestran en orden fijo `TUG → Dolor → Bipedestación`, independientemente del orden de entrada.
+- **Orden canónico en card:** cuando hay métricas, se muestran en orden fijo `TUG → Dolor → Bipedestación → Marcha`, independientemente del orden de entrada.
 - **Copy de lectura puntual:** el bloque incluye helper “Valores registrados en esta visita. No representan tendencia.” para evitar interpretación automática.
+- **No incluido en Fase 2B PR1:** sin distancia, pasos, asistencia, terreno ni dificultad estructurada; esos detalles permanecen en `clinicalNote` como contexto cualitativo.
+
 - **Legacy sin cierre:** si una visita histórica llega sin `endedAt`, la card explicita `Cierre: Sin cierre registrado` y `Duración: No calculable` (no habilita alta nueva sin cierre).
 - **Deudas explícitas:** (1) consistencia transaccional parcial si falla Observation luego de crear Encounter; (2) N+1 en loader por consulta de observations por `encounterId`.
 - **No-alcances preservados:** sin dashboard/tendencias avanzadas, sin IA, sin `Procedure`, sin `Goal`, sin interpretación automática, sin predicción ni recomendación clínica automatizada.

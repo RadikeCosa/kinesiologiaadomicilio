@@ -1,7 +1,8 @@
 export type FunctionalObservationCode =
   | "tug_seconds"
   | "pain_nrs_0_10"
-  | "standing_tolerance_minutes";
+  | "standing_tolerance_minutes"
+  | "gait_duration_minutes";
 
 export type FunctionalObservationStatus = "final";
 

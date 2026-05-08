@@ -76,11 +76,13 @@ const FUNCTIONAL_LABELS = {
   tug_seconds: "TUG",
   pain_nrs_0_10: "Dolor",
   standing_tolerance_minutes: "Bipedestación",
+  gait_duration_minutes: "Marcha",
 } as const;
 const FUNCTIONAL_OBSERVATION_ORDER: Array<keyof typeof FUNCTIONAL_LABELS> = [
   "tug_seconds",
   "pain_nrs_0_10",
   "standing_tolerance_minutes",
+  "gait_duration_minutes",
 ];
 
 function toCompactClinicalValue(value: string): string {

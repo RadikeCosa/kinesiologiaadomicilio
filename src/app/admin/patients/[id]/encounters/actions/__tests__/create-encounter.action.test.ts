@@ -186,13 +186,13 @@ describe("createEncounterAction", () => {
     }));
   });
 
-  it("creates 3 functional observations when all metrics are sent", async () => {
+  it("creates 4 functional observations when all metrics are sent", async () => {
     vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({ id: "epi-1", patientId: "pat-1", status: "active", startDate: "2026-04-01" });
     vi.mocked(createEncounter).mockResolvedValue({ id: "enc-1", patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30:00Z", endedAt: "2026-04-17T11:00:00Z", status: "finished" });
     vi.mocked(createFunctionalObservation).mockResolvedValue({ id: "obs-1", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "tug_seconds", value: 18.5, unit: "s", status: "final" });
-    const result = await createEncounterAction({ patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30", endedAt: "2026-04-17T11:00", tugSeconds: 18.5, painNrs010: 4, standingToleranceMinutes: 6 });
+    const result = await createEncounterAction({ patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30", endedAt: "2026-04-17T11:00", tugSeconds: 18.5, painNrs010: 4, standingToleranceMinutes: 6, gaitDurationMinutes: 5 });
     expect(result.ok).toBe(true);
-    expect(createFunctionalObservation).toHaveBeenCalledTimes(3);
+    expect(createFunctionalObservation).toHaveBeenCalledTimes(4);
   });
 
   it("keeps pain 0 and creates one observation", async () => {
