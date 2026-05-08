@@ -194,7 +194,7 @@ describe("calculateEncounterStats", () => {
 
     const result = calculateEncounterStats({ encounters, episodeOfCareId: "epi-1", episodeStartDate: "2026-04-01" });
 
-    expect(result.daysToFirstVisitFromEpisodeStart).toBe(2.25);
+    expect(result.daysToFirstVisitFromEpisodeStart).toBe(2);
     expect(result.isFirstVisitBeforeEpisodeStart).toBe(false);
     expect(result.averageDaysBetweenEpisodeVisits).toBeNull();
     expect(result.frequencyEligibleVisitCount).toBe(1);
@@ -278,6 +278,33 @@ describe("calculateEncounterStats", () => {
     const result = calculateEncounterStats({ encounters, episodeOfCareId: "epi-1", episodeStartDate: "2026-04-01" });
     expect(result.frequencyEligibleVisitCount).toBe(2);
     expect(result.averageDaysBetweenEpisodeVisits).toBe(3);
+  });
+
+  it("calculates first-visit gap by calendar day for next-day late visits", () => {
+    const encounters = [
+      createEncounter({ id: "enc-1", episodeOfCareId: "epi-1", startedAt: "2026-01-13T22:52:00" }),
+    ];
+
+    const result = calculateEncounterStats({ encounters, episodeOfCareId: "epi-1", episodeStartDate: "2026-01-12" });
+    expect(result.daysToFirstVisitFromEpisodeStart).toBe(1);
+  });
+
+  it("keeps same-day visits as 0 even with explicit timezone offset", () => {
+    const encounters = [
+      createEncounter({ id: "enc-1", episodeOfCareId: "epi-1", startedAt: "2026-01-12T23:30:00-03:00" }),
+    ];
+
+    const result = calculateEncounterStats({ encounters, episodeOfCareId: "epi-1", episodeStartDate: "2026-01-12" });
+    expect(result.daysToFirstVisitFromEpisodeStart).toBe(0);
+  });
+
+  it("calculates two days when first visit is two calendar days later", () => {
+    const encounters = [
+      createEncounter({ id: "enc-1", episodeOfCareId: "epi-1", startedAt: "2026-01-14T08:00:00" }),
+    ];
+
+    const result = calculateEncounterStats({ encounters, episodeOfCareId: "epi-1", episodeStartDate: "2026-01-12" });
+    expect(result.daysToFirstVisitFromEpisodeStart).toBe(2);
   });
 
   it("allows frequency calculation when episode has no startDate", () => {

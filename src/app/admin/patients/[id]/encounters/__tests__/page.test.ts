@@ -26,6 +26,10 @@ vi.mock("@/app/admin/patients/[id]/encounters/components/EncountersList", () => 
   EncountersList: () => createElement("div", null, "EncountersList"),
 }));
 
+
+vi.mock("@/app/admin/patients/[id]/encounters/components/SuccessStatusMessage", () => ({
+  SuccessStatusMessage: ({ message }: { message: string }) => createElement("p", null, message),
+}));
 describe("/admin/patients/[id]/encounters page", () => {
   it("shows success banner for known status params and hides unknown ones", async () => {
     loadPatientEncountersPageDataMock.mockResolvedValue({
@@ -271,7 +275,7 @@ describe("/admin/patients/[id]/encounters page", () => {
         durationEligibleCount: 3,
         durationExcludedCount: 0,
         isDurationPartial: false,
-        daysToFirstVisitFromEpisodeStart: 3.2,
+        daysToFirstVisitFromEpisodeStart: 3,
         isFirstVisitBeforeEpisodeStart: false,
         averageDaysBetweenEpisodeVisits: 3.2,
         frequencyEligibleVisitCount: 3,
@@ -284,7 +288,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const htmlPlural = renderToStaticMarkup(elementPlural);
 
-    expect(htmlPlural).toContain("A los 4 días del inicio");
+    expect(htmlPlural).toContain("A los 3 días del inicio");
     expect(htmlPlural).toContain("Una visita cada 3 días");
   });
 

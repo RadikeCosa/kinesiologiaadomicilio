@@ -17,6 +17,7 @@ export interface EncounterStats {
 }
 
 interface EncounterWithTimestamp {
+  startedAt: string;
   startedAtTimestamp: number;
 }
 
@@ -93,10 +94,37 @@ function resolveSortedEpisodeStartedAtCandidates(encounters: Encounter[]): Encou
       continue;
     }
 
-    candidates.push({ startedAtTimestamp });
+    candidates.push({ startedAt: encounter.startedAt, startedAtTimestamp });
   }
 
   return candidates.sort((a, b) => a.startedAtTimestamp - b.startedAtTimestamp);
+}
+
+
+
+const MS_PER_DAY = 86400000;
+
+function parseCalendarDayIndex(value: string | undefined): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const utcTimestamp = Date.UTC(year, monthIndex, day);
+
+  if (Number.isNaN(utcTimestamp)) {
+    return null;
+  }
+
+  return Math.floor(utcTimestamp / MS_PER_DAY);
 }
 
 function resolveDaysToFirstVisitFromEpisodeStart(params: {
@@ -117,20 +145,21 @@ function resolveDaysToFirstVisitFromEpisodeStart(params: {
     };
   }
 
-  const episodeStartTimestamp = toTimestamp(episodeStartDate);
+  const episodeStartDayIndex = parseCalendarDayIndex(episodeStartDate);
+  const firstVisitDayIndex = parseCalendarDayIndex(firstEncounter.startedAt);
 
-  if (episodeStartTimestamp === null) {
+  if (episodeStartDayIndex === null || firstVisitDayIndex === null) {
     return {
       daysToFirstVisitFromEpisodeStart: null,
       isFirstVisitBeforeEpisodeStart: false,
     };
   }
 
-  const rawDays = (firstEncounter.startedAtTimestamp - episodeStartTimestamp) / 86400000;
+  const calendarDayDifference = firstVisitDayIndex - episodeStartDayIndex;
 
   return {
-    daysToFirstVisitFromEpisodeStart: rawDays,
-    isFirstVisitBeforeEpisodeStart: rawDays < 0,
+    daysToFirstVisitFromEpisodeStart: calendarDayDifference,
+    isFirstVisitBeforeEpisodeStart: calendarDayDifference < 0,
   };
 }
 

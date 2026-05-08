@@ -91,6 +91,40 @@ describe("encounter.schemas", () => {
     ).toThrow("endedAt: debe ser igual o posterior al inicio.");
   });
 
+  it("accepts visitStartPunctuality undefined", () => {
+    const parsed = createEncounterSchema.parse({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:15",
+    });
+    expect(parsed.visitStartPunctuality).toBeUndefined();
+  });
+
+  it("accepts visitStartPunctuality valid values", () => {
+    const validValues = ["on_time_or_minor_delay", "delayed", "severely_delayed"] as const;
+    for (const value of validValues) {
+      const parsed = createEncounterSchema.parse({
+        patientId: "pat-1",
+        episodeOfCareId: "epi-1",
+        startedAt: "2026-04-17T10:30",
+        endedAt: "2026-04-17T11:15",
+        visitStartPunctuality: value,
+      });
+      expect(parsed.visitStartPunctuality).toBe(value);
+    }
+  });
+
+  it("rejects invalid visitStartPunctuality", () => {
+    expect(() => createEncounterSchema.parse({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:15",
+      visitStartPunctuality: "late",
+    })).toThrow("visitStartPunctuality: valor inválido.");
+  });
+
   it("keeps compatibility with occurrenceDate transitional payload", () => {
     expect(() =>
       createEncounterSchema.parse({

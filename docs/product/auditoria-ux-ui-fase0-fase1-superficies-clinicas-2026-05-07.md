@@ -216,3 +216,18 @@ No-alcances mantenidos: sin cambios de dominio, FHIR, mappers, repos, schemas, s
 - El bloque conserva título `Métricas funcionales` y agrega helper de lectura puntual: “Valores registrados en esta visita. No representan tendencia.”
 - Visitas sin métricas continúan sin renderizar bloque vacío; métricas parciales muestran solo valores presentes.
 - Backlog futuro (sin implementación): captura y visualización de puntualidad/demora de visita para mejorar interpretación operacional.
+
+## Nota de hardening QA (2026-05-07)
+- **Hallazgos QA de origen:** (1) duplicación visual de badges verdes equivalentes en Gestión clínica (`En tratamiento` + `Tratamiento activo`); (2) feedback de éxito post-registro de visita persistente.
+- **Implementado (patch UX mínimo y reversible):**
+  - deduplicación visual de badges en `/admin/patients/[id]/encounters`: se conserva una sola badge principal de estado operativo en header;
+  - el estado del bloque secundario de contexto de tratamiento se degradó a metadata textual (sin segunda badge equivalente);
+  - incorporación de `SuccessStatusMessage` para feedback de éxito transitorio por `status` reconocido;
+  - autolimpieza visual del éxito a ~5 segundos;
+  - limpieza del query param `status` vía `router.replace(..., { scroll: false })` para evitar reaparición tras refresh.
+- **No tocado (explícito):**
+  - domain/FHIR/schemas/actions/mappers/repositorios;
+  - `clinicalNote`;
+  - persistencia de `Observation`;
+  - scoping por episodio efectivo;
+  - cards/listado de visitas salvo lo estrictamente necesario para badge/feedback.

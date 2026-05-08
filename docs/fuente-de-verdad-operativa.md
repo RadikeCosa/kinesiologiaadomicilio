@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-07 (UTC)
+> Última actualización: 2026-05-08 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -46,6 +46,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
 - `/admin/patients/[id]/administrative`: administración no clínica con lectura + acciones (edición explícita de identidad, contacto y datos operativos) + sección de solicitudes de atención (listado/empty state y alta mínima).
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (header con acción primaria `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento y listado de visitas con corrección inline rápida).
+- Convención UX en Gestión clínica (`/encounters`): evitar badges verdes duplicadas con semántica equivalente de tratamiento activo; mantener una única badge dominante para el estado principal (paciente/tratamiento) y degradar estados secundarios del bloque contextual a metadata textual.
+- Feedback de éxito transitorio en Gestión clínica: confirmaciones por query param `status` reconocido (por ejemplo `encounter-created`, `treatment-started`) se muestran al volver, se ocultan automáticamente (~5s) y limpian `status` del URL para evitar reaparición al refrescar.
+- Esta convención de autolimpieza aplica a feedback de éxito transitorio; mensajes de error relevantes en otros flujos no se autohocultan por defecto salvo decisión explícita de producto/UX.
 - `/admin/patients/[id]/encounters/new`: pantalla específica para registrar una visita.
 - `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
 
@@ -166,6 +169,13 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - al cerrar como `No inició` o `Cancelar`, la UI administrativa exige motivo y lo muestra en listado cuando existe, con copy específico por estado y jerarquía visual compacta;
 - el teléfono operativo y el domicilio de atención pertenecen a los datos administrativos del paciente (no al formulario normal de alta de solicitud);
 - registrar solicitudes no inicia tratamiento por sí mismo; en el flujo normal, `Aceptar e iniciar tratamiento` crea el episodio vinculado y luego la navegación recomendada continúa en `/encounters`;
+- `Aceptar e iniciar tratamiento` requiere elegir explícitamente la **fecha de inicio del tratamiento** antes de confirmar;
+- por defecto, esa fecha se precarga con `ServiceRequest.requestedAt` y queda editable para ajuste manual;
+- al confirmar, `EpisodeOfCare.period.start` (dominio `startDate`) persiste la fecha elegida y no se fuerza automáticamente la fecha actual, salvo fallback defensivo cuando la solicitud no trae fecha válida;
+- en `/admin/patients/[id]/treatment`, la UI distingue explícitamente `Fecha de solicitud` (`ServiceRequest.requestedAt`) de `Inicio` (`EpisodeOfCare.startDate`) y usa cada dato según su semántica;
+- en `/admin/patients/[id]/encounters`, el baseline de cálculo de primera visita y métricas del ciclo usa `EpisodeOfCare.startDate` cuando existe (no `ServiceRequest.requestedAt`);
+- la estadística `Primera visita` en `/encounters` se calcula por **días calendario enteros** entre `EpisodeOfCare.startDate` y la fecha calendario de la primera `Encounter.startedAt` del episodio efectivo;
+- ese cálculo no usa diferencia horaria/fraccional ni `Math.ceil` sobre milisegundos; ejemplo canónico: inicio `2026-01-12` + primera visita `2026-01-13T22:52:00` => **1 día**;
 - las acciones que redirigen a `/encounters` usan feedback liviano por query param (`status`) para preservar confirmación cross-route;
 - `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/encounters?status=treatment-started`;
 - `Registrar visita` navega a `/admin/patients/[id]/encounters?status=encounter-created`;
@@ -232,6 +242,12 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - en `/admin`, las métricas globales de visitas (`Encounter`) permanecen fuera de Fase 1 por falta de consulta agregada eficiente;
 - en `/admin`, Fase 1 no introduce nuevas rutas ni gráficos.
 - no existe actualmente captura ni render de notas generales del paciente (`Patient.note`) en la UI privada.
+- puntualidad operativa de inicio de visita (`visitStartPunctuality`) disponible como metadata manual/transicional opcional de `Encounter`;
+- `visitStartPunctuality` se persiste en `Encounter.extension[]` con URL versionada `encounter-operational-punctuality-status-v1` y `valueCode` cerrado (`on_time_or_minor_delay`, `delayed`, `severely_delayed`);
+- la puntualidad operativa no es dato clínico, no vive en `clinicalNote`, no vive en `Observation` y no altera `startedAt`/`endedAt`;
+- en `/admin/patients/[id]/encounters/new` la captura es opcional, ubicada en bloque compacto entre Inicio/Cierre y métricas funcionales;
+- en `/admin/patients/[id]/encounters` se renderiza en la card solo cuando existe (`Puntualidad: ...`);
+- esta iteración no introduce `Appointment`, `scheduledStartAt`, `delayMinutes` calculado ni KPI/dashboard operativo.
 - en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`, Fase 2 para `Identifier.type` + tests/fixtures de identidad y Fase 3 queda cerrada con `telecom`, `contact.relationship` y `name` resueltos incrementalmente, más deuda/trigger explícitos de `address` documentados en FHIR-018.
 
 

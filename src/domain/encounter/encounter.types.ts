@@ -1,5 +1,6 @@
 import type { FunctionalObservation, FunctionalObservationInput } from "@/domain/functional-observation/functional-observation.types";
 export type EncounterStatus = "finished";
+export type EncounterVisitStartPunctuality = "on_time_or_minor_delay" | "delayed" | "severely_delayed";
 
 export interface EncounterClinicalNote {
   subjective?: string;
@@ -18,6 +19,7 @@ export interface Encounter {
   startedAt: string;
   endedAt?: string;
   status: EncounterStatus;
+  visitStartPunctuality?: EncounterVisitStartPunctuality;
   clinicalNote?: EncounterClinicalNote;
   functionalObservations?: FunctionalObservation[];
 }
@@ -27,6 +29,7 @@ export interface CreateEncounterInput {
   episodeOfCareId: string;
   startedAt: string;
   endedAt: string;
+  visitStartPunctuality?: EncounterVisitStartPunctuality;
   clinicalNote?: EncounterClinicalNote;
   functionalObservations?: FunctionalObservationInput[];
   /**

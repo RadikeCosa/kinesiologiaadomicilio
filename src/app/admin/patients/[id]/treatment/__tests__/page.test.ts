@@ -194,10 +194,54 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Tratamiento activo");
+    expect(html).toContain("Inicio: 01/04/2026");
     expect(html).toContain("TreatmentClinicalContextForm");
     expect(html).toContain("FinishEpisodeOfCareForm");
     expect(html).not.toContain("StartEpisodeOfCareForm");
     expect(html).not.toContain("Registrar visita");
+  });
+
+  it("displays treatment start from episode independently from service request date", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce({
+      ...basePatient,
+      operationalStatus: "active_treatment",
+      activeEpisode: {
+        id: "epi-9",
+        patientId: "pat-1",
+        status: "active",
+        startDate: "2026-05-03",
+      },
+      latestEpisode: {
+        id: "epi-9",
+        patientId: "pat-1",
+        status: "active",
+        startDate: "2026-05-03",
+      },
+    });
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: "sr-1",
+      isValid: true,
+      state: "valid",
+      message: undefined,
+      serviceRequest: {
+        id: "sr-1",
+        patientId: "pat-1",
+        status: "accepted",
+        requestedAt: "2026-05-01",
+        reasonText: "Dolor lumbar",
+        createdAt: "2026-05-01T00:00:00.000Z",
+      },
+    });
+
+    const element = await AdminPatientTreatmentPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ serviceRequestId: "sr-1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Fecha de solicitud: 01/05/2026");
+    expect(html).toContain("Inicio: 03/05/2026");
   });
 
   it("shows closed episodes history and requests link when no active treatment but finished cycles exist", async () => {

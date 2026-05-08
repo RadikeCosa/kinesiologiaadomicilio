@@ -4,6 +4,7 @@ import Link from "next/link";
 import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 import { EncounterStatsSummary } from "@/app/admin/patients/[id]/encounters/components/EncounterStatsSummary";
+import { SuccessStatusMessage } from "@/app/admin/patients/[id]/encounters/components/SuccessStatusMessage";
 import { loadPatientEncountersPageData } from "@/app/admin/patients/[id]/encounters/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import {
@@ -30,7 +31,6 @@ export async function generateMetadata({
 }
 
 type TreatmentMetadata = {
-  toneClassName: string;
   title: string;
   detail: string;
 };
@@ -42,7 +42,6 @@ function buildTreatmentMetadata(params: {
 }): TreatmentMetadata {
   if (params.activeEpisodeStartDate) {
     return {
-      toneClassName: "border-emerald-200 bg-emerald-50 text-emerald-900",
       title: "Tratamiento activo",
       detail: `Inicio: ${formatDateDisplay(params.activeEpisodeStartDate)}`,
     };
@@ -50,14 +49,12 @@ function buildTreatmentMetadata(params: {
 
   if (params.latestEpisodeStatus === "finished") {
     return {
-      toneClassName: "border-slate-300 bg-slate-100 text-slate-800",
       title: "Tratamiento finalizado",
       detail: `Finalización: ${formatDateDisplay(params.latestEpisodeEndDate)}`,
     };
   }
 
   return {
-    toneClassName: "border-amber-200 bg-amber-50 text-amber-900",
     title: "Sin tratamiento iniciado",
     detail: "No hay un tratamiento iniciado para este paciente.",
   };
@@ -145,18 +142,12 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
       </div>
 
       <p className="mt-2 text-sm text-slate-600">{PATIENT_SURFACE_COPY.clinicalDefinition}</p>
-      {statusMessage ? (
-        <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-2 text-sm text-emerald-900">
-          {statusMessage}
-        </p>
-      ) : null}
+      {statusMessage ? <SuccessStatusMessage message={statusMessage} /> : null}
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">
         {pageData.patient.dni ? <span>DNI: {formatDniDisplay(pageData.patient.dni)}</span> : null}
         {patientAge !== null ? <span>· Edad: {patientAge} años</span> : null}
-        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 font-medium ${treatmentMetadata.toneClassName}`}>
-          {treatmentMetadata.title}
-        </span>
+        <span className="font-medium">{treatmentMetadata.title}</span>
         <span>{treatmentMetadata.detail}</span>
       </div>
 
