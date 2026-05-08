@@ -50,7 +50,7 @@ describe("encounters data loader", () => {
     const data = await loadPatientEncountersPageData("pat-1");
 
     expect(data?.activeEpisode?.startDate).toBe("2026-05-03");
-    expect(data?.encounterStats.daysToFirstVisitFromEpisodeStart).toBeCloseTo(1.4166666667, 6);
+    expect(data?.encounterStats.daysToFirstVisitFromEpisodeStart).toBe(1);
     expect(data?.encounterStats.isFirstVisitBeforeEpisodeStart).toBe(false);
   });
 });

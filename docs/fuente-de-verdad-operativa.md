@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-07 (UTC)
+> Última actualización: 2026-05-08 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -169,6 +169,10 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `Aceptar e iniciar tratamiento` requiere elegir explícitamente la **fecha de inicio del tratamiento** antes de confirmar;
 - por defecto, esa fecha se precarga con `ServiceRequest.requestedAt` y queda editable para ajuste manual;
 - al confirmar, `EpisodeOfCare.period.start` (dominio `startDate`) persiste la fecha elegida y no se fuerza automáticamente la fecha actual, salvo fallback defensivo cuando la solicitud no trae fecha válida;
+- en `/admin/patients/[id]/treatment`, la UI distingue explícitamente `Fecha de solicitud` (`ServiceRequest.requestedAt`) de `Inicio` (`EpisodeOfCare.startDate`) y usa cada dato según su semántica;
+- en `/admin/patients/[id]/encounters`, el baseline de cálculo de primera visita y métricas del ciclo usa `EpisodeOfCare.startDate` cuando existe (no `ServiceRequest.requestedAt`);
+- la estadística `Primera visita` en `/encounters` se calcula por **días calendario enteros** entre `EpisodeOfCare.startDate` y la fecha calendario de la primera `Encounter.startedAt` del episodio efectivo;
+- ese cálculo no usa diferencia horaria/fraccional ni `Math.ceil` sobre milisegundos; ejemplo canónico: inicio `2026-01-12` + primera visita `2026-01-13T22:52:00` => **1 día**;
 - las acciones que redirigen a `/encounters` usan feedback liviano por query param (`status`) para preservar confirmación cross-route;
 - `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/encounters?status=treatment-started`;
 - `Registrar visita` navega a `/admin/patients/[id]/encounters?status=encounter-created`;
