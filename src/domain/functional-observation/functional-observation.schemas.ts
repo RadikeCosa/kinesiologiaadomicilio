@@ -1,7 +1,7 @@
 import { normalizeToFhirDateTime } from "@/lib/fhir/date-time";
 import type { FunctionalObservationCode, FunctionalObservationInput, FunctionalObservationStatus } from "@/domain/functional-observation/functional-observation.types";
 
-const VALID_CODES: FunctionalObservationCode[] = ["tug_seconds", "pain_nrs_0_10", "standing_tolerance_minutes"];
+const VALID_CODES: FunctionalObservationCode[] = ["tug_seconds", "pain_nrs_0_10", "standing_tolerance_minutes", "gait_duration_minutes"];
 
 function assertObject(input: unknown): Record<string, unknown> {
   if (typeof input !== "object" || input === null) throw new Error("functionalObservationInputSchema: se esperaba un objeto.");
@@ -15,6 +15,7 @@ function validateValueByCode(code: FunctionalObservationCode, value: number): nu
   if (code === "tug_seconds" && !(value > 0 && value <= 300)) throw new Error("value: tug_seconds fuera de rango (>0 y <=300).");
   if (code === "pain_nrs_0_10" && (!Number.isInteger(value) || value < 0 || value > 10)) throw new Error("value: pain_nrs_0_10 debe ser entero de 0 a 10.");
   if (code === "standing_tolerance_minutes" && !(value >= 0 && value <= 240)) throw new Error("value: standing_tolerance_minutes fuera de rango (>=0 y <=240).");
+  if (code === "gait_duration_minutes" && (!Number.isInteger(value) || value < 0 || value > 180)) throw new Error("value: gait_duration_minutes debe ser entero de 0 a 180.");
   return value;
 }
 

@@ -33,6 +33,7 @@ describe("EncountersList", () => {
             functionalObservations: [
               { id: "o1", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "tug_seconds", value: 18.5, unit: "s", status: "final" },
               { id: "o2", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "pain_nrs_0_10", value: 4, unit: "/10", status: "final" },
+              { id: "o3", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "gait_duration_minutes", value: 5, unit: "min", status: "final" },
             ],
           },
           {
@@ -69,6 +70,8 @@ describe("EncountersList", () => {
     expect(html).toContain("18.5 s");
     expect(html).toContain("Dolor:");
     expect(html).toContain("4/10");
+    expect(html).toContain("Marcha:");
+    expect(html).toContain("5 min");
     expect(html).toContain("Refiere menor dolor");
     expect(html).toContain("aria-label=\"Editar horario\"");
     expect(html).not.toContain("Estado: finished");
@@ -116,12 +119,14 @@ describe("EncountersList", () => {
             { id: "o2", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "pain_nrs_0_10", value: 4, unit: "/10", status: "final" },
             { id: "o3", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "standing_tolerance_minutes", value: 6, unit: "min", status: "final" },
             { id: "o1", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "tug_seconds", value: 18.5, unit: "s", status: "final" },
+            { id: "o4", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "gait_duration_minutes", value: 8, unit: "min", status: "final" },
           ],
         }],
       }),
     );
     expect(html.indexOf("TUG:")).toBeLessThan(html.indexOf("Dolor:"));
     expect(html.indexOf("Dolor:")).toBeLessThan(html.indexOf("Bipedestación:"));
+    expect(html.indexOf("Bipedestación:")).toBeLessThan(html.indexOf("Marcha:"));
   });
 
   it("keeps calculated duration for valid start/end without legacy fallback copy", () => {
@@ -169,6 +174,7 @@ describe("EncountersList", () => {
     expect(partialHtml).toContain("TUG:");
     expect(partialHtml).not.toContain("Dolor:");
     expect(partialHtml).not.toContain("Bipedestación:");
+    expect(partialHtml).not.toContain("Marcha:");
 
     const emptyHtml = renderToStaticMarkup(
       createElement(EncountersList, {

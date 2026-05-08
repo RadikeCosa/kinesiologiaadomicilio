@@ -36,4 +36,15 @@ describe("functional-observation.schemas", () => {
   it("rejects standing tolerance >240", () => {
     expect(() => functionalObservationInputSchema.parse({ ...base, code: "standing_tolerance_minutes", value: 241 })).toThrow();
   });
+
+  it("accepts gait duration 0 and 180", () => {
+    expect(functionalObservationInputSchema.parse({ ...base, code: "gait_duration_minutes", value: 0 }).value).toBe(0);
+    expect(functionalObservationInputSchema.parse({ ...base, code: "gait_duration_minutes", value: 180 }).value).toBe(180);
+  });
+
+  it("rejects gait duration negative, decimal or >180", () => {
+    expect(() => functionalObservationInputSchema.parse({ ...base, code: "gait_duration_minutes", value: -1 })).toThrow();
+    expect(() => functionalObservationInputSchema.parse({ ...base, code: "gait_duration_minutes", value: 2.5 })).toThrow();
+    expect(() => functionalObservationInputSchema.parse({ ...base, code: "gait_duration_minutes", value: 181 })).toThrow();
+  });
 });

@@ -142,9 +142,11 @@ segunda línea MIXTA`,
       tugSeconds: 18.5,
       painNrs010: 0,
       standingToleranceMinutes: 6,
+      gaitDurationMinutes: 5,
     });
-    expect(parsed.functionalObservations).toHaveLength(3);
+    expect(parsed.functionalObservations).toHaveLength(4);
     expect(parsed.functionalObservations?.find((item) => item.code === "pain_nrs_0_10")?.value).toBe(0);
+    expect(parsed.functionalObservations?.find((item) => item.code === "gait_duration_minutes")?.value).toBe(5);
   });
 
   it("rejects invalid functional metrics before create", () => {

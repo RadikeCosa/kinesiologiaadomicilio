@@ -49,6 +49,32 @@ describe("functional-observation mappers", () => {
     });
 
     expect(pain?.code).toBe("pain_nrs_0_10");
+
+    const gait = mapFhirObservationToFunctionalObservation({
+      resourceType: "Observation",
+      id: "obs-3",
+      status: "final",
+      subject: { reference: "Patient/pat-1" },
+      encounter: { reference: "Encounter/enc-1" },
+      effectiveDateTime: "2026-05-07T10:30:00-03:00",
+      code: { coding: [{ system: FUNCTIONAL_OBSERVATION_CODE_SYSTEM, code: "gait-duration-minutes" }] },
+      valueQuantity: { value: 5, unit: "min" },
+    });
+    expect(gait?.code).toBe("gait_duration_minutes");
+  });
+
+  it("write mapper maps gait duration with canonical system and UCUM min", () => {
+    const mapped = mapFunctionalObservationInputToFhir({
+      patientId: "pat-1",
+      encounterId: "enc-1",
+      effectiveDateTime: "2026-05-07T10:30:00-03:00",
+      code: "gait_duration_minutes",
+      value: 7,
+    });
+
+    expect(mapped.code?.coding?.[0]?.system).toBe("https://kinesiologiaadomicilio.local/fhir/CodeSystem/functional-observations");
+    expect(mapped.code?.coding?.[0]?.code).toBe("gait-duration-minutes");
+    expect(mapped.valueQuantity).toEqual(expect.objectContaining({ value: 7, unit: "min", system: "http://unitsofmeasure.org", code: "min" }));
   });
 
   it("read mapper ignores unknown local codes", () => {
