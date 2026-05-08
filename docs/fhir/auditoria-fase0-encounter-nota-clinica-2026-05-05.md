@@ -261,3 +261,12 @@ Para este repositorio y su comportamiento observado con HAPI local, la opción m
 - **Persistencia principal en `Encounter.extension[]` con URLs propias versionables (v1)**.
 - `Encounter.note[]` solo como fallback de lectura transicional, no como canal primario.
 - Implementación incremental en acciones separadas (crear visita vs editar nota) para reducir riesgo operativo.
+
+
+### Cierre documental adicional — estadística “Primera visita” en `/encounters` (2026-05-08)
+
+- Diagnóstico confirmado: el desvío visual provenía de diferencia temporal en milisegundos + redondeo `Math.ceil` en render para “Primera visita”.
+- Corrección aplicada en código: la brecha se calcula por **días calendario enteros** entre `EpisodeOfCare.startDate` y la fecha calendario de la primera `Encounter.startedAt` del episodio efectivo.
+- Regla vigente: baseline clínico de “Primera visita” = `EpisodeOfCare.startDate`; no usar `ServiceRequest.requestedAt`.
+- Caso de referencia validado: inicio `2026-01-12` y primera visita `2026-01-13T22:52:00` => `1` día desde el inicio.
+- No-alcances preservados: sin cambios en ServiceRequest, inicio desde administrativa, mappers EoC, creación de Encounter, `clinicalNote`, `Observation`, puntualidad, IA/Appointment/dashboard.

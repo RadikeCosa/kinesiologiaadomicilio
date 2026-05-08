@@ -61,6 +61,8 @@ El proyecto está en etapa **híbrida transicional**:
 - Registrar solicitudes de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
 - La resolución general de solicitudes puede cerrarlas o cancelarlas sin iniciar tratamiento.
 - La acción específica `Aceptar e iniciar tratamiento` desde `/administrative` sí marca la solicitud como `accepted` y crea el `EpisodeOfCare` vinculado.
+- En ese flujo, la fecha de inicio de tratamiento es explícita/editable: toma `ServiceRequest.requestedAt` como default inicial cuando es válido, y persiste la fecha elegida en `EpisodeOfCare.period.start` (`EpisodeOfCare.startDate`).
+- Semántica vigente de fechas: `requestedAt` es fecha administrativa/histórica de solicitud; baseline de tratamiento/visitas usa `EpisodeOfCare.startDate` cuando existe.
 - Las acciones que cambian de contexto hacia `/encounters` usan feedback liviano por query param (`status`) para mantener confirmación en la pantalla destino.
 - `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/encounters?status=treatment-started`.
 - `Registrar visita` navega a `/admin/patients/[id]/encounters?status=encounter-created`.
