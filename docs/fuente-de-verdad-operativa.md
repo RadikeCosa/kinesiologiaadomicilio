@@ -465,3 +465,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - Las métricas derivadas de tendencia **no se persisten**.
 - Se mantiene separación UX: valores puntuales en cards de visita vs tendencia global en bloque dedicado.
 - Sin dashboard, sin gráficos y sin interpretación automática clínica.
+
+#### Nota de cierre documental — P2 resumen clínico reciente en hub (2026-05-09)
+- **Estado:** cerrada / aprobada.
+- **Alcance confirmado:** `/admin/patients/[id]` incorpora `Resumen clínico reciente` como síntesis orientativa con estado de tratamiento, última visita, visitas del episodio, hasta 2 métricas recientes y CTA a Gestión clínica.
+- **Límites confirmados:** no reemplaza `/admin/patients/[id]/encounters`; sin tendencia completa, sin notas clínicas, sin listado de visitas y sin estadísticas extensas en el hub.
+- **No-alcances preservados:** sin dashboard clínico, sin IA, sin `Procedure`, sin `Goal`, sin interpretación automática.
