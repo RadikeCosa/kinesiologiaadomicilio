@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { MapsLinkAction } from "@/app/admin/patients/components/MapsLinkAction";
 import { PhoneContactBlock } from "@/app/admin/patients/components/PhoneContactBlock";
-import { loadPatientDetail, loadPatientHubServiceRequestContext } from "@/app/admin/patients/[id]/data";
+import { loadPatientClinicalRecentSummary, loadPatientDetail, loadPatientHubServiceRequestContext } from "@/app/admin/patients/[id]/data";
 import {
   buildGoogleMapsSearchHref,
   formatAddressDisplay,
@@ -18,6 +18,7 @@ import { PATIENT_SURFACE_COPY } from "@/app/admin/patients/[id]/patient-surface-
 
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
+import { ClinicalRecentSummaryCard } from "@/app/admin/patients/[id]/components/ClinicalRecentSummaryCard";
 
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
@@ -132,6 +133,9 @@ export default async function AdminPatientDetailPage({
   const serviceRequestContext = patient
     ? await loadPatientHubServiceRequestContext(patient.id)
     : null;
+  const clinicalRecentSummary = patient
+    ? await loadPatientClinicalRecentSummary(patient.id)
+    : null;
   const primaryAction = patient ? getPrimaryPatientAction(patient) : null;
   const isClinicalPrimary = primaryAction === "clinical";
   const mapsHref = patient ? buildGoogleMapsSearchHref(patient.address) : null;
@@ -198,6 +202,11 @@ export default async function AdminPatientDetailPage({
                     Siguiente paso sugerido: {nextStepSuggestion}
                   </p>
                 ) : null}
+
+                {clinicalRecentSummary ? (
+                  <ClinicalRecentSummaryCard patientId={patient.id} summary={clinicalRecentSummary} />
+                ) : null}
+
                 <p className="mt-2 text-xs text-slate-500">
                   {PATIENT_SURFACE_COPY.flowDefinition}
                 </p>

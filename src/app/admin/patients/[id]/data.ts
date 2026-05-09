@@ -13,6 +13,8 @@ import {
   getServiceRequestById,
   listServiceRequestsByPatientId,
 } from "@/infrastructure/repositories/service-request.repository";
+import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
+import { listFunctionalObservationsByEncounterId } from "@/infrastructure/repositories/observation.repository";
 
 export interface PatientServiceRequestReadContext {
   serviceRequests: ServiceRequest[];
@@ -69,6 +71,112 @@ export interface PatientHubServiceRequestContext {
   pendingAcceptedServiceRequestId?: string;
   latestClosedRequestStatus?: "closed_without_treatment" | "cancelled";
   latestClosedRequestReason?: string;
+}
+
+const RECENT_FUNCTIONAL_PRIORITY = [
+  "pain_nrs_0_10",
+  "gait_duration_minutes",
+  "tug_seconds",
+  "standing_tolerance_minutes",
+] as const;
+
+type RecentFunctionalCode = typeof RECENT_FUNCTIONAL_PRIORITY[number];
+
+const RECENT_FUNCTIONAL_META: Record<RecentFunctionalCode, { label: string; unit: "/10" | "min" | "s" }> = {
+  pain_nrs_0_10: { label: "Dolor", unit: "/10" },
+  gait_duration_minutes: { label: "Marcha", unit: "min" },
+  tug_seconds: { label: "TUG", unit: "s" },
+  standing_tolerance_minutes: { label: "Bipedestación", unit: "min" },
+};
+
+export interface ClinicalRecentSummaryItem {
+  label: string;
+  value: string;
+}
+
+export interface PatientClinicalRecentSummary {
+  treatmentStatusLabel: "Tratamiento activo" | "Nuevo tratamiento activo" | "Tratamiento finalizado" | "Sin tratamiento activo";
+  latestEncounterLabel: string;
+  encountersCount: number;
+  metrics: ClinicalRecentSummaryItem[];
+  metricsEmptyLabel: string;
+  ctaLabel: "Ver gestión clínica" | "Registrar primera visita";
+}
+
+function formatMetricValue(value: number, unit: "/10" | "min" | "s"): string {
+  if (unit === "/10") {
+    return `${value}/10`;
+  }
+
+  return `${value} ${unit}`;
+}
+
+export async function loadPatientClinicalRecentSummary(patientId: string): Promise<PatientClinicalRecentSummary> {
+  const [activeEpisode, mostRecentEpisode, encounters] = await Promise.all([
+    getActiveEpisodeByPatientId(patientId),
+    getMostRecentEpisodeByPatientId(patientId),
+    listEncountersByPatientId(patientId),
+  ]);
+
+  const effectiveEpisode = activeEpisode ?? mostRecentEpisode;
+  const scopedEncounters = effectiveEpisode
+    ? encounters
+      .filter((encounter) => encounter.episodeOfCareId === effectiveEpisode.id)
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
+    : [];
+
+  const latestEncounter = scopedEncounters[0];
+  const treatmentStatusLabel: PatientClinicalRecentSummary["treatmentStatusLabel"] = activeEpisode
+    ? (scopedEncounters.length === 0 ? "Nuevo tratamiento activo" : "Tratamiento activo")
+    : mostRecentEpisode?.status === "finished"
+      ? "Tratamiento finalizado"
+      : "Sin tratamiento activo";
+
+  const latestEncounterLabel = latestEncounter
+    ? latestEncounter.startedAt
+    : activeEpisode
+      ? "Aún no registrada"
+      : "No disponible";
+
+  const metricsByCode = new Map<RecentFunctionalCode, { value: number; date: string }>();
+  await Promise.all(scopedEncounters.map(async (encounter) => {
+    const observations = await listFunctionalObservationsByEncounterId(encounter.id);
+    observations.forEach((observation) => {
+      if (!RECENT_FUNCTIONAL_PRIORITY.includes(observation.code as RecentFunctionalCode)) {
+        return;
+      }
+      const code = observation.code as RecentFunctionalCode;
+      const existing = metricsByCode.get(code);
+      const obsDate = new Date(observation.effectiveDateTime).getTime();
+      const existingDate = existing ? new Date(existing.date).getTime() : Number.NEGATIVE_INFINITY;
+      if (!existing || obsDate >= existingDate) {
+        metricsByCode.set(code, { value: observation.value, date: observation.effectiveDateTime });
+      }
+    });
+  }));
+
+  const metrics = RECENT_FUNCTIONAL_PRIORITY
+    .flatMap((code) => {
+      const metric = metricsByCode.get(code);
+      if (!metric) {
+        return [];
+      }
+
+      return [{
+        label: RECENT_FUNCTIONAL_META[code].label,
+        value: formatMetricValue(metric.value, RECENT_FUNCTIONAL_META[code].unit),
+      }];
+    })
+    .slice(0, 2);
+
+  return {
+    treatmentStatusLabel,
+    latestEncounterLabel,
+    encountersCount: scopedEncounters.length,
+    metrics,
+    metricsEmptyLabel: activeEpisode ? "Sin registros funcionales todavía" : "Sin registros funcionales",
+    ctaLabel: activeEpisode && scopedEncounters.length === 0 ? "Registrar primera visita" : "Ver gestión clínica",
+  };
 }
 export type ServiceRequestDisplayStatus =
   | "in_review"

@@ -8,6 +8,7 @@ import AdminPatientDetailPage from "@/app/admin/patients/[id]/page";
 
 const loadPatientDetailMock = vi.hoisted(() => vi.fn());
 const loadPatientHubServiceRequestContextMock = vi.hoisted(() => vi.fn());
+const loadPatientClinicalRecentSummaryMock = vi.hoisted(() => vi.fn());
 (globalThis as { React?: typeof React }).React = React;
 
 vi.mock("next/link", () => ({
@@ -18,6 +19,7 @@ vi.mock("next/link", () => ({
 vi.mock("@/app/admin/patients/[id]/data", () => ({
   loadPatientDetail: loadPatientDetailMock,
   loadPatientHubServiceRequestContext: loadPatientHubServiceRequestContextMock,
+  loadPatientClinicalRecentSummary: loadPatientClinicalRecentSummaryMock,
 }));
 
 function buildPatient(
@@ -33,6 +35,18 @@ function buildPatient(
     updatedAt: "2026-04-17T00:00:00.000Z",
     ...overrides,
   };
+}
+
+function mockClinicalRecentSummary(overrides = {}) {
+  loadPatientClinicalRecentSummaryMock.mockResolvedValueOnce({
+    treatmentStatusLabel: "Sin tratamiento activo",
+    latestEncounterLabel: "No disponible",
+    encountersCount: 0,
+    metrics: [],
+    metricsEmptyLabel: "Sin registros funcionales",
+    ctaLabel: "Ver gestión clínica",
+    ...overrides,
+  });
 }
 
 function mockNoServiceRequestContext() {
@@ -52,6 +66,7 @@ describe("/admin/patients/[id] page", () => {
 
   it("renders the contacto section with patient contact, address and main contact in order", async () => {
     mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
     loadPatientDetailMock.mockResolvedValueOnce(
       buildPatient({
         phone: "+542995550101",
@@ -77,6 +92,13 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Gestión administrativa: datos del paciente y solicitudes de atención.");
     expect(html).toContain("Primero se resuelve la solicitud; luego se inicia tratamiento; con tratamiento activo se registran visitas.");
     expect(html).toContain("Siguiente paso sugerido: Registrá la primera solicitud de atención.");
+    expect(html).toContain("Resumen clínico reciente");
+    expect(html).toContain("Vista resumida. El detalle está en Gestión clínica.");
+    expect(html).toContain("Última visita:</span> No disponible");
+
+    const suggestionIndex = html.indexOf("Siguiente paso sugerido");
+    const summaryIndex = html.indexOf("Resumen clínico reciente");
+    expect(summaryIndex).toBeGreaterThan(suggestionIndex);
 
     const patientContactIndex = html.indexOf("Contacto del paciente");
     const addressIndex = html.indexOf("Dirección");
@@ -89,6 +111,7 @@ describe("/admin/patients/[id] page", () => {
 
   it("renders treatment summary with active episode start date", async () => {
     mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
     loadPatientDetailMock.mockResolvedValueOnce(
       buildPatient({
         operationalStatus: "active_treatment",
@@ -113,7 +136,9 @@ describe("/admin/patients/[id] page", () => {
   });
 
   it("shows next-step suggestion for in_review requests", async () => {
-    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: true, pendingAcceptedServiceRequestId: undefined, latestClosedRequestStatus: undefined, latestClosedRequestReason: undefined });
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({
+ hasServiceRequests: true, hasInReview: true, pendingAcceptedServiceRequestId: undefined, latestClosedRequestStatus: undefined, latestClosedRequestReason: undefined });
+    mockClinicalRecentSummary();
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient({ operationalStatus: "ready_to_start" }));
 
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
@@ -124,6 +149,7 @@ describe("/admin/patients/[id] page", () => {
 
   it("shows next-step suggestion for accepted pending treatment", async () => {
     loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: false, pendingAcceptedServiceRequestId: "sr-1", latestClosedRequestStatus: undefined, latestClosedRequestReason: undefined });
+    mockClinicalRecentSummary();
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient({ operationalStatus: "ready_to_start" }));
 
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
@@ -134,6 +160,7 @@ describe("/admin/patients/[id] page", () => {
 
   it("shows next-step suggestion for finished treatment without useful service request", async () => {
     loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({ hasServiceRequests: true, hasInReview: false, pendingAcceptedServiceRequestId: undefined, latestClosedRequestStatus: undefined, latestClosedRequestReason: undefined });
+    mockClinicalRecentSummary({ treatmentStatusLabel: "Tratamiento finalizado", latestEncounterLabel: "2026-02-01T12:00:00.000Z", encountersCount: 6 });
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient({
       operationalStatus: "finished_treatment",
       latestEpisode: { id: "ep-1", patientId: "pat-1", status: "finished", startDate: "2026-01-01", endDate: "2026-02-01" },
@@ -147,6 +174,7 @@ describe("/admin/patients/[id] page", () => {
 
   it("renders direct CTA to create service request in administrative", async () => {
     mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient());
 
     const element = await AdminPatientDetailPage({
