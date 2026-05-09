@@ -175,6 +175,12 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `Aceptar e iniciar tratamiento` requiere elegir explícitamente la **fecha de inicio del tratamiento** antes de confirmar;
 - por defecto, esa fecha se precarga con `ServiceRequest.requestedAt` y queda editable para ajuste manual;
 - al confirmar, `EpisodeOfCare.period.start` (dominio `startDate`) persiste la fecha elegida y no se fuerza automáticamente la fecha actual, salvo fallback defensivo cuando la solicitud no trae fecha válida;
+- reglas vigentes de fecha para `EpisodeOfCare` (gate server-side de negocio en actions de inicio/cierre):
+  - `EpisodeOfCare.startDate` no puede ser futura;
+  - si el inicio usa una `ServiceRequest` `accepted` con `requestedAt` válido, `EpisodeOfCare.startDate` no puede ser anterior a esa fecha de solicitud;
+  - `EpisodeOfCare.endDate` no puede ser futura;
+  - `EpisodeOfCare.endDate` no puede ser anterior a `EpisodeOfCare.startDate`;
+  - la UI puede orientar/validar en cliente, pero no reemplaza este gate server-side;
 - en `/admin/patients/[id]/treatment`, la UI distingue explícitamente `Fecha de solicitud` (`ServiceRequest.requestedAt`) de `Inicio` (`EpisodeOfCare.startDate`) y usa cada dato según su semántica;
 - en `/admin/patients/[id]/encounters`, el baseline de cálculo de primera visita y métricas del ciclo usa `EpisodeOfCare.startDate` cuando existe (no `ServiceRequest.requestedAt`);
 - la estadística `Primera visita` en `/encounters` se calcula por **días calendario enteros** entre `EpisodeOfCare.startDate` y la fecha calendario de la primera `Encounter.startedAt` del episodio efectivo;

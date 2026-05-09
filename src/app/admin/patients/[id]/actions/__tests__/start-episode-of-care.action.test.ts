@@ -201,4 +201,34 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
     expect(existsAnotherPatientWithDniMock).not.toHaveBeenCalled();
     expect(result.ok).toBe(true);
   });
+
+  it("blocks creation when start date is in the future", async () => {
+    const result = await startEpisodeOfCareAction({
+      patientId: "pat-1",
+      startDate: "2999-01-01",
+      serviceRequestId: "sr-1",
+    });
+
+    expect(result).toEqual({ ok: false, message: "La fecha de inicio no puede ser futura." });
+    expect(getPatientByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("blocks creation when start date is before accepted service request requestedAt", async () => {
+    getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
+    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
+    getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-7", patientId: "pat-1", status: "accepted", requestedAt: "2026-04-20" });
+
+    const result = await startEpisodeOfCareAction({
+      patientId: "pat-1",
+      startDate: "2026-04-16",
+      serviceRequestId: "sr-7",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      message: "La fecha de inicio no puede ser anterior a la fecha de solicitud aceptada.",
+    });
+    expect(createEpisodeOfCareMock).not.toHaveBeenCalled();
+  });
 });

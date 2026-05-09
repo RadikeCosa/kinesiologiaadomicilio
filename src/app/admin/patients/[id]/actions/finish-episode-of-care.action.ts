@@ -26,6 +26,22 @@ export async function finishEpisodeOfCareAction(
       };
     }
 
+    const today = new Date();
+    const todayDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    if (parsedInput.endDate > todayDate) {
+      return {
+        ok: false,
+        message: "La fecha de finalización no puede ser futura.",
+      };
+    }
+
+    if (activeEpisode?.startDate && parsedInput.endDate < activeEpisode.startDate) {
+      return {
+        ok: false,
+        message: "La fecha de finalización no puede ser anterior al inicio del tratamiento.",
+      };
+    }
+
     const finished = await finishActiveEpisodeOfCare(parsedInput);
 
     if (!finished) {

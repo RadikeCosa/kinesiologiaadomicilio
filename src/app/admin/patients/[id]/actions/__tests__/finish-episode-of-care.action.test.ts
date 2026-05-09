@@ -60,4 +60,43 @@ describe("finishEpisodeOfCareAction", () => {
       message: "Tratamiento finalizado correctamente.",
     });
   });
+
+  it("rejects future endDate", async () => {
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({
+      id: "epi-1",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-04-01",
+    });
+
+    const result = await finishEpisodeOfCareAction({
+      patientId: "pat-1",
+      endDate: "2999-01-01",
+      closureReason: "treatment_completed",
+    });
+
+    expect(result).toEqual({ ok: false, message: "La fecha de finalización no puede ser futura." });
+    expect(finishActiveEpisodeOfCare).not.toHaveBeenCalled();
+  });
+
+  it("rejects endDate before active episode startDate", async () => {
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({
+      id: "epi-2",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-04-20",
+    });
+
+    const result = await finishEpisodeOfCareAction({
+      patientId: "pat-1",
+      endDate: "2026-04-17",
+      closureReason: "treatment_completed",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      message: "La fecha de finalización no puede ser anterior al inicio del tratamiento.",
+    });
+    expect(finishActiveEpisodeOfCare).not.toHaveBeenCalled();
+  });
 });
