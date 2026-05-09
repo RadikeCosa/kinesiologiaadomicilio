@@ -24,6 +24,7 @@ describe("ClinicalRecentSummaryCard", () => {
       },
     }));
     expect(html).toContain("Resumen clínico reciente");
+    expect(html).toContain("Síntesis rápida. El detalle está en Gestión clínica.");
     expect(html).toContain("Estado del tratamiento:</span> Tratamiento activo");
     expect(html).toContain("Última visita:</span> 08/05/2026");
     expect(html).toContain("Visitas del episodio:</span> 4");

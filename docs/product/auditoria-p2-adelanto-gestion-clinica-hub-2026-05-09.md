@@ -172,3 +172,12 @@ Criterio de aceptación P2:
 - UI validada con título `Resumen clínico reciente`, helper `Vista resumida. El detalle está en Gestión clínica.`, layout compacto (4 filas + CTA) y CTA a `/admin/patients/[id]/encounters`.
 - Ubicación validada bajo `Siguiente paso sugerido`, preservando CTAs principales de `Gestión clínica` y `Gestión administrativa`.
 - Anti-duplicación validada explícitamente: el hub no renderiza tendencia completa, delta, nota clínica, listado de visitas, estadísticas extensas, puntualidad agregada ni dashboard clínico.
+
+## Cierre P0 UX/UI hub (2026-05-09)
+
+- Se aplicó reorganización visual del hub `/admin/patients/[id]` en layout de dos columnas para desktop y stack coherente en mobile.
+- Columna principal: identidad/estado + bloque dominante **Próxima acción recomendada** + CTAs principales + CTA contextual.
+- Columna secundaria: **Resumen clínico reciente** + bloque compacto de contacto/administrativo básico.
+- Se degradó jerarquía de textos históricos (último tratamiento / última solicitud) a bloque secundario compacto.
+- El CTA interno de `Resumen clínico reciente` pasa a enlace discreto y en el hub puede ocultarse para evitar duplicar CTA fuerte hacia `/encounters`.
+- Se preservan no-alcances: sin cambios funcionales, sin cambios de dominio/FHIR/read models y sin dashboard clínico.

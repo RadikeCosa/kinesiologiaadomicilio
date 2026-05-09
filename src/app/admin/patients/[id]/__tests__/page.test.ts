@@ -88,15 +88,13 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("DNI: No informado");
     expect(html).toContain("Gestión clínica");
     expect(html).toContain("Gestión administrativa");
-    expect(html).toContain("Gestión clínica: visitas y seguimiento operativo del tratamiento.");
-    expect(html).toContain("Gestión administrativa: datos del paciente y solicitudes de atención.");
-    expect(html).toContain("Primero se resuelve la solicitud; luego se inicia tratamiento; con tratamiento activo se registran visitas.");
-    expect(html).toContain("Siguiente paso sugerido: Registrá la primera solicitud de atención.");
+    expect(html).toContain("Próxima acción recomendada");
     expect(html).toContain("Resumen clínico reciente");
-    expect(html).toContain("Vista resumida. El detalle está en Gestión clínica.");
+    expect(html).toContain("Síntesis rápida. El detalle está en Gestión clínica.");
     expect(html).toContain("Última visita:</span> No disponible");
+    expect(html).not.toContain("href=\"/admin/patients/pat-1/encounters\">Ver gestión clínica");
 
-    const suggestionIndex = html.indexOf("Siguiente paso sugerido");
+    const suggestionIndex = html.indexOf("Próxima acción recomendada");
     const summaryIndex = html.indexOf("Resumen clínico reciente");
     expect(summaryIndex).toBeGreaterThan(suggestionIndex);
 
@@ -132,7 +130,7 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Edad:");
     expect(html).toContain("Registrar visita");
     expect(html).toContain("DNI: No informado");
-    expect(html).toContain("Siguiente paso sugerido: Registrá visitas desde Gestión Clínica.");
+    expect(html).toContain("Registrá visitas desde Gestión clínica.");
   });
 
   it("shows next-step suggestion for in_review requests", async () => {
@@ -144,7 +142,7 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Siguiente paso sugerido: Continuá la resolución administrativa de la solicitud.");
+    expect(html).toContain("Continuá la resolución administrativa de la solicitud.");
   });
 
   it("shows next-step suggestion for accepted pending treatment", async () => {
@@ -155,7 +153,7 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Siguiente paso sugerido: Iniciá el tratamiento desde la solicitud aceptada.");
+    expect(html).toContain("Iniciá el tratamiento desde la solicitud aceptada.");
   });
 
   it("shows next-step suggestion for finished treatment without useful service request", async () => {
@@ -169,7 +167,7 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Siguiente paso sugerido: Si requiere un nuevo ciclo, registrá una nueva solicitud de atención.");
+    expect(html).toContain("Si requiere un nuevo ciclo, registrá una nueva solicitud de atención.");
   });
 
   it("renders direct CTA to create service request in administrative", async () => {
