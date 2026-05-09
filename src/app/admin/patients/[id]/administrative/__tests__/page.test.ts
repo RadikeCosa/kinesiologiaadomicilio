@@ -143,7 +143,7 @@ describe("/admin/patients/[id]/administrative page", () => {
     expect(html).toContain("Solicitudes de atención");
     expect(html).toContain("Todavía no hay solicitudes. Registrá la primera para iniciar la evaluación.");
     expect(html).toContain("El próximo paso operativo es registrar o aceptar una solicitud de atención.");
-    expect(html.indexOf("Solicitudes de atención")).toBeLessThan(html.indexOf("Resumen administrativo"));
+    expect(html.indexOf("Resumen administrativo")).toBeLessThan(html.indexOf("Solicitudes de atención"));
   });
 
   it("keeps back link before page title", async () => {

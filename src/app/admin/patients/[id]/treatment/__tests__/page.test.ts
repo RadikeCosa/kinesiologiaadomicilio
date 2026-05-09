@@ -196,7 +196,12 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain("Tratamiento activo");
     expect(html).toContain("Inicio: 01/04/2026");
     expect(html).toContain("TreatmentClinicalContextForm");
+    expect(html).toContain("Cerrar ciclo de tratamiento (acción final)");
+    expect(html).toContain("<details>");
     expect(html).toContain("FinishEpisodeOfCareForm");
+    expect(html.indexOf("TreatmentClinicalContextForm")).toBeLessThan(html.indexOf("Cerrar ciclo de tratamiento (acción final)"));
+    expect(html).toContain("Tratamiento · Marco clínico del ciclo");
+    expect(html).toContain("Ver / registrar visitas del ciclo");
     expect(html).not.toContain("StartEpisodeOfCareForm");
     expect(html).not.toContain("Registrar visita");
   });
@@ -282,6 +287,7 @@ describe("/admin/patients/[id]/treatment page", () => {
 
     expect(html).toContain("No hay tratamiento activo");
     expect(html).toContain("Si corresponde continuar la atención, registrá una nueva solicitud para iniciar otro ciclo.");
+    expect(html).toContain("Resumen del tratamiento finalizado");
     expect(html).toContain("Historial de ciclos cerrados");
     expect(html).toContain("Motivo: Tratamiento completado");
     expect(html).toContain("Detalle: Alta funcional");

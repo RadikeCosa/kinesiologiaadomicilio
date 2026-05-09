@@ -296,3 +296,9 @@ Visitas del episodio: n
 - El delta conserva formato numérico con signo y se destaca con énfasis visual neutro (sin semáforos clínicos ni interpretación automática).
 - En cards de visitas se mejoró densidad/escaneabilidad con bloques compactos y mejor distribución de métricas funcionales, sin alterar datos, orden canónico ni lógica de render.
 - No se modificaron domain/FHIR/schemas/actions/mappers/repositories, ni scoping/captura/persistencia.
+
+
+### Cierre P1 CTAs transversales (2026-05-09)
+- `/encounters` conserva `Registrar visita` como CTA primario y elimina botón equivalente de `Gestionar tratamiento`; el acceso a tratamiento queda contextual en la card de contexto clínico.
+- `/administrative` mantiene foco administrativo y baja navegación cruzada a links textuales secundarios.
+- `/administrative` queda con un solo `h1` y orden estable: `Resumen administrativo` seguido por `Solicitudes de atención`.

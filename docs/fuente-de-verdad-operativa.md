@@ -476,3 +476,14 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Alcance confirmado:** `/admin/patients/[id]` incorpora `Resumen clínico reciente` como síntesis orientativa con estado de tratamiento, última visita, visitas del episodio, hasta 2 métricas recientes y CTA a Gestión clínica.
 - **Límites confirmados:** no reemplaza `/admin/patients/[id]/encounters`; sin tendencia completa, sin notas clínicas, sin listado de visitas y sin estadísticas extensas en el hub.
 - **No-alcances preservados:** sin dashboard clínico, sin IA, sin `Procedure`, sin `Goal`, sin interpretación automática.
+
+
+### Tratamiento (`/admin/patients/[id]/treatment`)
+- Es la superficie de **marco clínico del ciclo** (no una pantalla de cierre).
+- El **contexto clínico longitudinal** es protagonista en la jerarquía visual.
+- El **cierre de ciclo** es una acción secundaria y colapsada por defecto.
+- Si el ciclo está finalizado, se muestra un **resumen read-only** antes del historial completo.
+
+- `/admin/patients/[id]/encounters` muestra una card compacta **read-only** de contexto clínico del ciclo para interpretar tendencia/visitas; la edición permanece en `/treatment`.
+
+- Regla P1 de navegación privada: cada superficie mantiene **un CTA primario** de su tarea principal; enlaces cruzados (`/administrative`, `/treatment`, `/encounters`) se presentan como secundarios/contextuales.

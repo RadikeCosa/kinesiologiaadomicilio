@@ -6,6 +6,7 @@ import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/
 import { EncounterStatsSummary } from "@/app/admin/patients/[id]/encounters/components/EncounterStatsSummary";
 import { SuccessStatusMessage } from "@/app/admin/patients/[id]/encounters/components/SuccessStatusMessage";
 import { FunctionalTrendSummary } from "@/app/admin/patients/[id]/encounters/components/FunctionalTrendSummary";
+import { ClinicalCycleContextCard } from "@/app/admin/patients/[id]/encounters/components/ClinicalCycleContextCard";
 import { loadPatientEncountersPageData } from "@/app/admin/patients/[id]/encounters/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import {
@@ -126,12 +127,6 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
           {pageData.activeEpisode ? (
             <>
               <Link
-                className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                href={`/admin/patients/${pageData.patient.id}/treatment`}
-              >
-                Gestionar tratamiento
-              </Link>
-              <Link
                 className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
                 href={`/admin/patients/${pageData.patient.id}/encounters/new`}
               >
@@ -170,24 +165,12 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
 
 
 
-      {pageData.clinicalContext?.hasAnyContent ? (
-        <section className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Contexto clínico del tratamiento</h2>
-            <Link className="text-xs font-medium text-slate-700 underline-offset-2 hover:underline" href={`/admin/patients/${pageData.patient.id}/treatment`}>Editar en tratamiento</Link>
-          </div>
-          <details className="mt-2 rounded border border-slate-200 bg-white p-3">
-            <summary className="cursor-pointer text-xs font-medium text-slate-700">Ver contexto longitudinal del episodio</summary>
-            <div className="mt-2 space-y-2 text-sm text-slate-700">
-              {pageData.clinicalContext.medicalReferenceDiagnosisText ? <p><strong>Diagnóstico médico de referencia:</strong> {pageData.clinicalContext.medicalReferenceDiagnosisText}</p> : null}
-              {pageData.clinicalContext.kinesiologicImpressionText ? <p><strong>Impresión kinésica:</strong> {pageData.clinicalContext.kinesiologicImpressionText}</p> : null}
-              {pageData.clinicalContext.initialFunctionalStatus ? <p><strong>Situación inicial funcional:</strong> {pageData.clinicalContext.initialFunctionalStatus}</p> : null}
-              {pageData.clinicalContext.therapeuticGoals ? <p><strong>Objetivos terapéuticos:</strong> {pageData.clinicalContext.therapeuticGoals}</p> : null}
-              {pageData.clinicalContext.frameworkPlan ? <p><strong>Plan marco del tratamiento:</strong> {pageData.clinicalContext.frameworkPlan}</p> : null}
-            </div>
-          </details>
-        </section>
-      ) : null}
+      <ClinicalCycleContextCard
+        patientId={pageData.patient.id}
+        activeEpisode={pageData.activeEpisode}
+        mostRecentEpisode={pageData.mostRecentEpisode}
+        clinicalContext={pageData.clinicalContext}
+      />
 
       <FunctionalTrendSummary trend={pageData.functionalTrend} />
 

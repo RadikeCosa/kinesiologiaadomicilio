@@ -31,10 +31,10 @@ export function TreatmentClinicalContextForm({ patientId, episodeOfCareId, initi
     });
   }
 
-  return <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4"><h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Contexto clínico del tratamiento</h2><p className="mt-2 text-xs text-slate-600">Información longitudinal del ciclo. No reemplaza el registro de cada visita.</p>
-    <form className="mt-3 space-y-3" onSubmit={handleSubmit}>
+  return <section className="mt-5 rounded-xl border border-slate-300 bg-slate-100/70 p-6"><h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Contexto clínico del ciclo</h2><p className="mt-2 text-xs text-slate-600">Información longitudinal del ciclo. No reemplaza el registro de cada visita.</p>
+    <form className="mt-3 space-y-4" onSubmit={handleSubmit}>
       {message ? <p className={`text-sm ${message.tone === "success" ? "text-emerald-700" : "text-red-700"}`}>{message.text}</p> : null}
-      <section className="rounded border border-slate-200 bg-white p-3">
+      <section className="rounded-lg border border-slate-200 bg-white p-4">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Diagnósticos</h3>
         <label className="mt-2 block text-sm text-slate-700">
           Diagnóstico médico de referencia
@@ -45,8 +45,8 @@ export function TreatmentClinicalContextForm({ patientId, episodeOfCareId, initi
           <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Impresión kinésica" rows={3} value={kinesiologicImpressionText} onChange={(e) => setKinesiologic(e.target.value)} />
         </label>
       </section>
-      <section className="rounded border border-slate-200 bg-white p-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Contexto funcional y plan terapéutico</h3>
+      <section className="rounded-lg border border-slate-200 bg-white p-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Estado funcional, objetivos y plan terapéutico</h3>
         <label className="mt-2 block text-sm text-slate-700">
           Situación inicial funcional
           <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Situación inicial funcional" rows={3} value={initialFunctionalStatus} onChange={(e) => setInitial(e.target.value)} />
@@ -60,6 +60,6 @@ export function TreatmentClinicalContextForm({ patientId, episodeOfCareId, initi
           <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Plan marco del tratamiento" rows={3} value={frameworkPlan} onChange={(e) => setPlan(e.target.value)} />
         </label>
       </section>
-      <button className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white" disabled={isPending} type="submit">{isPending ? "Guardando..." : "Guardar contexto"}</button>
+      <button className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white" disabled={isPending} type="submit">{isPending ? "Guardando..." : "Guardar contexto clínico"}</button>
     </form></section>;
 }
