@@ -224,17 +224,20 @@ export function EncounterCreateForm({
           <legend className="px-1 text-sm font-medium text-slate-900">Puntualidad operativa</legend>
           <p className="mt-1 text-xs text-slate-600">Clasificación manual orientativa; no reemplaza agenda formal.</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <label className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700">
-              <input checked={visitStartPunctuality === "on_time_or_minor_delay"} className="sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("on_time_or_minor_delay")} type="radio" />
-              <span>En horario</span>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors hover:border-slate-400 peer-has-checked:border-slate-500 peer-has-checked:bg-slate-100 peer-has-checked:text-slate-900 peer-has-focus-visible:outline peer-has-focus-visible:outline-2 peer-has-focus-visible:outline-offset-2 peer-has-focus-visible:outline-slate-500">
+              <input checked={visitStartPunctuality === "on_time_or_minor_delay"} className="peer sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("on_time_or_minor_delay")} type="radio" value="on_time_or_minor_delay" />
+              <span aria-hidden="true" className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-400 bg-white text-[10px] font-semibold text-slate-700 peer-checked:border-slate-700 peer-checked:bg-slate-700 peer-checked:text-white">✓</span>
+              <span className="font-medium">En horario</span>
             </label>
-            <label className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700">
-              <input checked={visitStartPunctuality === "delayed"} className="sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("delayed")} type="radio" />
-              <span>Con demora</span>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors hover:border-slate-400 peer-has-checked:border-slate-500 peer-has-checked:bg-slate-100 peer-has-checked:text-slate-900 peer-has-focus-visible:outline peer-has-focus-visible:outline-2 peer-has-focus-visible:outline-offset-2 peer-has-focus-visible:outline-slate-500">
+              <input checked={visitStartPunctuality === "delayed"} className="peer sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("delayed")} type="radio" value="delayed" />
+              <span aria-hidden="true" className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-400 bg-white text-[10px] font-semibold text-slate-700 peer-checked:border-slate-700 peer-checked:bg-slate-700 peer-checked:text-white">✓</span>
+              <span className="font-medium">Con demora</span>
             </label>
-            <label className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700">
-              <input checked={visitStartPunctuality === "severely_delayed"} className="sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("severely_delayed")} type="radio" />
-              <span>Muy demorada</span>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition-colors hover:border-slate-400 peer-has-checked:border-slate-500 peer-has-checked:bg-slate-100 peer-has-checked:text-slate-900 peer-has-focus-visible:outline peer-has-focus-visible:outline-2 peer-has-focus-visible:outline-offset-2 peer-has-focus-visible:outline-slate-500">
+              <input checked={visitStartPunctuality === "severely_delayed"} className="peer sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("severely_delayed")} type="radio" value="severely_delayed" />
+              <span aria-hidden="true" className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-400 bg-white text-[10px] font-semibold text-slate-700 peer-checked:border-slate-700 peer-checked:bg-slate-700 peer-checked:text-white">✓</span>
+              <span className="font-medium">Muy demorada</span>
             </label>
           </div>
         </fieldset>
