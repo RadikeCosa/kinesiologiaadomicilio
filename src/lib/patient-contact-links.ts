@@ -38,6 +38,46 @@ export function buildTelHref(phone?: string): string | null {
   return buildTelHrefFromAdminDisplay(phone);
 }
 
+export type WhatsAppContactTarget = {
+  href: string;
+  label: "Enviar WhatsApp" | "Enviar WhatsApp a contacto principal";
+  displayPhone: string;
+  targetKind: "patient" | "mainContact";
+};
+
+type PatientWhatsAppContactSource = {
+  phone?: string | null;
+  mainContact?: {
+    phone?: string | null;
+  } | null;
+};
+
+export function resolvePatientWhatsAppTarget(patient: PatientWhatsAppContactSource): WhatsAppContactTarget | null {
+  const patientWhatsappHref = buildWhatsAppHref(patient.phone ?? undefined);
+
+  if (patientWhatsappHref) {
+    return {
+      href: patientWhatsappHref,
+      label: "Enviar WhatsApp",
+      displayPhone: formatPhoneDisplay(patient.phone ?? undefined),
+      targetKind: "patient",
+    };
+  }
+
+  const mainContactWhatsappHref = buildWhatsAppHref(patient.mainContact?.phone ?? undefined);
+
+  if (mainContactWhatsappHref) {
+    return {
+      href: mainContactWhatsappHref,
+      label: "Enviar WhatsApp a contacto principal",
+      displayPhone: formatPhoneDisplay(patient.mainContact?.phone ?? undefined),
+      targetKind: "mainContact",
+    };
+  }
+
+  return null;
+}
+
 export function formatAddressDisplay(address?: string): string {
   return cleanText(address) ?? "Sin dirección";
 }

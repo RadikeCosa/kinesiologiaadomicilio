@@ -1,0 +1,34 @@
+import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
+import { PhoneContactActions } from "@/app/admin/patients/components/PhoneContactBlock";
+
+describe("PhoneContactActions", () => {
+  it("shows patient WhatsApp action when patient phone exists", () => {
+    const html = renderToStaticMarkup(
+      createElement(PhoneContactActions, { phone: "+54 299 555 0101", mainContactPhone: "+54 299 555 0202" }),
+    );
+
+    expect(html).toContain("Enviar WhatsApp");
+    expect(html).toContain("https://wa.me/542995550101");
+  });
+
+  it("shows main contact WhatsApp action when patient phone is missing", () => {
+    const html = renderToStaticMarkup(
+      createElement(PhoneContactActions, { phone: undefined, mainContactPhone: "+54 299 555 0202" }),
+    );
+
+    expect(html).toContain("Enviar WhatsApp a contacto principal");
+    expect(html).toContain("https://wa.me/542995550202");
+  });
+
+  it("shows fallback when no operative phones are available", () => {
+    const html = renderToStaticMarkup(
+      createElement(PhoneContactActions, { phone: "abc", mainContactPhone: "123" }),
+    );
+
+    expect(html).toContain("No hay canales de contacto disponibles.");
+    expect(html).not.toContain("wa.me");
+  });
+});

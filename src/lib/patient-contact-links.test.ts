@@ -6,6 +6,7 @@ import {
   buildWhatsAppHref,
   formatAddressDisplay,
   formatPhoneDisplay,
+  resolvePatientWhatsAppTarget,
 } from "@/lib/patient-contact-links";
 
 describe("patient-contact-links", () => {
@@ -49,5 +50,36 @@ describe("patient-contact-links", () => {
     expect(buildGoogleMapsSearchHref("Sarmiento 10 #A")).toBe(
       "https://www.google.com/maps/search/?api=1&query=Sarmiento%2010%20%23A%2C%20Neuqu%C3%A9n%2C%20Argentina",
     );
+  });
+
+  it("resolves WhatsApp target prioritizing patient phone over main contact", () => {
+    expect(resolvePatientWhatsAppTarget({
+      phone: "+54 299 555 0101",
+      mainContact: { phone: "+54 299 555 0202" },
+    })).toEqual({
+      href: "https://wa.me/542995550101",
+      label: "Enviar WhatsApp",
+      displayPhone: "+54 299 555-0101",
+      targetKind: "patient",
+    });
+  });
+
+  it("resolves WhatsApp target using main contact phone when patient phone is missing", () => {
+    expect(resolvePatientWhatsAppTarget({
+      phone: undefined,
+      mainContact: { phone: "+54 299 555 0202" },
+    })).toEqual({
+      href: "https://wa.me/542995550202",
+      label: "Enviar WhatsApp a contacto principal",
+      displayPhone: "+54 299 555-0202",
+      targetKind: "mainContact",
+    });
+  });
+
+  it("returns null when neither patient nor main contact has an operative phone", () => {
+    expect(resolvePatientWhatsAppTarget({
+      phone: "abc",
+      mainContact: { phone: "123" },
+    })).toBeNull();
   });
 });
