@@ -222,6 +222,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - en `/admin/patients/[id]/encounters/new`, `Puntualidad operativa` se presenta compacta en opciones inline con wrap responsive;
   - en `/admin/patients/[id]/encounters`, `Tendencia funcional` se muestra antes de `Estadísticas de visitas`;
   - en cards de visitas, la puntualidad se renderiza como chip discreto cuando existe (fuera de la línea principal de metadata temporal);
+  - en `Estadísticas de visitas`, puede mostrarse KPI operativo compacto secundario: `Puntualidad: X/Y en horario o demora leve`;
 - convención P1 visual en Gestión clínica (UI-only):
   - `Tendencia funcional` prioriza jerarquía interna `Último` (principal) + `Previo`/`Cambio` (secundarios), sin interpretación clínica automática;
   - si hay una sola medición en la métrica, se muestra `Sin comparación previa`;
@@ -255,7 +256,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - la puntualidad operativa no es dato clínico, no vive en `clinicalNote`, no vive en `Observation` y no altera `startedAt`/`endedAt`;
 - en `/admin/patients/[id]/encounters/new` la captura es opcional, ubicada en bloque compacto entre Inicio/Cierre y métricas funcionales;
 - en `/admin/patients/[id]/encounters` se renderiza en la card solo cuando existe (`Puntualidad: ...`);
-- esta iteración no introduce `Appointment`, `scheduledStartAt`, `delayMinutes` calculado ni KPI/dashboard operativo.
+- en `Estadísticas de visitas`, el KPI de puntualidad usa denominador solo sobre visitas del episodio efectivo con `visitStartPunctuality` cargado y puede mostrar `Z sin dato` como detalle secundario;
+- esta iteración no introduce `Appointment`, `scheduledStartAt`, `delayMinutes` calculado ni dashboard operativo.
 - en el frente FHIR de `Patient`, Fase 1 está cerrada para `gender` + `birthDate`, Fase 2 para `Identifier.type` + tests/fixtures de identidad y Fase 3 queda cerrada con `telecom`, `contact.relationship` y `name` resueltos incrementalmente, más deuda/trigger explícitos de `address` documentados en FHIR-018.
 
 

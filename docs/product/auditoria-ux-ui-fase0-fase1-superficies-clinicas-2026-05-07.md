@@ -215,7 +215,7 @@ No-alcances mantenidos: sin cambios de dominio, FHIR, mappers, repos, schemas, s
 - Se fijó orden canónico de métricas funcionales en card (`TUG → Dolor → Bipedestación`) sin depender del orden de entrada.
 - El bloque conserva título `Métricas funcionales` y agrega helper de lectura puntual: “Valores registrados en esta visita. No representan tendencia.”
 - Visitas sin métricas continúan sin renderizar bloque vacío; métricas parciales muestran solo valores presentes.
-- Backlog futuro (sin implementación): captura y visualización de puntualidad/demora de visita para mejorar interpretación operacional.
+- Cierre posterior (2026-05-09): se implementó KPI compacto secundario de puntualidad en `Estadísticas de visitas` de `/encounters` (X/Y en horario o demora leve, con faltantes opcionales), manteniendo no-alcance de dashboard operativo.
 
 ## Nota de hardening QA (2026-05-07)
 - **Hallazgos QA de origen:** (1) duplicación visual de badges verdes equivalentes en Gestión clínica (`En tratamiento` + `Tratamiento activo`); (2) feedback de éxito post-registro de visita persistente.

@@ -65,6 +65,9 @@ describe("/admin/patients/[id]/encounters page", () => {
         averageDaysBetweenEpisodeVisits: null,
         frequencyEligibleVisitCount: 0,
         frequencyIntervalCount: 0,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
       },
     });
 
@@ -140,6 +143,9 @@ describe("/admin/patients/[id]/encounters page", () => {
         averageDaysBetweenEpisodeVisits: null,
         frequencyEligibleVisitCount: 0,
         frequencyIntervalCount: 0,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
       },
     });
 
@@ -164,6 +170,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("Tendencia funcional");
     expect(foundHtml.indexOf("Tendencia funcional")).toBeLessThan(foundHtml.indexOf("Estadísticas de visitas"));
     expect(foundHtml).toContain("Visitas del tratamiento");
+    expect(foundHtml).not.toContain("Puntualidad:");
     expect(foundHtml).not.toContain("Visitas registradas");
     expect(foundHtml).toContain("Primera visita");
     expect(foundHtml).toContain("Frecuencia promedio");
@@ -202,6 +209,9 @@ describe("/admin/patients/[id]/encounters page", () => {
         averageDaysBetweenEpisodeVisits: 0.75,
         frequencyEligibleVisitCount: 4,
         frequencyIntervalCount: 3,
+        punctualityWithDataCount: 10,
+        punctualityOnTimeOrMinorDelayCount: 8,
+        punctualityMissingCount: 2,
       },
     });
 
@@ -219,6 +229,8 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(html).toContain("Menos de 1 día");
     expect(html).toMatch(/Duración promedio<\/p><p[^>]*>—<\/p>/);
     expect(html).toContain("* Duración calculada sobre 3 de 4 visitas del tratamiento. Se excluyen visitas sin cierre, legacy o con fechas no válidas.");
+    expect(html).toContain("Puntualidad: 8/10 en horario o demora leve");
+    expect(html).toContain("2 sin dato");
   });
 
   it("renders frequency singular/plural and first-visit anomaly copy", async () => {
@@ -251,6 +263,9 @@ describe("/admin/patients/[id]/encounters page", () => {
         averageDaysBetweenEpisodeVisits: 1.2,
         frequencyEligibleVisitCount: 3,
         frequencyIntervalCount: 2,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
       },
     });
 
@@ -291,6 +306,9 @@ describe("/admin/patients/[id]/encounters page", () => {
         averageDaysBetweenEpisodeVisits: 3.2,
         frequencyEligibleVisitCount: 3,
         frequencyIntervalCount: 2,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
       },
     });
 
@@ -329,6 +347,9 @@ describe("/admin/patients/[id]/encounters page", () => {
         averageDaysBetweenEpisodeVisits: null,
         frequencyEligibleVisitCount: 0,
         frequencyIntervalCount: 0,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
       },
     });
 
@@ -370,6 +391,9 @@ describe("/admin/patients/[id]/encounters page", () => {
         totalCount: 0, treatmentCount: 0, lastStartedAt: null, averageDurationMinutes: null, totalDurationMinutes: null,
         durationEligibleCount: 0, durationExcludedCount: 0, isDurationPartial: false, daysToFirstVisitFromEpisodeStart: null,
         isFirstVisitBeforeEpisodeStart: false, averageDaysBetweenEpisodeVisits: null, frequencyEligibleVisitCount: 0, frequencyIntervalCount: 0,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
       },
     });
     const withContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
@@ -390,6 +414,9 @@ describe("/admin/patients/[id]/encounters page", () => {
         totalCount: 0, treatmentCount: 0, lastStartedAt: null, averageDurationMinutes: null, totalDurationMinutes: null,
         durationEligibleCount: 0, durationExcludedCount: 0, isDurationPartial: false, daysToFirstVisitFromEpisodeStart: null,
         isFirstVisitBeforeEpisodeStart: false, averageDaysBetweenEpisodeVisits: null, frequencyEligibleVisitCount: 0, frequencyIntervalCount: 0,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
       },
     });
     const withoutContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
