@@ -51,6 +51,14 @@ describe("/admin/patients/[id]/encounters page", () => {
       mostRecentEpisode: null,
       encounters: [],
       functionalTrend: [{ code: "pain_nrs_0_10", label: "Dolor", latestValue: 4, latestDate: "2026-04-17", unit: "/10" }],
+      clinicalContext: {
+        hasAnyContent: true,
+        medicalReferenceDiagnosisText: "Lumbalgia mecánica",
+        initialFunctionalStatus: "Marcha con dolor",
+        therapeuticGoals: "Reducir dolor y recuperar tolerancia a marcha diaria.",
+        frameworkPlan: "Plan general",
+        kinesiologicImpressionText: "Compromiso funcional lumbar",
+      },
       encounterStats: {
         totalCount: 0,
         treatmentCount: 0,
@@ -164,10 +172,13 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/encounters/new\"");
     expect(foundHtml).toContain("Registrar visita");
     expect(foundHtml.match(/href=\"\/admin\/patients\/pat-1\/encounters\/new\"/g)?.length).toBe(1);
-    expect(foundHtml).toContain("Gestionar tratamiento");
+    expect(foundHtml).not.toContain("Gestionar tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
         expect(foundHtml).toContain("Estadísticas de visitas");
+    expect(foundHtml).toContain("Contexto clínico del ciclo");
+    expect(foundHtml).toContain("Completar contexto en Tratamiento");
     expect(foundHtml).toContain("Tendencia funcional");
+    expect(foundHtml.indexOf("Contexto clínico del ciclo")).toBeLessThan(foundHtml.indexOf("Tendencia funcional"));
     expect(foundHtml.indexOf("Tendencia funcional")).toBeLessThan(foundHtml.indexOf("Estadísticas de visitas"));
     expect(foundHtml).toContain("Visitas del tratamiento");
     expect(foundHtml).not.toContain("Puntualidad:");
@@ -397,9 +408,9 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
     });
     const withContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
-    expect(withContext).toContain("Contexto clínico del tratamiento");
-    expect(withContext).toContain("Ver contexto longitudinal del episodio");
-    expect(withContext).toContain("Editar en tratamiento");
+    expect(withContext).toContain("Contexto clínico del ciclo");
+    expect(withContext).toContain("Ver detalle longitudinal");
+    expect(withContext).toContain("Completar contexto en Tratamiento");
     expect(withContext).toContain("href=\"/admin/patients/pat-1/treatment\"");
     expect(withContext).toContain("Registrar visita");
 
@@ -420,6 +431,29 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
     });
     const withoutContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
-    expect(withoutContext).not.toContain("Contexto clínico del tratamiento");
+    expect(withoutContext).toContain("Contexto clínico del ciclo");
+    expect(withoutContext).toContain("Completitud:</span> Sin contexto");
   });
+
+  it("shows compact historical context when treatment is finished", async () => {
+    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
+      patient: { id: "pat-1", fullName: "Ana Pérez", operationalStatus: "finished_treatment" },
+      activeEpisode: null,
+      mostRecentEpisode: { id: "epi-2", patientId: "pat-1", status: "finished", startDate: "2026-03-01", endDate: "2026-03-20", closureReason: "treatment_completed", closureDetail: "Alta funcional" },
+      encounters: [],
+      functionalTrend: [],
+      clinicalContext: { hasAnyContent: true, therapeuticGoals: "Alta con independencia funcional" },
+      encounterStats: { totalCount: 0, treatmentCount: 0, lastStartedAt: null, averageDurationMinutes: null, totalDurationMinutes: null, durationEligibleCount: 0, durationExcludedCount: 0, isDurationPartial: false, daysToFirstVisitFromEpisodeStart: null, isFirstVisitBeforeEpisodeStart: false, averageDaysBetweenEpisodeVisits: null, frequencyEligibleVisitCount: 0, frequencyIntervalCount: 0, punctualityWithDataCount: 0, punctualityOnTimeOrMinorDelayCount: 0, punctualityMissingCount: 0 },
+    });
+
+    const element = await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Visitas en modo historial.");
+    expect(html).toContain("Cierre:</span> 20/03/2026");
+    expect(html).toContain("Motivo de cierre:");
+    expect(html).toContain("Detalle de cierre:</span> Alta funcional");
+    expect(html).toContain("Ver ciclo en Tratamiento");
+  });
+
 });

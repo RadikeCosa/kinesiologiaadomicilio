@@ -59,6 +59,9 @@ export default async function AdminPatientTreatmentPage({
   const hasAnyEpisode = hasActiveTreatment || hasClosedEpisodes;
   const canStartTreatmentFromCurrentContext = treatmentServiceRequestContext.state === "valid" && Boolean(treatmentServiceRequestContext.serviceRequestId);
   const clinicalContext = activeEpisode ? await loadEpisodeClinicalContextReadModel(activeEpisode) : null;
+  const latestClosedEpisode = !hasActiveTreatment
+    ? treatmentEpisodeHistory.find((episode) => episode.id === patient?.latestEpisode?.id) ?? treatmentEpisodeHistory[0]
+    : null;
 
   if (!patient) {
     return (
@@ -86,28 +89,39 @@ export default async function AdminPatientTreatmentPage({
           ← Volver al paciente
         </Link>
         <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold text-slate-900">{patient.fullName}</h1>
-            <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge?.className}`}
-            >
-              {treatmentBadge?.label}
-            </span>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-semibold text-slate-900">Tratamiento · Marco clínico del ciclo</h1>
+              <span
+                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge?.className}`}
+              >
+                {treatmentBadge?.label}
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-slate-600">Definí aquí el marco clínico longitudinal del ciclo activo. La evolución de cada visita se registra en Gestión clínica (Visitas).</p>
           </div>
-          <Link
-            className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            href={`/admin/patients/${patient.id}/encounters`}
-          >
-            Ir a gestión clínica
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            {activeEpisode ? (
+              <Link className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800" href={`/admin/patients/${patient.id}/encounters`}>
+                Ver / registrar visitas del ciclo
+              </Link>
+            ) : null}
+            <Link
+              className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              href={`/admin/patients/${patient.id}/encounters`}
+            >
+              Ir a gestión clínica
+            </Link>
+          </div>
         </div>
-        <p className="mt-2 text-sm text-slate-600">El tratamiento representa el ciclo de atención profesional del paciente.</p>
         <p className="mt-1 text-xs text-slate-500">{PATIENT_SURFACE_COPY.treatmentDefinition}</p>
         <p className="mt-1 text-xs text-slate-500">
           DNI: {formatDniDisplay(patient.dni)}
           {patientAge !== null ? ` · Edad: ${patientAge} años` : ""}
         </p>
       </div>
+
+      {activeEpisode ? (<TreatmentClinicalContextForm patientId={patient.id} episodeOfCareId={activeEpisode.id} initialData={clinicalContext} />) : null}
 
       {treatmentServiceRequestContext.serviceRequest ? (
         <section className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
@@ -130,10 +144,6 @@ export default async function AdminPatientTreatmentPage({
               Solicitante: {treatmentServiceRequestContext.serviceRequest.requesterDisplay}
             </p>
           ) : null}
-          <p className="mt-3 text-sm text-emerald-800">
-            El tratamiento se iniciará desde esta solicitud. La visita se habilitará recién cuando exista un
-            tratamiento activo.
-          </p>
         </section>
       ) : treatmentServiceRequestContext.state === "already_used" ? (
         <p className="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
@@ -149,79 +159,56 @@ export default async function AdminPatientTreatmentPage({
       <section className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
         {activeEpisode ? (
           <>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Tratamiento activo
-            </h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Tratamiento activo</h2>
             <p className="mt-3 text-sm text-slate-700">Inicio: {formatDateDisplay(activeEpisode.startDate)}</p>
-            <div className="mt-4">
-              <FinishEpisodeOfCareForm patient={patient} />
-            </div>
           </>
         ) : hasClosedEpisodes ? (
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">No hay tratamiento activo</h2>
-            <p className="mt-3 text-sm text-slate-700">
-              Si corresponde continuar la atención, registrá una nueva solicitud para iniciar otro ciclo.
-            </p>
-            <Link
-              className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href={`/admin/patients/${patient.id}/administrative#service-requests`}
-            >
+            <p className="mt-3 text-sm text-slate-700">Si corresponde continuar la atención, registrá una nueva solicitud para iniciar otro ciclo.</p>
+            <Link className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/administrative#service-requests`}>
               Ver historial de solicitudes
             </Link>
-            {canStartTreatmentFromCurrentContext ? (
-              <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-                <StartEpisodeOfCareForm
-                  patient={patient}
-                  serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
-                />
-              </div>
-            ) : (
-              <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-                Iniciá un tratamiento desde una solicitud aceptada.
-              </p>
-            )}
           </>
         ) : (
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">No hay tratamientos registrados</h2>
-            <p className="mt-3 text-sm text-slate-700">
-              Iniciá un tratamiento desde una solicitud aceptada.
-            </p>
-            <Link
-              className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href={`/admin/patients/${patient.id}/administrative#service-requests`}
-            >
+            <p className="mt-3 text-sm text-slate-700">Iniciá un tratamiento desde una solicitud aceptada.</p>
+            <Link className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/administrative#service-requests`}>
               Ir a solicitudes
             </Link>
-            {canStartTreatmentFromCurrentContext ? (
-              <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4">
-                <StartEpisodeOfCareForm
-                  patient={patient}
-                  serviceRequestId={treatmentServiceRequestContext.serviceRequestId}
-                />
-              </div>
-            ) : null}
           </>
         )}
+
+        {!hasActiveTreatment && canStartTreatmentFromCurrentContext ? (
+          <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4"><StartEpisodeOfCareForm patient={patient} serviceRequestId={treatmentServiceRequestContext.serviceRequestId} /></div>
+        ) : null}
       </section>
 
-      {activeEpisode ? (<TreatmentClinicalContextForm patientId={patient.id} episodeOfCareId={activeEpisode.id} initialData={clinicalContext} />) : null}
+      {latestClosedEpisode ? (
+        <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Resumen del tratamiento finalizado</h2>
+          <p className="mt-3 text-sm text-slate-700">Inicio: {formatDateDisplay(latestClosedEpisode.startDate)}</p>
+          <p className="mt-2 text-sm text-slate-700">Cierre: {latestClosedEpisode.endDate ? formatDateDisplay(latestClosedEpisode.endDate) : "Sin fecha registrada"}</p>
+          <p className="mt-2 text-sm text-slate-700">Motivo: {latestClosedEpisode.closureReason ? EPISODE_OF_CARE_CLOSURE_REASON_LABELS[latestClosedEpisode.closureReason as keyof typeof EPISODE_OF_CARE_CLOSURE_REASON_LABELS] ?? latestClosedEpisode.closureReason : "Sin dato"}</p>
+          <p className="mt-2 text-sm text-slate-700">Detalle: {latestClosedEpisode.closureDetail || "Sin detalle"}</p>
+          <p className="mt-2 text-sm text-slate-700">Solicitud de origen: {latestClosedEpisode.serviceRequestId || "Sin solicitud vinculada"}</p>
+          <p className="mt-2 text-sm text-slate-700">Diagnóstico: {latestClosedEpisode.medicalReferenceDiagnosisText || "Sin dato"}</p>
+          <p className="mt-2 text-sm text-slate-700">Impresión: {latestClosedEpisode.kinesiologicImpressionText || "Sin dato"}</p>
+          <p className="mt-2 text-sm text-slate-700">Objetivos: {latestClosedEpisode.therapeuticGoals || "Sin dato"}</p>
+          <p className="mt-2 text-sm text-slate-700">Plan: {latestClosedEpisode.frameworkPlan || "Sin dato"}</p>
+          <Link className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/administrative#service-requests`}>Gestión administrativa para nuevo ciclo</Link>
+        </section>
+      ) : null}
+
+      {activeEpisode ? <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4"><details><summary className="cursor-pointer text-sm font-semibold text-slate-800">Cerrar ciclo de tratamiento (acción final)</summary><div className="mt-3"><FinishEpisodeOfCareForm patient={patient} /></div></details></section> : null}
 
       {hasAnyEpisode && treatmentEpisodeHistory.length > 0 ? (
         <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Historial de ciclos cerrados</h2>
           <ul className="mt-3 space-y-2">
             {treatmentEpisodeHistory.map((episode) => (
-              <li className="rounded border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" key={episode.id}>
-                <p>Inicio: {formatDateDisplay(episode.startDate)}</p>
-                <p>Fin: {episode.endDate ? formatDateDisplay(episode.endDate) : "Sin fecha registrada"}</p>
-                {episode.closureReason ? (
-                  <p>Motivo: {EPISODE_OF_CARE_CLOSURE_REASON_LABELS[episode.closureReason as keyof typeof EPISODE_OF_CARE_CLOSURE_REASON_LABELS] ?? episode.closureReason}</p>
-                ) : null}
-                {episode.closureDetail ? <p>Detalle: {episode.closureDetail}</p> : null}
-                {episode.serviceRequestId ? <p>Solicitud de origen: {episode.serviceRequestId}</p> : null}
-              </li>
+              <li className="rounded border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" key={episode.id}><p>Inicio: {formatDateDisplay(episode.startDate)}</p></li>
             ))}
           </ul>
         </section>

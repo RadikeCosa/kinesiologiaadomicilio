@@ -86,9 +86,9 @@ export default async function AdminPatientAdministrativePage({
         <>
           <header className="mt-4">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold text-slate-900">
+              <h2 className="text-2xl font-semibold text-slate-900">
                 {patient.fullName}
-              </h1>
+              </h2>
               <span
                 className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge?.className}`}
               >
@@ -101,81 +101,40 @@ export default async function AdminPatientAdministrativePage({
             </p>
           </header>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Link
-              className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href={`/admin/patients/${patient.id}/treatment`}
-            >
-              Gestionar tratamiento
-            </Link>
-            <Link
-              className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-              href={`/admin/patients/${patient.id}/encounters`}
-            >
-              Ir a gestión clínica
-            </Link>
-            {hasActiveTreatment ? (
-              <span className="text-xs text-slate-500">
-                Esta pantalla no reemplaza la gestión clínica del tratamiento o visitas.
-              </span>
-            ) : null}
+          <div className="mt-3 text-xs text-slate-600">
+            <span>Si necesitás revisar evolución o contexto clínico, usá </span>
+            <Link className="font-medium text-slate-700 underline-offset-2 hover:underline" href={`/admin/patients/${patient.id}/encounters`}>Gestión clínica</Link>
+            <span> o </span>
+            <Link className="font-medium text-slate-700 underline-offset-2 hover:underline" href={`/admin/patients/${patient.id}/treatment`}>Tratamiento</Link>
+            <span>.</span>
           </div>
 
-          {hasActiveTreatment ? (
-            <>
-              <div className="mt-4">
-                <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                    Resumen administrativo
-                  </h2>
-                  <div className="mt-3">
-                    <PatientAdministrativeEditor initialEditing={initialAdministrativeEditing} patient={patient} />
-                  </div>
-                </section>
+                    <div className="mt-4">
+            <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                Resumen administrativo
+              </h2>
+              <div className="mt-3">
+                <PatientAdministrativeEditor initialEditing={initialAdministrativeEditing} patient={patient} />
               </div>
-              <PatientServiceRequestsSection
-                contextualMessage={serviceRequestContextMessage}
-                initialCreateOpen={initialCreateOpen}
-                missingTreatmentRequirements={missingTreatmentRequirements}
-                patientAdministrativeSnapshot={{
-                  address: patient.address,
-                  phone: patient.phone,
-                  mainContactPhone: patient.mainContact?.phone,
-                }}
-                patientId={patient.id}
-                activeServiceRequest={serviceRequestHistoryContext.activeServiceRequest}
-                historicalServiceRequests={serviceRequestHistoryContext.historicalServiceRequests}
-                serviceRequests={serviceRequests}
-              />
-            </>
-          ) : (
-            <>
-              <PatientServiceRequestsSection
-                contextualMessage={serviceRequestContextMessage}
-                initialCreateOpen={initialCreateOpen}
-                missingTreatmentRequirements={missingTreatmentRequirements}
-                patientAdministrativeSnapshot={{
-                  address: patient.address,
-                  phone: patient.phone,
-                  mainContactPhone: patient.mainContact?.phone,
-                }}
-                patientId={patient.id}
-                activeServiceRequest={serviceRequestHistoryContext.activeServiceRequest}
-                historicalServiceRequests={serviceRequestHistoryContext.historicalServiceRequests}
-                serviceRequests={serviceRequests}
-              />
-              <div className="mt-4">
-                <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                    Resumen administrativo
-                  </h2>
-                  <div className="mt-3">
-                    <PatientAdministrativeEditor initialEditing={initialAdministrativeEditing} patient={patient} />
-                  </div>
-                </section>
-              </div>
-            </>
-          )}
+            </section>
+          </div>
+
+          <PatientServiceRequestsSection
+            contextualMessage={serviceRequestContextMessage}
+            initialCreateOpen={initialCreateOpen}
+            missingTreatmentRequirements={missingTreatmentRequirements}
+            patientAdministrativeSnapshot={{
+              address: patient.address,
+              phone: patient.phone,
+              mainContactPhone: patient.mainContact?.phone,
+            }}
+            patientId={patient.id}
+            activeServiceRequest={serviceRequestHistoryContext.activeServiceRequest}
+            historicalServiceRequests={serviceRequestHistoryContext.historicalServiceRequests}
+            serviceRequests={serviceRequests}
+          />
+
         </>
       ) : (
         <>

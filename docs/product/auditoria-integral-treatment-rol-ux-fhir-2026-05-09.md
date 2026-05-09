@@ -247,3 +247,12 @@ Recomendación temporal:
 - **Relación con Gestión clínica**: tratamiento define marco; encounters ejecuta evolución por sesión.
 - **Riesgo principal a evitar**: duplicar evolución de visitas dentro de tratamiento.
 
+
+
+## Cierre P0.1 visual `/treatment` (2026-05-09)
+- Se reforzó el framing de la pantalla como **"Tratamiento · Marco clínico del ciclo"** con subcopy longitudinal explícito.
+- El contexto clínico del ciclo pasó a ser card protagonista con agrupación visible (Diagnósticos / Estado funcional, objetivos y plan terapéutico) y CTA "Guardar contexto clínico".
+- El cierre quedó relegado a bloque inferior colapsado por defecto (`details/summary`) con copy: "Cerrar ciclo de tratamiento (acción final)".
+- Se agregó card read-only **"Resumen del tratamiento finalizado"** previa al historial completo para mejorar reconocibilidad del cierre previo.
+
+- Cierre P0 Encounters: se consolidó "Contexto clínico del ciclo" como resumen compacto persistente, previo a tendencia y estadísticas, con CTA a Tratamiento y sin edición local.
