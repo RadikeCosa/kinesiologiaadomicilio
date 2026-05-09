@@ -23,6 +23,16 @@ export async function startEpisodeOfCareAction(
 ): Promise<StartEpisodeOfCareActionResult> {
   try {
     const parsedInput = startEpisodeOfCareSchema.parse(input);
+    const today = new Date();
+    const todayDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+    if (parsedInput.startDate > todayDate) {
+      return {
+        ok: false,
+        message: "La fecha de inicio no puede ser futura.",
+      };
+    }
+
     const patient = await getPatientById(parsedInput.patientId);
 
     if (!patient) {
@@ -74,6 +84,13 @@ export async function startEpisodeOfCareAction(
         return {
           ok: false,
           message: "Solo una solicitud aceptada puede iniciar tratamiento.",
+        };
+      }
+
+      if (serviceRequest.requestedAt && parsedInput.startDate < serviceRequest.requestedAt) {
+        return {
+          ok: false,
+          message: "La fecha de inicio no puede ser anterior a la fecha de solicitud aceptada.",
         };
       }
 
