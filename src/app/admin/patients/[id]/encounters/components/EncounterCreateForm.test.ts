@@ -66,6 +66,12 @@ describe("EncounterCreateForm", () => {
     expect(html).toContain("Puntualidad operativa");
     expect(html).toContain("Clasificación manual orientativa; no reemplaza agenda formal.");
     expect(html).toContain("name=\"visitStartPunctuality\"");
+    expect((html.match(/name=\"visitStartPunctuality\"/g) ?? []).length).toBe(3);
+    expect(html).toContain("value=\"on_time_or_minor_delay\"");
+    expect(html).toContain("value=\"delayed\"");
+    expect(html).toContain("value=\"severely_delayed\"");
+    expect(html).toContain("peer-checked:bg-slate-700");
+    expect(html).toContain("peer-has-checked:bg-slate-100");
     expect(html).toContain("En horario");
     expect(html).toContain("Con demora");
     expect(html).toContain("Muy demorada");
