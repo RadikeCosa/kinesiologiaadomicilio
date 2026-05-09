@@ -5,6 +5,7 @@ import { loadPatientDetail } from "@/app/admin/patients/[id]/data";
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 import { EncounterStatsSummary } from "@/app/admin/patients/[id]/encounters/components/EncounterStatsSummary";
 import { SuccessStatusMessage } from "@/app/admin/patients/[id]/encounters/components/SuccessStatusMessage";
+import { FunctionalTrendSummary } from "@/app/admin/patients/[id]/encounters/components/FunctionalTrendSummary";
 import { loadPatientEncountersPageData } from "@/app/admin/patients/[id]/encounters/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import {
@@ -189,6 +190,8 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
       ) : null}
 
       <EncounterStatsSummary stats={pageData.encounterStats} />
+
+      <FunctionalTrendSummary trend={pageData.functionalTrend} />
 
       <EncountersList
         encounters={pageData.encounters}

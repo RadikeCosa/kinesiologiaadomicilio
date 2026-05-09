@@ -65,7 +65,7 @@ describe("EncountersList", () => {
     expect(html).toContain("Estado: Registrada");
     expect(html).toContain("Registro clínico");
     expect(html).toContain("Métricas funcionales");
-    expect(html).toContain("Valores registrados en esta visita. No representan tendencia.");
+    expect(html).not.toContain("Valores registrados en esta visita. No representan tendencia.");
     expect(html).toContain("TUG:");
     expect(html).toContain("18.5 s");
     expect(html).toContain("Dolor:");

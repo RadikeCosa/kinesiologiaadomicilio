@@ -26,6 +26,10 @@ vi.mock("@/app/admin/patients/[id]/encounters/components/EncountersList", () => 
   EncountersList: () => createElement("div", null, "EncountersList"),
 }));
 
+vi.mock("@/app/admin/patients/[id]/encounters/components/FunctionalTrendSummary", () => ({
+  FunctionalTrendSummary: ({ trend }: { trend: unknown[] }) => createElement("div", null, trend.length > 0 ? "Tendencia funcional" : ""),
+}));
+
 
 vi.mock("@/app/admin/patients/[id]/encounters/components/SuccessStatusMessage", () => ({
   SuccessStatusMessage: ({ message }: { message: string }) => createElement("p", null, message),
@@ -46,6 +50,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
       mostRecentEpisode: null,
       encounters: [],
+      functionalTrend: [],
       encounterStats: {
         totalCount: 0,
         treatmentCount: 0,
@@ -120,6 +125,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
       mostRecentEpisode: null,
       encounters: [],
+      functionalTrend: [],
       encounterStats: {
         totalCount: 0,
         treatmentCount: 0,
@@ -179,6 +185,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
       mostRecentEpisode: null,
       encounters: [],
+      functionalTrend: [],
       encounterStats: {
         totalCount: 5,
         treatmentCount: 4,
@@ -227,6 +234,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
       mostRecentEpisode: null,
       encounters: [],
+      functionalTrend: [],
       encounterStats: {
         totalCount: 3,
         treatmentCount: 3,
@@ -266,6 +274,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
       mostRecentEpisode: null,
       encounters: [],
+      functionalTrend: [],
       encounterStats: {
         totalCount: 3,
         treatmentCount: 3,
@@ -303,6 +312,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       activeEpisode: null,
       mostRecentEpisode: null,
       encounters: [],
+      functionalTrend: [],
       encounterStats: {
         totalCount: 0,
         treatmentCount: 0,
@@ -353,6 +363,7 @@ describe("/admin/patients/[id]/encounters page", () => {
         medicalReferenceDiagnosisText: "Lumbalgia",
       },
       encounters: [],
+      functionalTrend: [],
       encounterStats: {
         totalCount: 0, treatmentCount: 0, lastStartedAt: null, averageDurationMinutes: null, totalDurationMinutes: null,
         durationEligibleCount: 0, durationExcludedCount: 0, isDurationPartial: false, daysToFirstVisitFromEpisodeStart: null,
@@ -372,6 +383,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       mostRecentEpisode: null,
       clinicalContext: { hasAnyContent: false },
       encounters: [],
+      functionalTrend: [],
       encounterStats: {
         totalCount: 0, treatmentCount: 0, lastStartedAt: null, averageDurationMinutes: null, totalDurationMinutes: null,
         durationEligibleCount: 0, durationExcludedCount: 0, isDurationPartial: false, daysToFirstVisitFromEpisodeStart: null,
