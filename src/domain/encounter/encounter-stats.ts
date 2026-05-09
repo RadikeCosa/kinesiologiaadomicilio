@@ -14,6 +14,9 @@ export interface EncounterStats {
   averageDaysBetweenEpisodeVisits: number | null;
   frequencyEligibleVisitCount: number;
   frequencyIntervalCount: number;
+  punctualityWithDataCount: number;
+  punctualityOnTimeOrMinorDelayCount: number;
+  punctualityMissingCount: number;
 }
 
 interface EncounterWithTimestamp {
@@ -220,6 +223,11 @@ export function calculateEncounterStats(params: {
     sortedEpisodeEncounters: sortedEpisodeEncounterCandidates,
   });
   const frequencyStats = resolveAverageDaysBetweenEpisodeVisits(sortedEpisodeEncounterCandidates);
+  const punctualityWithDataCount = episodeEncounters.filter((encounter) => Boolean(encounter.visitStartPunctuality)).length;
+  const punctualityOnTimeOrMinorDelayCount = episodeEncounters.filter(
+    (encounter) => encounter.visitStartPunctuality === "on_time_or_minor_delay",
+  ).length;
+  const punctualityMissingCount = treatmentCount - punctualityWithDataCount;
 
   return {
     totalCount: encounters.length,
@@ -237,5 +245,8 @@ export function calculateEncounterStats(params: {
     averageDaysBetweenEpisodeVisits: frequencyStats.averageDaysBetweenEpisodeVisits,
     frequencyEligibleVisitCount: sortedEpisodeEncounterCandidates.length,
     frequencyIntervalCount: frequencyStats.frequencyIntervalCount,
+    punctualityWithDataCount,
+    punctualityOnTimeOrMinorDelayCount,
+    punctualityMissingCount,
   };
 }

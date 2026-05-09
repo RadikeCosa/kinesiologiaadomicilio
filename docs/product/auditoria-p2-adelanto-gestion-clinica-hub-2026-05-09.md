@@ -164,3 +164,11 @@ Criterio de aceptación P2:
 - El bloque muestra síntesis mínima del episodio efectivo: estado, última visita, cantidad de visitas, hasta 2 métricas recientes y CTA a Gestión clínica.
 - Priorización de métricas aplicada: Dolor → Marcha → TUG → Bipedestación.
 - Se mantienen límites anti-duplicación: sin tendencia completa, sin notas clínicas, sin listado de visitas, sin delta/comparaciones en hub.
+
+## Validación de cierre P2 (2026-05-09)
+
+- Read model del hub validado sobre episodio efectivo (`activeEpisode ?? mostRecentEpisode`) y scoping de visitas por `episodeOfCareId`, evitando mezcla con episodios previos cuando existe episodio activo nuevo.
+- Cálculo validado para: estado del tratamiento, última visita, conteo de visitas por episodio y hasta 2 métricas recientes según prioridad `Dolor → Marcha → TUG → Bipedestación`.
+- UI validada con título `Resumen clínico reciente`, helper `Vista resumida. El detalle está en Gestión clínica.`, layout compacto (4 filas + CTA) y CTA a `/admin/patients/[id]/encounters`.
+- Ubicación validada bajo `Siguiente paso sugerido`, preservando CTAs principales de `Gestión clínica` y `Gestión administrativa`.
+- Anti-duplicación validada explícitamente: el hub no renderiza tendencia completa, delta, nota clínica, listado de visitas, estadísticas extensas, puntualidad agregada ni dashboard clínico.

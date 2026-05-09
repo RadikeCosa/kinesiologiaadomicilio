@@ -9,6 +9,7 @@ function createEncounter(input: Partial<Encounter> & Pick<Encounter, "id" | "sta
     patientId: input.patientId ?? "pat-1",
     episodeOfCareId: input.episodeOfCareId,
     startedAt: input.startedAt,
+    ...(input.visitStartPunctuality ? { visitStartPunctuality: input.visitStartPunctuality } : {}),
     ...(input.endedAt ? { endedAt: input.endedAt } : {}),
     status: "finished",
   };
@@ -30,6 +31,9 @@ describe("calculateEncounterStats", () => {
       averageDaysBetweenEpisodeVisits: null,
       frequencyEligibleVisitCount: 0,
       frequencyIntervalCount: 0,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
     });
   });
 
@@ -317,5 +321,19 @@ describe("calculateEncounterStats", () => {
     expect(result.daysToFirstVisitFromEpisodeStart).toBeNull();
     expect(result.isFirstVisitBeforeEpisodeStart).toBe(false);
     expect(result.averageDaysBetweenEpisodeVisits).toBe(2);
+  });
+
+  it("calculates punctuality KPI with denominator only on visits with data", () => {
+    const encounters = [
+      createEncounter({ id: "enc-1", episodeOfCareId: "epi-1", startedAt: "2026-04-01T00:00:00Z", visitStartPunctuality: "on_time_or_minor_delay" }),
+      createEncounter({ id: "enc-2", episodeOfCareId: "epi-1", startedAt: "2026-04-02T00:00:00Z", visitStartPunctuality: "delayed" }),
+      createEncounter({ id: "enc-3", episodeOfCareId: "epi-1", startedAt: "2026-04-03T00:00:00Z" }),
+      createEncounter({ id: "enc-4", episodeOfCareId: "epi-2", startedAt: "2026-04-04T00:00:00Z", visitStartPunctuality: "on_time_or_minor_delay" }),
+    ];
+
+    const result = calculateEncounterStats({ encounters, episodeOfCareId: "epi-1", episodeStartDate: "2026-04-01" });
+    expect(result.punctualityWithDataCount).toBe(2);
+    expect(result.punctualityOnTimeOrMinorDelayCount).toBe(1);
+    expect(result.punctualityMissingCount).toBe(1);
   });
 });
