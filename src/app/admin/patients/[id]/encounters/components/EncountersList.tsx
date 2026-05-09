@@ -291,11 +291,16 @@ export function EncountersList({
                           : <span>Cierre: Sin cierre registrado</span>}
                         {durationLabel ? <span>Duración: {durationLabel}</span> : <span>Duración: No calculable</span>}
                         <span>Estado: {formatEncounterStatusLabel(encounter.status)}</span>
-                        {punctualityLabel ? <span>Puntualidad: {punctualityLabel}</span> : null}
+                        
                       </div>
+                      {punctualityLabel ? (
+                        <p className="mt-2 inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2 py-0.5 text-xs text-slate-700">
+                          Puntualidad: {punctualityLabel}
+                        </p>
+                      ) : null}
                       {clinicalEntries.length > 0 ? (
                         <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
-                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Registro clínico</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Registro clínico</p>
                           <ul className="mt-1 space-y-1 text-xs text-slate-700">
                             {clinicalEntries.map((entry) => (
                               <li key={entry.label}>
@@ -317,8 +322,8 @@ export function EncountersList({
                       ) : null}
                       {orderedFunctionalObservations.length > 0 ? (
                         <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
-                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Métricas funcionales</p>
-                          <ul className="mt-1 space-y-1 text-xs text-slate-700">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Métricas funcionales</p>
+                          <ul className="mt-1 grid gap-x-3 gap-y-1 text-xs text-slate-700 sm:grid-cols-2">
                             {orderedFunctionalObservations.map((metric) => (
                               <li key={`${encounter.id}-${metric.code}`}>
                                 <span className="font-medium">{FUNCTIONAL_LABELS[metric.code]}:</span>{" "}

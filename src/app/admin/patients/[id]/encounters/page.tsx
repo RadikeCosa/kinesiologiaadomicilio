@@ -189,9 +189,9 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
         </section>
       ) : null}
 
-      <EncounterStatsSummary stats={pageData.encounterStats} />
-
       <FunctionalTrendSummary trend={pageData.functionalTrend} />
+
+      <EncounterStatsSummary stats={pageData.encounterStats} />
 
       <EncountersList
         encounters={pageData.encounters}

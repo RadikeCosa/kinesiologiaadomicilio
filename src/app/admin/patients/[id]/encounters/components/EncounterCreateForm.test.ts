@@ -63,7 +63,14 @@ describe("EncounterCreateForm", () => {
     expect(html).toContain("name=\"gaitDurationMinutes\"");
     expect(html).toContain("Marcha");
     expect(html).toContain("Minutos de marcha registrados en esta visita.");
+    expect(html).toContain("Puntualidad operativa");
+    expect(html).toContain("Clasificación manual orientativa; no reemplaza agenda formal.");
+    expect(html).toContain("name=\"visitStartPunctuality\"");
+    expect(html).toContain("En horario");
+    expect(html).toContain("Con demora");
+    expect(html).toContain("Muy demorada");
     expect(html).toContain("* Campos obligatorios · El resto es opcional.");
+    expect(html.indexOf("Puntualidad operativa")).toBeLessThan(html.indexOf("Métricas funcionales"));
     expect(html.indexOf("Métricas funcionales")).toBeLessThan(html.indexOf("Registro clínico de la visita"));
     expect(html).toContain("Valor actual: Sin cargar");
     expect(html).toContain("name=\"episodeOfCareId\"");
