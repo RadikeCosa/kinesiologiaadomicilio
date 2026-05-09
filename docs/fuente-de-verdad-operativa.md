@@ -449,3 +449,11 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - error en rojo;
   - copy de resultado específico (evitar mensajes genéricos);
   - cuando cancelar implica retorno, el copy debe explicitarlo (ej.: `Cancelar y volver al paciente`).
+
+### Actualización — Tendencia funcional simple en `/encounters` (2026-05-09)
+- `/admin/patients/[id]/encounters` incorpora bloque compacto **Tendencia funcional** derivado en lectura desde `Observation` funcionales de visitas del **episodio efectivo**.
+- La tendencia es simple por métrica (TUG, Dolor, Bipedestación, Marcha): `último`, `previo` (si existe) y `delta` (`latest - previous`).
+- El bloque muestra solo métricas con datos y no se renderiza si no hay métricas.
+- Las métricas derivadas de tendencia **no se persisten**.
+- Se mantiene separación UX: valores puntuales en cards de visita vs tendencia global en bloque dedicado.
+- Sin dashboard, sin gráficos y sin interpretación automática clínica.

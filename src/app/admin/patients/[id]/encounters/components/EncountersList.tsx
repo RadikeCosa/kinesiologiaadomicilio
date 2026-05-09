@@ -318,7 +318,6 @@ export function EncountersList({
                       {orderedFunctionalObservations.length > 0 ? (
                         <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
                           <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">Métricas funcionales</p>
-                          <p className="mt-1 text-xs text-slate-600">Valores registrados en esta visita. No representan tendencia.</p>
                           <ul className="mt-1 space-y-1 text-xs text-slate-700">
                             {orderedFunctionalObservations.map((metric) => (
                               <li key={`${encounter.id}-${metric.code}`}>

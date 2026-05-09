@@ -12,6 +12,7 @@ import {
 } from "@/infrastructure/repositories/episode-of-care.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
 import { loadEpisodeClinicalContextReadModel, type EpisodeClinicalContextReadModel } from "@/app/admin/patients/[id]/clinical-context";
+import { buildFunctionalTrendSummary, type FunctionalObservationTrendSummary } from "@/app/admin/patients/[id]/encounters/functional-trend";
 
 export interface PatientEncountersPageData {
   patient: {
@@ -26,6 +27,7 @@ export interface PatientEncountersPageData {
   encounters: Encounter[];
   encounterStats: EncounterStats;
   clinicalContext: EpisodeClinicalContextReadModel | null;
+  functionalTrend: FunctionalObservationTrendSummary[];
 }
 
 function buildFullName(patient: { firstName: string; lastName: string }): string {
@@ -123,5 +125,6 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
       episodeStartDate: effectiveEpisode?.startDate,
     }),
     clinicalContext,
+    functionalTrend: buildFunctionalTrendSummary(encountersWithFunctional),
   };
 }

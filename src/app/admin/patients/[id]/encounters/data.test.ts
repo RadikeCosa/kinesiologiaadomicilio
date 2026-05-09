@@ -53,4 +53,18 @@ describe("encounters data loader", () => {
     expect(data?.encounterStats.daysToFirstVisitFromEpisodeStart).toBe(1);
     expect(data?.encounterStats.isFirstVisitBeforeEpisodeStart).toBe(false);
   });
+
+
+  it("does not mix previous episode metrics when active episode has no encounters", async () => {
+    vi.mocked(getPatientById).mockResolvedValue({ id: "pat-1", firstName: "A", lastName: "B", operationalStatus: "active" } as never);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({ id: "ep-2", patientId: "pat-1", status: "active", startDate: "2026-03-01" } as never);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue({ id: "ep-1", patientId: "pat-1", status: "finished", startDate: "2026-01-01" } as never);
+    vi.mocked(listEncountersByPatientId).mockResolvedValue([{ id: "enc-old", patientId: "pat-1", episodeOfCareId: "ep-1", startedAt: "2026-02-01T10:00:00Z", status: "finished" } as never]);
+    vi.mocked(listFunctionalObservationsByEncounterId).mockResolvedValue([{ id: "obs-old", patientId: "pat-1", encounterId: "enc-old", effectiveDateTime: "2026-02-01T10:00:00Z", code: "tug_seconds", value: 10, unit: "s", status: "final" } as never]);
+
+    const data = await loadPatientEncountersPageData("pat-1");
+    expect(data?.encounters).toHaveLength(0);
+    expect(data?.functionalTrend).toEqual([]);
+  });
+
 });
