@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-08 (UTC)
+> Última actualización: 2026-05-09 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -218,6 +218,14 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `finished_treatment` se representa con badge amarillo en la UI privada de pacientes;
 - pantalla de gestión clínica operativa por paciente (`/admin/patients/[id]/encounters`);
 - pantalla específica para registrar visita realizada (`/admin/patients/[id]/encounters/new`) con gate de tratamiento activo;
+- convención P0 UX/UI en Gestión clínica (UI-only):
+  - en `/admin/patients/[id]/encounters/new`, `Puntualidad operativa` se presenta compacta en opciones inline con wrap responsive;
+  - en `/admin/patients/[id]/encounters`, `Tendencia funcional` se muestra antes de `Estadísticas de visitas`;
+  - en cards de visitas, la puntualidad se renderiza como chip discreto cuando existe (fuera de la línea principal de metadata temporal);
+- convención P1 visual en Gestión clínica (UI-only):
+  - `Tendencia funcional` prioriza jerarquía interna `Último` (principal) + `Previo`/`Cambio` (secundarios), sin interpretación clínica automática;
+  - si hay una sola medición en la métrica, se muestra `Sin comparación previa`;
+  - el delta puede llevar énfasis visual neutro, sin umbrales clínicos ni semáforos diagnósticos;
 - listado de visitas del paciente ordenadas por fecha más reciente, con corrección inline acotada de fecha/hora de la visita;
 - registro clínico estructurado mínimo por `Encounter` (opcional) con campos: subjective, objective, intervention, assessment, tolerance, homeInstructions y nextPlan;
 - la nota clínica de `Encounter` se persiste en `Encounter.extension[]` (URLs propias versionables) y `Encounter.note[]` se usa solo como fallback legacy/transicional de lectura;

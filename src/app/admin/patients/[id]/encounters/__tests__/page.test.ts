@@ -50,7 +50,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
       mostRecentEpisode: null,
       encounters: [],
-      functionalTrend: [],
+      functionalTrend: [{ code: "pain_nrs_0_10", label: "Dolor", latestValue: 4, latestDate: "2026-04-17", unit: "/10" }],
       encounterStats: {
         totalCount: 0,
         treatmentCount: 0,
@@ -125,7 +125,7 @@ describe("/admin/patients/[id]/encounters page", () => {
       },
       mostRecentEpisode: null,
       encounters: [],
-      functionalTrend: [],
+      functionalTrend: [{ code: "pain_nrs_0_10", label: "Dolor", latestValue: 4, latestDate: "2026-04-17", unit: "/10" }],
       encounterStats: {
         totalCount: 0,
         treatmentCount: 0,
@@ -160,7 +160,9 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml.match(/href=\"\/admin\/patients\/pat-1\/encounters\/new\"/g)?.length).toBe(1);
     expect(foundHtml).toContain("Gestionar tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
-    expect(foundHtml).toContain("Estadísticas de visitas");
+        expect(foundHtml).toContain("Estadísticas de visitas");
+    expect(foundHtml).toContain("Tendencia funcional");
+    expect(foundHtml.indexOf("Tendencia funcional")).toBeLessThan(foundHtml.indexOf("Estadísticas de visitas"));
     expect(foundHtml).toContain("Visitas del tratamiento");
     expect(foundHtml).not.toContain("Visitas registradas");
     expect(foundHtml).toContain("Primera visita");

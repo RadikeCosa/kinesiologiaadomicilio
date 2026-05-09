@@ -222,19 +222,19 @@ export function EncounterCreateForm({
         <p className="text-xs text-slate-500">* Campos obligatorios · El resto es opcional.</p>
         <fieldset className="rounded-md border border-slate-200 bg-white p-3">
           <legend className="px-1 text-sm font-medium text-slate-900">Puntualidad operativa</legend>
-          <p className="mt-1 text-xs text-slate-600">Dato operativo opcional. No reemplaza una agenda formal.</p>
-          <div className="mt-3 space-y-2 text-sm">
-            <label className="flex items-start gap-2">
-              <input checked={visitStartPunctuality === "on_time_or_minor_delay"} name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("on_time_or_minor_delay")} type="radio" />
-              <span>En horario o demora leve — <span className="text-slate-600">hasta 15 min</span></span>
+          <p className="mt-1 text-xs text-slate-600">Clasificación manual orientativa; no reemplaza agenda formal.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <label className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700">
+              <input checked={visitStartPunctuality === "on_time_or_minor_delay"} className="sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("on_time_or_minor_delay")} type="radio" />
+              <span>En horario</span>
             </label>
-            <label className="flex items-start gap-2">
-              <input checked={visitStartPunctuality === "delayed"} name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("delayed")} type="radio" />
-              <span>Con demora — <span className="text-slate-600">15 a 45 min</span></span>
+            <label className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700">
+              <input checked={visitStartPunctuality === "delayed"} className="sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("delayed")} type="radio" />
+              <span>Con demora</span>
             </label>
-            <label className="flex items-start gap-2">
-              <input checked={visitStartPunctuality === "severely_delayed"} name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("severely_delayed")} type="radio" />
-              <span>Muy demorada — <span className="text-slate-600">más de 45 min</span></span>
+            <label className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700">
+              <input checked={visitStartPunctuality === "severely_delayed"} className="sr-only" name="visitStartPunctuality" onChange={() => setVisitStartPunctuality("severely_delayed")} type="radio" />
+              <span>Muy demorada</span>
             </label>
           </div>
         </fieldset>

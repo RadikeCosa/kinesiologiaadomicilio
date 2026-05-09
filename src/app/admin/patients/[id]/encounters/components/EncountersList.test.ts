@@ -63,6 +63,7 @@ describe("EncountersList", () => {
     expect((html.match(/Duración:/g) ?? []).length).toBe(3);
     expect((html.match(/Duración: No calculable/g) ?? []).length).toBe(2);
     expect(html).toContain("Estado: Registrada");
+    expect(html).not.toMatch(/Inicio:[\s\S]*Puntualidad:/);
     expect(html).toContain("Registro clínico");
     expect(html).toContain("Métricas funcionales");
     expect(html).not.toContain("Valores registrados en esta visita. No representan tendencia.");
@@ -77,6 +78,45 @@ describe("EncountersList", () => {
     expect(html).not.toContain("Estado: finished");
     expect(html).not.toContain("AM");
     expect(html).not.toContain("PM");
+  });
+
+  it("renders punctuality as compact chip only when present", () => {
+    const withPunctualityHtml = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [{
+          id: "enc-p",
+          patientId: "pat-1",
+          episodeOfCareId: "ep-1",
+          status: "finished",
+          startedAt: "2026-04-17T10:30:00Z",
+          endedAt: "2026-04-17T11:00:00Z",
+          visitStartPunctuality: "on_time_or_minor_delay",
+        }],
+      }),
+    );
+
+    expect(withPunctualityHtml).toContain("Puntualidad: En horario o demora leve");
+
+    const withoutPunctualityHtml = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [{
+          id: "enc-np",
+          patientId: "pat-1",
+          episodeOfCareId: "ep-1",
+          status: "finished",
+          startedAt: "2026-04-17T10:30:00Z",
+          endedAt: "2026-04-17T11:00:00Z",
+        }],
+      }),
+    );
+
+    expect(withoutPunctualityHtml).not.toContain("Puntualidad:");
   });
 
   it("does not render clinical block when encounter has no clinical note", () => {

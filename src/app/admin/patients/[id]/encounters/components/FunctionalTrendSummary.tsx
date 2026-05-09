@@ -11,17 +11,32 @@ export function FunctionalTrendSummary({ trend }: Props) {
     <section className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Tendencia funcional</h2>
       <p className="mt-1 text-xs text-slate-600">Comparación simple entre mediciones registradas en visitas del tratamiento actual. No implica interpretación clínica automática.</p>
-      <div className="mt-3 space-y-3">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {trend.map((item) => (
           <div key={item.code} className="rounded border border-slate-200 bg-white p-3">
             <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-            <p className="text-xs text-slate-700">Último: {formatFunctionalValue(item.latestValue, item.unit)} ({formatDateDisplay(item.latestDate)})</p>
+            <div className="mt-2 rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
+              <p className="text-[11px] uppercase tracking-wide text-slate-500">Último</p>
+              <p className="text-sm font-semibold text-slate-900">{formatFunctionalValue(item.latestValue, item.unit)}</p>
+              <p className="text-[11px] text-slate-500">{formatDateDisplay(item.latestDate)}</p>
+            </div>
             {item.previousValue !== undefined ? (
-              <>
-                <p className="text-xs text-slate-700">Previo: {formatFunctionalValue(item.previousValue, item.unit)} ({formatDateDisplay(item.previousDate)})</p>
-                <p className="text-xs text-slate-700">Cambio: {formatFunctionalDelta(item.delta ?? 0, item.unit)}</p>
-              </>
-            ) : null}
+              <div className="mt-2 space-y-1 text-xs text-slate-700">
+                <p>
+                  <span className="font-medium text-slate-800">Previo:</span>{" "}
+                  {formatFunctionalValue(item.previousValue, item.unit)}
+                  <span className="text-slate-500"> ({formatDateDisplay(item.previousDate)})</span>
+                </p>
+                <p>
+                  <span className="font-medium text-slate-800">Cambio:</span>{" "}
+                  <span className="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-slate-800">
+                    {formatFunctionalDelta(item.delta ?? 0, item.unit)}
+                  </span>
+                </p>
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-slate-600">Sin comparación previa</p>
+            )}
           </div>
         ))}
       </div>
