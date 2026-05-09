@@ -269,6 +269,7 @@ export default async function AdminPatientDetailPage({
                     <div className="mt-1.5">
                       <PhoneContactBlock
                         phone={patient.phone}
+                        mainContactPhone={patient.mainContact?.phone}
                         phoneLabel="Teléfono"
                       />
                     </div>

@@ -1,21 +1,27 @@
+import React from "react";
 import {
   buildTelHref,
-  buildWhatsAppHref,
   formatPhoneDisplay,
-} from "@/lib/patient-admin-display";
+  resolvePatientWhatsAppTarget,
+} from "@/lib/patient-contact-links";
 
 interface PhoneContactActionsProps {
   phone: string | null | undefined;
+  mainContactPhone?: string | null | undefined;
   showMissingChannelsMessage?: boolean;
 }
 
 export function PhoneContactActions({
   phone,
+  mainContactPhone,
   showMissingChannelsMessage = true,
 }: PhoneContactActionsProps) {
-  const whatsappHref = buildWhatsAppHref(phone);
+  const whatsappTarget = resolvePatientWhatsAppTarget({
+    phone,
+    mainContact: { phone: mainContactPhone },
+  });
   const telHref = buildTelHref(phone);
-  const hasContactChannel = Boolean(whatsappHref || telHref);
+  const hasContactChannel = Boolean(whatsappTarget || telHref);
 
   if (!hasContactChannel) {
     return showMissingChannelsMessage ? (
@@ -25,14 +31,14 @@ export function PhoneContactActions({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {whatsappHref ? (
+      {whatsappTarget ? (
         <a
           className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
-          href={whatsappHref}
+          href={whatsappTarget.href}
           rel="noopener noreferrer"
           target="_blank"
         >
-          WhatsApp
+          {whatsappTarget.label}
         </a>
       ) : null}
 
@@ -50,12 +56,14 @@ export function PhoneContactActions({
 
 interface PhoneContactBlockProps {
   phone: string | null | undefined;
+  mainContactPhone?: string | null | undefined;
   phoneLabel?: string;
   showMissingChannelsMessage?: boolean;
 }
 
 export function PhoneContactBlock({
   phone,
+  mainContactPhone,
   phoneLabel = "Teléfono",
   showMissingChannelsMessage = true,
 }: PhoneContactBlockProps) {
@@ -70,6 +78,7 @@ export function PhoneContactBlock({
 
       <PhoneContactActions
         phone={phone}
+        mainContactPhone={mainContactPhone}
         showMissingChannelsMessage={showMissingChannelsMessage}
       />
     </div>

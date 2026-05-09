@@ -440,6 +440,12 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - este criterio aplica a detalle, administrativa, visitas y tratamiento;
   - no se modifica el header global de `src/app/admin/layout.tsx`.
 
+- **Convención de WhatsApp operativo (superficie privada de pacientes)**
+  - la acción de WhatsApp asociada al paciente prioriza el teléfono del paciente;
+  - si el paciente no tiene teléfono operativo, usa el teléfono del contacto principal;
+  - el copy debe explicitar destino al contacto principal (`Enviar WhatsApp a contacto principal`);
+  - si no existe ningún teléfono operativo, no se renderiza CTA de WhatsApp y se muestra fallback operativo de ausencia de canal.
+
 - **Acción rápida en listado de pacientes (`/admin/patients`)**
   - el CTA `Registrar visita` es contextual y se muestra solo con `operationalStatus === "active_treatment"`;
   - el destino directo del CTA es `/admin/patients/[id]/encounters/new`;

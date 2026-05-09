@@ -65,7 +65,7 @@ export function PatientAdministrativeEditor({
           Contacto del paciente
         </h4>
         <div className="mt-2">
-          <PhoneContactBlock phone={patient.phone} phoneLabel="Teléfono" />
+          <PhoneContactBlock phone={patient.phone} mainContactPhone={patient.mainContact?.phone} phoneLabel="Teléfono" />
         </div>
       </section>
 

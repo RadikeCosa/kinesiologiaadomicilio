@@ -100,6 +100,7 @@ export function mapPatientToListItemReadModel(
     fullName: buildFullName(patient),
     dni: patient.dni,
     phone: patient.phone,
+    mainContact: patient.mainContact,
     gender: patient.gender,
     birthDate: patient.birthDate,
     address: patient.address,
