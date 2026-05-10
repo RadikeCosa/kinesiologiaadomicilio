@@ -88,15 +88,22 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("DNI: No informado");
     expect(html).toContain("Gestión clínica");
     expect(html).toContain("Gestión administrativa");
+    expect(html).toContain("Tratamiento");
     expect(html).toContain("Próxima acción recomendada");
+    expect(html).toContain("Priorizá una acción y continuá en la superficie indicada.");
     expect(html).toContain("Resumen clínico reciente");
     expect(html).toContain("Síntesis rápida. El detalle está en Gestión clínica.");
     expect(html).toContain("Última visita:</span> No disponible");
     expect(html).not.toContain("href=\"/admin/patients/pat-1/encounters\">Ver gestión clínica");
 
-    const suggestionIndex = html.indexOf("Próxima acción recomendada");
     const summaryIndex = html.indexOf("Resumen clínico reciente");
-    expect(summaryIndex).toBeGreaterThan(suggestionIndex);
+    const contactIndex = html.indexOf("Contacto operativo");
+    const suggestionIndex = html.indexOf("Próxima acción recomendada");
+    const actionsIndex = html.indexOf("Acciones principales");
+
+    expect(contactIndex).toBeGreaterThan(summaryIndex);
+    expect(suggestionIndex).toBeGreaterThan(contactIndex);
+    expect(actionsIndex).toBeGreaterThan(suggestionIndex);
 
     const patientContactIndex = html.indexOf("Paciente");
     const addressIndex = html.indexOf("Dirección");

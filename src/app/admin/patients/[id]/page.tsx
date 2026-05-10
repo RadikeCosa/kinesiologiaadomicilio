@@ -184,72 +184,8 @@ export default async function AdminPatientDetailPage({
             </div>
           </section>
 
-          <section className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
+          <section className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
             <div className="space-y-3">
-              {nextStepSuggestion ? (
-                <section className="rounded-md border border-sky-200 bg-sky-50 px-3 py-2">
-                  <h2 className="text-sm font-semibold text-sky-950">Próxima acción recomendada</h2>
-                  <p className="mt-1 text-sm font-medium text-sky-900">{nextStepSuggestion}</p>
-                </section>
-              ) : null}
-
-              <section className="rounded-md border border-slate-200 bg-white p-3">
-                <h2 className="text-sm font-semibold text-slate-900">Acciones principales</h2>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                  <Link
-                    className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
-                      isClinicalPrimary
-                        ? "bg-slate-900 text-white hover:bg-slate-700"
-                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                    }`}
-                    href={`/admin/patients/${patient.id}/encounters`}
-                  >
-                    Gestión clínica
-                  </Link>
-                  <Link
-                    className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
-                      !isClinicalPrimary
-                        ? "bg-slate-900 text-white hover:bg-slate-700"
-                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                    }`}
-                    href={`/admin/patients/${patient.id}/administrative`}
-                  >
-                    Gestión administrativa
-                  </Link>
-                </div>
-
-                {!patient.activeEpisode ? (
-                  <Link
-                    className="mt-2 inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                    href={`/admin/patients/${patient.id}/administrative?newServiceRequest=1#service-requests`}
-                  >
-                    Crear solicitud de atención
-                  </Link>
-                ) : null}
-
-                {patient.activeEpisode ? (
-                  <Link
-                    className="mt-2 inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                    href={`/admin/patients/${patient.id}/encounters/new`}
-                  >
-                    Registrar visita
-                  </Link>
-                ) : null}
-              </section>
-
-              {(latestEpisodeSummary || latestServiceRequestSummary) ? (
-                <section className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-                  {latestEpisodeSummary ? (
-                    <p>{latestEpisodeSummary}</p>
-                  ) : null}
-                  {latestServiceRequestSummary ? (
-                    <p className={latestEpisodeSummary ? "mt-1" : undefined}>{latestServiceRequestSummary}</p>
-                  ) : null}
-                </section>
-              ) : null}
-            </div>
-
-            <aside className="space-y-3">
               {clinicalRecentSummary ? (
                 <ClinicalRecentSummaryCard
                   patientId={patient.id}
@@ -319,6 +255,77 @@ export default async function AdminPatientDetailPage({
                     </section>
                   ) : null}
                 </div>
+              </section>
+
+              {(latestEpisodeSummary || latestServiceRequestSummary) ? (
+                <section className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+                  {latestEpisodeSummary ? (
+                    <p>{latestEpisodeSummary}</p>
+                  ) : null}
+                  {latestServiceRequestSummary ? (
+                    <p className={latestEpisodeSummary ? "mt-1" : undefined}>{latestServiceRequestSummary}</p>
+                  ) : null}
+                </section>
+              ) : null}
+            </div>
+
+            <aside className="space-y-3">
+              {nextStepSuggestion ? (
+                <section className="rounded-md border border-sky-200 bg-sky-50 px-3 py-2">
+                  <h2 className="text-sm font-semibold text-sky-950">Próxima acción recomendada</h2>
+                  <p className="mt-1 text-sm text-sky-900">{nextStepSuggestion}</p>
+                  <p className="mt-1 text-xs text-sky-800">Priorizá una acción y continuá en la superficie indicada.</p>
+                </section>
+              ) : null}
+
+              <section className="rounded-md border border-slate-200 bg-white p-3">
+                <h2 className="text-sm font-semibold text-slate-900">Acciones principales</h2>
+                <div className="mt-2 grid gap-2 sm:grid-cols-1">
+                  <Link
+                    className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
+                      isClinicalPrimary
+                        ? "bg-slate-900 text-white hover:bg-slate-700"
+                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                    }`}
+                    href={`/admin/patients/${patient.id}/encounters`}
+                  >
+                    Gestión clínica
+                  </Link>
+                  <Link
+                    className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
+                      !isClinicalPrimary
+                        ? "bg-slate-900 text-white hover:bg-slate-700"
+                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                    }`}
+                    href={`/admin/patients/${patient.id}/administrative`}
+                  >
+                    Gestión administrativa
+                  </Link>
+                  <Link
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    href={`/admin/patients/${patient.id}/treatment`}
+                  >
+                    Tratamiento
+                  </Link>
+                </div>
+
+                {!patient.activeEpisode ? (
+                  <Link
+                    className="mt-2 inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    href={`/admin/patients/${patient.id}/administrative?newServiceRequest=1#service-requests`}
+                  >
+                    Crear solicitud de atención
+                  </Link>
+                ) : null}
+
+                {patient.activeEpisode ? (
+                  <Link
+                    className="mt-2 inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    href={`/admin/patients/${patient.id}/encounters/new`}
+                  >
+                    Registrar visita
+                  </Link>
+                ) : null}
               </section>
             </aside>
           </section>

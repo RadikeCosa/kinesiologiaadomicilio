@@ -43,10 +43,13 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 #### Responsabilidad actual por ruta (superficie de pacientes)
 - `/admin`: dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes), sin gráficos.
 - `/admin/patients`: listado operativo de pacientes, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
-- `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
-- Convención P0 UX/UI del hub (`/admin/patients/[id]`): en desktop se organiza en dos columnas, con **columna principal de orientación y acciones** (identidad/estado, próxima acción recomendada, CTAs principales y CTA contextual) y **columna secundaria de contexto** (resumen clínico reciente + contacto/metadata compacta). En mobile mantiene stack vertical en ese orden.
-- `Resumen clínico reciente` en hub es una card secundaria de síntesis (sin tendencia completa, sin listado de visitas, sin nota clínica narrativa) y no reemplaza `/encounters`.
-- Contacto y metadata administrativa en hub se muestran como contexto secundario compacto para no competir con el bloque de acción.
+- `/admin/patients/[id]`: hub del paciente de **lectura y navegación contextual** (no una pantalla dominada por acciones), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
+- Convención UX/UI vigente del hub (`/admin/patients/[id]`): prioridad visual de lectura **identidad/estado → resumen clínico reciente → contacto operativo → próxima acción recomendada → acciones principales/navegación estructural**.
+- En desktop, el hub usa dos columnas con **columna principal/ancha clínico-operativa** (`Resumen clínico reciente`, `Contacto operativo`, contexto compacto de cierre cuando aplica) y **columna lateral/angosta** (`Próxima acción recomendada` compacta + `Acciones principales`).
+- En mobile, el orden de render respeta prioridad clínico-operativa antes de acciones: `Resumen clínico reciente` → `Contacto operativo` → `Próxima acción recomendada` → `Acciones principales`.
+- `Resumen clínico reciente` en hub es síntesis orientativa de alta jerarquía (sin tendencia completa, sin listado de visitas, sin nota clínica narrativa) y no reemplaza `/encounters`.
+- `Próxima acción recomendada` debe permanecer compacta (recomendación breve + apoyo corto) y no duplicar contenido clínico.
+- `Acciones principales` cumplen rol de navegación secundaria/estructural.
 - `/admin/patients/[id]/administrative`: administración no clínica con lectura + acciones (edición explícita de identidad, contacto y datos operativos) + sección de solicitudes de atención (listado/empty state y alta mínima).
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (header con acción primaria `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento y listado de visitas con corrección inline rápida).
 - Convención UX en Gestión clínica (`/encounters`): evitar badges verdes duplicadas con semántica equivalente de tratamiento activo; mantener una única badge dominante para el estado principal (paciente/tratamiento) y degradar estados secundarios del bloque contextual a metadata textual.
@@ -127,6 +130,24 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   3. `/administrative` muestra faltantes administrativos de forma explícita; no oculta campos relevantes.
   4. El hub puede sintetizar contexto, pero no duplicar acciones ni mezclar sujetos.
 - **No-alcances preservados:** sin cambios de dominio, sin cambios FHIR, sin cambios de schemas/actions/repositorios, sin cambios en normalización telefónica y sin cambios de flujos de solicitudes/tratamiento/visitas.
+
+
+#### Nota de cierre documental — Jerarquía visual del hub de paciente (2026-05-10)
+- **Estado:** cerrada / aprobada.
+- **Superficie auditada:** `/admin/patients/[id]`.
+- **Convención vigente asentada:** el hub es de lectura y navegación contextual; no debe quedar dominado por bloques de acción.
+- **Jerarquía visual vigente:**
+  1. identidad/estado;
+  2. resumen clínico reciente;
+  3. contacto operativo;
+  4. próxima acción recomendada (compacta);
+  5. acciones principales / navegación estructural.
+- **Layout vigente:**
+  - desktop: columna principal/ancha para síntesis clínico-operativa + columna lateral/angosta para orientación/navegación;
+  - mobile: orden de lectura clínico-operativo antes de acciones.
+- **Comportamiento preservado:** `Registrar visita` solo con tratamiento activo; accesos a `Gestión clínica`, `Gestión administrativa` y `Tratamiento` visibles como navegación estructural.
+- **Cobertura de regresión route-local:** tests de `/admin/patients/[id]` validan orden visible y jerarquía esperada (`Resumen clínico reciente` → `Contacto operativo` → `Próxima acción recomendada` → `Acciones principales`), además de copy compacta y navegación esperada.
+- **No-alcances preservados:** sin cambios de dominio, FHIR, schemas/actions/repositorios/loaders, persistencia, datos clínicos nuevos ni duplicación de superficies (`/encounters`, `/administrative`, `/treatment`).
 
 #### Nota de cierre documental — Fase 2A PR3 métricas funcionales en visitas (2026-05-07)
 - **Estado:** cerrada / aprobada.
