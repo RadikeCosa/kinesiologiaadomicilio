@@ -171,7 +171,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - en `/admin/patients/[id]/administrative`, las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse con formulario mínimo embebido (fecha, motivo y datos básicos de quién consulta: relación + nombre) y resolverse administrativamente (`Aceptar`, `No inició`, `Cancelar`);
 - al cerrar como `No inició` o `Cancelar`, la UI administrativa exige motivo y lo muestra en listado cuando existe, con copy específico por estado y jerarquía visual compacta;
 - el teléfono operativo y el domicilio de atención pertenecen a los datos administrativos del paciente (no al formulario normal de alta de solicitud);
-- registrar solicitudes no inicia tratamiento por sí mismo; en el flujo normal, `Aceptar e iniciar tratamiento` crea el episodio vinculado y luego la navegación recomendada continúa en `/encounters`;
+- registrar solicitudes no inicia tratamiento por sí mismo; en el flujo normal, `Aceptar e iniciar tratamiento` crea el episodio vinculado y luego la navegación recomendada continúa en `/treatment` para revisar/completar marco clínico inicial;
 - `Aceptar e iniciar tratamiento` requiere elegir explícitamente la **fecha de inicio del tratamiento** antes de confirmar;
 - por defecto, esa fecha se precarga con `ServiceRequest.requestedAt` y queda editable para ajuste manual;
 - al confirmar, `EpisodeOfCare.period.start` (dominio `startDate`) persiste la fecha elegida y no se fuerza automáticamente la fecha actual, salvo fallback defensivo cuando la solicitud no trae fecha válida;
@@ -185,8 +185,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - en `/admin/patients/[id]/encounters`, el baseline de cálculo de primera visita y métricas del ciclo usa `EpisodeOfCare.startDate` cuando existe (no `ServiceRequest.requestedAt`);
 - la estadística `Primera visita` en `/encounters` se calcula por **días calendario enteros** entre `EpisodeOfCare.startDate` y la fecha calendario de la primera `Encounter.startedAt` del episodio efectivo;
 - ese cálculo no usa diferencia horaria/fraccional ni `Math.ceil` sobre milisegundos; ejemplo canónico: inicio `2026-01-12` + primera visita `2026-01-13T22:52:00` => **1 día**;
-- las acciones que redirigen a `/encounters` usan feedback liviano por query param (`status`) para preservar confirmación cross-route;
-- `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/encounters?status=treatment-started`;
+- las acciones cross-route usan feedback liviano por query param (`status`) para preservar confirmación en la pantalla destino;
+- `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/treatment?status=treatment-started`;
 - `Registrar visita` navega a `/admin/patients/[id]/encounters?status=encounter-created`;
 - el formulario de solicitud conserva campos propios mínimos (fecha, motivo y datos básicos de quién consulta) y puede mostrar/completar en contexto datos administrativos requeridos para iniciar tratamiento (domicilio y teléfonos);
 - esos datos contextuales se persisten en `Patient` y no en `ServiceRequest`;
@@ -250,10 +250,13 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - en `/encounters`, sin tratamiento activo se muestra una única señal impeditiva dominante + salida a `/treatment`, evitando duplicación de bloqueos;
 - en `/encounters`, el copy distingue explícitamente `sin tratamiento iniciado` de `tratamiento finalizado`;
 - en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas, con navegación secundaria a visitas;
-- en `/admin/patients/[id]/treatment`, el marco clínico del ciclo se edita **solo** en esta superficie y en modo **campo por campo** (5 mini-forms con submit independiente): diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento;
+- en `/admin/patients/[id]/treatment`, el marco clínico del ciclo se gestiona **solo** en esta superficie con patrón **lectura primero + edición campo por campo** (5 mini-forms con submit independiente): diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento;
 - en `/admin/patients/[id]/treatment`, no existe submit global de guardado masivo del marco clínico;
+- en `/admin/patients/[id]/treatment`, cada campo muestra valor actual o `No registrado`; si hay valor ofrece `Editar ...`, si falta valor ofrece `Agregar ...`, y solo se abre el input del campo activo;
 - cada edición de campo del marco clínico lee el `EpisodeOfCare` vigente y preserva datos estructurales no relacionados (`period.start`, `period.end`, `status`, `referralRequest`, diagnósticos ajenos, extensiones ajenas y extensiones de cierre);
 - en `/admin/patients/[id]/encounters`, el marco clínico se consume en modo read-only y sin edición inline;
+- en `/admin/patients/[id]/encounters`, el marco clínico se muestra en card compacta read-only con los 5 campos, sin `Completitud` y sin detalle longitudinal duplicado; campos faltantes muestran `No registrado`;
+- en `/admin/patients/[id]/encounters`, no hay bloqueo de `Registrar visita` por marco clínico incompleto;
 - pendientes explícitos: posible test E2E posterior y no-alcances vigentes (sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido).
 - en `/treatment`, cuando el tratamiento está finalizado se presenta estado explícito de cierre antes de cualquier reinicio;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.

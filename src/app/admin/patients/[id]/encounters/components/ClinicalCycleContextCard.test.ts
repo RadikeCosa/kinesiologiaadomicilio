@@ -11,7 +11,7 @@ vi.mock("next/link", () => ({
 }));
 
 describe("ClinicalCycleContextCard", () => {
-  it("renders complete active context with edit CTA and details", () => {
+  it("renders compact read-only context with neutral secondary CTA", () => {
     const html = renderToStaticMarkup(createElement(ClinicalCycleContextCard, {
       patientId: "pat-1",
       activeEpisode: { id: "epi-1", startDate: "2026-04-01" },
@@ -22,18 +22,18 @@ describe("ClinicalCycleContextCard", () => {
     }));
 
     expect(html).toContain("Estado del ciclo:</span> Activo");
-    expect(html).toContain("Completitud:</span> 5/5");
+    expect(html).not.toContain("Completitud:");
     expect(html).toContain("Diagnóstico médico de referencia:");
     expect(html).toContain("Diagnóstico kinésico:");
     expect(html).toContain("Situación funcional inicial:");
     expect(html).toContain("Objetivo de tratamiento:");
     expect(html).toContain("Plan marco del tratamiento:");
-    expect(html).toContain("Ver/editar marco clínico en Tratamiento");
-    expect(html).toContain("<details");
+    expect(html).toContain("Ver/editar en Tratamiento");
+    expect(html).not.toContain("<details");
     expect(html).not.toContain("Impresión kinésica");
   });
 
-  it("renders compact empty active context with complete CTA", () => {
+  it("renders empty context with neutral placeholders", () => {
     const html = renderToStaticMarkup(createElement(ClinicalCycleContextCard, {
       patientId: "pat-1",
       activeEpisode: { id: "epi-1", startDate: "2026-04-01" },
@@ -41,9 +41,8 @@ describe("ClinicalCycleContextCard", () => {
       clinicalContext: { hasAnyContent: false },
     }));
 
-    expect(html).toContain("Completitud:</span> 0/5");
-    expect(html).toContain("Completar marco clínico en Tratamiento");
-    expect(html).toContain("Este ciclo aún no tiene contexto clínico completo. Completá el marco clínico en Tratamiento.");
-    expect(html).not.toContain("<details");
+    expect(html).toContain("No registrado");
+    expect(html).toContain("Ver/editar en Tratamiento");
+    expect(html).toContain("Este ciclo todavía no registra contexto clínico.");
   });
 });

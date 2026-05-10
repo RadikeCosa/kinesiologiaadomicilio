@@ -249,6 +249,26 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain("Inicio: 03/05/2026");
   });
 
+  it("shows started-treatment status feedback when redirected from administrative flow", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: undefined,
+      isValid: false,
+      state: "none",
+      message: undefined,
+      serviceRequest: undefined,
+    });
+
+    const element = await AdminPatientTreatmentPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ status: "treatment-started" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Tratamiento iniciado. Revisá o completá el marco clínico inicial.");
+  });
+
   it("shows closed episodes history and requests link when no active treatment but finished cycles exist", async () => {
     loadPatientDetailMock.mockResolvedValueOnce({
       ...basePatient,

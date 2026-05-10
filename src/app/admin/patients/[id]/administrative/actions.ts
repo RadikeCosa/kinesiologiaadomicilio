@@ -132,7 +132,7 @@ export async function acceptAndStartTreatmentFromServiceRequestAction(
     return {
       ok: true,
       message: "Solicitud aceptada y tratamiento iniciado correctamente.",
-      redirectTo: `/admin/patients/${patientId}/encounters?status=treatment-started`,
+      redirectTo: `/admin/patients/${patientId}/treatment?status=treatment-started`,
     };
   } catch {
     return { ok: false, message: "No se pudo iniciar tratamiento desde esta solicitud." };

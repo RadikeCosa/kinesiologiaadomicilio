@@ -21,7 +21,7 @@ import { TreatmentClinicalContextForm } from "@/app/admin/patients/[id]/componen
 
 interface AdminPatientTreatmentPageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ serviceRequestId?: string }>;
+  searchParams?: Promise<{ serviceRequestId?: string; status?: string }>;
 }
 
 export async function generateMetadata({
@@ -41,6 +41,9 @@ export default async function AdminPatientTreatmentPage({
 }: AdminPatientTreatmentPageProps) {
   const { id } = await params;
   const resolvedSearchParams = await searchParams;
+  const statusMessage = resolvedSearchParams?.status === "treatment-started"
+    ? "Tratamiento iniciado. Revisá o completá el marco clínico inicial."
+    : undefined;
   const patient = await loadPatientDetail(id);
   const treatmentServiceRequestContext = patient
     ? await loadTreatmentServiceRequestContext({
@@ -120,6 +123,7 @@ export default async function AdminPatientTreatmentPage({
           {patientAge !== null ? ` · Edad: ${patientAge} años` : ""}
         </p>
       </div>
+      {statusMessage ? <p className="mt-3 rounded border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">{statusMessage}</p> : null}
 
       {activeEpisode ? (<TreatmentClinicalContextForm patientId={patient.id} episodeOfCareId={activeEpisode.id} initialData={clinicalContext} />) : null}
 
