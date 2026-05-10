@@ -98,7 +98,7 @@ describe("/admin/patients/[id] page", () => {
     const summaryIndex = html.indexOf("Resumen clínico reciente");
     expect(summaryIndex).toBeGreaterThan(suggestionIndex);
 
-    const patientContactIndex = html.indexOf("Contacto del paciente");
+    const patientContactIndex = html.indexOf("Paciente");
     const addressIndex = html.indexOf("Dirección");
     const mainContactIndex = html.indexOf("Contacto principal");
 
@@ -131,6 +131,51 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Registrar visita");
     expect(html).toContain("DNI: No informado");
     expect(html).toContain("Registrá visitas desde Gestión clínica.");
+  });
+
+  it("uses main contact actions in hub when patient phone is missing", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        phone: undefined,
+        mainContact: {
+          name: "Adolfo Javier",
+          relationship: undefined,
+          phone: "+54 299 545 6578",
+        },
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+    expect(html).toContain("Teléfono del paciente:</span> No informado");
+    expect(html).toContain("WhatsApp contacto principal");
+    expect(html).not.toContain("WhatsApp paciente");
+  });
+
+  it("prioritizes patient channel in hub when both patient and main contact phones exist", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        phone: "+54 299 555 0101",
+        mainContact: {
+          name: "Carlos Pérez",
+          relationship: "caregiver",
+          phone: "+54 299 555 0202",
+        },
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Teléfono del paciente:</span> +54 299 555-0101");
+    expect(html).toContain("WhatsApp paciente");
+    expect(html).toContain("https://wa.me/542995550101");
+    expect(html).toContain("Teléfono del contacto principal:</span> +54 299 555-0202");
+    expect(html).toContain("https://wa.me/542995550202");
   });
 
   it("shows next-step suggestion for in_review requests", async () => {

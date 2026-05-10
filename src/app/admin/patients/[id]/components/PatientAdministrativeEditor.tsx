@@ -62,10 +62,15 @@ export function PatientAdministrativeEditor({
 
       <section className="rounded-md border border-slate-300 bg-white p-3">
         <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-900">
-          Contacto del paciente
+          Datos del paciente
         </h4>
         <div className="mt-2">
-          <PhoneContactBlock phone={patient.phone} mainContactPhone={patient.mainContact?.phone} phoneLabel="Teléfono" />
+          <PhoneContactBlock
+            phone={patient.phone}
+            entity="patient"
+            allowMainContactFallback={false}
+            phoneLabel="Teléfono del paciente"
+          />
         </div>
       </section>
 
@@ -99,7 +104,8 @@ export function PatientAdministrativeEditor({
         <div className="mt-2">
           <PhoneContactBlock
             phone={patient.mainContact?.phone}
-            phoneLabel="Teléfono"
+            entity="mainContact"
+            phoneLabel="Teléfono del contacto principal"
           />
         </div>
       </section>

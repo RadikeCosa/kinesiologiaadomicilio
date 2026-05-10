@@ -40,7 +40,7 @@ export function buildTelHref(phone?: string): string | null {
 
 export type WhatsAppContactTarget = {
   href: string;
-  visibleLabel: "WhatsApp paciente" | "WhatsApp contacto";
+  visibleLabel: "WhatsApp paciente" | "WhatsApp contacto principal";
   accessibleLabel: "Enviar WhatsApp al paciente" | "Enviar WhatsApp al contacto principal";
   displayPhone: string;
   targetKind: "patient" | "mainContact";
@@ -71,7 +71,7 @@ export function resolvePatientWhatsAppTarget(patient: PatientWhatsAppContactSour
   if (mainContactWhatsappHref) {
     return {
       href: mainContactWhatsappHref,
-      visibleLabel: "WhatsApp contacto",
+      visibleLabel: "WhatsApp contacto principal",
       accessibleLabel: "Enviar WhatsApp al contacto principal",
       displayPhone: formatPhoneDisplay(patient.mainContact?.phone ?? undefined),
       targetKind: "mainContact",
