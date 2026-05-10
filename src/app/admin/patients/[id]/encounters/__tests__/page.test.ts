@@ -176,7 +176,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
         expect(foundHtml).toContain("Estadísticas de visitas");
     expect(foundHtml).toContain("Contexto clínico del ciclo");
-    expect(foundHtml).toContain("Completar contexto en Tratamiento");
+    expect(foundHtml).toContain("Completar marco clínico en Tratamiento");
     expect(foundHtml).toContain("Tendencia funcional");
     expect(foundHtml.indexOf("Contexto clínico del ciclo")).toBeLessThan(foundHtml.indexOf("Tendencia funcional"));
     expect(foundHtml.indexOf("Tendencia funcional")).toBeLessThan(foundHtml.indexOf("Estadísticas de visitas"));
@@ -410,7 +410,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     const withContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
     expect(withContext).toContain("Contexto clínico del ciclo");
     expect(withContext).toContain("Ver detalle longitudinal");
-    expect(withContext).toContain("Completar contexto en Tratamiento");
+    expect(withContext).toContain("Completar marco clínico en Tratamiento");
     expect(withContext).toContain("href=\"/admin/patients/pat-1/treatment\"");
     expect(withContext).toContain("Registrar visita");
 
@@ -432,7 +432,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const withoutContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
     expect(withoutContext).toContain("Contexto clínico del ciclo");
-    expect(withoutContext).toContain("Completitud:</span> Sin contexto");
+    expect(withoutContext).toContain("Completitud:</span> 0/5");
   });
 
   it("shows compact historical context when treatment is finished", async () => {

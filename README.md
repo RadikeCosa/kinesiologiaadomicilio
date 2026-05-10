@@ -85,7 +85,11 @@ El proyecto está en etapa **híbrida transicional**:
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
-- En Fase 1, el contexto clínico longitudinal del tratamiento se edita en `/admin/patients/[id]/treatment` y se resume en modo read-only en `/admin/patients/[id]/encounters` (diagnósticos en `Condition` vinculados desde `EpisodeOfCare.diagnosis[]`).
+- En Fase 1 (cierre documental 2026-05-10), el contexto clínico longitudinal del tratamiento se edita en `/admin/patients/[id]/treatment` y se consume en modo read-only en `/admin/patients/[id]/encounters` (sin edición inline).
+- Terminología visible vigente: **Diagnóstico kinésico** ("Impresión kinésica" queda solo como posible legacy interno).
+- El marco clínico visible del ciclo se compone de 5 campos: diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento; su completitud se calcula sobre **5/5**.
+- Pendiente de Fase 2: edición campo por campo y eventual compatibilidad interna `kinesiologic_impression` → `kinesiologic_diagnosis`, sin migración obligatoria por ahora.
+- No-alcances preservados: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido.
 - En Fase 2A/2B PR1 se incorporó modelado mínimo de `Observation` funcional por visita (TUG, dolor 0–10, bipedestación y marcha en minutos) con captura opcional; continúan fuera de alcance `Procedure`, `Goal`, IA y tendencia avanzada/dashboard clínico.
 
 #### Mapa corto de superficies privadas de paciente (UI vigente)

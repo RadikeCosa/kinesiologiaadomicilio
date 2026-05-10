@@ -22,12 +22,15 @@ describe("ClinicalCycleContextCard", () => {
     }));
 
     expect(html).toContain("Estado del ciclo:</span> Activo");
-    expect(html).toContain("Completitud:</span> Completo");
-    expect(html).toContain("Objetivo principal:");
-    expect(html).toContain("Diagnóstico de referencia:");
-    expect(html).toContain("Estado funcional inicial:");
-    expect(html).toContain("Editar en Tratamiento");
+    expect(html).toContain("Completitud:</span> 5/5");
+    expect(html).toContain("Diagnóstico médico de referencia:");
+    expect(html).toContain("Diagnóstico kinésico:");
+    expect(html).toContain("Situación funcional inicial:");
+    expect(html).toContain("Objetivo de tratamiento:");
+    expect(html).toContain("Plan marco del tratamiento:");
+    expect(html).toContain("Ver/editar marco clínico en Tratamiento");
     expect(html).toContain("<details");
+    expect(html).not.toContain("Impresión kinésica");
   });
 
   it("renders compact empty active context with complete CTA", () => {
@@ -38,8 +41,9 @@ describe("ClinicalCycleContextCard", () => {
       clinicalContext: { hasAnyContent: false },
     }));
 
-    expect(html).toContain("Completitud:</span> Sin contexto");
-    expect(html).toContain("Completar contexto en Tratamiento");
+    expect(html).toContain("Completitud:</span> 0/5");
+    expect(html).toContain("Completar marco clínico en Tratamiento");
+    expect(html).toContain("Este ciclo aún no tiene contexto clínico completo. Completá el marco clínico en Tratamiento.");
     expect(html).not.toContain("<details");
   });
 });
