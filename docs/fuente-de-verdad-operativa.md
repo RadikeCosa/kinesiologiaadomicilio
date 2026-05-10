@@ -497,5 +497,10 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - Si el ciclo está finalizado, se muestra un **resumen read-only** antes del historial completo.
 
 - `/admin/patients/[id]/encounters` muestra una card compacta **read-only** de contexto clínico del ciclo para interpretar tendencia/visitas; la edición permanece en `/treatment`.
+- La card read-only de `/encounters` muestra 5 campos del marco clínico del ciclo: diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento.
+- La completitud del marco clínico en `/encounters` se calcula sobre esos 5 campos (**5/5**).
+- Empty state/CTA en `/encounters`: orienta a completar el marco clínico en `/treatment` cuando faltan datos.
+- Pendiente explícito (Fase 2): pasar de edición masiva a edición campo por campo en `/treatment` y evaluar normalización interna `kinesiologic_impression` → `kinesiologic_diagnosis` sin migración obligatoria en esta fase.
+- No-alcances vigentes: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido y sin edición inline en `/encounters`.
 
 - Regla P1 de navegación privada: cada superficie mantiene **un CTA primario** de su tarea principal; enlaces cruzados (`/administrative`, `/treatment`, `/encounters`) se presentan como secundarios/contextuales.

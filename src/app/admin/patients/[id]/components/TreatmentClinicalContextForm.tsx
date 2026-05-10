@@ -41,8 +41,8 @@ export function TreatmentClinicalContextForm({ patientId, episodeOfCareId, initi
           <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Diagnóstico médico de referencia" rows={3} value={medicalReferenceDiagnosisText} onChange={(e) => setMedical(e.target.value)} />
         </label>
         <label className="mt-2 block text-sm text-slate-700">
-          Impresión kinésica
-          <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Impresión kinésica" rows={3} value={kinesiologicImpressionText} onChange={(e) => setKinesiologic(e.target.value)} />
+          Diagnóstico kinésico
+          <textarea className="mt-1 w-full rounded border p-2 text-sm" placeholder="Diagnóstico kinésico" rows={3} value={kinesiologicImpressionText} onChange={(e) => setKinesiologic(e.target.value)} />
         </label>
       </section>
       <section className="rounded-lg border border-slate-200 bg-white p-4">
