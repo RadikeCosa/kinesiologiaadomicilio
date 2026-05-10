@@ -9,7 +9,10 @@ import { PhoneContactBlock } from "@/app/admin/patients/components/PhoneContactB
 import { PatientEditForm } from "@/app/admin/patients/[id]/components/PatientEditForm";
 import { buildGoogleMapsSearchHref, formatAddressDisplay } from "@/lib/patient-contact-links";
 import {
+  calculateAgeFromBirthDate,
   formatContactRelationshipLabel,
+  formatDateDisplay,
+  formatDniDisplay,
   formatGenderLabel,
 } from "@/lib/patient-admin-display";
 
@@ -25,6 +28,7 @@ export function PatientAdministrativeEditor({
   const [isEditing, setIsEditing] = useState(initialEditing);
   const mapsHref = buildGoogleMapsSearchHref(patient.address);
   const addressLabel = formatAddressDisplay(patient.address);
+  const age = calculateAgeFromBirthDate(patient.birthDate);
 
   if (isEditing) {
     return (
@@ -54,6 +58,24 @@ export function PatientAdministrativeEditor({
       <dl className="grid gap-3 text-sm text-slate-800 sm:grid-cols-2">
         <div>
           <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+            DNI
+          </dt>
+          <dd className="mt-1">{formatDniDisplay(patient.dni)}</dd>
+        </div>
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+            Fecha de nacimiento
+          </dt>
+          <dd className="mt-1">{patient.birthDate ? formatDateDisplay(patient.birthDate) : "No informada"}</dd>
+        </div>
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+            Edad
+          </dt>
+          <dd className="mt-1">{age !== null ? `${age} años` : "No informada"}</dd>
+        </div>
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-slate-600">
             Género
           </dt>
           <dd className="mt-1">{formatGenderLabel(patient.gender)}</dd>
@@ -78,7 +100,7 @@ export function PatientAdministrativeEditor({
         <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
           Dirección
         </h4>
-        <p className="mt-2 text-sm text-slate-700">{addressLabel}</p>
+        <p className="mt-2 text-sm text-slate-700">{addressLabel === "Sin dirección" ? "No informada" : addressLabel}</p>
         {mapsHref ? (
           <MapsLinkAction
             className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-sky-700 underline-offset-2 hover:underline"

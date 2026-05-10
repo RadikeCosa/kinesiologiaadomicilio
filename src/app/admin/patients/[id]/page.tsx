@@ -271,6 +271,7 @@ export default async function AdminPatientDetailPage({
                         phone={patient.phone}
                         entity="patient"
                         mainContactPhone={patient.mainContact?.phone}
+                        allowMainContactFallback={false}
                         phoneLabel="Teléfono del paciente"
                       />
                     </div>

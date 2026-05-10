@@ -110,6 +110,24 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Checklist ejecutado:** `docs/checklist-sincronizacion-doc-codigo.md`.
 
 
+
+
+#### Nota de cierre documental — Semántica y jerarquía de contacto (2026-05-10)
+- **Estado:** cerrada / aprobada.
+- **Superficies auditadas:** `/admin/patients/[id]` (hub) y `/admin/patients/[id]/administrative` (Gestión administrativa).
+- **Ajustes confirmados:**
+  - en el hub se elimina duplicación de CTA cuando falta teléfono del paciente y existe teléfono de contacto principal: el subbloque paciente muestra faltante y la acción queda en el bloque de contacto principal;
+  - en administrativa los faltantes de datos se muestran explícitamente (`No informado` / `No informada`) y no se ocultan campos administrativos relevantes;
+  - en administrativa el bloque `Datos del paciente` no usa fallback silencioso a contacto principal;
+  - en `Contacto principal`, CTAs con semántica por entidad (`entity="mainContact"`): `WhatsApp contacto principal` y `Llamar contacto`;
+  - `PhoneContactActions` centraliza la semántica por entidad para alinear label visible + `title` + `aria-label`.
+- **Convenciones operativas vigentes (contacto):**
+  1. En bloques por entidad, las acciones pertenecen a esa entidad.
+  2. El fallback paciente → contacto principal solo se permite en capa explícitamente operativa y sin duplicar CTAs cercanos.
+  3. `/administrative` muestra faltantes administrativos de forma explícita; no oculta campos relevantes.
+  4. El hub puede sintetizar contexto, pero no duplicar acciones ni mezclar sujetos.
+- **No-alcances preservados:** sin cambios de dominio, sin cambios FHIR, sin cambios de schemas/actions/repositorios, sin cambios en normalización telefónica y sin cambios de flujos de solicitudes/tratamiento/visitas.
+
 #### Nota de cierre documental — Fase 2A PR3 métricas funcionales en visitas (2026-05-07)
 - **Estado:** cerrada / aprobada.
 - **Alcance confirmado:** flujo conectado UI → schema/action → persistencia FHIR `Observation` → loader de `/encounters` → card de visita.

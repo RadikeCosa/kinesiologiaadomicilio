@@ -40,6 +40,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Listado y alta de pacientes.
 - Acceso rápido contextual desde el listado para `Registrar visita` en pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`).
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación, con acción rápida contextual `Registrar visita` cuando hay tratamiento activo.
+- Convención de contacto por entidad en superficies privadas: en el hub no se duplican CTAs entre bloque paciente y contacto principal; en `administrative` los faltantes administrativos se muestran explícitamente (`No informado` / `No informada`) y las acciones de contacto respetan el sujeto (paciente vs contacto principal).
 - Administración no clínica del paciente en `/admin/patients/[id]/administrative` con lectura + acciones, edición explícita de identidad/contacto/datos operativos y sección de solicitudes de atención (lectura, alta mínima y resolución administrativa: aceptar, cancelar, cerrar como No inició con motivo). Los motivos operativos se muestran como metadata compacta contextual (no como bloque protagonista clínico).
 - Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (header interno con CTA primario `Registrar visita` **solo** con tratamiento activo, navegación secundaria compacta a tratamiento, metadata compacta, estadísticas clínicas mínimas derivadas y diferenciación de estado entre sin inicio/finalizado).
 - Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.

@@ -150,7 +150,7 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
     expect(html).toContain("Teléfono del paciente:</span> No informado");
-    expect(html).toContain("WhatsApp contacto principal");
+    expect((html.match(/WhatsApp contacto principal/g) ?? []).length).toBe(1);
     expect(html).not.toContain("WhatsApp paciente");
   });
 
