@@ -446,7 +446,7 @@ describe("updatePatientServiceRequestStatusAction", () => {
 });
 
 describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
-  it("accepts in_review request, creates episode and returns encounters redirect", async () => {
+  it("accepts in_review request, creates episode and returns treatment redirect", async () => {
     vi.mocked(getServiceRequestById).mockResolvedValueOnce({
       id: "sr-1", patientId: "pat-1", requestedAt: "2026-04-28", reasonText: "Dolor", status: "in_review",
     });
@@ -463,7 +463,7 @@ describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
     expect(result).toEqual({
       ok: true,
       message: "Solicitud aceptada y tratamiento iniciado correctamente.",
-      redirectTo: "/admin/patients/pat-1/encounters?status=treatment-started",
+      redirectTo: "/admin/patients/pat-1/treatment?status=treatment-started",
     });
     expect(createEpisodeOfCare).toHaveBeenCalledWith({
       patientId: "pat-1",

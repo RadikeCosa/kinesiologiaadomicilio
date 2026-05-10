@@ -176,7 +176,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
         expect(foundHtml).toContain("Estadísticas de visitas");
     expect(foundHtml).toContain("Contexto clínico del ciclo");
-    expect(foundHtml).toContain("Completar marco clínico en Tratamiento");
+    expect(foundHtml).toContain("Ver/editar en Tratamiento");
     expect(foundHtml).toContain("Tendencia funcional");
     expect(foundHtml.indexOf("Contexto clínico del ciclo")).toBeLessThan(foundHtml.indexOf("Tendencia funcional"));
     expect(foundHtml.indexOf("Tendencia funcional")).toBeLessThan(foundHtml.indexOf("Estadísticas de visitas"));
@@ -409,8 +409,8 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const withContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
     expect(withContext).toContain("Contexto clínico del ciclo");
-    expect(withContext).toContain("Ver detalle longitudinal");
-    expect(withContext).toContain("Completar marco clínico en Tratamiento");
+    expect(withContext).not.toContain("Ver detalle longitudinal");
+    expect(withContext).toContain("Ver/editar en Tratamiento");
     expect(withContext).toContain("href=\"/admin/patients/pat-1/treatment\"");
     expect(withContext).toContain("Registrar visita");
 
@@ -432,7 +432,8 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const withoutContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
     expect(withoutContext).toContain("Contexto clínico del ciclo");
-    expect(withoutContext).toContain("Completitud:</span> 0/5");
+    expect(withoutContext).not.toContain("Completitud:");
+    expect(withoutContext).toContain("No registrado");
   });
 
   it("shows compact historical context when treatment is finished", async () => {
@@ -451,9 +452,8 @@ describe("/admin/patients/[id]/encounters page", () => {
 
     expect(html).toContain("Visitas en modo historial.");
     expect(html).toContain("Cierre:</span> 20/03/2026");
-    expect(html).toContain("Motivo de cierre:");
-    expect(html).toContain("Detalle de cierre:</span> Alta funcional");
-    expect(html).toContain("Ver ciclo en Tratamiento");
+    expect(html).not.toContain("Ver detalle longitudinal");
+    expect(html).toContain("Ver/editar en Tratamiento");
   });
 
 });

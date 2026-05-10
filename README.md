@@ -63,8 +63,8 @@ El proyecto está en etapa **híbrida transicional**:
 - La acción específica `Aceptar e iniciar tratamiento` desde `/administrative` sí marca la solicitud como `accepted` y crea el `EpisodeOfCare` vinculado.
 - En ese flujo, la fecha de inicio de tratamiento es explícita/editable: toma `ServiceRequest.requestedAt` como default inicial cuando es válido, y persiste la fecha elegida en `EpisodeOfCare.period.start` (`EpisodeOfCare.startDate`).
 - Semántica vigente de fechas: `requestedAt` es fecha administrativa/histórica de solicitud; baseline de tratamiento/visitas usa `EpisodeOfCare.startDate` cuando existe.
-- Las acciones que cambian de contexto hacia `/encounters` usan feedback liviano por query param (`status`) para mantener confirmación en la pantalla destino.
-- `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/encounters?status=treatment-started`.
+- Las acciones cross-route usan feedback liviano por query param (`status`) para mantener confirmación en la pantalla destino.
+- `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/treatment?status=treatment-started`.
 - `Registrar visita` navega a `/admin/patients/[id]/encounters?status=encounter-created`.
 - Los cambios de estado de solicitud revalidan `/admin/patients`, `/admin/patients/[id]`, `/admin/patients/[id]/administrative` y `/admin/patients/[id]/treatment` para evitar vistas stale.
 - El formulario de solicitud mantiene sus campos propios mínimos (fecha, motivo y datos básicos de quién consulta) y puede completar en contexto domicilio/teléfonos administrativos cuando faltan.
@@ -87,9 +87,11 @@ El proyecto está en etapa **híbrida transicional**:
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
 - En Fase 1 (cierre documental 2026-05-10), el contexto clínico longitudinal del tratamiento se edita en `/admin/patients/[id]/treatment` y se consume en modo read-only en `/admin/patients/[id]/encounters` (sin edición inline).
 - Terminología visible y naming interno vigentes: **Diagnóstico kinésico** / `kinesiologic_diagnosis`.
-- El marco clínico visible del ciclo se compone de 5 campos: diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento; su completitud se calcula sobre **5/5**.
+- El marco clínico visible del ciclo se compone de 5 campos: diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento.
 - Fase 2A cerrada (2026-05-10): el marco clínico en `/admin/patients/[id]/treatment` se edita campo por campo con 5 submits independientes, sin guardado masivo global.
-- `/admin/patients/[id]/encounters` mantiene consumo read-only del marco clínico (sin edición inline).
+- En `/admin/patients/[id]/treatment` se aplica patrón lectura primero + edición después: valor actual o `No registrado`, acción `Editar ...` / `Agregar ...`, y apertura de input solo para el campo activo.
+- `/admin/patients/[id]/encounters` mantiene consumo read-only compacto del marco clínico (sin edición inline), sin `Completitud` ni “detalle longitudinal” duplicado; los campos faltantes se muestran como `No registrado`.
+- No se bloquea `Registrar visita` por marco clínico incompleto.
 - Fase 2B cerrada: se normalizó el naming interno de diagnóstico kinésico a `kinesiologic_diagnosis`.
 - No-alcances preservados: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido.
 - En Fase 2A/2B PR1 se incorporó modelado mínimo de `Observation` funcional por visita (TUG, dolor 0–10, bipedestación y marcha en minutos) con captura opcional; continúan fuera de alcance `Procedure`, `Goal`, IA y tendencia avanzada/dashboard clínico.

@@ -11,7 +11,7 @@ import { TreatmentClinicalContextForm } from "@/app/admin/patients/[id]/componen
 (globalThis as { React?: typeof React }).React = React;
 
 describe("TreatmentClinicalContextForm", () => {
-  it("renderiza submits independientes por campo y no submit global", () => {
+  it("renderiza campos en modo lectura con acciones independientes por campo", () => {
     const html = renderToStaticMarkup(createElement(TreatmentClinicalContextForm, {
       patientId: "pat-1",
       episodeOfCareId: "epi-1",
@@ -25,11 +25,11 @@ describe("TreatmentClinicalContextForm", () => {
       },
     }));
 
-    expect(html).toContain("Guardar diagnóstico médico");
-    expect(html).toContain("Guardar diagnóstico kinésico");
-    expect(html).toContain("Guardar situación funcional");
-    expect(html).toContain("Guardar objetivo");
-    expect(html).toContain("Guardar plan marco");
+    expect(html).toContain("Editar diagnóstico médico de referencia");
+    expect(html).toContain("Editar diagnóstico kinésico");
+    expect(html).toContain("Editar situación funcional inicial");
+    expect(html).toContain("Editar objetivo de tratamiento");
+    expect(html).toContain("Editar plan marco del tratamiento");
     expect(html).not.toContain("Guardar contexto clínico");
   });
 });
