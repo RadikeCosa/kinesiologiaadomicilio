@@ -9,7 +9,7 @@ describe("loadEpisodeClinicalContextReadModel", () => {
   it("returns partial model when one condition is missing", async () => {
     vi.mocked(getConditionDiagnosisById)
       .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ kind: "kinesiologic_impression", text: "Kin text" });
+      .mockResolvedValueOnce({ kind: "kinesiologic_diagnosis", text: "Kin text" });
 
     const data = await loadEpisodeClinicalContextReadModel({
       id: "epi-1",
@@ -18,13 +18,13 @@ describe("loadEpisodeClinicalContextReadModel", () => {
       startDate: "2026-01-01",
       diagnosisReferences: [
         { kind: "medical_reference", conditionId: "missing" },
-        { kind: "kinesiologic_impression", conditionId: "present" },
+        { kind: "kinesiologic_diagnosis", conditionId: "present" },
       ],
       clinicalContext: { therapeuticGoals: "Goal" },
     });
 
     expect(data?.medicalReferenceDiagnosisText).toBeUndefined();
-    expect(data?.kinesiologicImpressionText).toBe("Kin text");
+    expect(data?.kinesiologicDiagnosisText).toBe("Kin text");
     expect(data?.therapeuticGoals).toBe("Goal");
     expect(data?.hasAnyContent).toBe(true);
   });

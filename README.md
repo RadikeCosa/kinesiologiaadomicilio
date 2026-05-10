@@ -86,9 +86,11 @@ El proyecto está en etapa **híbrida transicional**:
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
 - En Fase 1 (cierre documental 2026-05-10), el contexto clínico longitudinal del tratamiento se edita en `/admin/patients/[id]/treatment` y se consume en modo read-only en `/admin/patients/[id]/encounters` (sin edición inline).
-- Terminología visible vigente: **Diagnóstico kinésico** ("Impresión kinésica" queda solo como posible legacy interno).
+- Terminología visible y naming interno vigentes: **Diagnóstico kinésico** / `kinesiologic_diagnosis`.
 - El marco clínico visible del ciclo se compone de 5 campos: diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento; su completitud se calcula sobre **5/5**.
-- Pendiente de Fase 2: edición campo por campo y eventual compatibilidad interna `kinesiologic_impression` → `kinesiologic_diagnosis`, sin migración obligatoria por ahora.
+- Fase 2A cerrada (2026-05-10): el marco clínico en `/admin/patients/[id]/treatment` se edita campo por campo con 5 submits independientes, sin guardado masivo global.
+- `/admin/patients/[id]/encounters` mantiene consumo read-only del marco clínico (sin edición inline).
+- Fase 2B cerrada: se normalizó el naming interno de diagnóstico kinésico a `kinesiologic_diagnosis`.
 - No-alcances preservados: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido.
 - En Fase 2A/2B PR1 se incorporó modelado mínimo de `Observation` funcional por visita (TUG, dolor 0–10, bipedestación y marcha en minutos) con captura opcional; continúan fuera de alcance `Procedure`, `Goal`, IA y tendencia avanzada/dashboard clínico.
 

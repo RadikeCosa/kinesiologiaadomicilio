@@ -18,7 +18,7 @@ export function ClinicalCycleContextCard({ patientId, activeEpisode, mostRecentE
   const isFinished = !activeEpisode && mostRecentEpisode?.status === "finished";
   const trunkFields = [
     clinicalContext?.medicalReferenceDiagnosisText,
-    clinicalContext?.kinesiologicImpressionText,
+    clinicalContext?.kinesiologicDiagnosisText,
     clinicalContext?.initialFunctionalStatus,
     clinicalContext?.therapeuticGoals,
     clinicalContext?.frameworkPlan,
@@ -44,7 +44,7 @@ export function ClinicalCycleContextCard({ patientId, activeEpisode, mostRecentE
       </div>
 
       {clinicalContext?.medicalReferenceDiagnosisText ? <p className="mt-2 text-sm text-slate-700"><span className="font-medium">Diagnóstico médico de referencia:</span> {truncate(clinicalContext.medicalReferenceDiagnosisText, 120)}</p> : null}
-      {clinicalContext?.kinesiologicImpressionText ? <p className="mt-1 text-sm text-slate-700"><span className="font-medium">Diagnóstico kinésico:</span> {truncate(clinicalContext.kinesiologicImpressionText, 120)}</p> : null}
+      {clinicalContext?.kinesiologicDiagnosisText ? <p className="mt-1 text-sm text-slate-700"><span className="font-medium">Diagnóstico kinésico:</span> {truncate(clinicalContext.kinesiologicDiagnosisText, 120)}</p> : null}
       {clinicalContext?.initialFunctionalStatus ? <p className="mt-1 text-sm text-slate-700"><span className="font-medium">Situación funcional inicial:</span> {truncate(clinicalContext.initialFunctionalStatus, 120)}</p> : null}
       {clinicalContext?.therapeuticGoals ? <p className="mt-1 text-sm text-slate-700"><span className="font-medium">Objetivo de tratamiento:</span> {truncate(clinicalContext.therapeuticGoals, 140)}</p> : null}
       {clinicalContext?.frameworkPlan ? <p className="mt-1 text-sm text-slate-700"><span className="font-medium">Plan marco del tratamiento:</span> {truncate(clinicalContext.frameworkPlan, 140)}</p> : null}
@@ -57,7 +57,7 @@ export function ClinicalCycleContextCard({ patientId, activeEpisode, mostRecentE
         <details className="mt-3 rounded border border-slate-200 bg-white p-3">
           <summary className="cursor-pointer text-xs font-medium text-slate-700">Ver detalle longitudinal</summary>
           <div className="mt-2 space-y-1 text-sm text-slate-700">
-            {clinicalContext?.kinesiologicImpressionText ? <p><span className="font-medium">Diagnóstico kinésico:</span> {clinicalContext.kinesiologicImpressionText}</p> : null}
+            {clinicalContext?.kinesiologicDiagnosisText ? <p><span className="font-medium">Diagnóstico kinésico:</span> {clinicalContext.kinesiologicDiagnosisText}</p> : null}
             {clinicalContext?.frameworkPlan ? <p><span className="font-medium">Plan marco del tratamiento:</span> {clinicalContext.frameworkPlan}</p> : null}
             {clinicalContext?.therapeuticGoals ? <p><span className="font-medium">Objetivo de tratamiento:</span> {clinicalContext.therapeuticGoals}</p> : null}
             {clinicalContext?.initialFunctionalStatus ? <p><span className="font-medium">Situación funcional inicial:</span> {clinicalContext.initialFunctionalStatus}</p> : null}

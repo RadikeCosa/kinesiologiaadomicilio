@@ -194,7 +194,7 @@ export default async function AdminPatientTreatmentPage({
           <p className="mt-2 text-sm text-slate-700">Detalle: {latestClosedEpisode.closureDetail || "Sin detalle"}</p>
           <p className="mt-2 text-sm text-slate-700">Solicitud de origen: {latestClosedEpisode.serviceRequestId || "Sin solicitud vinculada"}</p>
           <p className="mt-2 text-sm text-slate-700">Diagnóstico: {latestClosedEpisode.medicalReferenceDiagnosisText || "Sin dato"}</p>
-          <p className="mt-2 text-sm text-slate-700">Diagnóstico kinésico: {latestClosedEpisode.kinesiologicImpressionText || "Sin dato"}</p>
+          <p className="mt-2 text-sm text-slate-700">Diagnóstico kinésico: {latestClosedEpisode.kinesiologicDiagnosisText || "Sin dato"}</p>
           <p className="mt-2 text-sm text-slate-700">Objetivos: {latestClosedEpisode.therapeuticGoals || "Sin dato"}</p>
           <p className="mt-2 text-sm text-slate-700">Plan: {latestClosedEpisode.frameworkPlan || "Sin dato"}</p>
           <Link className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/administrative#service-requests`}>Gestión administrativa para nuevo ciclo</Link>

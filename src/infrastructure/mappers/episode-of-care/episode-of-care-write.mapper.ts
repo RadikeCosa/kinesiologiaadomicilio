@@ -11,7 +11,7 @@ import {
   EPISODE_CONTEXT_FRAMEWORK_PLAN_EXTENSION_URL,
   EPISODE_CONTEXT_INITIAL_FUNCTIONAL_STATUS_EXTENSION_URL,
   EPISODE_CONTEXT_THERAPEUTIC_GOALS_EXTENSION_URL,
-  EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_IMPRESSION,
+  EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_DIAGNOSIS,
   EPISODE_DIAGNOSIS_ROLE_MEDICAL_REFERENCE,
   EPISODE_DIAGNOSIS_ROLE_SYSTEM,
 } from "@/infrastructure/mappers/episode-of-care/episode-of-care-context.constants";
@@ -79,7 +79,7 @@ function upsertDiagnosisByRole(existing: FhirEpisodeOfCare["diagnosis"], referen
   const base = existing ?? [];
   if (!references?.length) return base;
   const filtered = base.filter((item) => !roleMatches(item, EPISODE_DIAGNOSIS_ROLE_MEDICAL_REFERENCE)
-    && !roleMatches(item, EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_IMPRESSION));
+    && !roleMatches(item, EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_DIAGNOSIS));
   const mapped = references.map((reference) => ({
     condition: { reference: `Condition/${reference.conditionId}` },
     role: {

@@ -14,11 +14,11 @@ describe("treatment context schemas", () => {
 
   it("accepts valid kinesiologic impression", () => {
     const parsed = treatmentContextSchemas.episodeDiagnosisSchema.parse({
-      kind: "kinesiologic_impression",
+      kind: "kinesiologic_diagnosis",
       text: "Disfunción de control lumbo-pélvico",
     });
 
-    expect(parsed.kind).toBe("kinesiologic_impression");
+    expect(parsed.kind).toBe("kinesiologic_diagnosis");
   });
 
   it("rejects invalid diagnosis kind", () => {

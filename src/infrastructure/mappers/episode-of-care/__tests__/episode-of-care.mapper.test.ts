@@ -235,7 +235,7 @@ describe("episode-of-care mappers", () => {
       status: "active",
       diagnosis: [
         { condition: { reference: "Condition/cond-1" }, role: { coding: [{ system: "https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1", code: "medical_reference" }] } },
-        { condition: { reference: "Condition/cond-2" }, role: { coding: [{ system: "https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1", code: "kinesiologic_impression" }] } },
+        { condition: { reference: "Condition/cond-2" }, role: { coding: [{ system: "https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1", code: "kinesiologic_diagnosis" }] } },
         { condition: { reference: "Condition/cond-3" }, role: { coding: [{ system: "other", code: "unknown" }] } },
       ],
       extension: [
@@ -246,7 +246,7 @@ describe("episode-of-care mappers", () => {
 
     expect(mapped.diagnosisReferences).toEqual([
       { kind: "medical_reference", conditionId: "cond-1" },
-      { kind: "kinesiologic_impression", conditionId: "cond-2" },
+      { kind: "kinesiologic_diagnosis", conditionId: "cond-2" },
     ]);
     expect(mapped.clinicalContext).toMatchObject({ initialFunctionalStatus: "Baseline", therapeuticGoals: "Goals" });
   });
@@ -269,7 +269,7 @@ describe("episode-of-care mappers", () => {
       {
         diagnosisReferences: [
           { kind: "medical_reference", conditionId: "new-med" },
-          { kind: "kinesiologic_impression", conditionId: "new-kine" },
+          { kind: "kinesiologic_diagnosis", conditionId: "new-kine" },
         ],
         clinicalContext: { initialFunctionalStatus: "init", therapeuticGoals: " ", frameworkPlan: "plan" },
       },
@@ -278,7 +278,7 @@ describe("episode-of-care mappers", () => {
     expect(updated.diagnosis).toEqual([
       { condition: { reference: "Condition/keep-unknown" }, role: { coding: [{ system: "other", code: "legacy" }] } },
       { condition: { reference: "Condition/new-med" }, role: { coding: [{ system: "https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1", code: "medical_reference" }] } },
-      { condition: { reference: "Condition/new-kine" }, role: { coding: [{ system: "https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1", code: "kinesiologic_impression" }] } },
+      { condition: { reference: "Condition/new-kine" }, role: { coding: [{ system: "https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1", code: "kinesiologic_diagnosis" }] } },
     ]);
     expect(updated.extension).toEqual([
       { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason", valueCode: "treatment_completed" },

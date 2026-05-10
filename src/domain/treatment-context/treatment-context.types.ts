@@ -1,4 +1,4 @@
-export type EpisodeDiagnosisKind = "medical_reference" | "kinesiologic_impression";
+export type EpisodeDiagnosisKind = "medical_reference" | "kinesiologic_diagnosis";
 export type EpisodeDiagnosisClinicalStatus = "active" | "recurrence" | "relapse" | "inactive" | "remission" | "resolved";
 
 export interface EpisodeDiagnosisInput {
@@ -11,7 +11,7 @@ export interface EpisodeDiagnosisInput {
 
 export interface EpisodeClinicalContext {
   medicalReferenceDiagnosis?: EpisodeDiagnosisInput;
-  kinesiologicImpression?: EpisodeDiagnosisInput;
+  kinesiologicDiagnosis?: EpisodeDiagnosisInput;
   initialFunctionalStatus?: string;
   therapeuticGoals?: string;
   frameworkPlan?: string;

@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-09 (UTC)
+> Última actualización: 2026-05-10 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -98,8 +98,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Alcance confirmado:**
   - edición principal del contexto longitudinal en `/admin/patients/[id]/treatment`;
   - resumen read-only en `/admin/patients/[id]/encounters` para el episodio efectivo;
-  - diagnóstico médico de referencia + impresión kinésica persistidos como `Condition`;
-  - vínculo desde `EpisodeOfCare.diagnosis[]` con roles locales versionados (`medical_reference`, `kinesiologic_impression`);
+  - diagnóstico médico de referencia + diagnóstico kinésico persistidos como `Condition`;
+  - vínculo desde `EpisodeOfCare.diagnosis[]` con roles locales versionados (`medical_reference`, `kinesiologic_diagnosis`);
   - situación inicial funcional, objetivos terapéuticos y plan marco en `EpisodeOfCare.extension[]` (URLs versionadas).
 - **Estrategia diagnóstica confirmada:**
   - editar diagnóstico crea nueva `Condition` y reemplaza referencia por kind en `EpisodeOfCare.diagnosis[]`;
@@ -250,6 +250,11 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - en `/encounters`, sin tratamiento activo se muestra una única señal impeditiva dominante + salida a `/treatment`, evitando duplicación de bloqueos;
 - en `/encounters`, el copy distingue explícitamente `sin tratamiento iniciado` de `tratamiento finalizado`;
 - en `/treatment`, la cabecera/copy explicitan que es la superficie de inicio/cierre de tratamiento y no de operación de visitas, con navegación secundaria a visitas;
+- en `/admin/patients/[id]/treatment`, el marco clínico del ciclo se edita **solo** en esta superficie y en modo **campo por campo** (5 mini-forms con submit independiente): diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento;
+- en `/admin/patients/[id]/treatment`, no existe submit global de guardado masivo del marco clínico;
+- cada edición de campo del marco clínico lee el `EpisodeOfCare` vigente y preserva datos estructurales no relacionados (`period.start`, `period.end`, `status`, `referralRequest`, diagnósticos ajenos, extensiones ajenas y extensiones de cierre);
+- en `/admin/patients/[id]/encounters`, el marco clínico se consume en modo read-only y sin edición inline;
+- pendientes explícitos: posible test E2E posterior y no-alcances vigentes (sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido).
 - en `/treatment`, cuando el tratamiento está finalizado se presenta estado explícito de cierre antes de cualquier reinicio;
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - en `EpisodeOfCare`, el motivo/detalle de cierre se persisten en `extension[]` (URLs propias versionables para reason/detail); `note[]` no es canal principal por pérdida en roundtrip HAPI y se mantiene solo como fallback legacy de lectura.
@@ -377,7 +382,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 
 - `npm run lint`: pasa.
 - `npm run test`: pasa.
-- `npm run build`: falla en entorno sin `FHIR_BASE_URL` para prerender de `/admin/patients`.
+- `npm run build`: sin errores de TypeScript detectados; en este entorno falla por configuración al faltar `FHIR_BASE_URL` durante prerender de `/admin`.
 
 ## Convenciones de datos administrativos (UI privada)
 
@@ -500,7 +505,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - La card read-only de `/encounters` muestra 5 campos del marco clínico del ciclo: diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento.
 - La completitud del marco clínico en `/encounters` se calcula sobre esos 5 campos (**5/5**).
 - Empty state/CTA en `/encounters`: orienta a completar el marco clínico en `/treatment` cuando faltan datos.
-- Pendiente explícito (Fase 2): pasar de edición masiva a edición campo por campo en `/treatment` y evaluar normalización interna `kinesiologic_impression` → `kinesiologic_diagnosis` sin migración obligatoria en esta fase.
+- Fase 2A cerrada: en `/treatment` la edición del marco clínico es campo por campo (5 submits independientes) y ya no existe guardado masivo global.
+- Fase 2B cerrada: naming interno de diagnóstico kinésico normalizado a `kinesiologic_diagnosis`.
 - No-alcances vigentes: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido y sin edición inline en `/encounters`.
 
 - Regla P1 de navegación privada: cada superficie mantiene **un CTA primario** de su tarea principal; enlaces cruzados (`/administrative`, `/treatment`, `/encounters`) se presentan como secundarios/contextuales.

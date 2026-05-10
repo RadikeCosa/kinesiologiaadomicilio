@@ -57,7 +57,7 @@ describe("/admin/patients/[id]/encounters page", () => {
         initialFunctionalStatus: "Marcha con dolor",
         therapeuticGoals: "Reducir dolor y recuperar tolerancia a marcha diaria.",
         frameworkPlan: "Plan general",
-        kinesiologicImpressionText: "Compromiso funcional lumbar",
+        kinesiologicDiagnosisText: "Compromiso funcional lumbar",
       },
       encounterStats: {
         totalCount: 0,

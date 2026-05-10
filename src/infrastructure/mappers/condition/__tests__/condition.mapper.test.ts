@@ -24,10 +24,10 @@ describe("condition mappers", () => {
       id: "cond-1",
       code: { text: "Cervicobraquialgia" },
       subject: { reference: "Patient/pat-1" },
-    }, "kinesiologic_impression");
+    }, "kinesiologic_diagnosis");
 
     expect(mapped.conditionId).toBe("cond-1");
-    expect(mapped.kind).toBe("kinesiologic_impression");
+    expect(mapped.kind).toBe("kinesiologic_diagnosis");
     expect(mapped.text).toBe("Cervicobraquialgia");
   });
 
@@ -35,7 +35,7 @@ describe("condition mappers", () => {
     const mapped = mapDiagnosisInputToFhirCondition({
       patientId: "pat-1",
       diagnosis: {
-        kind: "kinesiologic_impression",
+        kind: "kinesiologic_diagnosis",
         text: "Déficit de estabilidad escapular",
       },
     });

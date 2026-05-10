@@ -17,7 +17,7 @@ export function PhoneContactBlock({
   phoneLabel = "Teléfono",
   showMissingChannelsMessage = true,
 }: PhoneContactBlockProps) {
-  const formattedPhone = formatPhoneDisplay(phone);
+  const formattedPhone = formatPhoneDisplay(phone ?? undefined);
 
   return (
     <div className="space-y-2">

@@ -12,7 +12,7 @@ import {
   EPISODE_CONTEXT_FRAMEWORK_PLAN_EXTENSION_URL,
   EPISODE_CONTEXT_INITIAL_FUNCTIONAL_STATUS_EXTENSION_URL,
   EPISODE_CONTEXT_THERAPEUTIC_GOALS_EXTENSION_URL,
-  EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_IMPRESSION,
+  EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_DIAGNOSIS,
   EPISODE_DIAGNOSIS_ROLE_MEDICAL_REFERENCE,
   EPISODE_DIAGNOSIS_ROLE_SYSTEM,
 } from "@/infrastructure/mappers/episode-of-care/episode-of-care-context.constants";
@@ -101,13 +101,13 @@ function extractFirstServiceRequestId(
   return undefined;
 }
 
-function extractDiagnosisKind(resource: FhirEpisodeOfCare["diagnosis"][number]): EpisodeDiagnosisKind | undefined {
+function extractDiagnosisKind(resource: NonNullable<FhirEpisodeOfCare["diagnosis"]>[number]): EpisodeDiagnosisKind | undefined {
   const coding = resource.role?.coding;
   if (!coding?.length) return undefined;
   for (const item of coding) {
     if (item.system !== EPISODE_DIAGNOSIS_ROLE_SYSTEM) continue;
     if (item.code === EPISODE_DIAGNOSIS_ROLE_MEDICAL_REFERENCE) return EPISODE_DIAGNOSIS_ROLE_MEDICAL_REFERENCE;
-    if (item.code === EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_IMPRESSION) return EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_IMPRESSION;
+    if (item.code === EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_DIAGNOSIS) return EPISODE_DIAGNOSIS_ROLE_KINESIOLOGIC_DIAGNOSIS;
   }
   return undefined;
 }
