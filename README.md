@@ -40,6 +40,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Listado y alta de pacientes.
 - Acceso rápido contextual desde el listado para `Registrar visita` en pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`).
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación, con acción rápida contextual `Registrar visita` cuando hay tratamiento activo.
+- En el hub (`/admin/patients/[id]`), `Resumen clínico reciente` puede mostrar `Diagnóstico médico` e `Impresión kinésica` de forma compacta y read-only (más señal `Marco clínico: Incompleto` cuando aplica), sin formularios ni edición.
 - Administración no clínica del paciente en `/admin/patients/[id]/administrative` con lectura + acciones, edición explícita de identidad/contacto/datos operativos y sección de solicitudes de atención (lectura, alta mínima y resolución administrativa: aceptar, cancelar, cerrar como No inició con motivo). Los motivos operativos se muestran como metadata compacta contextual (no como bloque protagonista clínico).
 - Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (header interno con CTA primario `Registrar visita` **solo** con tratamiento activo, navegación secundaria compacta a tratamiento, metadata compacta, estadísticas clínicas mínimas derivadas y diferenciación de estado entre sin inicio/finalizado).
 - Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.
@@ -86,6 +87,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
 - En Fase 1, el contexto clínico longitudinal del tratamiento se edita en `/admin/patients/[id]/treatment` y se resume en modo read-only en `/admin/patients/[id]/encounters` (diagnósticos en `Condition` vinculados desde `EpisodeOfCare.diagnosis[]`).
+- Convención vigente: la edición del marco clínico longitudinal vive en `/treatment` (lectura primero + edición individual por campo), no en hub ni en `/encounters`.
 - En Fase 2A/2B PR1 se incorporó modelado mínimo de `Observation` funcional por visita (TUG, dolor 0–10, bipedestación y marcha en minutos) con captura opcional; continúan fuera de alcance `Procedure`, `Goal`, IA y tendencia avanzada/dashboard clínico.
 
 #### Mapa corto de superficies privadas de paciente (UI vigente)

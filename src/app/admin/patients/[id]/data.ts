@@ -15,6 +15,7 @@ import {
 } from "@/infrastructure/repositories/service-request.repository";
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
 import { listFunctionalObservationsByEncounterId } from "@/infrastructure/repositories/observation.repository";
+import { loadEpisodeClinicalContextReadModel } from "@/app/admin/patients/[id]/clinical-context";
 
 export interface PatientServiceRequestReadContext {
   serviceRequests: ServiceRequest[];
@@ -101,6 +102,9 @@ export interface PatientClinicalRecentSummary {
   metrics: ClinicalRecentSummaryItem[];
   metricsEmptyLabel: string;
   ctaLabel: "Ver gestión clínica" | "Registrar primera visita";
+  medicalDiagnosisLabel?: string;
+  kinesiologicImpressionLabel?: string;
+  clinicalContextIncomplete: boolean;
 }
 
 function formatMetricValue(value: number, unit: "/10" | "min" | "s"): string {
@@ -169,6 +173,11 @@ export async function loadPatientClinicalRecentSummary(patientId: string): Promi
     })
     .slice(0, 2);
 
+  const clinicalContext = await loadEpisodeClinicalContextReadModel(effectiveEpisode ?? null);
+  const medicalDiagnosisLabel = clinicalContext?.medicalReferenceDiagnosisText;
+  const kinesiologicImpressionLabel = clinicalContext?.kinesiologicImpressionText;
+  const clinicalContextIncomplete = Boolean(activeEpisode) && !(medicalDiagnosisLabel && kinesiologicImpressionLabel);
+
   return {
     treatmentStatusLabel,
     latestEncounterLabel,
@@ -176,6 +185,9 @@ export async function loadPatientClinicalRecentSummary(patientId: string): Promi
     metrics,
     metricsEmptyLabel: activeEpisode ? "Sin registros funcionales todavía" : "Sin registros funcionales",
     ctaLabel: activeEpisode && scopedEncounters.length === 0 ? "Registrar primera visita" : "Ver gestión clínica",
+    medicalDiagnosisLabel,
+    kinesiologicImpressionLabel,
+    clinicalContextIncomplete,
   };
 }
 export type ServiceRequestDisplayStatus =

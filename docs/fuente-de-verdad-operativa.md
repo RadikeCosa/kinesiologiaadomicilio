@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-09 (UTC)
+> Última actualización: 2026-05-10 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -46,6 +46,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `/admin/patients/[id]`: hub del paciente (resumen + navegación a superficies administrativa y clínica), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
 - Convención P0 UX/UI del hub (`/admin/patients/[id]`): en desktop se organiza en dos columnas, con **columna principal de orientación y acciones** (identidad/estado, próxima acción recomendada, CTAs principales y CTA contextual) y **columna secundaria de contexto** (resumen clínico reciente + contacto/metadata compacta). En mobile mantiene stack vertical en ese orden.
 - `Resumen clínico reciente` en hub es una card secundaria de síntesis (sin tendencia completa, sin listado de visitas, sin nota clínica narrativa) y no reemplaza `/encounters`.
+- En el hub, `Resumen clínico reciente` puede incluir `Diagnóstico médico` e `Impresión kinésica` cuando existen, y señal compacta `Marco clínico: Incompleto` con tratamiento activo; siempre en read-only y sin acciones de edición.
 - Contacto y metadata administrativa en hub se muestran como contexto secundario compacto para no competir con el bloque de acción.
 - `/admin/patients/[id]/administrative`: administración no clínica con lectura + acciones (edición explícita de identidad, contacto y datos operativos) + sección de solicitudes de atención (listado/empty state y alta mínima).
 - `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (header con acción primaria `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento y listado de visitas con corrección inline rápida).
@@ -109,6 +110,34 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **No-alcances preservados:** sin IA, sin `Observation`, sin `Procedure`, sin `Goal`, sin cambios de reglas de inicio/cierre de tratamiento y sin cambios de scoping de `/encounters`.
 - **Checklist ejecutado:** `docs/checklist-sincronizacion-doc-codigo.md`.
 
+
+
+
+#### Nota de cierre documental — Ajuste marco clínico longitudinal hub ↔ treatment (2026-05-10)
+- **Estado:** cerrada / aprobada.
+- **Regla vigente de superficies:**
+  - `/admin/patients/[id]` (hub) puede mostrar `Diagnóstico médico` e `Impresión kinésica` en `Resumen clínico reciente` **solo en lectura**;
+  - `/admin/patients/[id]/treatment` es la superficie principal de lectura completa + edición individual del marco clínico longitudinal;
+  - `/admin/patients/[id]/encounters` consume ese contexto en modo read-only para interpretar visitas y tendencia;
+  - la edición del marco clínico no vive en hub ni en `/encounters`.
+- **Convención UX vigente (hub):**
+  - mostrar `Diagnóstico médico` solo si existe;
+  - mostrar `Impresión kinésica` solo si existe;
+  - mostrar `Marco clínico: Incompleto` solo como señal compacta cuando aplique;
+  - sin formularios ni botones de edición;
+  - sin duplicar `/treatment`.
+- **Convención UX vigente (`/treatment`):**
+  - lectura primero con valor actual o `No registrado`;
+  - edición campo por campo (`Agregar...` / `Editar...`);
+  - input solo del campo activo;
+  - guardado puntual;
+  - sin submit global protagonista;
+  - no bloquea registrar visitas por incompletitud.
+- **Validación ejecutada:**
+  - tests route-local del hub para diagnóstico médico, impresión kinésica e incompletitud compacta.
+- **Cobertura recomendada pendiente antes de cierre definitivo:**
+  - tests de `TreatmentClinicalContextForm` para patrón lectura primero, acciones `Agregar/Editar`, apertura por campo y ausencia de submit global protagonista.
+- **No-alcances preservados:** sin cambios de dominio/FHIR/schemas/actions/repositorios/persistencia; sin recursos clínicos nuevos; sin IA; sin `Procedure`; sin `Goal`; sin edición desde hub; sin duplicar `/encounters`, `/administrative` ni `/treatment`.
 
 #### Nota de cierre documental — Fase 2A PR3 métricas funcionales en visitas (2026-05-07)
 - **Estado:** cerrada / aprobada.
