@@ -44,6 +44,9 @@ describe("PatientAdministrativeEditor", () => {
     expect(html).toContain("Datos administrativos y de contacto");
     expect(html).toContain("Editar datos");
     expect(html).toContain("Género");
+    expect(html).toContain("DNI");
+    expect(html).toContain("Fecha de nacimiento");
+    expect(html).toContain("Edad");
     expect(html).toContain("Datos del paciente");
     expect(html).toContain("Dirección");
     expect(html).toContain("Contacto principal");
@@ -63,6 +66,33 @@ describe("PatientAdministrativeEditor", () => {
     expect(html).toContain("Teléfono del paciente:</span> No informado");
     expect(html).not.toContain("WhatsApp paciente");
     expect(html).toContain("WhatsApp contacto principal");
+    expect(html).toContain('aria-label="Enviar WhatsApp al contacto principal"');
+    expect(html).toContain('title="Enviar WhatsApp al contacto principal"');
+  });
+
+  it("shows explicit fallbacks for missing administrative fields", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientAdministrativeEditor, {
+        patient: {
+          ...basePatient,
+          dni: undefined,
+          birthDate: undefined,
+          gender: undefined,
+          phone: undefined,
+          address: undefined,
+          mainContact: {
+            name: undefined,
+            relationship: undefined,
+            phone: undefined,
+          },
+        },
+      }),
+    );
+
+    expect(html).toContain("No informado");
+    expect(html).toContain("No informada");
+    expect(html).toContain("Teléfono del paciente:</span> No informado");
+    expect(html).toContain("Teléfono del contacto principal:</span> No informado");
   });
 
   it("renders edit form when editing mode is active", () => {

@@ -2,6 +2,7 @@ import React from "react";
 
 import {
   buildTelHref,
+  buildWhatsAppHref,
   resolvePatientWhatsAppTarget,
 } from "@/lib/patient-contact-links";
 
@@ -18,15 +19,21 @@ export function PhoneContactActions({
   entity,
   showMissingChannelsMessage = true,
 }: PhoneContactActionsProps) {
+  const mainContactWhatsAppHref = entity === "mainContact"
+    ? buildWhatsAppHref(phone ?? undefined)
+    : null;
   const whatsappTarget = entity === "patient"
     ? resolvePatientWhatsAppTarget({
       phone,
       mainContact: { phone: mainContactPhone },
     })
-    : resolvePatientWhatsAppTarget({
-      phone,
-      mainContact: null,
-    });
+    : (mainContactWhatsAppHref
+      ? {
+        href: mainContactWhatsAppHref,
+        visibleLabel: "WhatsApp contacto principal",
+        accessibleLabel: "Enviar WhatsApp al contacto principal",
+      }
+      : null);
   const telHref = buildTelHref(phone ?? undefined);
   const hasContactChannel = Boolean(whatsappTarget || telHref);
 
@@ -44,14 +51,14 @@ export function PhoneContactActions({
     <div className="flex flex-wrap items-center gap-2">
       {whatsappTarget ? (
         <a
-          aria-label={entity === "mainContact" ? "Enviar WhatsApp al contacto principal" : whatsappTarget.accessibleLabel}
+          aria-label={whatsappTarget.accessibleLabel}
           className="inline-flex items-center justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
           href={whatsappTarget.href}
           rel="noopener noreferrer"
           target="_blank"
-          title={entity === "mainContact" ? "Enviar WhatsApp al contacto principal" : whatsappTarget.accessibleLabel}
+          title={whatsappTarget.accessibleLabel}
         >
-          {entity === "mainContact" ? "WhatsApp contacto principal" : whatsappTarget.visibleLabel}
+          {whatsappTarget.visibleLabel}
         </a>
       ) : null}
 
