@@ -259,18 +259,19 @@ export default async function AdminPatientDetailPage({
               ) : null}
 
               <section className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-800">
-                <h2 className="text-sm font-semibold text-slate-900">Contacto y datos administrativos</h2>
+                <h2 className="text-sm font-semibold text-slate-900">Contacto operativo</h2>
 
                 <div className="mt-2 grid gap-2">
                   <section className="rounded-md border border-slate-300 bg-white p-2.5">
                     <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-900">
-                      Contacto del paciente
+                      Paciente
                     </h3>
                     <div className="mt-1.5">
                       <PhoneContactBlock
                         phone={patient.phone}
+                        entity="patient"
                         mainContactPhone={patient.mainContact?.phone}
-                        phoneLabel="Teléfono"
+                        phoneLabel="Teléfono del paciente"
                       />
                     </div>
                   </section>
@@ -310,7 +311,8 @@ export default async function AdminPatientDetailPage({
                       <div className="mt-1.5">
                         <PhoneContactBlock
                           phone={patient.mainContact.phone}
-                          phoneLabel="Teléfono"
+                          entity="mainContact"
+                          phoneLabel="Teléfono del contacto principal"
                         />
                       </div>
                     </section>

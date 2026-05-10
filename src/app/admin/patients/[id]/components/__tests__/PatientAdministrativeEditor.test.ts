@@ -44,10 +44,25 @@ describe("PatientAdministrativeEditor", () => {
     expect(html).toContain("Datos administrativos y de contacto");
     expect(html).toContain("Editar datos");
     expect(html).toContain("Género");
-    expect(html).toContain("Contacto del paciente");
+    expect(html).toContain("Datos del paciente");
     expect(html).toContain("Dirección");
     expect(html).toContain("Contacto principal");
     expect(html).not.toContain("Guardar cambios");
+  });
+
+  it("keeps patient and main contact actions separated when patient phone is missing", () => {
+    const html = renderToStaticMarkup(
+      createElement(PatientAdministrativeEditor, {
+        patient: {
+          ...basePatient,
+          phone: undefined,
+        },
+      }),
+    );
+
+    expect(html).toContain("Teléfono del paciente:</span> No informado");
+    expect(html).not.toContain("WhatsApp paciente");
+    expect(html).toContain("WhatsApp contacto principal");
   });
 
   it("renders edit form when editing mode is active", () => {

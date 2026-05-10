@@ -7,6 +7,8 @@ import { PhoneContactActions } from "@/app/admin/patients/components/PhoneContac
 interface PhoneContactBlockProps {
   phone: string | null | undefined;
   mainContactPhone?: string | null | undefined;
+  entity?: "patient" | "mainContact";
+  allowMainContactFallback?: boolean;
   phoneLabel?: string;
   showMissingChannelsMessage?: boolean;
 }
@@ -14,6 +16,8 @@ interface PhoneContactBlockProps {
 export function PhoneContactBlock({
   phone,
   mainContactPhone,
+  entity = "patient",
+  allowMainContactFallback = true,
   phoneLabel = "Teléfono",
   showMissingChannelsMessage = true,
 }: PhoneContactBlockProps) {
@@ -28,7 +32,8 @@ export function PhoneContactBlock({
 
       <PhoneContactActions
         phone={phone}
-        mainContactPhone={mainContactPhone}
+        mainContactPhone={allowMainContactFallback ? mainContactPhone : undefined}
+        entity={entity}
         showMissingChannelsMessage={showMissingChannelsMessage}
       />
     </div>
