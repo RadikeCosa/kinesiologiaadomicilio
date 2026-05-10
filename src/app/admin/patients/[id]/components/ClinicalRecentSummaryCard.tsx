@@ -24,6 +24,15 @@ export function ClinicalRecentSummaryCard({
         <p><span className="font-medium">Estado del tratamiento:</span> {summary.treatmentStatusLabel}</p>
         <p><span className="font-medium">Última visita:</span> {latestVisitLabel}</p>
         <p><span className="font-medium">Visitas del episodio:</span> {summary.encountersCount}</p>
+        {summary.medicalReferenceDiagnosisText ? (
+          <p><span className="font-medium">Diagnóstico médico:</span> {summary.medicalReferenceDiagnosisText}</p>
+        ) : null}
+        {summary.kinesiologicDiagnosisText ? (
+          <p><span className="font-medium">Impresión kinésica:</span> {summary.kinesiologicDiagnosisText}</p>
+        ) : null}
+        {!summary.medicalReferenceDiagnosisText && !summary.kinesiologicDiagnosisText ? (
+          <p><span className="font-medium">Marco clínico:</span> incompleto</p>
+        ) : null}
         {summary.metrics.length > 0 ? (
           <p>
             <span className="font-medium">Métricas recientes:</span>{" "}

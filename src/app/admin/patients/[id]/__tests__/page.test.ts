@@ -114,6 +114,24 @@ describe("/admin/patients/[id] page", () => {
     expect(mainContactIndex).toBeGreaterThan(addressIndex);
   });
 
+  it("renders compact diagnosis rows in clinical summary without edit controls", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary({
+      medicalReferenceDiagnosisText: "Artrosis de rodilla",
+      kinesiologicDiagnosisText: "Déficit de control femoropatelar",
+    });
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient());
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Diagnóstico médico:</span> Artrosis de rodilla");
+    expect(html).toContain("Impresión kinésica:</span> Déficit de control femoropatelar");
+    expect(html).not.toContain("Editar diagnóstico médico");
+    expect(html).not.toContain("Agregar diagnóstico médico");
+    expect(html).not.toContain("<form");
+  });
+
   it("renders treatment summary with active episode start date", async () => {
     mockNoServiceRequestContext();
     mockClinicalRecentSummary();
