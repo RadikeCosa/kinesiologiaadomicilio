@@ -62,6 +62,10 @@ export interface TreatmentEpisodeHistoryItem {
   closureReason?: string;
   closureDetail?: string;
   serviceRequestId?: string;
+  medicalReferenceDiagnosisText?: string;
+  kinesiologicDiagnosisText?: string;
+  therapeuticGoals?: string;
+  frameworkPlan?: string;
 }
 
 

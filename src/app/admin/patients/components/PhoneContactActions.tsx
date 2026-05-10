@@ -20,7 +20,7 @@ export function PhoneContactActions({
     phone,
     mainContact: { phone: mainContactPhone },
   });
-  const telHref = buildTelHref(phone);
+  const telHref = buildTelHref(phone ?? undefined);
   const hasContactChannel = Boolean(whatsappTarget || telHref);
 
   if (!hasContactChannel) {

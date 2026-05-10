@@ -181,3 +181,21 @@ Estado general: **apto con riesgos controlables**.
 - No incorporación de `Goal`, `Procedure` ni recursos clínicos avanzados en esta fase.
 - No dashboard de tendencia avanzada.
 - No historia clínica de cierre enriquecida (mantener cierre simple).
+
+## Cierre documental Fase 2A (implementado)
+
+- `/admin/patients/[id]/treatment` queda consolidada como **única superficie editable** del marco clínico del ciclo.
+- El marco clínico ahora se edita **campo por campo** (sin guardado masivo):
+  1) diagnóstico médico de referencia;
+  2) diagnóstico kinésico;
+  3) situación funcional inicial;
+  4) objetivo de tratamiento;
+  5) plan marco del tratamiento.
+- Cada campo tiene submit independiente y no existe botón global “guardar todo”.
+- `/admin/patients/[id]/encounters` mantiene consumo del marco clínico en modo read-only, sin edición inline.
+- Cada actualización de campo preserva el resto del contexto clínico y campos estructurales no relacionados del `EpisodeOfCare` (incluyendo `period.start`, `period.end`, `status`, `referralRequest`, diagnósticos/extensiones ajenas y cierre).
+
+### Pendientes explícitos
+- Fase 2B: normalización de naming interno `kinesiologic_diagnosis` con compatibilidad transicional.
+- Posible test E2E posterior para reforzar garantías de superficie completa.
+- Se mantienen no-alcances: sin Goal, sin Procedure, sin IA, sin dashboard clínico y sin cierre clínico enriquecido.

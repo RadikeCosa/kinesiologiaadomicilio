@@ -17,7 +17,7 @@ describe("ClinicalCycleContextCard", () => {
       activeEpisode: { id: "epi-1", startDate: "2026-04-01" },
       mostRecentEpisode: { id: "epi-1", status: "active", startDate: "2026-04-01" },
       clinicalContext: {
-        hasAnyContent: true, medicalReferenceDiagnosisText: "Lumbalgia", initialFunctionalStatus: "Marcha limitada", therapeuticGoals: "Reducir dolor y recuperar autonomía", frameworkPlan: "Plan general", kinesiologicImpressionText: "Compromiso lumbar",
+        hasAnyContent: true, medicalReferenceDiagnosisText: "Lumbalgia", initialFunctionalStatus: "Marcha limitada", therapeuticGoals: "Reducir dolor y recuperar autonomía", frameworkPlan: "Plan general", kinesiologicDiagnosisText: "Compromiso lumbar",
       },
     }));
 

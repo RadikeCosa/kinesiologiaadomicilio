@@ -1,6 +1,6 @@
 export type EpisodeOfCareStatus = "active" | "finished";
 
-export type EpisodeDiagnosisKind = "medical_reference" | "kinesiologic_impression";
+export type EpisodeDiagnosisKind = "medical_reference" | "kinesiologic_diagnosis";
 
 export interface EpisodeDiagnosisReference {
   kind: EpisodeDiagnosisKind;

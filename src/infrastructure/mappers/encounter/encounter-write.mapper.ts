@@ -5,7 +5,9 @@ import { ENCOUNTER_CLINICAL_NOTE_EXTENSION_URLS } from "@/infrastructure/mappers
 import { ENCOUNTER_OPERATIONAL_PUNCTUALITY_EXTENSION_URL } from "@/infrastructure/mappers/encounter/encounter-operational-punctuality.constants";
 import { type FhirEncounter } from "@/infrastructure/mappers/encounter/encounter-fhir.types";
 
-const CLINICAL_NOTE_EXTENSION_URL_SET = new Set(Object.values(ENCOUNTER_CLINICAL_NOTE_EXTENSION_URLS));
+const CLINICAL_NOTE_EXTENSION_URL_SET: ReadonlySet<string> = new Set(
+  Object.values(ENCOUNTER_CLINICAL_NOTE_EXTENSION_URLS),
+);
 
 function buildClinicalNoteExtensions(input: CreateEncounterInput): NonNullable<FhirEncounter["extension"]> {
   const fields = input.clinicalNote;
