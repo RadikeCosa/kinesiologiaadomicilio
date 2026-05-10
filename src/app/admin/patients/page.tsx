@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { MapsLinkAction } from "@/app/admin/patients/components/MapsLinkAction";
-import { PhoneContactActions } from "@/app/admin/patients/components/PhoneContactBlock";
+import { PhoneContactActions } from "@/app/admin/patients/components/PhoneContactActions";
 import { loadPatientsList } from "@/app/admin/patients/data";
 import {
   buildGoogleMapsSearchHref,
@@ -48,7 +48,9 @@ export default async function AdminPatientsPage() {
           </p>
         ) : (
           patients.map((patient) => {
-            const treatmentBadge = getTreatmentBadgePresentation(patient.operationalStatus);
+            const treatmentBadge = getTreatmentBadgePresentation(
+              patient.operationalStatus,
+            );
             const mapsHref = buildGoogleMapsSearchHref(patient.address);
             const addressLabel = formatAddressDisplay(patient.address);
 
@@ -77,7 +79,8 @@ export default async function AdminPatientsPage() {
 
                   <div className="flex flex-wrap items-center justify-between gap-2.5">
                     <p className="text-xs text-slate-600">
-                      DNI: {formatDniDisplay(patient.dni)} · Tel: {formatPhoneDisplay(patient.phone)}
+                      DNI: {formatDniDisplay(patient.dni)} · Tel:{" "}
+                      {formatPhoneDisplay(patient.phone)}
                     </p>
                     <div className="flex flex-wrap items-center justify-end gap-2">
                       {patient.operationalStatus === "active_treatment" ? (
@@ -97,7 +100,9 @@ export default async function AdminPatientsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-sm text-slate-700">Dirección: {addressLabel}</p>
+                    <p className="text-sm text-slate-700">
+                      Dirección: {addressLabel}
+                    </p>
                     {mapsHref ? (
                       <MapsLinkAction
                         className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 underline-offset-2 hover:underline"
