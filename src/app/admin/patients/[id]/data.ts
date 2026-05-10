@@ -15,6 +15,7 @@ import {
 } from "@/infrastructure/repositories/service-request.repository";
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
 import { listFunctionalObservationsByEncounterId } from "@/infrastructure/repositories/observation.repository";
+import { loadEpisodeClinicalContextReadModel } from "@/app/admin/patients/[id]/clinical-context";
 
 export interface PatientServiceRequestReadContext {
   serviceRequests: ServiceRequest[];
@@ -104,6 +105,8 @@ export interface PatientClinicalRecentSummary {
   encountersCount: number;
   metrics: ClinicalRecentSummaryItem[];
   metricsEmptyLabel: string;
+  medicalReferenceDiagnosisText?: string;
+  kinesiologicDiagnosisText?: string;
   ctaLabel: "Ver gestión clínica" | "Registrar primera visita";
 }
 
@@ -159,6 +162,8 @@ export async function loadPatientClinicalRecentSummary(patientId: string): Promi
     });
   }));
 
+  const clinicalContext = effectiveEpisode ? await loadEpisodeClinicalContextReadModel(effectiveEpisode) : null;
+
   const metrics = RECENT_FUNCTIONAL_PRIORITY
     .flatMap((code) => {
       const metric = metricsByCode.get(code);
@@ -179,6 +184,8 @@ export async function loadPatientClinicalRecentSummary(patientId: string): Promi
     encountersCount: scopedEncounters.length,
     metrics,
     metricsEmptyLabel: activeEpisode ? "Sin registros funcionales todavía" : "Sin registros funcionales",
+    medicalReferenceDiagnosisText: clinicalContext?.medicalReferenceDiagnosisText,
+    kinesiologicDiagnosisText: clinicalContext?.kinesiologicDiagnosisText,
     ctaLabel: activeEpisode && scopedEncounters.length === 0 ? "Registrar primera visita" : "Ver gestión clínica",
   };
 }
