@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { PhoneContactActions } from "@/app/admin/patients/components/PhoneContactBlock";
+import { PhoneContactActions } from "@/app/admin/patients/components/PhoneContactActions";
 
 describe("PhoneContactActions", () => {
   it("shows patient WhatsApp action when patient phone exists", () => {
@@ -10,7 +10,9 @@ describe("PhoneContactActions", () => {
       createElement(PhoneContactActions, { phone: "+54 299 555 0101", mainContactPhone: "+54 299 555 0202" }),
     );
 
-    expect(html).toContain("Enviar WhatsApp");
+    expect(html).toContain("WhatsApp paciente");
+    expect(html).toContain('aria-label="Enviar WhatsApp al paciente"');
+    expect(html).toContain('title="Enviar WhatsApp al paciente"');
     expect(html).toContain("https://wa.me/542995550101");
   });
 
@@ -19,7 +21,9 @@ describe("PhoneContactActions", () => {
       createElement(PhoneContactActions, { phone: undefined, mainContactPhone: "+54 299 555 0202" }),
     );
 
-    expect(html).toContain("Enviar WhatsApp a contacto principal");
+    expect(html).toContain("WhatsApp contacto");
+    expect(html).toContain('aria-label="Enviar WhatsApp al contacto principal"');
+    expect(html).toContain('title="Enviar WhatsApp al contacto principal"');
     expect(html).toContain("https://wa.me/542995550202");
   });
 
