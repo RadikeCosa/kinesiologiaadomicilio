@@ -8,6 +8,7 @@ import {
   finishActiveEpisodeOfCare,
   getActiveEpisodeByPatientId,
   getEpisodeById,
+  getMostRecentEpisodeByPatientId,
   listEpisodeOfCareByIncomingReferral,
   updateEpisodeOfCareClinicalContext,
 } from "@/infrastructure/repositories/episode-of-care.repository";
@@ -95,6 +96,102 @@ describe("episode-of-care.repository (FHIR)", () => {
 
     expect(getSpy).toHaveBeenCalledWith("EpisodeOfCare?patient=Patient%2Fpat-1&status=active");
     expect(episode).toMatchObject({ id: "epi-1", patientId: "pat-1", status: "active" });
+  });
+
+  it("gets most recent episode by temporal comparison (not lexicographic)", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-early",
+            status: "finished",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-05-2T00:00:00Z" },
+          },
+        },
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-late-legacy",
+            status: "active",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-05-10T00:00:00Z" },
+          },
+        },
+      ],
+    });
+
+    const episode = await getMostRecentEpisodeByPatientId("pat-1");
+    expect(episode?.id).toBe("epi-late-legacy");
+  });
+
+  it("resolves most recent episode correctly across timezone offsets", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-a",
+            status: "finished",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-06-01T01:00:00+02:00" },
+          },
+        },
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-b",
+            status: "active",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-05-31T23:30:00Z" },
+          },
+        },
+      ],
+    });
+
+    const episode = await getMostRecentEpisodeByPatientId("pat-1");
+    expect(episode?.id).toBe("epi-b");
+  });
+
+  it("ignores invalid/absent starts when resolving most recent and keeps deterministic ties", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-invalid",
+            status: "finished",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "not-a-date" },
+          },
+        },
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-valid",
+            status: "active",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-04-10" },
+          },
+        },
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-valid-same-ts",
+            status: "finished",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-04-10" },
+          },
+        },
+      ],
+    });
+
+    const episode = await getMostRecentEpisodeByPatientId("pat-1");
+    expect(episode?.id).toBe("epi-valid");
   });
 
   it("finishes active episode using GET + mapper + PUT", async () => {

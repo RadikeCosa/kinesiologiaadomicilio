@@ -31,11 +31,37 @@ function getMostRecentEpisode(episodes: FhirEpisodeOfCare[]): FhirEpisodeOfCare 
     return null;
   }
 
-  return episodes.reduce((latest, current) => {
-    const latestStart = latest.period?.start ?? "";
-    const currentStart = current.period?.start ?? "";
+  function toSafeTimestamp(value: string | undefined): number | null {
+    if (!value) {
+      return null;
+    }
 
-    return currentStart > latestStart ? current : latest;
+    const timestamp = new Date(value).getTime();
+    return Number.isNaN(timestamp) ? null : timestamp;
+  }
+
+  return episodes.reduce((latest, current) => {
+    const latestTimestamp = toSafeTimestamp(latest.period?.start);
+    const currentTimestamp = toSafeTimestamp(current.period?.start);
+
+    if (latestTimestamp === null && currentTimestamp === null) {
+      return latest;
+    }
+
+    if (latestTimestamp === null) {
+      return current;
+    }
+
+    if (currentTimestamp === null) {
+      return latest;
+    }
+
+    if (currentTimestamp === latestTimestamp) {
+      // Keep stable deterministic behavior on ties by preserving first seen.
+      return latest;
+    }
+
+    return currentTimestamp > latestTimestamp ? current : latest;
   });
 }
 
