@@ -594,6 +594,17 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - Se mantiene separación UX: valores puntuales en cards de visita vs tendencia global en bloque dedicado.
 - Sin dashboard, sin gráficos y sin interpretación automática clínica.
 
+#### Nota de cierre documental — Batch Observations en `/encounters` (2026-05-12)
+- **Estado:** cerrado con validación en HAPI local real.
+- **Alcance confirmado:** el loader de `/admin/patients/[id]/encounters` dejó de consultar `Observation` funcional por visita (N+1) y ahora consume un método batch único por `encounterIds` del episodio efectivo.
+- **Query batch implementada:** `Observation?encounter=Encounter/{id1},Encounter/{id2},...`.
+- **Validación HAPI real (2026-05-12):** `GET /metadata` OK (`HTTP 200`) en `http://localhost:8080/fhir`; `software.name=HAPI FHIR Server`, `software.version=8.8.0`, `fhirVersion=4.0.1`; la query `Observation?encounter=Encounter/1004,Encounter/1005` devolvió observaciones de ambos encounters.
+- **Scoping preservado:** episodio efectivo (activo o, en su ausencia, último registrado); además se filtra defensivamente por `patientId` y por `encounterId` dentro del set efectivo.
+- **Filtro defensivo validado:** no se mezclaron observaciones de otro paciente (`1015`) ni de encounters fuera del episodio efectivo (`1012`).
+- **Derivados preservados:** cards por visita y tendencia funcional siguen derivándose de `Observation`; no se persisten métricas derivadas.
+- **Compatibilidad HAPI/fallback:** en este entorno HAPI 8.8.0 la query batch con OR por coma funcionó en runtime; el fallback queda activo como compatibilidad para servidores FHIR que no soporten ese formato en `encounter`.
+- **No-alcances preservados:** sin cambios de UI/captura, sin cambios de schemas/actions, sin cambios de modelo clínico/FHIR de dominio, sin dashboard/gráficos/IA, sin `Procedure`/`Goal`.
+
 #### Nota de cierre documental — P2 resumen clínico reciente en hub (2026-05-09)
 - **Estado:** cerrada / aprobada.
 - **Alcance confirmado:** `/admin/patients/[id]` incorpora `Resumen clínico reciente` como síntesis orientativa con estado de tratamiento, última visita, visitas del episodio, hasta 2 métricas recientes y CTA a Gestión clínica.

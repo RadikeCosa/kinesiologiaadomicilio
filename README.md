@@ -99,6 +99,8 @@ El proyecto está en etapa **híbrida transicional**:
 - Fase 2B cerrada: se normalizó el naming interno de diagnóstico kinésico a `kinesiologic_diagnosis`.
 - No-alcances preservados: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido.
 - En Fase 2A/2B PR1 se incorporó modelado mínimo de `Observation` funcional por visita (TUG, dolor 0–10, bipedestación y marcha en minutos) con captura opcional; continúan fuera de alcance `Procedure`, `Goal`, IA y tendencia avanzada/dashboard clínico.
+- En `/admin/patients/[id]/encounters` el loader ya no hace N+1 por visita para `Observation` funcional: usa lectura batch por `encounterIds` del episodio efectivo vía `Observation?encounter=Encounter/{id1},Encounter/{id2},...`, manteniendo métricas derivadas en lectura (no persistidas) y scoping por episodio efectivo.
+- Hardening de compatibilidad: si un servidor FHIR rechaza el OR por coma en `encounter`, el repositorio aplica fallback interno controlado por encounter individual sin cambiar la firma batch consumida por el loader.
 
 #### Mapa corto de superficies privadas de paciente (UI vigente)
 - **Gestión administrativa** (`/admin/patients/[id]/administrative`): datos del paciente y solicitudes de atención.
