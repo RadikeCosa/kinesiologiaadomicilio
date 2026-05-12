@@ -1,6 +1,11 @@
 import type { Encounter } from "@/domain/encounter/encounter.types";
 
 export interface EncounterStats {
+  /**
+   * Conteo global de encuentros del paciente (todos los episodios).
+   * Las métricas operativas/clínicas restantes de este contrato se calculan
+   * sobre el episodio efectivo resuelto por el loader.
+   */
   totalCount: number;
   treatmentCount: number;
   lastStartedAt: string | null;
