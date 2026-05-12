@@ -139,6 +139,8 @@ export function mapEpisodeOfCareRead(resource: EpisodeOfCare): EpisodeOfCare {
     serviceRequestId: resource.serviceRequestId,
     closureReason: resource.closureReason,
     closureDetail: resource.closureDetail,
+    diagnosisReferences: resource.diagnosisReferences,
+    clinicalContext: resource.clinicalContext,
   };
 }
 

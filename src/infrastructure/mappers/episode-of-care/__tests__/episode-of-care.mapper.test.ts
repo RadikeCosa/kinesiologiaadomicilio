@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { mapFhirEpisodeOfCareToDomain } from "@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper";
+import { mapEpisodeOfCareRead, mapFhirEpisodeOfCareToDomain } from "@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper";
 import {
   applyEpisodeClinicalContextToFhir,
   applyFinishEpisodeOfCareToFhir,
@@ -102,6 +102,35 @@ describe("episode-of-care mappers", () => {
     ]);
   });
 
+
+
+  it("preserves diagnosis and clinical context when remapping domain read model", () => {
+    const mapped = mapEpisodeOfCareRead({
+      id: "epi-domain",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-05-01",
+      diagnosisReferences: [
+        { kind: "medical_reference", conditionId: "cond-1" },
+        { kind: "kinesiologic_diagnosis", conditionId: "cond-2" },
+      ],
+      clinicalContext: {
+        initialFunctionalStatus: "Inicial",
+        therapeuticGoals: "Meta",
+        frameworkPlan: "Plan",
+      },
+    });
+
+    expect(mapped.diagnosisReferences).toEqual([
+      { kind: "medical_reference", conditionId: "cond-1" },
+      { kind: "kinesiologic_diagnosis", conditionId: "cond-2" },
+    ]);
+    expect(mapped.clinicalContext).toEqual({
+      initialFunctionalStatus: "Inicial",
+      therapeuticGoals: "Meta",
+      frameworkPlan: "Plan",
+    });
+  });
   it("maps FHIR EpisodeOfCare to domain", () => {
     const mapped = mapFhirEpisodeOfCareToDomain({
       resourceType: "EpisodeOfCare",
