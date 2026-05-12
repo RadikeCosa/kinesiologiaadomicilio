@@ -168,6 +168,63 @@ describe("patient-write.mapper", () => {
     expect(mapped.telecom?.[0]).not.toHaveProperty("use");
   });
 
+  it("preserves external identifier/name/address/contact while updating own editable fields", () => {
+    const mapped = mapUpdatePatientInputToFhir({
+      existing: {
+        resourceType: "Patient",
+        id: "pat-ext",
+        identifier: [
+          { system: "http://hospital.local/mrn", value: "MRN-123" },
+          { system: DNI_IDENTIFIER_SYSTEM, value: "30111222" },
+        ],
+        name: [
+          { family: "Legacy", given: ["Nombre"], use: "official" },
+          { text: "Alias externo", use: "nickname" },
+        ],
+        telecom: [
+          { system: "phone", value: "+54 299 555 0101" },
+          { system: "email", value: "legacy@example.com" },
+        ],
+        address: [{ text: "Dirección 1" }, { text: "Dirección 2 (externa)" }],
+        contact: [
+          {
+            name: { text: "Contacto principal legado" },
+            relationship: [{ text: "caregiver" }],
+            telecom: [{ system: "phone", value: "+54 299 555 0199" }],
+          },
+          {
+            name: { text: "Contacto secundario externo" },
+            telecom: [{ system: "phone", value: "+54 299 555 0188" }],
+          },
+        ],
+      },
+      update: {
+        id: "pat-ext",
+        firstName: "Ana",
+        lastName: "Gómez",
+        gender: "female",
+      },
+    });
+
+    expect(mapped.identifier).toEqual([
+      { system: "http://hospital.local/mrn", value: "MRN-123" },
+      { system: DNI_IDENTIFIER_SYSTEM, value: "30111222" },
+    ]);
+    expect(mapped.address).toEqual([{ text: "Dirección 1" }, { text: "Dirección 2 (externa)" }]);
+    expect(mapped.contact).toEqual([
+      {
+        name: { text: "Contacto principal legado" },
+        relationship: [{ text: "caregiver" }],
+        telecom: [{ system: "phone", value: "+54 299 555 0199" }],
+      },
+      {
+        name: { text: "Contacto secundario externo" },
+        telecom: [{ system: "phone", value: "+54 299 555 0188" }],
+      },
+    ]);
+    expect(mapped.name).toEqual([{ family: "Gómez", given: ["Ana"], text: "Ana Gómez" }]);
+  });
+
   it("maps legacy free text relationship into transitional relationship catalog", () => {
     const mapped = mapCreatePatientInputToFhir({
       firstName: "Ana",

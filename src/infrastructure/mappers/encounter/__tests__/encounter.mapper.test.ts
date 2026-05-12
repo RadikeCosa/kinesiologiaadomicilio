@@ -129,6 +129,29 @@ describe("encounter mappers", () => {
     ]);
   });
 
+  it("preserves unknown, clinical and punctuality extensions on period update", () => {
+    const mapped = mapEncounterTimeRangeUpdate(
+      {
+        resourceType: "Encounter",
+        id: "enc-preserve",
+        status: "finished",
+        extension: [
+          { url: "https://external.local/ext", valueString: "keep" },
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "dolor leve" },
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1", valueCode: "delayed" },
+        ],
+      },
+      "2026-04-17T10:45:00Z",
+      "2026-04-17T11:50:00Z",
+    );
+
+    expect(mapped.extension).toEqual([
+      { url: "https://external.local/ext", valueString: "keep" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1", valueCode: "delayed" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "dolor leve" },
+    ]);
+  });
+
   it("maps legacy FHIR Encounter with start===end without exposing endedAt", () => {
     const mapped = mapFhirEncounterToDomain({
       resourceType: "Encounter",
