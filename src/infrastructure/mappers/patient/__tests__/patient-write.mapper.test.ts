@@ -164,8 +164,11 @@ describe("patient-write.mapper", () => {
       },
     });
 
-    expect(mapped.telecom).toEqual([{ system: "phone", value: "+542995550101" }]);
-    expect(mapped.telecom?.[0]).not.toHaveProperty("use");
+    expect(mapped.telecom).toEqual([
+      { system: "email", value: "ana@example.com" },
+      { system: "phone", value: "+542995550101" },
+    ]);
+    expect(mapped.telecom?.[1]).not.toHaveProperty("use");
   });
 
   it("preserves external identifier/name/address/contact while updating own editable fields", () => {
@@ -222,7 +225,7 @@ describe("patient-write.mapper", () => {
         telecom: [{ system: "phone", value: "+54 299 555 0188" }],
       },
     ]);
-    expect(mapped.name).toEqual([{ family: "Gómez", given: ["Ana"], text: "Ana Gómez" }]);
+    expect(mapped.name).toEqual([{ family: "Gómez", given: ["Ana"], text: "Ana Gómez" }, { text: "Alias externo", use: "nickname" }]);
   });
 
   it("maps legacy free text relationship into transitional relationship catalog", () => {

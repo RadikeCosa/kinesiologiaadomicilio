@@ -135,6 +135,31 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Trazabilidad:** commit `fe22eca`, PR `Fix treatment clinical context read-model data loss`.
 - **Validación ejecutada:** `npm run lint` + `npm test -- src/infrastructure/mappers/episode-of-care/__tests__/episode-of-care.mapper.test.ts src/app/admin/patients/[id]/treatment/__tests__/page.test.ts src/app/admin/patients/[id]/encounters/components/ClinicalCycleContextCard.test.ts`.
 
+
+#### Nota de cierre documental — FHIR-HARDEN-002 repositorios/roundtrip liviano (2026-05-12)
+- **Estado:** cerrado / aprobado.
+- **Alcance confirmado:** hardening de preservación en capa repositorio con patrón `GET -> merge -> PUT` usando cliente FHIR mockeado (sin servidor FHIR real en este cierre).
+- **Recursos cubiertos:** `Patient`, `ServiceRequest`, `EpisodeOfCare`, `Encounter`.
+- **Hallazgo real:** en `Patient` se detectó pérdida de datos externos en update (`identifier` no-DNI, `telecom` no-phone, `name` externo).
+- **Fix mínimo aplicado:** patch puntual en mapper write de `Patient` para preservar esos elementos externos durante merge controlado.
+- **Garantía lograda:** superior a tests unitarios de mappers aislados y aún inferior a validación end-to-end contra servidor FHIR real/HAPI.
+- **Pendientes explícitos:** prueba contra servidor FHIR real/local HAPI, mitigación N+1 de `Observation`, atomicidad/consistencia `Encounter -> Observation`.
+- **No-alcances preservados:** sin cambios UI/copy/rutas, sin cambios de dominio/flujos, sin perfiles FHIR formales, sin migraciones, sin `Procedure`/`Goal`/IA.
+- **Trazabilidad documental técnica:** `docs/fhir/fhir-harden-002-repository-roundtrip-preservacion.md`.
+
+#### Nota de cierre documental — FHIR-CONSISTENCY-001A éxito parcial Encounter→Observation (2026-05-12)
+- **Estado:** cerrado / aprobado.
+- **Decisión V1 vigente:** sin atomicidad dura entre `Encounter` y `Observation` en creación de visita.
+- **Regla operativa vigente:** `Encounter` es la unidad principal de la visita realizada; métricas funcionales (`Observation`) son anexos opcionales que pueden fallar parcialmente.
+- **Semántica de resultado vigente en action:**
+  1. `ok:false` = fallo total (no se creó `Encounter`);
+  2. `ok:true`, `partial:false` = éxito total;
+  3. `ok:true`, `partial:true` = éxito parcial (visita creada con métricas fallidas).
+- **Comportamiento ante éxito parcial:** no se borra `Encounter`, no hay rollback compensatorio, se reportan `failedObservationCodes` y logging server-side mínimo (`patientId`, `encounterId`, códigos fallidos).
+- **Pendientes explícitos:** reintento manual dirigido para métricas de `Encounter` existente; eventual integración/validación HAPI real; N+1 de `Observation` sigue fuera de este PR.
+- **No-alcances preservados:** sin transacciones Bundle, sin colas/jobs, sin dashboard, sin cambios de recursos FHIR, sin cambios de rutas, sin rediseño UI y sin mezclar N+1/performance.
+- **Trazabilidad documental técnica:** `docs/fhir/fhir-consistency-001a-encounter-observation-partial-success.md`.
+
 #### Nota de cierre documental — FHIR-HARDEN-001 mappers (2026-05-12)
 - **Estado:** cerrado / aprobado.
 - **Alcance confirmado:** hardening de **tests unitarios de mappers FHIR** orientado a preservación y roundtrip parcial (sin cambios de runtime).

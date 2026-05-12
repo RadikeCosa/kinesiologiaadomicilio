@@ -280,4 +280,40 @@ describe("episode-of-care.repository (FHIR)", () => {
     expect(payload.extension?.some((item) => item.url.includes("closure-reason"))).toBe(true);
     expect(payload.diagnosis).toHaveLength(1);
   });
+
+  it("preserves referralRequest, unknown diagnosis roles and unknown extensions on clinical context update", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "EpisodeOfCare",
+      id: "epi-preserve",
+      status: "active",
+      patient: { reference: "Patient/pat-1" },
+      referralRequest: [{ reference: "ServiceRequest/sr-99" }],
+      period: { start: "2026-04-01" },
+      diagnosis: [
+        { condition: { reference: "Condition/cond-local-old" }, role: { coding: [{ code: "kinesiologic" }] } },
+        { condition: { reference: "Condition/cond-external" }, role: { coding: [{ system: "http://acme.test", code: "external" }] } },
+      ],
+      extension: [
+        { url: "https://example.org/fhir/StructureDefinition/external-flag", valueString: "keep-me" },
+      ],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "EpisodeOfCare",
+      id: "epi-preserve",
+      status: "active",
+      patient: { reference: "Patient/pat-1" },
+      period: { start: "2026-04-01" },
+    });
+
+    await updateEpisodeOfCareClinicalContext({
+      episodeId: "epi-preserve",
+      diagnosisReferences: [{ kind: "medical_reference", conditionId: "cond-local-new" }],
+      clinicalContext: { treatmentPlan: "plan" },
+    });
+
+    const payload = putSpy.mock.calls[0]?.[1] as { diagnosis?: Array<{ condition?: { reference?: string } }>; extension?: Array<{ url: string }>; referralRequest?: unknown[] };
+    expect(payload.referralRequest).toEqual([{ reference: "ServiceRequest/sr-99" }]);
+    expect(payload.diagnosis?.some((item) => item.condition?.reference === "Condition/cond-external")).toBe(true);
+    expect(payload.extension?.some((item) => item.url === "https://example.org/fhir/StructureDefinition/external-flag")).toBe(true);
+  });
 });

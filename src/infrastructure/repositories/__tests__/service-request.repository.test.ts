@@ -241,6 +241,41 @@ describe("service-request.repository (FHIR)", () => {
     );
   });
 
+  it("preserves external notes + tagged own notes and existing statusReason on status update", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-preserve",
+      status: "active",
+      intent: "order",
+      subject: { reference: "Patient/pat-1" },
+      statusReason: { text: "Motivo previo" },
+      note: [
+        { text: "nota externa A" },
+        { text: "workflow-status:v1:in_review" },
+        { text: "resolution-reason:v1:Razón vieja" },
+        { text: "nota externa B" },
+      ],
+      reasonCode: [{ text: "Motivo original" }],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-preserve",
+      status: "active",
+      intent: "order",
+      subject: { reference: "Patient/pat-1" },
+    });
+
+    await updateServiceRequestStatus({ id: "sr-preserve", status: "accepted" });
+
+    const payload = putSpy.mock.calls[0]?.[1] as { note?: Array<{ text?: string }>; statusReason?: { text?: string } };
+    expect(payload.statusReason).toBeUndefined();
+    expect(payload.note?.map((item) => item.text)).toEqual([
+      "nota externa A",
+      "nota externa B",
+      "workflow-status:v1:accepted",
+    ]);
+  });
+
   it("updates cancelled with revoked + statusReason.text + resolution note", async () => {
     vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "ServiceRequest",

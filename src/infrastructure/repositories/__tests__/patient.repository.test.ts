@@ -108,6 +108,54 @@ describe("patient.repository (FHIR)", () => {
     expect(updated.firstName).toBe("Ana María");
   });
 
+  it("preserves external identifiers/address/contact/telecom/name entries when updating owned fields", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Patient",
+      id: "pat-preserve",
+      identifier: [
+        { system: "urn:mrn", value: "MRN-123" },
+        { system: DNI_IDENTIFIER_SYSTEM, value: "32123456" },
+      ],
+      name: [
+        { use: "official", family: "Pérez", given: ["Ana"] },
+        { use: "nickname", text: "Ani" },
+      ],
+      address: [{ use: "home", line: ["Calle 1 123"], city: "CABA" }],
+      telecom: [{ system: "phone", value: "+541155551111", use: "mobile" }],
+      contact: [{ relationship: [{ text: "Madre" }], name: { text: "María" } }],
+      gender: "female",
+      birthDate: "1988-01-10",
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "Patient",
+      id: "pat-preserve",
+      name: [{ family: "Pérez", given: ["Ana María"] }],
+      identifier: [{ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }],
+    });
+
+    await updatePatient({
+      id: "pat-preserve",
+      firstName: "Ana María",
+      lastName: "Pérez",
+      dni: "32123456",
+    });
+
+    const payload = putSpy.mock.calls[0]?.[1] as Record<string, unknown>;
+    expect(payload.identifier).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ system: "urn:mrn", value: "MRN-123" }),
+        expect.objectContaining({ system: DNI_IDENTIFIER_SYSTEM, value: "32123456" }),
+      ]),
+    );
+    expect(payload.name).toEqual([
+      { family: "Pérez", given: ["Ana", "María"], text: "Ana María Pérez" },
+      { use: "nickname", text: "Ani" },
+    ]);
+    expect(payload.address).toEqual([{ use: "home", line: ["Calle 1 123"], city: "CABA" }]);
+    expect(payload.telecom).toEqual([{ system: "phone", value: "+541155551111" }]);
+    expect(payload.contact).toEqual([{ relationship: [{ text: "Madre" }], name: { text: "María" } }]);
+  });
+
   it("checks if another patient exists for a DNI", async () => {
     const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "Bundle",
