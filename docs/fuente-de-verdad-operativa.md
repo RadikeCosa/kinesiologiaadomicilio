@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-10 (UTC)
+> Última actualización: 2026-05-12 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -111,6 +111,29 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - se preservan roles diagnósticos desconocidos.
 - **No-alcances preservados:** sin IA, sin `Observation`, sin `Procedure`, sin `Goal`, sin cambios de reglas de inicio/cierre de tratamiento y sin cambios de scoping de `/encounters`.
 - **Checklist ejecutado:** `docs/checklist-sincronizacion-doc-codigo.md`.
+
+#### Nota de hardening/cierre de bugfix — lectura de contexto longitudinal en `/treatment` (2026-05-12)
+- **Estado:** corregido / cerrado.
+- **Bug corregido:** en `/admin/patients/[id]/treatment` podía verse `No registrado` al volver/recargar pese a que los datos estaban persistidos; la pérdida era solo de **lectura/reconstrucción del read-model** (no de persistencia).
+- **Causa raíz:** `mapEpisodeOfCareRead` descartaba `diagnosisReferences` y `clinicalContext`.
+- **Fix aplicado:** `mapEpisodeOfCareRead` preserva `diagnosisReferences` + `clinicalContext`, evitando pérdida de:
+  - diagnóstico médico de referencia;
+  - impresión/diagnóstico kinésico;
+  - `initialFunctionalStatus`;
+  - `therapeuticGoals`;
+  - `frameworkPlan`.
+- **Responsabilidad de superficies (sin cambios):**
+  - `/admin/patients/[id]/treatment` continúa como **superficie dueña de edición** del contexto clínico longitudinal del ciclo;
+  - `/admin/patients/[id]/encounters` continúa consumiendo ese contexto en **modo read-only**, sin duplicar edición.
+- **No-alcances preservados (explícitos):**
+  - sin cambios de modelo FHIR;
+  - sin cambios de persistencia;
+  - sin cambios de actions;
+  - sin cambios de `ServiceRequest`;
+  - sin cambios de `Encounter`;
+  - sin cambios de UX/copy.
+- **Trazabilidad:** commit `fe22eca`, PR `Fix treatment clinical context read-model data loss`.
+- **Validación ejecutada:** `npm run lint` + `npm test -- src/infrastructure/mappers/episode-of-care/__tests__/episode-of-care.mapper.test.ts src/app/admin/patients/[id]/treatment/__tests__/page.test.ts src/app/admin/patients/[id]/encounters/components/ClinicalCycleContextCard.test.ts`.
 
 
 
