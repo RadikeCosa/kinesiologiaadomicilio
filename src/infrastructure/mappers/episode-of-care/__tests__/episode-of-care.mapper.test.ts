@@ -316,4 +316,34 @@ describe("episode-of-care mappers", () => {
       { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-framework-plan-v1", valueString: "plan" },
     ]);
   });
+
+  it("preserves referralRequest and unknown diagnosis roles while updating only local diagnosis/context", () => {
+    const updated = applyEpisodeClinicalContextToFhir(
+      {
+        resourceType: "EpisodeOfCare",
+        id: "epi-preserve",
+        status: "active",
+        referralRequest: [{ reference: "ServiceRequest/sr-keep" }],
+        diagnosis: [
+          { condition: { reference: "Condition/old-med" }, role: { coding: [{ system: "https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1", code: "medical_reference" }] } },
+          { condition: { reference: "Condition/ext-keep" }, role: { coding: [{ system: "http://external/roles", code: "other-role" }] } },
+        ],
+        extension: [{ url: "https://external.local/ext", valueString: "keep" }],
+      },
+      {
+        diagnosisReferences: [{ kind: "kinesiologic_diagnosis", conditionId: "new-kine" }],
+        clinicalContext: { therapeuticGoals: "Recuperar marcha" },
+      },
+    );
+
+    expect(updated.referralRequest).toEqual([{ reference: "ServiceRequest/sr-keep" }]);
+    expect(updated.diagnosis).toEqual([
+      { condition: { reference: "Condition/ext-keep" }, role: { coding: [{ system: "http://external/roles", code: "other-role" }] } },
+      { condition: { reference: "Condition/new-kine" }, role: { coding: [{ system: "https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1", code: "kinesiologic_diagnosis" }] } },
+    ]);
+    expect(updated.extension).toEqual([
+      { url: "https://external.local/ext", valueString: "keep" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-therapeutic-goals-v1", valueString: "Recuperar marcha" },
+    ]);
+  });
 });

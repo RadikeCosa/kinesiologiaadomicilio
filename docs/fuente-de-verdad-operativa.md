@@ -135,6 +135,20 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Trazabilidad:** commit `fe22eca`, PR `Fix treatment clinical context read-model data loss`.
 - **Validación ejecutada:** `npm run lint` + `npm test -- src/infrastructure/mappers/episode-of-care/__tests__/episode-of-care.mapper.test.ts src/app/admin/patients/[id]/treatment/__tests__/page.test.ts src/app/admin/patients/[id]/encounters/components/ClinicalCycleContextCard.test.ts`.
 
+#### Nota de cierre documental — FHIR-HARDEN-001 mappers (2026-05-12)
+- **Estado:** cerrado / aprobado.
+- **Alcance confirmado:** hardening de **tests unitarios de mappers FHIR** orientado a preservación y roundtrip parcial (sin cambios de runtime).
+- **Recursos cubiertos:** `Patient`, `ServiceRequest`, `EpisodeOfCare`, `Encounter`.
+- **Garantía entregada:** cobertura de preservación de campos externos/no propios en capa mapper (incluyendo `extension[]`, `note[]`, referencias no locales y arrays en updates, según recurso).
+- **Límite explícito del cierre:** no constituye garantía end-to-end de repositorio/servidor (`create -> read -> update -> read`) ni validación integral PUT/GET para todos los payloads externos.
+- **Pendientes explícitos posteriores:**
+  1. cobertura equivalente a nivel repositorio PUT/GET;
+  2. matriz de roundtrip integrada por recurso;
+  3. consistencia/atomicidad `Encounter -> Observation`;
+  4. mitigación de N+1 en consultas de `Observation`.
+- **No-alcances preservados:** sin cambios funcionales, sin cambios UI/copy/rutas, sin cambios de dominio, sin perfiles FHIR formales, sin migraciones, sin `Procedure`/`Goal`/IA.
+- **Trazabilidad documental técnica:** `docs/fhir/fhir-harden-001-mappers-roundtrip-preservacion.md`.
+
 
 
 

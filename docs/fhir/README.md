@@ -1,7 +1,7 @@
 # Documentación FHIR
 
 > Estado: vigente
-> Última actualización: 2026-04-28 (UTC)
+> Última actualización: 2026-05-12 (UTC)
 
 ## Objetivo
 
@@ -75,6 +75,11 @@ Centralizar la documentación de trabajo para la remediación técnica del model
    - cierre documental de requester transicional (`requester.display`) para V1;
    - definición de `requesterType`/`requesterContact` como deuda controlada de dominio/read-model;
    - contrato mínimo de búsquedas V1 y prohibición de `EpisodeOfCare?referralRequest=...`.
+
+15. `fhir-harden-001-mappers-roundtrip-preservacion.md`
+   - cierre documental de hardening de tests FHIR en mappers;
+   - alcance real de preservación/roundtrip parcial por recurso (`Patient`, `ServiceRequest`, `EpisodeOfCare`, `Encounter`);
+   - pendientes explícitos que siguen fuera de este PR (repositorios roundtrip E2E, atomicidad `Encounter->Observation`, mitigación N+1).
 
 ## Flujo recomendado de trabajo
 

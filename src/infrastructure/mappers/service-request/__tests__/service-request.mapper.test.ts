@@ -312,6 +312,38 @@ describe("service-request mappers", () => {
     });
   });
 
+  it("preserves unknown note entries and tagged own notes when changing status", () => {
+    const updated = applyServiceRequestStatusUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-preserve-notes",
+        status: "active",
+        subject: { reference: "Patient/pat-1" },
+        requester: { display: "Dra. Pérez" },
+        note: [
+          { text: "external-note:prioridad alta" },
+          { text: "reported-diagnosis:v1:Gonalgia" },
+          { text: "requester-contact:v1:+54 9 299 123 4567" },
+          { text: "resolution-reason:v1:motivo viejo" },
+        ],
+      },
+      {
+        id: "sr-preserve-notes",
+        status: "closed_without_treatment",
+        closedReasonText: "No corresponde actualmente",
+      },
+    );
+
+    expect(updated.subject).toEqual({ reference: "Patient/pat-1" });
+    expect(updated.requester).toEqual({ display: "Dra. Pérez" });
+    expect(updated.note).toEqual([
+      { text: "external-note:prioridad alta" },
+      { text: "reported-diagnosis:v1:Gonalgia" },
+      { text: "requester-contact:v1:+54 9 299 123 4567" },
+      { text: "resolution-reason:v1:No corresponde actualmente" },
+    ]);
+  });
+
   it("buildServiceRequestNotes returns only tagged known entries", () => {
     const notes = buildServiceRequestNotes({
       reportedDiagnosisText: " Dx informado ",
@@ -361,6 +393,35 @@ describe("service-request mappers", () => {
     });
 
     expect(mapped.status).toBe("accepted");
+  });
+
+  it("maps revoked with statusReason coding fallback and note fallback", () => {
+    const fromCoding = mapFhirServiceRequestToDomain({
+      resourceType: "ServiceRequest",
+      id: "sr-revoked-coding",
+      status: "revoked",
+      subject: { reference: "Patient/pat-3" },
+      authoredOn: "2026-04-30",
+      reasonCode: [{ text: "Dolor lumbar" }],
+      statusReason: {
+        coding: [{ system: "http://example.org/reasons", code: "x", display: "Paciente cancela" }],
+      },
+    });
+
+    const fromNote = mapFhirServiceRequestToDomain({
+      resourceType: "ServiceRequest",
+      id: "sr-revoked-note",
+      status: "revoked",
+      subject: { reference: "Patient/pat-4" },
+      authoredOn: "2026-04-30",
+      reasonCode: [{ text: "Dolor lumbar" }],
+      note: [{ text: "resolution-reason:v1:No inició por agenda" }],
+    });
+
+    expect(fromCoding.status).toBe("closed_without_treatment");
+    expect(fromCoding.closedReasonText).toBe("Paciente cancela");
+    expect(fromNote.status).toBe("closed_without_treatment");
+    expect(fromNote.closedReasonText).toBe("No inició por agenda");
   });
 
   it("maps active + unknown workflow-status as in_review", () => {
