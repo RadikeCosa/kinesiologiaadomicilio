@@ -594,6 +594,15 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - Se mantiene separación UX: valores puntuales en cards de visita vs tendencia global en bloque dedicado.
 - Sin dashboard, sin gráficos y sin interpretación automática clínica.
 
+#### Nota de cierre documental — Batch Observations en `/encounters` (2026-05-12)
+- **Estado:** cerrado a nivel código/tests; validación contra HAPI real/local pendiente de disponibilidad de entorno.
+- **Alcance confirmado:** el loader de `/admin/patients/[id]/encounters` dejó de consultar `Observation` funcional por visita (N+1) y ahora consume un método batch único por `encounterIds` del episodio efectivo.
+- **Query batch implementada:** `Observation?encounter=Encounter/{id1},Encounter/{id2},...`.
+- **Scoping preservado:** episodio efectivo (activo o, en su ausencia, último registrado); además se filtra defensivamente por `patientId` y por `encounterId` dentro del set efectivo.
+- **Derivados preservados:** cards por visita y tendencia funcional siguen derivándose de `Observation`; no se persisten métricas derivadas.
+- **Compatibilidad HAPI/fallback:** si un servidor FHIR rechaza OR por coma en `encounter`, el repositorio mantiene la firma batch y ejecuta fallback interno controlado por encounter individual + merge en memoria.
+- **No-alcances preservados:** sin cambios de UI/captura, sin cambios de schemas/actions, sin cambios de modelo clínico/FHIR de dominio, sin dashboard/gráficos/IA, sin `Procedure`/`Goal`.
+
 #### Nota de cierre documental — P2 resumen clínico reciente en hub (2026-05-09)
 - **Estado:** cerrada / aprobada.
 - **Alcance confirmado:** `/admin/patients/[id]` incorpora `Resumen clínico reciente` como síntesis orientativa con estado de tratamiento, última visita, visitas del episodio, hasta 2 métricas recientes y CTA a Gestión clínica.
