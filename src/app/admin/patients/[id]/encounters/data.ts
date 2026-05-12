@@ -5,7 +5,7 @@ import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.typ
 import { getPatientOperationalStatus } from "@/domain/patient/patient.rules";
 import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
-import { listFunctionalObservationsByEncounterId } from "@/infrastructure/repositories/observation.repository";
+import { listFunctionalObservationsByEncounterIds } from "@/infrastructure/repositories/observation.repository";
 import {
   getActiveEpisodeByPatientId,
   getMostRecentEpisodeByPatientId,
@@ -85,18 +85,30 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     ? encounters.filter((encounter) => encounter.episodeOfCareId === effectiveEpisode.id)
     : [];
   const sortedEncounters = sortByMostRecentEncounter(scopedEncounters);
+  const effectiveEncounterIds = new Set(sortedEncounters.map((encounter) => encounter.id));
+  const scopedObservations = (await listFunctionalObservationsByEncounterIds(Array.from(effectiveEncounterIds))).filter((observation) => (
+    observation.patientId === patient.id
+    && effectiveEncounterIds.has(observation.encounterId)
+  ));
   const functionalObservationsByEncounterId = new Map<string, Encounter["functionalObservations"]>();
-  await Promise.all(sortedEncounters.map(async (encounter) => {
-    const observations = await listFunctionalObservationsByEncounterId(encounter.id);
-    const deduped = new Map<string, (typeof observations)[number]>();
-    observations.forEach((observation) => {
+
+  scopedObservations.forEach((observation) => {
+    const encounterObservations = functionalObservationsByEncounterId.get(observation.encounterId) ?? [];
+    const deduped = new Map<string, (typeof encounterObservations)[number]>();
+
+    encounterObservations.forEach((existing) => {
+      deduped.set(existing.code, existing);
+    });
+
+    {
       const existing = deduped.get(observation.code);
       if (!existing || new Date(observation.effectiveDateTime).getTime() >= new Date(existing.effectiveDateTime).getTime()) {
         deduped.set(observation.code, observation);
       }
-    });
-    functionalObservationsByEncounterId.set(encounter.id, Array.from(deduped.values()));
-  }));
+    }
+
+    functionalObservationsByEncounterId.set(observation.encounterId, Array.from(deduped.values()));
+  });
   const encountersWithFunctional = sortedEncounters.map((encounter) => ({
     ...encounter,
     functionalObservations: functionalObservationsByEncounterId.get(encounter.id) ?? [],
