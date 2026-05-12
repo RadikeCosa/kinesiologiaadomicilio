@@ -12,12 +12,12 @@ import {
   calculateAgeFromBirthDate,
   formatContactRelationshipLabel,
   formatDateDisplay,
-  formatDniDisplay,
 } from "@/lib/patient-admin-display";
 
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
 import { ClinicalRecentSummaryCard } from "@/app/admin/patients/[id]/components/ClinicalRecentSummaryCard";
+import { PatientIdentityHeaderCard } from "@/app/admin/patients/[id]/components/PatientIdentityHeaderCard";
 
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
@@ -159,30 +159,14 @@ export default async function AdminPatientDetailPage({
 
       {patient ? (
         <div className="mt-3 space-y-4">
-          <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <div className="min-w-0 space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-semibold text-slate-900">
-                  {patient.fullName}
-                </h1>
-                <span
-                  className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentSummary?.badgeClassName}`}
-                >
-                  {treatmentSummary?.badgeLabel}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-700">
-                <p className="font-medium">DNI: {formatDniDisplay(patient.dni)}</p>
-                {patientAge !== null ? (
-                  <p className="text-slate-600">Edad: {patientAge} años</p>
-                ) : null}
-                {treatmentSummary?.detail ? (
-                  <p className="text-slate-600">{treatmentSummary.detail}</p>
-                ) : null}
-              </div>
-            </div>
-          </section>
+          <PatientIdentityHeaderCard
+            fullName={patient.fullName}
+            treatmentBadgeClassName={treatmentSummary?.badgeClassName ?? ""}
+            treatmentBadgeLabel={treatmentSummary?.badgeLabel ?? ""}
+            dni={patient.dni}
+            age={patientAge}
+            treatmentDetail={treatmentSummary?.detail}
+          />
 
           <section className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
             <div className="space-y-3">
