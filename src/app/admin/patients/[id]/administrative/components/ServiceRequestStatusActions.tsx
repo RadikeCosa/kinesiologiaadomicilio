@@ -8,6 +8,7 @@ import type { ServiceRequestDisplayStatus } from "@/app/admin/patients/[id]/data
 
 import { updatePatientServiceRequestStatusAction } from "@/app/admin/patients/[id]/administrative/actions";
 import { acceptAndStartTreatmentFromServiceRequestAction } from "@/app/admin/patients/[id]/administrative/actions";
+import { formatLocalDateInputValue } from "@/lib/date-input";
 
 type CloseLikeStatus = "closed_without_treatment" | "cancelled";
 type ActionKind = "accept_and_start_treatment" | "close_without_treatment" | "cancel" | "start_treatment_legacy";
@@ -59,6 +60,14 @@ export function buildAcceptAndStartTreatmentFormData(input: {
   return formData;
 }
 
+export function resolveInitialTreatmentStartDate(defaultTreatmentStartDate?: string): string {
+  const today = formatLocalDateInputValue();
+
+  return defaultTreatmentStartDate && /^\d{4}-\d{2}-\d{2}$/.test(defaultTreatmentStartDate)
+    ? defaultTreatmentStartDate
+    : today;
+}
+
 export async function submitServiceRequestStatusAction(input: {
   patientId: string;
   serviceRequestId: string;
@@ -104,10 +113,8 @@ export function ServiceRequestStatusActions({
   const [activeCloseAction, setActiveCloseAction] = useState<ActionKind | null>(null);
   const [closeReasonText, setCloseReasonText] = useState("");
   const [feedback, setFeedback] = useState<ActionFeedback | null>(null);
-  const today = new Date().toISOString().slice(0, 10);
-  const initialTreatmentStartDate = defaultTreatmentStartDate && /^\d{4}-\d{2}-\d{2}$/.test(defaultTreatmentStartDate)
-    ? defaultTreatmentStartDate
-    : today;
+  const today = formatLocalDateInputValue();
+  const initialTreatmentStartDate = resolveInitialTreatmentStartDate(defaultTreatmentStartDate);
   const [treatmentStartDate, setTreatmentStartDate] = useState(initialTreatmentStartDate);
 
   const availableActions = getServiceRequestStatusActions(displayStatus);

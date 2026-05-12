@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PatientAdministrativeEditor } from "@/app/admin/patients/[id]/components/PatientAdministrativeEditor";
+import { PatientIdentityHeaderCard } from "@/app/admin/patients/[id]/components/PatientIdentityHeaderCard";
 import { PatientServiceRequestsSection } from "@/app/admin/patients/[id]/administrative/components/PatientServiceRequestsSection";
 import { loadPatientAdministrativeContext, loadPatientServiceRequestHistoryContext } from "@/app/admin/patients/[id]/data";
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
 import {
   calculateAgeFromBirthDate,
-  formatDniDisplay,
 } from "@/lib/patient-admin-display";
 import { getMissingTreatmentStartRequirements } from "@/domain/patient/patient.rules";
 
@@ -84,22 +84,15 @@ export default async function AdminPatientAdministrativePage({
 
       {patient ? (
         <>
-          <header className="mt-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-2xl font-semibold text-slate-900">
-                {patient.fullName}
-              </h2>
-              <span
-                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge?.className}`}
-              >
-                {treatmentBadge?.label}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-slate-500">
-              DNI: {formatDniDisplay(patient.dni)}
-              {patientAge !== null ? ` · Edad: ${patientAge} años` : ""}
-            </p>
-          </header>
+          <div className="mt-4">
+            <PatientIdentityHeaderCard
+              fullName={patient.fullName}
+              treatmentBadgeClassName={treatmentBadge?.className ?? ""}
+              treatmentBadgeLabel={treatmentBadge?.label ?? ""}
+              dni={patient.dni}
+              age={patientAge}
+            />
+          </div>
 
           <div className="mt-3 text-xs text-slate-600">
             <span>Si necesitás revisar evolución o contexto clínico, usá </span>

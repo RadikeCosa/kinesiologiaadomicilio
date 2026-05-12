@@ -20,8 +20,10 @@ import {
   getServiceRequestStatusActions,
   ServiceRequestStatusActions,
   buildAcceptAndStartTreatmentFormData,
+  resolveInitialTreatmentStartDate,
   submitServiceRequestStatusAction,
 } from "@/app/admin/patients/[id]/administrative/components/ServiceRequestStatusActions";
+import { formatLocalDateInputValue } from "@/lib/date-input";
 
 (globalThis as { React?: typeof React }).React = React;
 
@@ -182,5 +184,16 @@ describe("ServiceRequestStatusActions", () => {
 
     expect(formData.get("id")).toBe("sr-33");
     expect(formData.get("treatmentStartDate")).toBe("2026-05-03");
+  });
+
+  it("uses local calendar default when defaultTreatmentStartDate is missing or invalid", () => {
+    const localToday = formatLocalDateInputValue();
+
+    expect(resolveInitialTreatmentStartDate()).toBe(localToday);
+    expect(resolveInitialTreatmentStartDate("invalid")).toBe(localToday);
+  });
+
+  it("preserves requestedAt default when it is a valid yyyy-mm-dd", () => {
+    expect(resolveInitialTreatmentStartDate("2026-05-10")).toBe("2026-05-10");
   });
 });

@@ -375,6 +375,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - `dashboard-metrics.ts` concentra funciones puras testeables;
   - `dashboard.read-model.ts` mantiene contrato específico de dashboard;
   - UI sin FHIR crudo y lógica route-local en `src/app/admin/*` (sin extracción prematura a dominio).
+  - Convención vigente en superficies privadas de paciente (`/admin/patients/[id]` y `/administrative`): el bloque compacto de identidad estable (nombre + badge de tratamiento + DNI/edad + detalle opcional) puede reutilizar `src/app/admin/patients/[id]/components/PatientIdentityHeaderCard.tsx` como componente **presentacional route-local**.
+  - `PatientIdentityHeaderCard` **no** es header universal de superficie ni design system; no debe absorber link de retorno, `h1`/subtítulo, CTAs, navegación, solicitudes, sugerencia de siguiente paso ni lógica clínica/administrativa.
 - **Validación de fase**:
   - tests unitarios de métricas;
   - tests del loader;
