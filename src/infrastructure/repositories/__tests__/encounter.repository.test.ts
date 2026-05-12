@@ -140,6 +140,49 @@ describe("encounter.repository (FHIR)", () => {
     expect(updated.endedAt).toBe("2026-04-18T11:45:00Z");
   });
 
+  it("preserves unknown and clinical/punctuality extensions when updating period", async () => {
+    vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Encounter",
+      id: "enc-preserve",
+      status: "finished",
+      subject: { reference: "Patient/pat-1" },
+      episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
+      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T11:00:00Z" },
+      extension: [
+        { url: "https://example.org/fhir/StructureDefinition/external", valueString: "external" },
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-note-v1",
+          valueString: "nota",
+        },
+        {
+          url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-punctuality-v1",
+          valueCode: "on_time",
+        },
+      ],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "Encounter",
+      id: "enc-preserve",
+      status: "finished",
+      subject: { reference: "Patient/pat-1" },
+      period: { start: "2026-04-18T09:15:00Z", end: "2026-04-18T11:45:00Z" },
+    });
+
+    await updateEncounterTimeRange({
+      encounterId: "enc-preserve",
+      patientId: "pat-1",
+      startedAt: "2026-04-18T09:15:00Z",
+      endedAt: "2026-04-18T11:45:00Z",
+    });
+
+    const payload = putSpy.mock.calls[0]?.[1] as { extension?: Array<{ url: string }> };
+    expect(payload.extension?.map((item) => item.url)).toEqual([
+      "https://example.org/fhir/StructureDefinition/external",
+      "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-note-v1",
+      "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-punctuality-v1",
+    ]);
+  });
+
   it("lists encounters by patient using simple query", async () => {
     const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "Bundle",

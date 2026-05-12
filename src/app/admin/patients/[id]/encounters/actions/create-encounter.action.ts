@@ -10,7 +10,9 @@ import { createFunctionalObservation } from "@/infrastructure/repositories/obser
 
 export interface CreateEncounterActionResult {
   ok: boolean;
+  partial?: boolean;
   message?: string;
+  failedObservationCodes?: string[];
 }
 
 export async function createEncounterAction(input: unknown): Promise<CreateEncounterActionResult> {
@@ -55,23 +57,42 @@ export async function createEncounterAction(input: unknown): Promise<CreateEncou
     const createdEncounter = await createEncounter(parsedInput);
     const functionalObservations = parsedInput.functionalObservations ?? [];
 
-    try {
-      await Promise.all(functionalObservations.map((observation) => createFunctionalObservation({
-        ...observation,
-        patientId: parsedInput.patientId,
-        encounterId: createdEncounter.id,
-        effectiveDateTime: parsedInput.startedAt,
-      })));
-    } catch {
-      return {
-        ok: false,
-        message: "La visita se registró, pero falló la carga de métricas funcionales. Reintentá cargar métricas en una nueva visita o contactar soporte.",
-      };
+    if (functionalObservations.length > 0) {
+      const observationCreationResults = await Promise.allSettled(
+        functionalObservations.map((observation) => createFunctionalObservation({
+          ...observation,
+          patientId: parsedInput.patientId,
+          encounterId: createdEncounter.id,
+          effectiveDateTime: parsedInput.startedAt,
+        })),
+      );
+
+      const failedObservationCodes = observationCreationResults
+        .map((result, index) => (result.status === "rejected" ? functionalObservations[index]?.code : null))
+        .filter((code): code is string => Boolean(code));
+
+      if (failedObservationCodes.length > 0) {
+        console.error("createEncounterAction partial functional observation failure", {
+          patientId: parsedInput.patientId,
+          encounterId: createdEncounter.id,
+          failedObservationCodes,
+        });
+
+        revalidatePath(`/admin/patients/${parsedInput.patientId}/encounters`);
+        return {
+          ok: true,
+          partial: true,
+          message: "La visita se registró, pero algunas métricas funcionales no pudieron guardarse.",
+          failedObservationCodes,
+        };
+      }
     }
+
     revalidatePath(`/admin/patients/${parsedInput.patientId}/encounters`);
 
     return {
       ok: true,
+      partial: false,
       message: "Visita registrada correctamente.",
     };
   } catch (error) {

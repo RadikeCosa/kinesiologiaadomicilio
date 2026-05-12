@@ -99,6 +99,32 @@ function normalizeIdentifiers(identifier?: FhirPatient["identifier"]): FhirPatie
   return identifier.filter((item) => item.system !== DNI_IDENTIFIER_SYSTEM || Boolean(item.value));
 }
 
+function mergeIdentifiersPreservingExternal(existing?: FhirPatient["identifier"], next?: FhirPatient["identifier"]): FhirPatient["identifier"] {
+  if (!next) {
+    return existing;
+  }
+
+  const externalExisting = (existing ?? []).filter((item) => item.system !== DNI_IDENTIFIER_SYSTEM);
+  return [...externalExisting, ...next];
+}
+
+function mergeTelecomPreservingNonPhone(existing?: FhirPatient["telecom"], nextPhone?: string): FhirPatient["telecom"] {
+  const nonPhoneEntries = (existing ?? []).filter((entry) => entry.system !== "phone");
+  const phoneEntries = buildSinglePhoneTelecom(nextPhone) ?? [];
+  const merged = [...nonPhoneEntries, ...phoneEntries];
+
+  return merged.length ? merged : undefined;
+}
+
+function mergeNamesPreservingExternal(existing?: FhirPatient["name"], next?: FhirPatient["name"]): FhirPatient["name"] {
+  if (!next) {
+    return existing;
+  }
+
+  const externalExisting = (existing ?? []).filter((item) => item.use && item.use !== "official");
+  return [...next, ...externalExisting];
+}
+
 function preferDefined<T>(nextValue: T | undefined, existingValue: T | undefined): T | undefined {
   return nextValue === undefined ? existingValue : nextValue;
 }
@@ -120,9 +146,9 @@ export function mapUpdatePatientInputToFhir(options: {
   const merged: FhirPatient = {
     ...options.existing,
     resourceType: "Patient",
-    identifier: preferDefined(mappedUpdate.identifier, options.existing.identifier),
-    name: preferDefined(mappedUpdate.name, options.existing.name),
-    telecom: buildSinglePhoneTelecom(nextPhone),
+    identifier: mergeIdentifiersPreservingExternal(options.existing.identifier, mappedUpdate.identifier),
+    name: mergeNamesPreservingExternal(options.existing.name, mappedUpdate.name),
+    telecom: mergeTelecomPreservingNonPhone(options.existing.telecom, nextPhone),
     gender: preferDefined(mappedUpdate.gender, options.existing.gender),
     birthDate: preferDefined(mappedUpdate.birthDate, options.existing.birthDate),
     address: preferDefined(mappedUpdate.address, options.existing.address),

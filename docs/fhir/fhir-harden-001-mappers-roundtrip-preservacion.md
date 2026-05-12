@@ -60,3 +60,9 @@ Casos reforzados:
 - `src/infrastructure/mappers/service-request/__tests__/service-request.mapper.test.ts`
 - `src/infrastructure/mappers/episode-of-care/__tests__/episode-of-care.mapper.test.ts`
 - `src/infrastructure/mappers/encounter/__tests__/encounter.mapper.test.ts`
+
+
+## 8) Relación con FHIR-HARDEN-002
+
+- Este cierre (001) quedó complementado por `docs/fhir/fhir-harden-002-repository-roundtrip-preservacion.md`, que agrega cobertura en repositorios (`GET -> merge -> PUT`) con cliente FHIR mockeado.
+- FHIR-HARDEN-002 no reemplaza este documento: lo extiende en profundidad de garantía sin convertirlo aún en validación end-to-end contra servidor FHIR real.

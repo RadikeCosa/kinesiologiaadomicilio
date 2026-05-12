@@ -23,6 +23,25 @@ import { getActiveEpisodeByPatientId } from "@/infrastructure/repositories/episo
 import { revalidatePath } from "next/cache";
 
 describe("createEncounterAction", () => {
+  it("returns ok:false and does not create observations when encounter creation fails", async () => {
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({ id: "epi-1", patientId: "pat-1", status: "active", startDate: "2026-04-01" });
+    vi.mocked(createEncounter).mockRejectedValue(new Error("FHIR post Encounter failed"));
+
+    const result = await createEncounterAction({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:00",
+      tugSeconds: 18.5,
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      message: "FHIR post Encounter failed",
+    });
+    expect(createFunctionalObservation).not.toHaveBeenCalled();
+  });
+
   it("fails when endedAt is missing in new create payload", async () => {
     const result = await createEncounterAction({
       patientId: "pat-1",
@@ -124,6 +143,7 @@ describe("createEncounterAction", () => {
 
     expect(result).toEqual({
       ok: true,
+      partial: false,
       message: "Visita registrada correctamente.",
     });
     expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/encounters");
@@ -201,5 +221,59 @@ describe("createEncounterAction", () => {
     vi.mocked(createFunctionalObservation).mockResolvedValue({ id: "obs-1", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "pain_nrs_0_10", value: 0, unit: "/10", status: "final" });
     await createEncounterAction({ patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30", endedAt: "2026-04-17T11:00", painNrs010: 0 });
     expect(createFunctionalObservation).toHaveBeenCalledWith(expect.objectContaining({ value: 0, code: "pain_nrs_0_10" }));
+  });
+
+  it("returns partial success when one functional observation fails and others pass", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({ id: "epi-1", patientId: "pat-1", status: "active", startDate: "2026-04-01" });
+    vi.mocked(createEncounter).mockResolvedValue({ id: "enc-1", patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30:00Z", endedAt: "2026-04-17T11:00:00Z", status: "finished" });
+    vi.mocked(createFunctionalObservation)
+      .mockResolvedValueOnce({ id: "obs-1", patientId: "pat-1", encounterId: "enc-1", effectiveDateTime: "2026-04-17T10:30:00Z", code: "tug_seconds", value: 18.5, unit: "s", status: "final" })
+      .mockRejectedValueOnce(new Error("obs write failed"));
+
+    const result = await createEncounterAction({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:00",
+      tugSeconds: 18.5,
+      painNrs010: 4,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      partial: true,
+      message: "La visita se registró, pero algunas métricas funcionales no pudieron guardarse.",
+      failedObservationCodes: ["pain_nrs_0_10"],
+    });
+    expect(errorSpy).toHaveBeenCalledWith(
+      "createEncounterAction partial functional observation failure",
+      expect.objectContaining({ patientId: "pat-1", encounterId: "enc-1", failedObservationCodes: ["pain_nrs_0_10"] }),
+    );
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/encounters");
+  });
+
+  it("returns partial success when all functional observations fail", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({ id: "epi-1", patientId: "pat-1", status: "active", startDate: "2026-04-01" });
+    vi.mocked(createEncounter).mockResolvedValue({ id: "enc-1", patientId: "pat-1", episodeOfCareId: "epi-1", startedAt: "2026-04-17T10:30:00Z", endedAt: "2026-04-17T11:00:00Z", status: "finished" });
+    vi.mocked(createFunctionalObservation).mockRejectedValue(new Error("obs write failed"));
+
+    const result = await createEncounterAction({
+      patientId: "pat-1",
+      episodeOfCareId: "epi-1",
+      startedAt: "2026-04-17T10:30",
+      endedAt: "2026-04-17T11:00",
+      tugSeconds: 18.5,
+      painNrs010: 4,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      partial: true,
+      message: "La visita se registró, pero algunas métricas funcionales no pudieron guardarse.",
+      failedObservationCodes: ["tug_seconds", "pain_nrs_0_10"],
+    });
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/encounters");
   });
 });

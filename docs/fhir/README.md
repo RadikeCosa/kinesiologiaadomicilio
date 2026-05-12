@@ -81,6 +81,20 @@ Centralizar la documentación de trabajo para la remediación técnica del model
    - alcance real de preservación/roundtrip parcial por recurso (`Patient`, `ServiceRequest`, `EpisodeOfCare`, `Encounter`);
    - pendientes explícitos que siguen fuera de este PR (repositorios roundtrip E2E, atomicidad `Encounter->Observation`, mitigación N+1).
 
+
+16. `fhir-harden-002-repository-roundtrip-preservacion.md`
+   - cierre documental de hardening de preservación a nivel repositorio (`GET -> merge -> PUT`) con cliente FHIR mockeado;
+   - recursos cubiertos: `Patient`, `ServiceRequest`, `EpisodeOfCare`, `Encounter`;
+   - hallazgo real en `Patient` y patch mínimo aplicado en mapper write;
+   - límite explícito: no equivale a validación end-to-end contra servidor FHIR real.
+
+
+17. `fhir-consistency-001a-encounter-observation-partial-success.md`
+   - cierre documental de consistencia V1 para creación de visitas con métricas funcionales;
+   - semántica explícita de `ok:false` / `ok:true, partial:false` / `ok:true, partial:true`;
+   - decisión operativa sin atomicidad dura (`Encounter` principal, `Observation` anexo opcional);
+   - pendientes explícitos: reintento manual dirigido y validación HAPI real futura.
+
 ## Flujo recomendado de trabajo
 
 1. Leer la ADR antes de tocar identidad, DNI o semántica de `Identifier` (DNI opcional, no gate de inicio de tratamiento).
