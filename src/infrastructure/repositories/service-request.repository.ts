@@ -3,7 +3,7 @@ import { createServiceRequestSchema, updateServiceRequestStatusSchema } from "@/
 import { extractResourcesByType } from "@/lib/fhir/bundle-utils";
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
-import { buildServiceRequestBySubjectQuery } from "@/lib/fhir/search-params";
+import { buildServiceRequestBySubjectIdsQuery, buildServiceRequestBySubjectQuery } from "@/lib/fhir/search-params";
 import type { FhirBundle } from "@/lib/fhir/types";
 
 import { type FhirServiceRequest } from "@/infrastructure/mappers/service-request/service-request-fhir.types";
@@ -40,6 +40,22 @@ export async function listServiceRequestsByPatientId(patientId: string): Promise
   }
 
   const query = buildServiceRequestBySubjectQuery(patientId);
+  const bundle = await fhirClient.get<FhirBundle<FhirServiceRequest>>(buildSearchPath("ServiceRequest", query));
+  const resources = extractResourcesByType<FhirServiceRequest>(bundle, "ServiceRequest");
+
+  return resources
+    .map((resource) => mapFhirServiceRequestToDomain(resource))
+    .filter((resource) => resource.id.trim().length > 0);
+}
+
+
+export async function listServiceRequestsByPatientIds(patientIds: string[]): Promise<ServiceRequest[]> {
+  const query = buildServiceRequestBySubjectIdsQuery(patientIds);
+
+  if (!query) {
+    return [];
+  }
+
   const bundle = await fhirClient.get<FhirBundle<FhirServiceRequest>>(buildSearchPath("ServiceRequest", query));
   const resources = extractResourcesByType<FhirServiceRequest>(bundle, "ServiceRequest");
 
