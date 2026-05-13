@@ -1,5 +1,5 @@
 import { loadPatientsList } from "@/app/admin/patients/data";
-import { listEpisodeOfCareByIncomingReferral } from "@/infrastructure/repositories/episode-of-care.repository";
+import { listEpisodesByIncomingReferralIds } from "@/infrastructure/repositories/episode-of-care.repository";
 import { listServiceRequestsByPatientIds } from "@/infrastructure/repositories/service-request.repository";
 
 import { buildAdminDashboardReadModel, buildServiceRequestSummary } from "./dashboard-metrics";
@@ -10,16 +10,14 @@ export async function loadAdminDashboard(): Promise<AdminDashboardReadModel> {
 
   const serviceRequests = await listServiceRequestsByPatientIds(patients.map((patient) => patient.id));
   const acceptedServiceRequests = serviceRequests.filter((serviceRequest) => serviceRequest.status === "accepted");
-
-  const usedServiceRequestIds = new Set<string>();
-  await Promise.all(
-    acceptedServiceRequests.map(async (serviceRequest) => {
-      const linkedEpisodes = await listEpisodeOfCareByIncomingReferral(serviceRequest.id);
-
-      if (linkedEpisodes.length > 0) {
-        usedServiceRequestIds.add(serviceRequest.id);
-      }
-    }),
+  const acceptedServiceRequestIds = acceptedServiceRequests.map((serviceRequest) => serviceRequest.id);
+  const linkedEpisodes = await listEpisodesByIncomingReferralIds(acceptedServiceRequestIds);
+  const acceptedServiceRequestIdSet = new Set(acceptedServiceRequestIds);
+  const usedServiceRequestIds = new Set(
+    linkedEpisodes
+      .map((episode) => episode.serviceRequestId?.trim())
+      .filter((serviceRequestId): serviceRequestId is string => Boolean(serviceRequestId))
+      .filter((serviceRequestId) => acceptedServiceRequestIdSet.has(serviceRequestId)),
   );
 
   const serviceRequestSummary = buildServiceRequestSummary(serviceRequests, usedServiceRequestIds);

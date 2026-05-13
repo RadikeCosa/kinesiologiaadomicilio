@@ -9,6 +9,7 @@ import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
 import {
   buildActiveEpisodeOfCareByPatientQuery,
+  buildEpisodeOfCareByIncomingReferralIdsQuery,
   buildEpisodeOfCareByIncomingReferralQuery,
   buildEpisodeOfCareByPatientIdsQuery,
   buildEpisodeOfCareByPatientQuery,
@@ -130,6 +131,25 @@ export async function listEpisodeOfCareByIncomingReferral(serviceRequestId: stri
   }
 
   const query = buildEpisodeOfCareByIncomingReferralQuery(serviceRequestId);
+  const bundle = await fhirClient.get<FhirBundle<FhirEpisodeOfCare>>(buildSearchPath("EpisodeOfCare", query));
+  const episodes = extractResourcesByType<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
+
+  return episodes.map(mapFhirEpisodeOfCareToDomain);
+}
+
+export async function listEpisodesByIncomingReferralIds(serviceRequestIds: string[]): Promise<EpisodeOfCare[]> {
+  const normalizedServiceRequestIds = Array.from(new Set(serviceRequestIds.map((id) => id.trim()).filter(Boolean)));
+
+  if (!normalizedServiceRequestIds.length) {
+    return [];
+  }
+
+  const query = buildEpisodeOfCareByIncomingReferralIdsQuery(normalizedServiceRequestIds);
+
+  if (!query) {
+    return [];
+  }
+
   const bundle = await fhirClient.get<FhirBundle<FhirEpisodeOfCare>>(buildSearchPath("EpisodeOfCare", query));
   const episodes = extractResourcesByType<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
 

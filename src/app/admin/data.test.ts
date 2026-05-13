@@ -11,11 +11,11 @@ vi.mock("@/infrastructure/repositories/service-request.repository", () => ({
 }));
 
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
-  listEpisodeOfCareByIncomingReferral: vi.fn(),
+  listEpisodesByIncomingReferralIds: vi.fn(),
 }));
 
 import { loadPatientsList } from "@/app/admin/patients/data";
-import { listEpisodeOfCareByIncomingReferral } from "@/infrastructure/repositories/episode-of-care.repository";
+import { listEpisodesByIncomingReferralIds } from "@/infrastructure/repositories/episode-of-care.repository";
 import { listServiceRequestsByPatientIds } from "@/infrastructure/repositories/service-request.repository";
 
 describe("loadAdminDashboard", () => {
@@ -47,16 +47,17 @@ describe("loadAdminDashboard", () => {
       { id: "sr-5", patientId: "pat-2", status: "cancelled", requestedAt: "2026-04-05", reasonText: "E" },
     ] as never);
 
-    vi.mocked(listEpisodeOfCareByIncomingReferral)
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ id: "epi-1" }] as never);
+    vi.mocked(listEpisodesByIncomingReferralIds).mockResolvedValueOnce([
+      { id: "epi-1", serviceRequestId: "sr-3" },
+    ] as never);
 
     const dashboard = await loadAdminDashboard();
 
     expect(loadPatientsList).toHaveBeenCalledTimes(1);
     expect(listServiceRequestsByPatientIds).toHaveBeenCalledTimes(1);
     expect(listServiceRequestsByPatientIds).toHaveBeenCalledWith(["pat-1", "pat-2"]);
-    expect(listEpisodeOfCareByIncomingReferral).toHaveBeenCalledTimes(2);
+    expect(listEpisodesByIncomingReferralIds).toHaveBeenCalledTimes(1);
+    expect(listEpisodesByIncomingReferralIds).toHaveBeenCalledWith(["sr-2", "sr-3"]);
     expect(dashboard.operationalSummary.withoutStartedTreatment).toBe(1);
     expect(dashboard.ageSummary.withValidBirthDate).toBe(1);
     expect(dashboard.ageSummary.withoutValidBirthDate).toBe(0);

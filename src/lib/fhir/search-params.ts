@@ -107,3 +107,25 @@ export function buildEpisodeOfCareByIncomingReferralQuery(serviceRequestId: stri
 
   return params.toString();
 }
+
+export function buildEpisodeOfCareByIncomingReferralIdsQuery(serviceRequestIds: string[]): string {
+  const normalizedServiceRequestReferences = Array.from(
+    new Set(
+      serviceRequestIds
+        .map((serviceRequestId) => extractIdFromReference(serviceRequestId) ?? serviceRequestId)
+        .map((serviceRequestId) => serviceRequestId.trim())
+        .filter(Boolean)
+        .map((serviceRequestId) => `ServiceRequest/${serviceRequestId}`),
+    ),
+  );
+
+  if (!normalizedServiceRequestReferences.length) {
+    return "";
+  }
+
+  const params = new URLSearchParams({
+    "incoming-referral": normalizedServiceRequestReferences.join(","),
+  });
+
+  return params.toString();
+}
