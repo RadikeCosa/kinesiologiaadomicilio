@@ -100,6 +100,7 @@ El proyecto está en etapa **híbrida transicional**:
 - No-alcances preservados: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido.
 - En Fase 2A/2B PR1 se incorporó modelado mínimo de `Observation` funcional por visita (TUG, dolor 0–10, bipedestación y marcha en minutos) con captura opcional; continúan fuera de alcance `Procedure`, `Goal`, IA y tendencia avanzada/dashboard clínico.
 - En `/admin/patients/[id]/encounters` el loader ya no hace N+1 por visita para `Observation` funcional: usa lectura batch por `encounterIds` del episodio efectivo vía `Observation?encounter=Encounter/{id1},Encounter/{id2},...`, manteniendo métricas derivadas en lectura (no persistidas) y scoping por episodio efectivo.
+- En `/admin/patients` el loader ya no hace N+1 por paciente para `EpisodeOfCare`: usa una única lectura batch por `patientIds` vía `EpisodeOfCare?patient=Patient/{id1},Patient/{id2},...`, agrupa en memoria por paciente y resuelve `activeEpisode`/`latestEpisode` preservando comparación temporal segura para el episodio más reciente.
 - Hardening de compatibilidad: si un servidor FHIR rechaza el OR por coma en `encounter`, el repositorio aplica fallback interno controlado por encounter individual sin cambiar la firma batch consumida por el loader.
 
 #### Mapa corto de superficies privadas de paciente (UI vigente)
