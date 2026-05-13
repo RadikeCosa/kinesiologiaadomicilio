@@ -76,6 +76,29 @@ export function buildServiceRequestBySubjectQuery(patientId: string): string {
   return params.toString();
 }
 
+
+export function buildServiceRequestBySubjectIdsQuery(patientIds: string[]): string {
+  const normalizedPatientReferences = Array.from(
+    new Set(
+      patientIds
+        .map((patientId) => extractIdFromReference(patientId) ?? patientId)
+        .map((patientId) => patientId.trim())
+        .filter(Boolean)
+        .map((patientId) => buildPatientReference(patientId)),
+    ),
+  );
+
+  if (!normalizedPatientReferences.length) {
+    return "";
+  }
+
+  const params = new URLSearchParams({
+    subject: normalizedPatientReferences.join(","),
+  });
+
+  return params.toString();
+}
+
 export function buildEpisodeOfCareByIncomingReferralQuery(serviceRequestId: string): string {
   const normalizedServiceRequestId = extractIdFromReference(serviceRequestId) ?? serviceRequestId;
   const params = new URLSearchParams({

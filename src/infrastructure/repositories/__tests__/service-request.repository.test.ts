@@ -2,11 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
-import { buildServiceRequestBySubjectQuery } from "@/lib/fhir/search-params";
+import { buildServiceRequestBySubjectIdsQuery, buildServiceRequestBySubjectQuery } from "@/lib/fhir/search-params";
 import {
   createServiceRequest,
   getServiceRequestById,
   listServiceRequestsByPatientId,
+  listServiceRequestsByPatientIds,
   updateServiceRequestStatus,
 } from "@/infrastructure/repositories/service-request.repository";
 
@@ -114,6 +115,48 @@ describe("service-request.repository (FHIR)", () => {
     expect(getSpy).not.toHaveBeenCalled();
   });
 
+  it("lists by subject OR comma for many patients and maps resources", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "ServiceRequest",
+            id: "sr-1",
+            status: "active",
+            subject: { reference: "Patient/pat-1" },
+            authoredOn: "2026-04-28",
+            reasonCode: [{ text: "Dolor lumbar" }],
+          },
+        },
+        {
+          resource: {
+            resourceType: "ServiceRequest",
+            id: "sr-2",
+            status: "active",
+            subject: { reference: "Patient/pat-2" },
+            authoredOn: "2026-04-29",
+            reasonCode: [{ text: "Dolor cervical" }],
+          },
+        },
+      ],
+    });
+
+    const results = await listServiceRequestsByPatientIds(["pat-1", "Patient/pat-2", "pat-1"]);
+
+    expect(getSpy).toHaveBeenCalledWith("ServiceRequest?subject=Patient%2Fpat-1%2CPatient%2Fpat-2");
+    expect(results).toHaveLength(2);
+    expect(results.map((item) => item.patientId)).toEqual(["pat-1", "pat-2"]);
+  });
+
+  it("returns [] and does not query FHIR when patientIds is empty/invalid", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get");
+    const results = await listServiceRequestsByPatientIds([" ", ""]);
+
+    expect(results).toEqual([]);
+    expect(getSpy).not.toHaveBeenCalled();
+  });
+
   it("gets service request by id", async () => {
     const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "ServiceRequest",
@@ -160,6 +203,12 @@ describe("service-request.repository (FHIR)", () => {
 
   it("builds service request subject query", () => {
     expect(buildServiceRequestBySubjectQuery("pat-1")).toBe("subject=Patient%2Fpat-1");
+  });
+
+  it("builds service request subject OR query", () => {
+    expect(buildServiceRequestBySubjectIdsQuery(["pat-1", "Patient/pat-2", "pat-1"])).toBe(
+      "subject=Patient%2Fpat-1%2CPatient%2Fpat-2",
+    );
   });
 
   it("updates status: GET + PUT + mapped domain response", async () => {
