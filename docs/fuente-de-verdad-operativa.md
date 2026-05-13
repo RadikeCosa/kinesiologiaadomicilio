@@ -147,6 +147,22 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **No-alcances preservados:** sin cambios UI/copy/rutas, sin cambios de dominio/flujos, sin perfiles FHIR formales, sin migraciones, sin `Procedure`/`Goal`/IA.
 - **Trazabilidad documental técnica:** `docs/fhir/fhir-harden-002-repository-roundtrip-preservacion.md`.
 
+
+
+#### Nota de cierre documental — Patch P1 performance `/admin/patients` batch de `EpisodeOfCare` por pacientes (2026-05-13)
+- **Estado:** cerrado / validado contra HAPI real.
+- **Cambio operativo confirmado:** el loader de `/admin/patients` deja de hacer N+1 de `EpisodeOfCare` por paciente y consume una única lectura batch por `patientIds` (`listEpisodesByPatientIds(patientIds: string[])`).
+- **Query batch validada en servidor real:** HAPI FHIR 8.8.0 (`fhirVersion` 4.0.1) respondió correctamente `EpisodeOfCare?patient=Patient/{id1},Patient/{id2},...` (HTTP 200), incluyendo solo episodios del set solicitado y excluyendo pacientes fuera del set.
+- **Resolución de estado en loader:** los episodios se agrupan en memoria por `patientId` y desde ese agrupamiento se resuelven `activeEpisode` y `latestEpisode` sin consultas adicionales por paciente.
+- **Hardening preservado:** la selección de `latestEpisode` mantiene comparación temporal segura (fechas), no comparación lexicográfica de strings.
+- **Aislamiento por paciente validado:** no se observó mezcla de episodios entre pacientes en runtime.
+- **Semántica visible preservada en `/admin/patients`:**
+  - episodio activo → `En tratamiento`;
+  - sin activo pero con episodio finalizado/reciente → `Tratamiento finalizado`;
+  - sin episodios → `Sin tratamiento activo`.
+- **No-alcances preservados:** sin cambios en `ServiceRequest`, `incoming-referral`, UI, modelo FHIR, persistencia, cache ni read-model materializado; tampoco se aborda el N+1 restante de `/admin` por `ServiceRequest`.
+- **Validación registrada:** `/metadata` (HTTP 200, `software.name=HAPI FHIR Server`), query batch de `EpisodeOfCare` y ejecución runtime de `/admin/patients` (HTTP 200) con estados observados consistentes.
+
 #### Nota de cierre documental — FHIR-CONSISTENCY-001A éxito parcial Encounter→Observation (2026-05-12)
 - **Estado:** cerrado / aprobado.
 - **Decisión V1 vigente:** sin atomicidad dura entre `Encounter` y `Observation` en creación de visita.
