@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-12 (UTC)
+> Última actualización: 2026-05-13 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -149,6 +149,20 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 
 
 
+
+
+#### Nota de cierre documental — Patch P1 performance `/admin` batch de `ServiceRequest` por pacientes (2026-05-13)
+- **Estado:** cerrado / validado contra HAPI real.
+- **Cambio operativo confirmado:** el loader de `/admin` deja de hacer N+1 de `ServiceRequest` por paciente y consume una única lectura batch por `patientIds` (`listServiceRequestsByPatientIds(patientIds: string[])`).
+- **Query batch validada en servidor real:** HAPI FHIR 8.8.0 (`fhirVersion` 4.0.1) respondió correctamente `ServiceRequest?subject=Patient/{id1},Patient/{id2},...` (HTTP 200).
+- **Compatibilidad de encoding validada:** también se validó la forma encoded generada por `URLSearchParams` (`ServiceRequest?subject=Patient%2F{id1}%2CPatient%2F{id2}`) con respuesta correcta en HAPI.
+- **Semántica del dashboard preservada:**
+  - `in_review` se mantiene como pendiente operativa;
+  - `accepted` sin vínculo `incoming-referral` se mantiene como `Pendiente de iniciar tratamiento`;
+  - estados terminales (`closed_without_treatment`/`cancelled`) continúan fuera de pendientes.
+- **Regla de vínculo preservada:** las solicitudes `accepted` con `incoming-referral` siguen excluidas de `accepted` pendiente cuando ya existe vínculo real con `EpisodeOfCare`.
+- **Validación runtime registrada:** `/admin` respondió HTTP 200, renderizó correctamente y sostuvo conteos esperados (2 en evaluación, 1 aceptada pendiente), sin mezcla de solicitudes entre pacientes.
+- **No-alcances preservados:** `incoming-referral` no se optimiza en este patch y queda como deuda separada; sin cambios de UI, modelo FHIR, persistencia, cache, read-model materializado ni reglas de clasificación de `ServiceRequest`.
 #### Nota de cierre documental — Patch P1 performance `/admin/patients` batch de `EpisodeOfCare` por pacientes (2026-05-13)
 - **Estado:** cerrado / validado contra HAPI real.
 - **Cambio operativo confirmado:** el loader de `/admin/patients` deja de hacer N+1 de `EpisodeOfCare` por paciente y consume una única lectura batch por `patientIds` (`listEpisodesByPatientIds(patientIds: string[])`).

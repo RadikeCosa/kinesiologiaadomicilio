@@ -102,6 +102,7 @@ El proyecto está en etapa **híbrida transicional**:
 - En `/admin/patients/[id]/encounters` el loader ya no hace N+1 por visita para `Observation` funcional: usa lectura batch por `encounterIds` del episodio efectivo vía `Observation?encounter=Encounter/{id1},Encounter/{id2},...`, manteniendo métricas derivadas en lectura (no persistidas) y scoping por episodio efectivo.
 - En `/admin/patients` el loader ya no hace N+1 por paciente para `EpisodeOfCare`: usa una única lectura batch por `patientIds` vía `EpisodeOfCare?patient=Patient/{id1},Patient/{id2},...`, agrupa en memoria por paciente y resuelve `activeEpisode`/`latestEpisode` preservando comparación temporal segura para el episodio más reciente.
 - Hardening de compatibilidad: si un servidor FHIR rechaza el OR por coma en `encounter`, el repositorio aplica fallback interno controlado por encounter individual sin cambiar la firma batch consumida por el loader.
+- En `/admin` el loader ya no hace N+1 por paciente para `ServiceRequest`: usa una única lectura batch por `patientIds` vía `ServiceRequest?subject=Patient/{id1},Patient/{id2},...`, validada contra HAPI FHIR 8.8.0 (FHIR 4.0.1), incluyendo compatibilidad con la versión encoded de `URLSearchParams` (`Patient%2Fid1%2CPatient%2Fid2`).
 
 #### Mapa corto de superficies privadas de paciente (UI vigente)
 - **Gestión administrativa** (`/admin/patients/[id]/administrative`): datos del paciente y solicitudes de atención.
@@ -112,7 +113,7 @@ El proyecto está en etapa **híbrida transicional**:
 ##### Cierre DASHBOARD-SR-001 (abril 2026)
 - **Estado**: cerrado (PR1+PR2+PR3).
 - **Resultado**: `/admin` muestra embudo SR (`in_review` y `accepted` pendiente sin vínculo `incoming-referral`) y mantiene resumen operativo + card simplificada de edad clínica.
-- **Deuda técnica vigente**: métricas SR por composición per-patient (N+1 potencial). Migrar a read-model agregado cuando aumente volumen.
+- **Deuda técnica vigente**: `incoming-referral` aún no optimizado en este patch (deuda separada). Sin cache ni read-model materializado en `/admin`.
 
 ##### Cierre Fase 1 dashboard `/admin` (abril 2026)
 - **Estado**: fase cerrada/aprobada para `/admin` como dashboard operativo mínimo.
