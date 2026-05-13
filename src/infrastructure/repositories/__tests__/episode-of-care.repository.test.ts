@@ -2,7 +2,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
-import { buildEpisodeOfCareByIncomingReferralQuery, buildEpisodeOfCareByPatientIdsQuery } from "@/lib/fhir/search-params";
+import {
+  buildEpisodeOfCareByIncomingReferralIdsQuery,
+  buildEpisodeOfCareByIncomingReferralQuery,
+  buildEpisodeOfCareByPatientIdsQuery,
+} from "@/lib/fhir/search-params";
 import {
   createEpisodeOfCare,
   finishActiveEpisodeOfCare,
@@ -10,6 +14,7 @@ import {
   getEpisodeById,
   getMostRecentEpisodeByPatientId,
   listEpisodeOfCareByIncomingReferral,
+  listEpisodesByIncomingReferralIds,
   listEpisodesByPatientIds,
   updateEpisodeOfCareClinicalContext,
 } from "@/infrastructure/repositories/episode-of-care.repository";
@@ -335,6 +340,55 @@ describe("episode-of-care.repository (FHIR)", () => {
 
     expect(query).toBe("incoming-referral=ServiceRequest%2Fsr-2");
     expect(query).not.toContain("referralRequest");
+  });
+
+  it("returns [] and does not query FHIR when incoming-referral ids input is empty", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get");
+    const episodes = await listEpisodesByIncomingReferralIds(["  ", ""]);
+    expect(episodes).toEqual([]);
+    expect(getSpy).not.toHaveBeenCalled();
+  });
+
+  it("lists episodes by incoming-referral ids in a single batch query", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-sr-1",
+            status: "active",
+            patient: { reference: "Patient/pat-1" },
+            referralRequest: [{ reference: "ServiceRequest/sr-1" }],
+            period: { start: "2026-04-10" },
+          },
+        },
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-sr-2",
+            status: "active",
+            patient: { reference: "Patient/pat-2" },
+            referralRequest: [{ reference: "ServiceRequest/sr-2" }],
+            period: { start: "2026-04-11" },
+          },
+        },
+      ],
+    });
+
+    const episodes = await listEpisodesByIncomingReferralIds(["sr-1", "ServiceRequest/sr-2", "sr-1"]);
+
+    expect(getSpy).toHaveBeenCalledWith(
+      "EpisodeOfCare?incoming-referral=ServiceRequest%2Fsr-1%2CServiceRequest%2Fsr-2",
+    );
+    expect(episodes).toHaveLength(2);
+    expect(episodes[0]).toMatchObject({ id: "epi-sr-1", serviceRequestId: "sr-1" });
+    expect(episodes[1]).toMatchObject({ id: "epi-sr-2", serviceRequestId: "sr-2" });
+  });
+
+  it("builds incoming-referral ids batch query from mixed ids and references", () => {
+    const query = buildEpisodeOfCareByIncomingReferralIdsQuery(["sr-1", "ServiceRequest/sr-2", "sr-1"]);
+    expect(query).toBe("incoming-referral=ServiceRequest%2Fsr-1%2CServiceRequest%2Fsr-2");
   });
 
   it("gets episode by id", async () => {
