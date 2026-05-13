@@ -7,15 +7,12 @@ vi.mock("@/infrastructure/repositories/patient.repository", () => ({
 }));
 
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
-  getActiveEpisodeByPatientId: vi.fn(),
-  getMostRecentEpisodeByPatientId: vi.fn(),
+  getMostRecentEpisode: vi.fn(),
+  listEpisodesByPatientIds: vi.fn(),
 }));
 
+import { listEpisodesByPatientIds, getMostRecentEpisode } from "@/infrastructure/repositories/episode-of-care.repository";
 import { listPatients } from "@/infrastructure/repositories/patient.repository";
-import {
-  getActiveEpisodeByPatientId,
-  getMostRecentEpisodeByPatientId,
-} from "@/infrastructure/repositories/episode-of-care.repository";
 
 describe("loadPatientsList", () => {
   it("maps finished_treatment when no active episode exists but latest is finished", async () => {
@@ -30,8 +27,8 @@ describe("loadPatientsList", () => {
       },
     ]);
 
-    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue(null);
-    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue({
+    vi.mocked(listEpisodesByPatientIds).mockResolvedValue([]);
+    vi.mocked(getMostRecentEpisode).mockReturnValue({
       id: "epi-1",
       patientId: "pat-1",
       status: "finished",
@@ -41,7 +38,9 @@ describe("loadPatientsList", () => {
 
     const patients = await loadPatientsList();
 
-    expect(getMostRecentEpisodeByPatientId).toHaveBeenCalledWith("pat-1");
+    expect(listEpisodesByPatientIds).toHaveBeenCalledWith(["pat-1"]);
+    expect(listEpisodesByPatientIds).toHaveBeenCalledTimes(1);
+    expect(getMostRecentEpisode).toHaveBeenCalledTimes(1);
     expect(patients[0]?.operationalStatus).toBe("finished_treatment");
   });
 });
