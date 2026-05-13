@@ -27,6 +27,29 @@ export function buildEpisodeOfCareByPatientQuery(patientId: string): string {
   return params.toString();
 }
 
+
+export function buildEpisodeOfCareByPatientIdsQuery(patientIds: string[]): string {
+  const normalizedPatientReferences = Array.from(
+    new Set(
+      patientIds
+        .map((patientId) => extractIdFromReference(patientId) ?? patientId)
+        .map((patientId) => patientId.trim())
+        .filter(Boolean)
+        .map((patientId) => buildPatientReference(patientId)),
+    ),
+  );
+
+  if (!normalizedPatientReferences.length) {
+    return "";
+  }
+
+  const params = new URLSearchParams({
+    patient: normalizedPatientReferences.join(","),
+  });
+
+  return params.toString();
+}
+
 export function buildActiveEpisodeOfCareByPatientQuery(patientId: string): string {
   const params = new URLSearchParams({
     patient: buildPatientReference(patientId),

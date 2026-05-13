@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
-import { buildEpisodeOfCareByIncomingReferralQuery } from "@/lib/fhir/search-params";
+import { buildEpisodeOfCareByIncomingReferralQuery, buildEpisodeOfCareByPatientIdsQuery } from "@/lib/fhir/search-params";
 import {
   createEpisodeOfCare,
   finishActiveEpisodeOfCare,
@@ -10,6 +10,7 @@ import {
   getEpisodeById,
   getMostRecentEpisodeByPatientId,
   listEpisodeOfCareByIncomingReferral,
+  listEpisodesByPatientIds,
   updateEpisodeOfCareClinicalContext,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 
@@ -74,6 +75,40 @@ describe("episode-of-care.repository (FHIR)", () => {
       status: "active",
       serviceRequestId: "sr-1",
     });
+  });
+
+
+  it("returns empty list for empty patientIds without querying FHIR", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get");
+
+    const episodes = await listEpisodesByPatientIds([]);
+
+    expect(episodes).toEqual([]);
+    expect(getSpy).not.toHaveBeenCalled();
+  });
+
+  it("deduplicates patient ids and queries EpisodeOfCare in batch", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "epi-1",
+            status: "active",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-04-17" },
+          },
+        },
+      ],
+    });
+
+    const episodes = await listEpisodesByPatientIds(["pat-1", " pat-1 ", "pat-2"]);
+
+    expect(getSpy).toHaveBeenCalledWith(
+      `EpisodeOfCare?${buildEpisodeOfCareByPatientIdsQuery(["pat-1", "pat-2"])}`,
+    );
+    expect(episodes[0]).toMatchObject({ id: "epi-1", patientId: "pat-1" });
   });
 
   it("gets active episode by patient id with simple query", async () => {

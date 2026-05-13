@@ -11,6 +11,7 @@ import {
 import { buildPatientReference, extractIdFromReference } from "@/lib/fhir/references";
 import {
   buildActiveEpisodeOfCareByPatientQuery,
+  buildEpisodeOfCareByPatientIdsQuery,
   buildPatientListQuery,
   buildPatientSearchByDniQuery,
 } from "@/lib/fhir/search-params";
@@ -61,5 +62,10 @@ describe("fhir helpers", () => {
 
   it("builds active episode search by patient", () => {
     expect(buildActiveEpisodeOfCareByPatientQuery("patient-1")).toBe("patient=Patient%2Fpatient-1&status=active");
+  });
+
+  it("builds batch episode search by multiple patients", () => {
+    expect(buildEpisodeOfCareByPatientIdsQuery(["patient-1", " patient-1 ", "Patient/patient-2"]))
+      .toBe("patient=Patient%2Fpatient-1%2CPatient%2Fpatient-2");
   });
 });
