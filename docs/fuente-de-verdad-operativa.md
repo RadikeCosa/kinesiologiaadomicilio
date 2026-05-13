@@ -177,6 +177,22 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **No-alcances preservados:** sin cambios en `ServiceRequest`, `incoming-referral`, UI, modelo FHIR, persistencia, cache ni read-model materializado; tampoco se aborda el N+1 restante de `/admin` por `ServiceRequest`.
 - **Validación registrada:** `/metadata` (HTTP 200, `software.name=HAPI FHIR Server`), query batch de `EpisodeOfCare` y ejecución runtime de `/admin/patients` (HTTP 200) con estados observados consistentes.
 
+
+#### Nota de cierre documental — Patch P1 performance `/admin` batch de `EpisodeOfCare` por `incoming-referral` (2026-05-13)
+- **Estado:** cerrado / validado contra HAPI real.
+- **Cambio operativo confirmado:** el loader de `/admin` deja de hacer N+1 de `EpisodeOfCare` por cada `ServiceRequest` `accepted` y consume una única lectura batch por `serviceRequestIds` (`listEpisodesByIncomingReferralIds(serviceRequestIds: string[])`).
+- **Query batch validada en servidor real:** HAPI FHIR 8.8.0 (`fhirVersion` 4.0.1) respondió correctamente `EpisodeOfCare?incoming-referral=ServiceRequest/{id1},ServiceRequest/{id2},...` (HTTP 200).
+- **Compatibilidad de encoding validada:** también se validó la forma encoded generada por `URLSearchParams` (`EpisodeOfCare?incoming-referral=ServiceRequest%2F{id1}%2CServiceRequest%2F{id2}`) con respuesta correcta en HAPI.
+- **Resolución en memoria preservada:** el loader construye sets/mapas en memoria para decidir qué `accepted` siguen pendientes y cuáles quedan excluidas por vínculo real `incoming-referral`.
+- **Semántica del dashboard preservada:**
+  - `in_review` se mantiene como pendiente operativa;
+  - `accepted` sin vínculo `incoming-referral` se mantiene como `Pendiente de iniciar tratamiento`;
+  - `accepted` con `EpisodeOfCare` ya vinculado por `incoming-referral` queda excluida de pendientes;
+  - estados terminales (`closed_without_treatment`/`cancelled`) continúan fuera de pendientes.
+- **Métricas derivadas preservadas:** los conteos siguen calculándose en lectura (sin persistencia nueva).
+- **Validación runtime registrada:** en dataset aislado (`test-batch-incoming-referral-admin`), `/admin` respondió HTTP 200 y sostuvo conteos esperados (totales 3; tratamiento 0; finalizado 2; sin iniciar 1; en evaluación 1; aceptadas pendientes 1).
+- **No-alcances preservados:** sin cache, sin read-model materializado, sin cambios de UI, sin cambios de modelo FHIR, sin cambios de persistencia y sin rediseño de dashboard.
+
 #### Nota de cierre documental — FHIR-CONSISTENCY-001A éxito parcial Encounter→Observation (2026-05-12)
 - **Estado:** cerrado / aprobado.
 - **Decisión V1 vigente:** sin atomicidad dura entre `Encounter` y `Observation` en creación de visita.
