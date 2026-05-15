@@ -30,5 +30,10 @@ export const HOW_IT_WORKS_CONTENT = {
   ],
   ctaLabel: "Iniciar consulta por WhatsApp",
   ctaWhatsAppMessage:
-    "Hola Ramiro, quiero iniciar una consulta para coordinar una evaluación kinesiológica a domicilio.",
+    `Hola, quisiera consultar por kinesiología a domicilio.
+
+Zona/barrio:
+Motivo de consulta:
+Edad aproximada del paciente:
+Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
 } as const;

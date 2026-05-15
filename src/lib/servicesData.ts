@@ -12,7 +12,12 @@ export const servicesData: Service[] = [
     description:
       "Acompañamiento en los primeros días y semanas después de una operación. Ramiro trabaja la movilización temprana, el uso de elementos de apoyo y los cuidados prácticos para que la recuperación sea segura y progresiva.",
     whatsappMessage:
-      "Hola Ramiro, quisiera consultar sobre rehabilitación post-operatoria a domicilio para un familiar",
+      `Hola, quisiera consultar por rehabilitación post-operatoria a domicilio para un familiar.
+
+Zona/barrio:
+Motivo de consulta:
+Edad aproximada del paciente:
+Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
   },
   {
     title: "Adultos Mayores",
@@ -20,7 +25,12 @@ export const servicesData: Service[] = [
     description:
       "Atención kinesiológica y de fisioterapia a domicilio para personas mayores que necesitan recuperar o mantener su movilidad, fuerza e independencia. Un acompañamiento pensado también para dar tranquilidad a la familia.",
     whatsappMessage:
-      "Hola Ramiro, quisiera consultar sobre kinesiología para adultos mayores a domicilio",
+      `Hola, quisiera consultar por kinesiología para adultos mayores a domicilio.
+
+Zona/barrio:
+Motivo de consulta:
+Edad aproximada del paciente:
+Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
   },
   {
     title: "Cuidados Paliativos",
@@ -28,7 +38,12 @@ export const servicesData: Service[] = [
     description:
       "Cuidados kinesicos orientados al bienestar y el confort en situaciones de cuidados paliativos.",
     whatsappMessage:
-      "Hola Ramiro, quisiera consultar sobre kinesiología en cuidados paliativos a domicilio",
+      `Hola, quisiera consultar por kinesiología en cuidados paliativos a domicilio.
+
+Zona/barrio:
+Motivo de consulta:
+Edad aproximada del paciente:
+Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
   },
   {
     title: "Recuperación Funcional",
@@ -36,6 +51,11 @@ export const servicesData: Service[] = [
     description:
       "Sesiones de kinesiología y rehabilitación a domicilio para adultos con dolor crónico, movilidad reducida o que buscan recuperar funcionalidad en su vida cotidiana.",
     whatsappMessage:
-      "Hola Ramiro, quisiera consultar sobre kinesiología a domicilio",
+      `Hola, quisiera consultar por kinesiología a domicilio.
+
+Zona/barrio:
+Motivo de consulta:
+Edad aproximada del paciente:
+Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
   },
 ];
