@@ -2,6 +2,7 @@ import Link from "next/link";
 import { WhatsAppButton } from "./WhatsAppButton";
 import { BUSINESS_CONFIG } from "@/lib/config";
 import { NAV_LINKS } from "@/lib/navLinks";
+import { WHATSAPP_GLOBAL_PREQUALIFIED_MESSAGE } from "@/lib/whatsapp-messages";
 import { PhoneLink } from "./PhoneLink";
 import { servicesData } from "@/lib/servicesData";
 import { Container } from "./ui/Container";
@@ -61,7 +62,7 @@ export function Footer() {
 
             <div className="mt-5">
               <WhatsAppButton
-                message="Hola, quisiera consultar sobre kinesiología a domicilio"
+                message={WHATSAPP_GLOBAL_PREQUALIFIED_MESSAGE}
                 ctaLocation="footer"
                 size="sm"
                 iconSize="h-4 w-4"
