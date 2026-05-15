@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BUSINESS_CONFIG } from "@/lib/config";
 import { NAV_LINKS } from "@/lib/navLinks";
+import { WHATSAPP_GLOBAL_PREQUALIFIED_MESSAGE } from "@/lib/whatsapp-messages";
 import { WhatsAppButton } from "./WhatsAppButton";
 import { Container } from "./ui/Container";
 
@@ -42,7 +43,7 @@ export function Header() {
               ))}
               <li>
                 <WhatsAppButton
-                  message="Hola quisiera consultar por kinesio a domicilio"
+                  message={WHATSAPP_GLOBAL_PREQUALIFIED_MESSAGE}
                   ctaLocation="header"
                   ctaLabel="Contactar"
                   size="sm"

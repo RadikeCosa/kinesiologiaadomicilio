@@ -193,6 +193,7 @@ Esta definición permite separar:
 
 ## Decisión operativa
 - [x] Implementado PATCH LANDING-GROWTH-002: mensaje prellenado de WhatsApp para pre-calificación suave (zona, motivo, edad aproximada, disponibilidad/modalidad particular y valor).
+- [x] Implementado PATCH LANDING-GROWTH-002B: consistencia de CTAs globales de WhatsApp en Header/Footer con el mensaje de pre-calificación suave (zona, motivo, edad aproximada y consulta por disponibilidad/modalidad particular/valor).
 - [ ] Monitorear 30 días el impacto en consultas calificadas antes de ajustar fricción o copy adicional.
 - [x] Implementado PATCH LANDING-GROWTH-003: ajuste SEO local en metadata/copy de rutas públicas existentes y FAQ breve de pre-calificación suave.
 - [ ] Medir a 30 días por ruta pública: impresiones, clicks, CTR, `generate_lead` y proporción de consultas calificadas (sin mezclar `/admin`).
