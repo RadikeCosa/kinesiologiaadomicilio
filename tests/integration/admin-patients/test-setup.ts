@@ -141,8 +141,12 @@ function handleGet(path: string): unknown {
     const patientReference = params.get("patient");
     const status = params.get("status");
 
+    const patientReferences = patientReference
+      ? patientReference.split(",").map((ref) => ref.trim())
+      : [];
+
     const filtered = store.episodes.filter((episode) => {
-      const matchesPatient = patientReference ? episode.patient?.reference === patientReference : true;
+      const matchesPatient = patientReferences.length > 0 ? patientReferences.includes(episode.patient?.reference ?? "") : true;
       const matchesStatus = status ? episode.status === status : true;
 
       return matchesPatient && matchesStatus;

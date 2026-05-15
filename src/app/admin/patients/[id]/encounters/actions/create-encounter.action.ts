@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { canCreateEncounter, canUseEncounterTimeRangeWithinEpisode } from "@/domain/encounter/encounter.rules";
 import { createEncounterSchema } from "@/domain/encounter/encounter.schemas";
+import type { FunctionalObservationCode } from "@/domain/functional-observation/functional-observation.types";
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
 import { getActiveEpisodeByPatientId } from "@/infrastructure/repositories/episode-of-care.repository";
 import { createFunctionalObservation } from "@/infrastructure/repositories/observation.repository";
@@ -68,8 +69,8 @@ export async function createEncounterAction(input: unknown): Promise<CreateEncou
       );
 
       const failedObservationCodes = observationCreationResults
-        .map((result, index) => (result.status === "rejected" ? functionalObservations[index]?.code : null))
-        .filter((code): code is string => Boolean(code));
+        .map((result, index) => (result.status === "rejected" ? functionalObservations[index]?.code ?? null : null))
+        .filter((code): code is FunctionalObservationCode => code !== null);
 
       if (failedObservationCodes.length > 0) {
         console.error("createEncounterAction partial functional observation failure", {

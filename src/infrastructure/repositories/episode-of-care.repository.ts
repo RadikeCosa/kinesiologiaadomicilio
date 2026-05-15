@@ -28,7 +28,19 @@ function buildSearchPath(resourceType: string, query: string): string {
   return query ? `${resourceType}?${query}` : resourceType;
 }
 
-export function getMostRecentEpisode(episodes: FhirEpisodeOfCare[]): FhirEpisodeOfCare | null {
+type EpisodeWithStartDate = EpisodeOfCare | FhirEpisodeOfCare;
+
+function isFhirEpisodeOfCare(episode: EpisodeWithStartDate): episode is FhirEpisodeOfCare {
+  return "resourceType" in episode && episode.resourceType === "EpisodeOfCare";
+}
+
+function getEpisodeStartDate(episode: EpisodeWithStartDate): string | undefined {
+  return isFhirEpisodeOfCare(episode) ? episode.period?.start : episode.startDate;
+}
+
+export function getMostRecentEpisode(episodes: FhirEpisodeOfCare[]): FhirEpisodeOfCare | null;
+export function getMostRecentEpisode(episodes: EpisodeOfCare[]): EpisodeOfCare | null;
+export function getMostRecentEpisode(episodes: EpisodeWithStartDate[]): EpisodeWithStartDate | null {
   if (!episodes.length) {
     return null;
   }
@@ -43,8 +55,8 @@ export function getMostRecentEpisode(episodes: FhirEpisodeOfCare[]): FhirEpisode
   }
 
   return episodes.reduce((latest, current) => {
-    const latestTimestamp = toSafeTimestamp(latest.period?.start);
-    const currentTimestamp = toSafeTimestamp(current.period?.start);
+    const latestTimestamp = toSafeTimestamp(getEpisodeStartDate(latest));
+    const currentTimestamp = toSafeTimestamp(getEpisodeStartDate(current));
 
     if (latestTimestamp === null && currentTimestamp === null) {
       return latest;

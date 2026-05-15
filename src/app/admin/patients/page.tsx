@@ -94,6 +94,7 @@ export default async function AdminPatientsPage() {
                       <PhoneContactActions
                         phone={patient.phone}
                         mainContactPhone={patient.mainContact?.phone}
+                        entity="patient"
                         showMissingChannelsMessage={false}
                       />
                     </div>
