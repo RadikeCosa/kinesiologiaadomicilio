@@ -13,16 +13,16 @@ import { SERVICES_PAGE_CONTENT } from "./servicesPageContent";
 import { BUSINESS_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Servicios de kinesiología y fisioterapia a domicilio en Neuquén",
+  title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia",
   description:
-    "Kinesiología a domicilio en Neuquén con enfoque en rehabilitación y fisioterapia a domicilio como complemento terapéutico. Atención para adultos, adultos mayores, postoperatorios, cuidados paliativos y recuperación funcional.",
+    "Servicios de kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios, cuidados paliativos y recuperación funcional.",
   alternates: {
     canonical: `${BUSINESS_CONFIG.url}/services`,
   },
   openGraph: {
-    title: "Servicios de kinesiología y fisioterapia a domicilio en Neuquén",
+    title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia",
     description:
-      "Kinesiología a domicilio en Neuquén con enfoque en rehabilitación y fisioterapia a domicilio como complemento terapéutico. Atención para adultos, adultos mayores, postoperatorios, cuidados paliativos y recuperación funcional.",
+      "Servicios de kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios, cuidados paliativos y recuperación funcional.",
     url: `${BUSINESS_CONFIG.url}/services`,
     siteName: "Rehabilitación a domicilio Neuquén",
     locale: "es_AR",
@@ -32,15 +32,15 @@ export const metadata: Metadata = {
         url: "/og-placeholder.png",
         width: 1200,
         height: 630,
-        alt: "Servicios de kinesiología y fisioterapia a domicilio en Neuquén",
+        alt: "Servicios de kinesiología a domicilio en Neuquén",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Servicios de kinesiología y fisioterapia a domicilio en Neuquén",
+    title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia",
     description:
-      "Kinesiología a domicilio en Neuquén con enfoque en rehabilitación y fisioterapia a domicilio como complemento terapéutico. Atención para adultos, adultos mayores, postoperatorios, cuidados paliativos y recuperación funcional.",
+      "Servicios de kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios, cuidados paliativos y recuperación funcional.",
     images: ["/og-placeholder.png"],
   },
   keywords: [
@@ -66,6 +66,30 @@ export default function ServicesPage() {
         <div id="servicios-grid">
           <ServicesGrid />
         </div>
+
+        <section className="mt-14 rounded-2xl border border-slate-200 bg-white p-6 text-left dark:border-neutral-700 dark:bg-neutral-800">
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            Preguntas frecuentes sobre atención a domicilio en Neuquén
+          </h2>
+          <dl className="mt-6 space-y-4 text-slate-700 dark:text-slate-200">
+            <div>
+              <dt className="font-semibold">¿En qué zonas atienden?</dt>
+              <dd className="mt-1 text-sm">Atendemos en Neuquén Capital y zonas cercanas según disponibilidad y logística del día.</dd>
+            </div>
+            <div>
+              <dt className="font-semibold">¿La atención es por obra social?</dt>
+              <dd className="mt-1 text-sm">La modalidad actual es particular. Por WhatsApp te orientamos sobre disponibilidad, forma de trabajo y valor de la consulta.</dd>
+            </div>
+            <div>
+              <dt className="font-semibold">¿Cuándo conviene consultar?</dt>
+              <dd className="mt-1 text-sm">Podés consultar ante recuperación postoperatoria, pérdida de movilidad, rehabilitación funcional o necesidad de acompañamiento en domicilio.</dd>
+            </div>
+            <div>
+              <dt className="font-semibold">¿Qué información conviene enviar por WhatsApp?</dt>
+              <dd className="mt-1 text-sm">Zona/barrio, motivo de consulta, edad aproximada del paciente y franja horaria orientativa para coordinar.</dd>
+            </div>
+          </dl>
+        </section>
 
         <div className="mt-16 text-center">
           <div className="rounded-2xl bg-sky-50 p-8 dark:bg-sky-950">

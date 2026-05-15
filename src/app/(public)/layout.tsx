@@ -58,13 +58,13 @@ const structuredData = {
 };
 
 export const metadata: Metadata = {
-  title: "Kinesiología y rehabilitación a domicilio en Neuquén",
+  title: "Kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia en casa",
   description:
-    "Atención profesional y personalizada en la comodidad del hogar. Sesiones de kinesiología y rehabilitación funcional, cuidados paliativos y recuperación postoperatoria en Neuquén.",
+    "Kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios y cuidados paliativos.",
   openGraph: {
-    title: "Kinesiología y rehabilitación a domicilio en Neuquén",
+    title: "Kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia en casa",
     description:
-      "Atención profesional y personalizada en la comodidad del hogar. Sesiones de kinesiología y rehabilitación funcional, cuidados paliativos y recuperación postoperatoria en Neuquén.",
+      "Kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios y cuidados paliativos.",
     url: businessUrl,
     siteName: "Rehabilitación a domicilio Neuquén",
     locale: "es_AR",
@@ -74,15 +74,15 @@ export const metadata: Metadata = {
         url: "/og-placeholder.png",
         width: 1200,
         height: 630,
-        alt: "Kinesiología y rehabilitación a domicilio en Neuquén",
+        alt: "Kinesiología a domicilio en Neuquén",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kinesiología y rehabilitación a domicilio en Neuquén",
+    title: "Kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia en casa",
     description:
-      "Atención profesional y personalizada en la comodidad del hogar. Sesiones de kinesiología y rehabilitación funcional, cuidados paliativos y recuperación postoperatoria en Neuquén.",
+      "Kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios y cuidados paliativos.",
     images: ["/og-placeholder.png"],
   },
   keywords: [

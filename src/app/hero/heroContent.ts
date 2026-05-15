@@ -10,6 +10,11 @@ export const heroContent = {
         "Acompañamiento kinesiológico profesional para tu familiar, en la comodidad de su hogar en Neuquén Capital.",
     ctaLabel: "Consultar por mi familiar",
     whatsappMessage:
-        "Hola Ramiro, quisiera consultar sobre kinesiología a domicilio para un familiar",
+        `Hola, quisiera consultar por kinesiología a domicilio para un familiar.
+
+Zona/barrio:
+Motivo de consulta:
+Edad aproximada del paciente:
+Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
     secondaryLinkLabel: "Ver servicios",
 };

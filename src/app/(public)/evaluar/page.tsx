@@ -4,16 +4,16 @@ import { EVALUAR_CONTENT } from "./evaluar-content";
 import { BUSINESS_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "¿Me puede ayudar un kinesiólogo a domicilio? | Kinesiología Neuquén",
+  title: "Evaluar kinesiología a domicilio en Neuquén | ¿Cuándo consultar?",
   description:
-    "Orientación inicial para saber si la atención kinesiológica a domicilio puede encajar en distintos casos en Neuquén, sin reemplazar una evaluación profesional ni un diagnóstico.",
+    "Orientación inicial para saber cuándo consultar por kinesiología a domicilio en Neuquén, con foco en rehabilitación funcional y atención particular en domicilio.",
   alternates: {
     canonical: `${BUSINESS_CONFIG.url}/evaluar`,
   },
   openGraph: {
-    title: "¿Me puede ayudar un kinesiólogo a domicilio? | Kinesiología Neuquén",
+    title: "Evaluar kinesiología a domicilio en Neuquén | ¿Cuándo consultar?",
     description:
-      "Orientación inicial para saber si la atención kinesiológica a domicilio puede encajar en distintos casos en Neuquén, sin reemplazar una evaluación profesional ni un diagnóstico.",
+      "Orientación inicial para saber cuándo consultar por kinesiología a domicilio en Neuquén, con foco en rehabilitación funcional y atención particular en domicilio.",
     url: `${BUSINESS_CONFIG.url}/evaluar`,
     siteName: "Rehabilitación a domicilio Neuquén",
     locale: "es_AR",
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "¿Me puede ayudar un kinesiólogo a domicilio? | Kinesiología Neuquén",
+    title: "Evaluar kinesiología a domicilio en Neuquén | ¿Cuándo consultar?",
     description:
-      "Orientación inicial para saber si la atención kinesiológica a domicilio puede encajar en distintos casos en Neuquén, sin reemplazar una evaluación profesional ni un diagnóstico.",
+      "Orientación inicial para saber cuándo consultar por kinesiología a domicilio en Neuquén, con foco en rehabilitación funcional y atención particular en domicilio.",
     images: ["/og-placeholder.png"],
   },
 };
