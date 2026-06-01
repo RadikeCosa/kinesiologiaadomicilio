@@ -1,3 +1,5 @@
+import { WHATSAPP_EVALUAR_MESSAGE } from "@/lib/whatsapp-messages";
+
 export const EVALUAR_CONTENT = {
   headline: "¿Me puede ayudar un kinesiólogo a domicilio?",
   subtitle:
@@ -13,13 +15,7 @@ export const EVALUAR_CONTENT = {
       resultText:
         "Después de un tiempo prolongado de inactividad, es habitual perder fuerza, estabilidad y confianza para moverse. La kinesiología a domicilio puede ayudar a recuperar movilidad y seguridad de manera gradual, adaptada al momento y al entorno real de la persona.",
       ctaLabel: "Consultar por una primera evaluación en domicilio",
-      whatsappMessage:
-        `Hola, completé la orientación del sitio y quisiera consultar por kinesiología a domicilio.
-
-Zona/barrio:
-Motivo de consulta:
-Edad aproximada del paciente:
-Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
+      whatsappMessage: WHATSAPP_EVALUAR_MESSAGE,
     },
     {
       id: "recuperacion-reciente",
@@ -30,13 +26,7 @@ Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
       resultText:
         "Después de una cirugía, una internación o un período de reposo, muchas personas necesitan apoyo para recuperar movilidad, fuerza y mayor independencia en sus actividades diarias. La atención en domicilio permite trabajar esa recuperación en el contexto real de la persona.",
       ctaLabel: "Consultar por una primera evaluación en domicilio",
-      whatsappMessage:
-        `Hola, completé la orientación del sitio y quisiera consultar por kinesiología a domicilio.
-
-Zona/barrio:
-Motivo de consulta:
-Edad aproximada del paciente:
-Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
+      whatsappMessage: WHATSAPP_EVALUAR_MESSAGE,
     },
     {
       id: "movilidad-autonomia",
@@ -47,13 +37,7 @@ Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
       resultText:
         "Cuando caminar, trasladarse o realizar actividades cotidianas se vuelve más difícil, una intervención en domicilio puede ser útil para trabajar movilidad, equilibrio, seguridad y mayor autonomía. Hacerlo en casa además permite adaptar mejor la atención a la realidad diaria de la persona.",
       ctaLabel: "Consultar por una primera evaluación en domicilio",
-      whatsappMessage:
-        `Hola, completé la orientación del sitio y quisiera consultar por kinesiología a domicilio.
-
-Zona/barrio:
-Motivo de consulta:
-Edad aproximada del paciente:
-Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
+      whatsappMessage: WHATSAPP_EVALUAR_MESSAGE,
     },
     {
       id: "salud-compleja",
@@ -64,13 +48,7 @@ Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
       resultText:
         "Cuando hay una situación de salud compleja, muchas veces el foco está en acompañar el movimiento posible, facilitar cuidados, mejorar el confort y sostener la mejor calidad de vida en casa. La atención kinesiológica a domicilio puede formar parte de ese acompañamiento, de acuerdo con el momento y las necesidades del caso.",
       ctaLabel: "Consultar por este caso en domicilio",
-      whatsappMessage:
-        `Hola, completé la orientación del sitio y quisiera consultar por kinesiología a domicilio.
-
-Zona/barrio:
-Motivo de consulta:
-Edad aproximada del paciente:
-Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
+      whatsappMessage: WHATSAPP_EVALUAR_MESSAGE,
     },
     {
       id: "no-estoy-seguro",
@@ -81,13 +59,7 @@ Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
       resultText:
         "Muchas personas llegan con la misma duda: no saben si la atención kinesiológica a domicilio corresponde, si este es el momento indicado o si el caso realmente encaja. Con una breve descripción de la situación ya se puede evaluar mejor si tiene sentido coordinar una primera visita.",
       ctaLabel: "Consultar por este caso en domicilio",
-      whatsappMessage:
-        `Hola, completé la orientación del sitio y quisiera consultar por kinesiología a domicilio.
-
-Zona/barrio:
-Motivo de consulta:
-Edad aproximada del paciente:
-Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
+      whatsappMessage: WHATSAPP_EVALUAR_MESSAGE,
     },
   ],
 } as const;

@@ -296,6 +296,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - catálogo de servicios con cards + CTA;
 - flujo de orientación en `/evaluar` (selección de situación, resultado y CTA de consulta);
 - contacto por WhatsApp y teléfono;
+- los CTAs públicos de WhatsApp abren con mensajes iniciales livianos y contextuales; la pre-calificación operativa (zona/barrio, edad, motivo y modalidad particular) se realiza en la respuesta posterior, no como plantilla inicial obligatoria;
 - SEO técnico base:
   - metadata global + metadata por ruta;
   - Open Graph/Twitter;
@@ -487,6 +488,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 | Datos del negocio/contacto/base URL | `src/lib/config.ts` |
 | Catálogo de servicios | `src/lib/servicesData.ts` |
 | Navegación global | `src/lib/navLinks.ts` |
+| Mensajes iniciales de WhatsApp público | `src/lib/whatsapp-messages.ts` |
 | Hero (copy editorial) | `src/app/hero/heroContent.ts` |
 | Home (copy editorial) | `src/app/home/homeContent.ts` |
 | Home “Cómo funciona” | `src/app/home/howItWorksContent.ts` |

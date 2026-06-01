@@ -1,3 +1,5 @@
+import { WHATSAPP_GENERAL_MESSAGE } from "@/lib/whatsapp-messages";
+
 export const HOME_CONTENT = {
   about: {
     sectionTitle: "Sobre Ramiro",
@@ -11,13 +13,7 @@ export const HOME_CONTENT = {
       "Cada tratamiento comienza con una evaluación inicial",
     ],
     ctaLabel: "Consultar con Ramiro",
-    whatsappMessage:
-      `Hola, quisiera consultar por kinesiología a domicilio.
-
-Zona/barrio:
-Motivo de consulta:
-Edad aproximada del paciente:
-Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
+    whatsappMessage: WHATSAPP_GENERAL_MESSAGE,
     photo: null,
     photoPlaceholderTitle: "Foto profesional próximamente",
     photoPlaceholderDescription:

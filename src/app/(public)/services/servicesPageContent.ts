@@ -1,3 +1,5 @@
+import { WHATSAPP_GENERAL_MESSAGE } from "@/lib/whatsapp-messages";
+
 export const SERVICES_PAGE_CONTENT = {
   intro: {
     title: "Servicios de kinesiología a domicilio en Neuquén",
@@ -10,12 +12,6 @@ export const SERVICES_PAGE_CONTENT = {
       "Contactanos por WhatsApp para una consulta personalizada sin compromiso.",
     ctaLabel: "Consultá por WhatsApp",
     evaluationLinkLabel: "¿No estás seguro? Hacé una evaluación rápida",
-    whatsappMessage:
-      `Hola, quisiera consultar por kinesiología a domicilio.
-
-Zona/barrio:
-Motivo de consulta:
-Edad aproximada del paciente:
-Quisiera conocer disponibilidad, modalidad de atención particular y valor.`,
+    whatsappMessage: WHATSAPP_GENERAL_MESSAGE,
   },
 } as const;
