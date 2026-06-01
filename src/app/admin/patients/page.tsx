@@ -12,6 +12,7 @@ import {
   formatDniDisplay,
   formatPhoneDisplay,
 } from "@/lib/patient-admin-display";
+import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 
 import { getTreatmentBadgePresentation } from "./treatment-badge";
 
@@ -19,8 +20,81 @@ export const metadata: Metadata = {
   title: "Pacientes",
 };
 
-export default async function AdminPatientsPage() {
+type PatientsStatusFilter = "active" | "pending" | "finished" | "all";
+
+interface AdminPatientsPageProps {
+  searchParams?: Promise<{ status?: string | string[] }>;
+}
+
+const STATUS_FILTERS: Array<{
+  value: PatientsStatusFilter;
+  label: string;
+  href: string;
+}> = [
+  { value: "all", label: "Todos", href: "/admin/patients" },
+  {
+    value: "active",
+    label: "En tratamiento",
+    href: "/admin/patients?status=active",
+  },
+  {
+    value: "pending",
+    label: "Sin tratamiento activo",
+    href: "/admin/patients?status=pending",
+  },
+  {
+    value: "finished",
+    label: "Finalizados",
+    href: "/admin/patients?status=finished",
+  },
+];
+
+const EMPTY_STATE_BY_FILTER: Record<PatientsStatusFilter, string> = {
+  active: "No hay pacientes en tratamiento.",
+  pending: "No hay pacientes sin tratamiento activo.",
+  finished: "No hay pacientes con tratamiento finalizado.",
+  all: "No hay pacientes para mostrar.",
+};
+
+const OPERATIONAL_STATUSES_BY_FILTER: Record<
+  Exclude<PatientsStatusFilter, "all">,
+  PatientOperationalStatus[]
+> = {
+  active: ["active_treatment"],
+  pending: ["ready_to_start", "preliminary"],
+  finished: ["finished_treatment"],
+};
+
+function normalizeStatusFilter(status?: string | string[]): PatientsStatusFilter {
+  const value = Array.isArray(status) ? status[0] : status;
+
+  if (value === "active" || value === "pending" || value === "finished") {
+    return value;
+  }
+
+  return "all";
+}
+
+function matchesStatusFilter(
+  operationalStatus: PatientOperationalStatus,
+  filter: PatientsStatusFilter,
+): boolean {
+  if (filter === "all") {
+    return true;
+  }
+
+  return OPERATIONAL_STATUSES_BY_FILTER[filter].includes(operationalStatus);
+}
+
+export default async function AdminPatientsPage({
+  searchParams,
+}: AdminPatientsPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const activeFilter = normalizeStatusFilter(resolvedSearchParams?.status);
   const patients = await loadPatientsList();
+  const filteredPatients = patients.filter((patient) =>
+    matchesStatusFilter(patient.operationalStatus, activeFilter),
+  );
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -41,13 +115,36 @@ export default async function AdminPatientsPage() {
         </Link>
       </div>
 
+      <nav aria-label="Filtrar pacientes por estado" className="mt-4">
+        <div className="flex flex-wrap gap-2">
+          {STATUS_FILTERS.map((filter) => {
+            const isActive = filter.value === activeFilter;
+
+            return (
+              <Link
+                key={filter.value}
+                aria-current={isActive ? "page" : undefined}
+                className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
+                  isActive
+                    ? "border-slate-900 bg-slate-900 text-white"
+                    : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+                href={filter.href}
+              >
+                {filter.label}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
       <section className="mt-4 space-y-2.5">
-        {patients.length === 0 ? (
+        {filteredPatients.length === 0 ? (
           <p className="rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
-            No hay pacientes para mostrar.
+            {EMPTY_STATE_BY_FILTER[activeFilter]}
           </p>
         ) : (
-          patients.map((patient) => {
+          filteredPatients.map((patient) => {
             const treatmentBadge = getTreatmentBadgePresentation(
               patient.operationalStatus,
             );

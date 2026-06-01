@@ -42,7 +42,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 
 #### Responsabilidad actual por ruta (superficie de pacientes)
 - `/admin`: dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes), sin gráficos.
-- `/admin/patients`: listado operativo de pacientes, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
+- `/admin/patients`: listado operativo de pacientes, ordenado primero por prioridad operativa (`active_treatment` → `ready_to_start` → `preliminary` → `finished_treatment`) y luego por nombre visible, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
+- `/admin/patients` incorpora filtros simples por estado operativo vía query param (`status=active`, `status=pending`, `status=finished`, `status=all`/sin query). El filtro visible `Sin tratamiento activo` (`status=pending`) agrupa por ahora `ready_to_start + preliminary` y no representa una señal fina de `ServiceRequest`.
 - `/admin/patients/[id]`: hub del paciente de **lectura y navegación contextual** (no una pantalla dominada por acciones), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
 - Convención UX/UI vigente del hub (`/admin/patients/[id]`): prioridad visual de lectura **identidad/estado → resumen clínico reciente → contacto operativo → próxima acción recomendada → acciones principales/navegación estructural**.
 - En desktop, el hub usa dos columnas con **columna principal/ancha clínico-operativa** (`Resumen clínico reciente`, `Contacto operativo`, contexto compacto de cierre cuando aplica) y **columna lateral/angosta** (`Próxima acción recomendada` compacta + `Acciones principales`).
@@ -168,12 +169,14 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Cambio operativo confirmado:** el loader de `/admin/patients` deja de hacer N+1 de `EpisodeOfCare` por paciente y consume una única lectura batch por `patientIds` (`listEpisodesByPatientIds(patientIds: string[])`).
 - **Query batch validada en servidor real:** HAPI FHIR 8.8.0 (`fhirVersion` 4.0.1) respondió correctamente `EpisodeOfCare?patient=Patient/{id1},Patient/{id2},...` (HTTP 200), incluyendo solo episodios del set solicitado y excluyendo pacientes fuera del set.
 - **Resolución de estado en loader:** los episodios se agrupan en memoria por `patientId` y desde ese agrupamiento se resuelven `activeEpisode` y `latestEpisode` sin consultas adicionales por paciente.
+- **Orden visible vigente:** el read model resultante se ordena por prioridad operativa (`active_treatment`, `ready_to_start`, `preliminary`, `finished_treatment`) y desempata por nombre visible del paciente.
 - **Hardening preservado:** la selección de `latestEpisode` mantiene comparación temporal segura (fechas), no comparación lexicográfica de strings.
 - **Aislamiento por paciente validado:** no se observó mezcla de episodios entre pacientes en runtime.
 - **Semántica visible preservada en `/admin/patients`:**
   - episodio activo → `En tratamiento`;
   - sin activo pero con episodio finalizado/reciente → `Tratamiento finalizado`;
   - sin episodios → `Sin tratamiento activo`.
+- **Filtro vigente:** `/admin/patients` expone filtros visuales por query param (`active`, `pending`, `finished`, `all`); `pending` se comunica como `Sin tratamiento activo` y no consulta ni promete semántica fina de `ServiceRequest`.
 - **No-alcances preservados:** sin cambios en `ServiceRequest`, `incoming-referral`, UI, modelo FHIR, persistencia, cache ni read-model materializado; tampoco se aborda el N+1 restante de `/admin` por `ServiceRequest`.
 - **Validación registrada:** `/metadata` (HTTP 200, `software.name=HAPI FHIR Server`), query batch de `EpisodeOfCare` y ejecución runtime de `/admin/patients` (HTTP 200) con estados observados consistentes.
 
