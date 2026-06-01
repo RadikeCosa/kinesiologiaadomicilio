@@ -4,7 +4,8 @@ import type {
   StartEpisodeOfCareInput,
   UpdateEpisodeClinicalContextInput,
 } from "@/domain/episode-of-care/episode-of-care.types";
-import { extractResourcesByType, extractSingleResource } from "@/lib/fhir/bundle-utils";
+import { selectPatientEpisodes } from "@/domain/episode-of-care/episode-of-care.selectors";
+import { extractResourcesByType } from "@/lib/fhir/bundle-utils";
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
 import {
@@ -26,6 +27,13 @@ import {
 
 function buildSearchPath(resourceType: string, query: string): string {
   return query ? `${resourceType}?${query}` : resourceType;
+}
+
+function logMultipleActiveEpisodes(patientId: string, activeEpisodesCount: number): void {
+  console.error("multiple active EpisodeOfCare resources detected", {
+    patientId,
+    activeEpisodesCount,
+  });
 }
 
 type EpisodeWithStartDate = EpisodeOfCare | FhirEpisodeOfCare;
@@ -80,15 +88,26 @@ export function getMostRecentEpisode(episodes: EpisodeWithStartDate[]): EpisodeW
 }
 
 export async function getActiveEpisodeByPatientId(patientId: string): Promise<EpisodeOfCare | null> {
+  const activeEpisodes = await listActiveEpisodesByPatientId(patientId);
+  const selection = selectPatientEpisodes(activeEpisodes);
+
+  if (selection.hasMultipleActiveEpisodes) {
+    logMultipleActiveEpisodes(patientId.trim(), selection.activeEpisodesCount);
+  }
+
+  return selection.activeEpisode;
+}
+
+export async function listActiveEpisodesByPatientId(patientId: string): Promise<EpisodeOfCare[]> {
   if (!patientId.trim()) {
-    return null;
+    return [];
   }
 
   const query = buildActiveEpisodeOfCareByPatientQuery(patientId);
   const bundle = await fhirClient.get<FhirBundle<FhirEpisodeOfCare>>(buildSearchPath("EpisodeOfCare", query));
-  const episode = extractSingleResource<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
+  const episodes = extractResourcesByType<FhirEpisodeOfCare>(bundle, "EpisodeOfCare");
 
-  return episode ? mapFhirEpisodeOfCareToDomain(episode) : null;
+  return episodes.map(mapFhirEpisodeOfCareToDomain);
 }
 
 export async function getMostRecentEpisodeByPatientId(patientId: string): Promise<EpisodeOfCare | null> {

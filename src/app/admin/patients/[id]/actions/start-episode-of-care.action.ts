@@ -4,7 +4,7 @@ import { canStartEpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.
 import { startEpisodeOfCareSchema } from "@/domain/episode-of-care/episode-of-care.schemas";
 import {
   createEpisodeOfCare,
-  getActiveEpisodeByPatientId,
+  listActiveEpisodesByPatientId,
   listEpisodeOfCareByIncomingReferral,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 import {
@@ -16,6 +16,15 @@ import { getServiceRequestById } from "@/infrastructure/repositories/service-req
 export interface StartEpisodeOfCareActionResult {
   ok: boolean;
   message?: string;
+}
+
+const MULTIPLE_ACTIVE_EPISODES_MESSAGE = "Se detectó más de un tratamiento activo. Revisá los datos antes de iniciar otro tratamiento.";
+
+function logMultipleActiveEpisodes(patientId: string, activeEpisodesCount: number): void {
+  console.error("cannot start EpisodeOfCare because multiple active episodes exist", {
+    patientId,
+    activeEpisodesCount,
+  });
 }
 
 export async function startEpisodeOfCareAction(
@@ -42,7 +51,15 @@ export async function startEpisodeOfCareAction(
       };
     }
 
-    const existingActiveEpisode = await getActiveEpisodeByPatientId(patient.id);
+    const activeEpisodes = await listActiveEpisodesByPatientId(patient.id);
+
+    if (activeEpisodes.length > 1) {
+      logMultipleActiveEpisodes(patient.id, activeEpisodes.length);
+      return {
+        ok: false,
+        message: MULTIPLE_ACTIVE_EPISODES_MESSAGE,
+      };
+    }
 
     const duplicatePatientByDni = patient.dni?.trim()
       ? await existsAnotherPatientWithDni({
@@ -52,7 +69,7 @@ export async function startEpisodeOfCareAction(
       : false;
 
     const startValidation = canStartEpisodeOfCare(patient, {
-      hasActiveEpisode: Boolean(existingActiveEpisode),
+      hasActiveEpisode: activeEpisodes.length > 0,
       duplicatePatientByDni,
     });
 

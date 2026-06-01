@@ -206,6 +206,119 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).not.toContain("Registrar visita");
   });
 
+  it("renders active treatment as primary state and closed cycles only as history", async () => {
+    const closedEpisodeOld = {
+      id: "episode-closed-old",
+      startDate: "2026-01-01",
+      endDate: "2026-01-31",
+      closureReason: "treatment_completed",
+      closureDetail: "Alta funcional previa",
+      serviceRequestId: "sr-closed-old",
+    };
+    const closedEpisodeRecent = {
+      id: "episode-closed-recent",
+      startDate: "2026-03-01",
+      endDate: "2026-03-31",
+      closureReason: "clinical_discharge",
+      closureDetail: "Alta clínica previa",
+      serviceRequestId: "sr-closed-recent",
+    };
+    const activeEpisode = {
+      id: "episode-active",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-05-01",
+    };
+
+    loadPatientDetailMock.mockResolvedValueOnce({
+      ...basePatient,
+      operationalStatus: "active_treatment",
+      activeEpisode,
+      latestEpisode: activeEpisode,
+    });
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([
+      closedEpisodeRecent,
+      closedEpisodeOld,
+    ]);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: undefined,
+      isValid: false,
+      state: "none",
+      message: undefined,
+      serviceRequest: undefined,
+    });
+
+    const element = await AdminPatientTreatmentPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Tratamiento activo");
+    expect(html).toContain("Inicio: 01/05/2026");
+    expect(html).toContain("TreatmentClinicalContextForm");
+    expect(html).toContain("Historial de ciclos cerrados");
+    expect(html).toContain("Ciclos anteriores del paciente. No reemplazan el tratamiento activo actual.");
+    expect(html.match(/Ciclo finalizado/g)?.length).toBe(2);
+    expect(html.match(/Finalizado/g)?.length).toBe(2);
+    expect(html).toContain("01/03/2026");
+    expect(html).toContain("01/01/2026");
+    expect(html).toContain("Cierre");
+    expect(html).toContain("31/03/2026");
+    expect(html).toContain("31/01/2026");
+    expect(html).toContain("Alta clínica");
+    expect(html).toContain("Alta funcional previa");
+    expect(html).toContain("sr-closed-recent");
+    expect(html).toContain("sr-closed-old");
+    expect(html).not.toContain("Resumen del tratamiento finalizado");
+    expect(html).not.toContain("No hay tratamiento activo");
+    expect(html).not.toContain("StartEpisodeOfCareForm");
+    expect(html.indexOf("Tratamiento activo")).toBeLessThan(html.indexOf("Historial de ciclos cerrados"));
+  });
+
+  it("renders closed-cycle fallbacks without making history look actionable", async () => {
+    const activeEpisode = {
+      id: "episode-active",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-05-01",
+    };
+
+    loadPatientDetailMock.mockResolvedValueOnce({
+      ...basePatient,
+      operationalStatus: "active_treatment",
+      activeEpisode,
+      latestEpisode: activeEpisode,
+    });
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([
+      {
+        id: "episode-closed-without-detail",
+        startDate: "2026-02-01",
+        endDate: "2026-02-20",
+      },
+    ]);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: undefined,
+      isValid: false,
+      state: "none",
+      message: undefined,
+      serviceRequest: undefined,
+    });
+
+    const element = await AdminPatientTreatmentPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Tratamiento activo");
+    expect(html).toContain("Historial de ciclos cerrados");
+    expect(html).toContain("Sin motivo registrado");
+    expect(html).toContain("Sin detalle adicional");
+    expect(html).toContain("Sin solicitud vinculada");
+    expect(html).not.toContain("Gestión administrativa para nuevo ciclo");
+  });
+
   it("displays treatment start from episode independently from service request date", async () => {
     loadPatientDetailMock.mockResolvedValueOnce({
       ...basePatient,
@@ -309,9 +422,14 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain("Si corresponde continuar la atención, registrá una nueva solicitud para iniciar otro ciclo.");
     expect(html).toContain("Resumen del tratamiento finalizado");
     expect(html).toContain("Historial de ciclos cerrados");
+    expect(html).toContain("Ciclos anteriores del paciente. No reemplazan el tratamiento activo actual.");
     expect(html).toContain("Motivo: Tratamiento completado");
     expect(html).toContain("Detalle: Alta funcional");
     expect(html).toContain("Solicitud de origen: sr-22");
+    expect(html).toContain("Ciclo finalizado");
+    expect(html).toContain("Finalizado");
+    expect(html).toContain("Tratamiento completado");
+    expect(html).toContain("Alta funcional");
     expect(html).toContain("Ver historial de solicitudes");
     expect(html).toContain('href="/admin/patients/pat-1/administrative#service-requests"');
     expect(html).not.toContain("No hay tratamientos registrados");

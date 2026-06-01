@@ -9,11 +9,10 @@ vi.mock("@/infrastructure/repositories/patient.repository", () => ({
 }));
 
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
-  getMostRecentEpisode: vi.fn(),
   listEpisodesByPatientIds: vi.fn(),
 }));
 
-import { listEpisodesByPatientIds, getMostRecentEpisode } from "@/infrastructure/repositories/episode-of-care.repository";
+import { listEpisodesByPatientIds } from "@/infrastructure/repositories/episode-of-care.repository";
 import { listPatients } from "@/infrastructure/repositories/patient.repository";
 
 function buildPatient(overrides: Partial<Patient> & Pick<Patient, "id" | "firstName" | "lastName">): Patient {
@@ -28,6 +27,93 @@ function buildPatient(overrides: Partial<Patient> & Pick<Patient, "id" | "firstN
 }
 
 describe("loadPatientsList", () => {
+  it("prioritizes active episode over multiple finished episodes for operational status", async () => {
+    const closedEpisodeOld: EpisodeOfCare = {
+      id: "episode-closed-old",
+      patientId: "pat-cycle",
+      status: "finished",
+      startDate: "2026-01-01",
+      endDate: "2026-01-31",
+    };
+    const closedEpisodeRecent: EpisodeOfCare = {
+      id: "episode-closed-recent",
+      patientId: "pat-cycle",
+      status: "finished",
+      startDate: "2026-03-01",
+      endDate: "2026-03-31",
+    };
+    const activeEpisode: EpisodeOfCare = {
+      id: "episode-active",
+      patientId: "pat-cycle",
+      status: "active",
+      startDate: "2026-05-01",
+    };
+
+    vi.mocked(listPatients).mockResolvedValue([
+      buildPatient({
+        id: "pat-cycle",
+        firstName: "Ciclo",
+        lastName: "Activo",
+      }),
+    ]);
+    vi.mocked(listEpisodesByPatientIds).mockResolvedValue([
+      closedEpisodeOld,
+      closedEpisodeRecent,
+      activeEpisode,
+    ]);
+
+    const patients = await loadPatientsList();
+
+    expect(patients).toHaveLength(1);
+    expect(patients[0]?.operationalStatus).toBe("active_treatment");
+    expect(patients[0]?.operationalStatus).not.toBe("finished_treatment");
+  });
+
+  it("keeps active_treatment and logs when multiple active episodes are present", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const closedEpisodeOld: EpisodeOfCare = {
+      id: "episode-closed-old",
+      patientId: "pat-cycle",
+      status: "finished",
+      startDate: "2026-01-01",
+      endDate: "2026-01-31",
+    };
+    const activeEpisodeOld: EpisodeOfCare = {
+      id: "episode-active-old",
+      patientId: "pat-cycle",
+      status: "active",
+      startDate: "2026-04-01",
+    };
+    const activeEpisodeRecent: EpisodeOfCare = {
+      id: "episode-active-recent",
+      patientId: "pat-cycle",
+      status: "active",
+      startDate: "2026-05-01",
+    };
+
+    vi.mocked(listPatients).mockResolvedValue([
+      buildPatient({
+        id: "pat-cycle",
+        firstName: "Ciclo",
+        lastName: "Activo",
+      }),
+    ]);
+    vi.mocked(listEpisodesByPatientIds).mockResolvedValue([
+      closedEpisodeOld,
+      activeEpisodeOld,
+      activeEpisodeRecent,
+    ]);
+
+    const patients = await loadPatientsList();
+
+    expect(patients[0]?.operationalStatus).toBe("active_treatment");
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "multiple active EpisodeOfCare resources detected while loading patients list",
+      { patientId: "pat-cycle", activeEpisodesCount: 2 },
+    );
+    consoleErrorSpy.mockRestore();
+  });
+
   it("maps finished_treatment when no active episode exists but latest is finished", async () => {
     vi.mocked(listPatients).mockResolvedValue([
       {
@@ -40,20 +126,18 @@ describe("loadPatientsList", () => {
       },
     ]);
 
-    vi.mocked(listEpisodesByPatientIds).mockResolvedValue([]);
-    vi.mocked(getMostRecentEpisode).mockReturnValue({
+    vi.mocked(listEpisodesByPatientIds).mockResolvedValue([{
       id: "epi-1",
       patientId: "pat-1",
       status: "finished",
       startDate: "2026-03-01",
       endDate: "2026-04-01",
-    });
+    }]);
 
     const patients = await loadPatientsList();
 
     expect(listEpisodesByPatientIds).toHaveBeenCalledWith(["pat-1"]);
     expect(listEpisodesByPatientIds).toHaveBeenCalledTimes(1);
-    expect(getMostRecentEpisode).toHaveBeenCalledTimes(1);
     expect(patients[0]?.operationalStatus).toBe("finished_treatment");
   });
 
@@ -113,9 +197,6 @@ describe("loadPatientsList", () => {
         startDate: "2026-04-02",
       },
     ]);
-    vi.mocked(getMostRecentEpisode).mockImplementation(
-      (episodes: EpisodeOfCare[]) => episodes.at(-1) ?? null,
-    );
 
     const patients = await loadPatientsList();
 

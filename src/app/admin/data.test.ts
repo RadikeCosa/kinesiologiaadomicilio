@@ -19,6 +19,27 @@ import { listEpisodesByIncomingReferralIds } from "@/infrastructure/repositories
 import { listServiceRequestsByPatientIds } from "@/infrastructure/repositories/service-request.repository";
 
 describe("loadAdminDashboard", () => {
+  it("counts a patient with current active cycle as active and not finished", async () => {
+    vi.mocked(loadPatientsList).mockResolvedValueOnce([
+      {
+        id: "pat-cycle",
+        fullName: "Ciclo Actual",
+        operationalStatus: "active_treatment",
+        birthDate: "1990-01-10",
+        createdAt: "2026-04-01T00:00:00.000Z",
+        updatedAt: "2026-04-01T00:00:00.000Z",
+      },
+    ]);
+    vi.mocked(listServiceRequestsByPatientIds).mockResolvedValueOnce([]);
+    vi.mocked(listEpisodesByIncomingReferralIds).mockResolvedValueOnce([]);
+
+    const dashboard = await loadAdminDashboard();
+
+    expect(dashboard.operationalSummary.activeTreatment).toBe(1);
+    expect(dashboard.operationalSummary.finishedTreatment).toBe(0);
+    expect(dashboard.operationalSummary.totalPatients).toBe(1);
+  });
+
   it("builds dashboard read model from patients list and service request funnel", async () => {
     vi.mocked(loadPatientsList).mockResolvedValueOnce([
       {

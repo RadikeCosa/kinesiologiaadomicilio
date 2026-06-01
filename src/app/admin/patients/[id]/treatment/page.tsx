@@ -35,6 +35,14 @@ export async function generateMetadata({
   };
 }
 
+function formatClosureReasonDisplay(reason?: string): string {
+  if (!reason) {
+    return "Sin motivo registrado";
+  }
+
+  return EPISODE_OF_CARE_CLOSURE_REASON_LABELS[reason as keyof typeof EPISODE_OF_CARE_CLOSURE_REASON_LABELS] ?? reason;
+}
+
 export default async function AdminPatientTreatmentPage({
   params,
   searchParams,
@@ -210,9 +218,37 @@ export default async function AdminPatientTreatmentPage({
       {hasAnyEpisode && treatmentEpisodeHistory.length > 0 ? (
         <section className="mt-5 rounded-lg border border-slate-200 bg-white p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Historial de ciclos cerrados</h2>
-          <ul className="mt-3 space-y-2">
+          <p className="mt-2 text-sm text-slate-600">Ciclos anteriores del paciente. No reemplazan el tratamiento activo actual.</p>
+          <ul className="mt-3 space-y-2.5">
             {treatmentEpisodeHistory.map((episode) => (
-              <li className="rounded border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" key={episode.id}><p>Inicio: {formatDateDisplay(episode.startDate)}</p></li>
+              <li className="rounded border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700" key={episode.id}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-medium text-slate-900">Ciclo finalizado</p>
+                  <span className="rounded-full border border-slate-300 bg-white px-2 py-0.5 text-xs font-medium text-slate-600">Finalizado</span>
+                </div>
+                <dl className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Inicio</dt>
+                    <dd className="mt-0.5">{formatDateDisplay(episode.startDate)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cierre</dt>
+                    <dd className="mt-0.5">{episode.endDate ? formatDateDisplay(episode.endDate) : "Sin fecha registrada"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Motivo</dt>
+                    <dd className="mt-0.5">{formatClosureReasonDisplay(episode.closureReason)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Solicitud de origen</dt>
+                    <dd className="mt-0.5">{episode.serviceRequestId || "Sin solicitud vinculada"}</dd>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Detalle</dt>
+                    <dd className="mt-0.5">{episode.closureDetail || "Sin detalle adicional"}</dd>
+                  </div>
+                </dl>
+              </li>
             ))}
           </ul>
         </section>

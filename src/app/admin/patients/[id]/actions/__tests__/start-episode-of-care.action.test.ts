@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { startEpisodeOfCareAction } from "@/app/admin/patients/[id]/actions/start-episode-of-care.action";
 
 const getPatientByIdMock = vi.hoisted(() => vi.fn());
-const getActiveEpisodeByPatientIdMock = vi.hoisted(() => vi.fn());
+const listActiveEpisodesByPatientIdMock = vi.hoisted(() => vi.fn());
 const createEpisodeOfCareMock = vi.hoisted(() => vi.fn());
 const existsAnotherPatientWithDniMock = vi.hoisted(() => vi.fn());
 const getServiceRequestByIdMock = vi.hoisted(() => vi.fn());
@@ -15,7 +15,7 @@ vi.mock("@/infrastructure/repositories/patient.repository", () => ({
 }));
 
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
-  getActiveEpisodeByPatientId: getActiveEpisodeByPatientIdMock,
+  listActiveEpisodesByPatientId: listActiveEpisodesByPatientIdMock,
   createEpisodeOfCare: createEpisodeOfCareMock,
   listEpisodeOfCareByIncomingReferral: listEpisodeOfCareByIncomingReferralMock,
 }));
@@ -31,7 +31,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("blocks creation when serviceRequestId is missing", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
     const result = await startEpisodeOfCareAction({ patientId: "pat-1", startDate: "2026-04-16" });
 
@@ -43,7 +43,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("creates episode when serviceRequestId is accepted, belongs to patient and has no prior links", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
     getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-1", patientId: "pat-1", status: "accepted" });
     listEpisodeOfCareByIncomingReferralMock.mockResolvedValueOnce([]);
@@ -65,9 +65,37 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
     expect(result).toEqual({ ok: true, message: "Tratamiento iniciado correctamente." });
   });
 
+  it("blocks creation and logs when multiple active episodes already exist", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([
+      { id: "episode-active-old", patientId: "pat-1", status: "active", startDate: "2026-04-01" },
+      { id: "episode-active-recent", patientId: "pat-1", status: "active", startDate: "2026-05-01" },
+    ]);
+
+    const result = await startEpisodeOfCareAction({
+      patientId: "pat-1",
+      startDate: "2026-05-10",
+      serviceRequestId: "sr-1",
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      message: "Se detectó más de un tratamiento activo. Revisá los datos antes de iniciar otro tratamiento.",
+    });
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "cannot start EpisodeOfCare because multiple active episodes exist",
+      { patientId: "pat-1", activeEpisodesCount: 2 },
+    );
+    expect(existsAnotherPatientWithDniMock).not.toHaveBeenCalled();
+    expect(getServiceRequestByIdMock).not.toHaveBeenCalled();
+    expect(createEpisodeOfCareMock).not.toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
+
   it("blocks creation when serviceRequestId does not exist", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
     getServiceRequestByIdMock.mockResolvedValueOnce(null);
 
@@ -84,7 +112,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("blocks creation when serviceRequest belongs to another patient", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
     getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-2", patientId: "pat-2", status: "accepted" });
 
@@ -103,7 +131,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
     "blocks creation when serviceRequest status is %s",
     async (status) => {
       getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-      getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+      listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
       existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
       getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-3", patientId: "pat-1", status });
 
@@ -121,7 +149,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("blocks creation when serviceRequest is already linked to a finished episode", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
     getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-4", patientId: "pat-1", status: "accepted" });
     listEpisodeOfCareByIncomingReferralMock.mockResolvedValueOnce([
@@ -143,7 +171,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("blocks creation when serviceRequest is already linked to an active episode", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
     getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-5", patientId: "pat-1", status: "accepted" });
     listEpisodeOfCareByIncomingReferralMock.mockResolvedValueOnce([
@@ -165,7 +193,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("returns error when incoming-referral lookup fails", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
     getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-6", patientId: "pat-1", status: "accepted" });
     listEpisodeOfCareByIncomingReferralMock.mockRejectedValueOnce(new Error("FHIR unavailable"));
@@ -182,7 +210,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("starts treatment without DNI when patient phone exists", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-10", patientId: "pat-1", status: "accepted" });
     listEpisodeOfCareByIncomingReferralMock.mockResolvedValueOnce([]);
     createEpisodeOfCareMock.mockResolvedValueOnce({ id: "ep-10" });
@@ -193,7 +221,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("starts treatment without patient phone when main contact phone exists", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: undefined, mainContact: { phone: "2991112233" } });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-11", patientId: "pat-1", status: "accepted" });
     listEpisodeOfCareByIncomingReferralMock.mockResolvedValueOnce([]);
     createEpisodeOfCareMock.mockResolvedValueOnce({ id: "ep-11" });
@@ -215,7 +243,7 @@ describe("startEpisodeOfCareAction (serviceRequestId backend guards)", () => {
 
   it("blocks creation when start date is before accepted service request requestedAt", async () => {
     getPatientByIdMock.mockResolvedValueOnce({ id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "2995550101", dni: "30111222" });
-    getActiveEpisodeByPatientIdMock.mockResolvedValueOnce(null);
+    listActiveEpisodesByPatientIdMock.mockResolvedValueOnce([]);
     existsAnotherPatientWithDniMock.mockResolvedValueOnce(false);
     getServiceRequestByIdMock.mockResolvedValueOnce({ id: "sr-7", patientId: "pat-1", status: "accepted", requestedAt: "2026-04-20" });
 

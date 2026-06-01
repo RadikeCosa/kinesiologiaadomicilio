@@ -13,6 +13,7 @@ import {
   getActiveEpisodeByPatientId,
   getEpisodeById,
   getMostRecentEpisodeByPatientId,
+  listActiveEpisodesByPatientId,
   listEpisodeOfCareByIncomingReferral,
   listEpisodesByIncomingReferralIds,
   listEpisodesByPatientIds,
@@ -136,6 +137,45 @@ describe("episode-of-care.repository (FHIR)", () => {
 
     expect(getSpy).toHaveBeenCalledWith("EpisodeOfCare?patient=Patient%2Fpat-1&status=active");
     expect(episode).toMatchObject({ id: "epi-1", patientId: "pat-1", status: "active" });
+  });
+
+  it("lists active episodes and selects the most recent one when more than one active exists", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "episode-active-old",
+            status: "active",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-04-01" },
+          },
+        },
+        {
+          resource: {
+            resourceType: "EpisodeOfCare",
+            id: "episode-active-recent",
+            status: "active",
+            patient: { reference: "Patient/pat-1" },
+            period: { start: "2026-05-01" },
+          },
+        },
+      ],
+    });
+
+    const activeEpisodes = await listActiveEpisodesByPatientId("pat-1");
+    const activeEpisode = await getActiveEpisodeByPatientId("pat-1");
+
+    expect(getSpy).toHaveBeenCalledWith("EpisodeOfCare?patient=Patient%2Fpat-1&status=active");
+    expect(activeEpisodes.map((episode) => episode.id)).toEqual(["episode-active-old", "episode-active-recent"]);
+    expect(activeEpisode?.id).toBe("episode-active-recent");
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "multiple active EpisodeOfCare resources detected",
+      { patientId: "pat-1", activeEpisodesCount: 2 },
+    );
+    consoleErrorSpy.mockRestore();
   });
 
   it("gets most recent episode by temporal comparison (not lexicographic)", async () => {

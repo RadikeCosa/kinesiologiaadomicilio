@@ -190,6 +190,64 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("EncountersList");
   });
 
+  it("renders active treatment context when closed cycles also exist", async () => {
+    const closedEpisodeRecent = {
+      id: "episode-closed-recent",
+      patientId: "pat-1",
+      status: "finished",
+      startDate: "2026-03-01",
+      endDate: "2026-03-31",
+    };
+    const activeEpisode = {
+      id: "episode-active",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-05-01",
+    };
+
+    loadPatientEncountersPageDataMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        operationalStatus: "active_treatment",
+      },
+      activeEpisode,
+      mostRecentEpisode: closedEpisodeRecent,
+      encounters: [],
+      functionalTrend: [],
+      clinicalContext: { hasAnyContent: false },
+      encounterStats: {
+        totalCount: 0,
+        treatmentCount: 0,
+        lastStartedAt: null,
+        averageDurationMinutes: null,
+        totalDurationMinutes: null,
+        durationEligibleCount: 0,
+        durationExcludedCount: 0,
+        isDurationPartial: false,
+        daysToFirstVisitFromEpisodeStart: null,
+        isFirstVisitBeforeEpisodeStart: false,
+        averageDaysBetweenEpisodeVisits: null,
+        frequencyEligibleVisitCount: 0,
+        frequencyIntervalCount: 0,
+        punctualityWithDataCount: 0,
+        punctualityOnTimeOrMinorDelayCount: 0,
+        punctualityMissingCount: 0,
+      },
+    });
+
+    const element = await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Tratamiento activo");
+    expect(html).toContain("Inicio: 01/05/2026");
+    expect(html).toContain("href=\"/admin/patients/pat-1/encounters/new\"");
+    expect(html).toContain("Registrar visita");
+    expect(html).not.toContain("Tratamiento finalizado. Las visitas quedan disponibles como historial.");
+    expect(html).not.toContain("Finalización: 31/03/2026");
+    expect(html).not.toContain("Tendencia funcional");
+  });
+
   it("shows duration helper and rhythm cards with expected copy", async () => {
     loadPatientEncountersPageDataMock.mockResolvedValueOnce({
       patient: {

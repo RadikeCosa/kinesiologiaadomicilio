@@ -1,5 +1,7 @@
 import type { ServiceRequest } from "@/domain/service-request/service-request.types";
 import type { PatientDetailReadModel } from "@/features/patients/read-models/patient-detail.read-model";
+import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
+import { selectPatientEpisodes } from "@/domain/episode-of-care/episode-of-care.selectors";
 import { mapEpisodeOfCareRead } from "@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper";
 import { mapPatientToDetailReadModel } from "@/infrastructure/mappers/patient/patient-read.mapper";
 import {
@@ -125,7 +127,9 @@ export async function loadPatientClinicalRecentSummary(patientId: string): Promi
     listEncountersByPatientId(patientId),
   ]);
 
-  const effectiveEpisode = activeEpisode ?? mostRecentEpisode;
+  const { effectiveEpisode } = selectPatientEpisodes(
+    [activeEpisode, mostRecentEpisode].filter((episode): episode is EpisodeOfCare => Boolean(episode)),
+  );
   const scopedEncounters = effectiveEpisode
     ? encounters
       .filter((encounter) => encounter.episodeOfCareId === effectiveEpisode.id)
@@ -365,8 +369,8 @@ export async function loadPatientServiceRequestHistoryContext(patientId: string)
 
 export async function loadTreatmentEpisodeHistoryContext(patientId: string): Promise<TreatmentEpisodeHistoryItem[]> {
   const episodes = await listEpisodeOfCareByPatientId(patientId);
-  const finishedEpisodes = episodes.filter((episode) => episode.status === "finished");
-  return finishedEpisodes
+  const { closedEpisodes } = selectPatientEpisodes(episodes);
+  return closedEpisodes
     .sort((a, b) => (b.endDate ?? b.startDate).localeCompare(a.endDate ?? a.startDate))
     .map((episode) => ({
       id: episode.id,
@@ -405,11 +409,14 @@ export async function loadPatientDetail(id: string): Promise<PatientDetailReadMo
   }
 
   const activeEpisode = await getActiveEpisodeByPatientId(patient.id);
-  const latestEpisode = activeEpisode ?? (await getMostRecentEpisodeByPatientId(patient.id));
+  const mostRecentEpisode = activeEpisode ? null : await getMostRecentEpisodeByPatientId(patient.id);
+  const { effectiveEpisode } = selectPatientEpisodes(
+    [activeEpisode, mostRecentEpisode].filter((episode): episode is EpisodeOfCare => Boolean(episode)),
+  );
 
   return mapPatientToDetailReadModel(patient, {
     activeEpisode: activeEpisode ? mapEpisodeOfCareRead(activeEpisode) : null,
-    latestEpisode: latestEpisode ? mapEpisodeOfCareRead(latestEpisode) : null,
+    latestEpisode: effectiveEpisode ? mapEpisodeOfCareRead(effectiveEpisode) : null,
   });
 }
 

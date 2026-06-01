@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   isOperationalPendingServiceRequest,
+  loadPatientClinicalRecentSummary,
   loadPatientAdministrativeContext,
   loadPatientHubServiceRequestContext,
   loadPatientServiceRequestHistoryContext,
@@ -11,6 +12,14 @@ import {
 
 vi.mock("@/infrastructure/repositories/service-request.repository", () => ({
   listServiceRequestsByPatientId: vi.fn(),
+}));
+
+vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
+  listEncountersByPatientId: vi.fn(),
+}));
+
+vi.mock("@/infrastructure/repositories/observation.repository", () => ({
+  listFunctionalObservationsByEncounterId: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/repositories/patient.repository", () => ({
@@ -42,9 +51,16 @@ vi.mock("@/infrastructure/mappers/patient/patient-read.mapper", () => ({
   })),
 }));
 
+vi.mock("@/app/admin/patients/[id]/clinical-context", () => ({
+  loadEpisodeClinicalContextReadModel: vi.fn(),
+}));
+
 import { getActiveEpisodeByPatientId, getMostRecentEpisodeByPatientId, listEpisodeOfCareByIncomingReferral } from "@/infrastructure/repositories/episode-of-care.repository";
+import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
+import { listFunctionalObservationsByEncounterId } from "@/infrastructure/repositories/observation.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
 import { listServiceRequestsByPatientId } from "@/infrastructure/repositories/service-request.repository";
+import { loadEpisodeClinicalContextReadModel } from "@/app/admin/patients/[id]/clinical-context";
 
 describe("patient detail service-request technical composition", () => {
   beforeEach(() => {
@@ -250,6 +266,112 @@ describe("patient detail service-request technical composition", () => {
     });
   });
 
+  it("classifies mixed accepted requests by their linked treatment cycle", async () => {
+    const closedEpisodeOld = {
+      id: "episode-closed-old",
+      patientId: "pat-1",
+      status: "finished",
+      startDate: "2026-01-01",
+      endDate: "2026-01-31",
+      closureReason: "treatment_completed",
+    };
+    const activeEpisode = {
+      id: "episode-active",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-05-01",
+    };
+
+    vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([
+      { id: "sr-pending", patientId: "pat-1", requestedAt: "2026-05-10", reasonText: "Nuevo pedido", status: "accepted" },
+      { id: "sr-active", patientId: "pat-1", requestedAt: "2026-05-01", reasonText: "Pedido activo", status: "accepted" },
+      { id: "sr-finished", patientId: "pat-1", requestedAt: "2026-01-01", reasonText: "Pedido cerrado", status: "accepted" },
+    ] as never);
+    vi.mocked(listEpisodeOfCareByIncomingReferral)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([activeEpisode] as never)
+      .mockResolvedValueOnce([closedEpisodeOld] as never);
+
+    const context = await loadPatientServiceRequestHistoryContext("pat-1");
+
+    expect(context.activeServiceRequest?.serviceRequest.id).toBe("sr-pending");
+    expect(context.activeServiceRequest?.displayStatus).toBe("accepted_pending_treatment");
+    expect(context.activeServiceRequest?.isPendingOperational).toBe(true);
+    expect(context.historicalServiceRequests).toEqual([
+      expect.objectContaining({
+        serviceRequest: expect.objectContaining({ id: "sr-active" }),
+        displayStatus: "accepted_linked_active_treatment",
+        startedTreatment: true,
+        isPendingOperational: false,
+        linkedEpisode: expect.objectContaining({ id: "episode-active", status: "active" }),
+      }),
+      expect.objectContaining({
+        serviceRequest: expect.objectContaining({ id: "sr-finished" }),
+        displayStatus: "accepted_linked_finished_treatment",
+        startedTreatment: true,
+        isPendingOperational: false,
+        linkedEpisode: expect.objectContaining({ id: "episode-closed-old", status: "finished" }),
+      }),
+    ]);
+  });
+
+});
+
+describe("loadPatientClinicalRecentSummary", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("uses active episode as effective cycle and ignores previous finished visits and metrics", async () => {
+    const closedEpisodeOld = {
+      id: "episode-closed-old",
+      patientId: "pat-1",
+      status: "finished",
+      startDate: "2026-01-01",
+      endDate: "2026-01-31",
+    };
+    const closedEpisodeRecent = {
+      id: "episode-closed-recent",
+      patientId: "pat-1",
+      status: "finished",
+      startDate: "2026-03-01",
+      endDate: "2026-03-31",
+    };
+    const activeEpisode = {
+      id: "episode-active",
+      patientId: "pat-1",
+      status: "active",
+      startDate: "2026-05-01",
+    };
+
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValueOnce(activeEpisode as never);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValueOnce(closedEpisodeRecent as never);
+    vi.mocked(listEncountersByPatientId).mockResolvedValueOnce([
+      { id: "enc-old", patientId: "pat-1", episodeOfCareId: closedEpisodeOld.id, startedAt: "2026-01-15T10:00:00Z", status: "finished" },
+      { id: "enc-recent", patientId: "pat-1", episodeOfCareId: closedEpisodeRecent.id, startedAt: "2026-03-15T10:00:00Z", status: "finished" },
+    ] as never);
+    vi.mocked(listFunctionalObservationsByEncounterId).mockResolvedValue([
+      { id: "obs-recent", patientId: "pat-1", encounterId: "enc-recent", effectiveDateTime: "2026-03-15T10:00:00Z", code: "pain_nrs_0_10", value: 8, unit: "/10", status: "final" },
+    ] as never);
+    vi.mocked(loadEpisodeClinicalContextReadModel).mockResolvedValueOnce({
+      hasAnyContent: true,
+      medicalReferenceDiagnosisText: "Diagnóstico del activo",
+    } as never);
+
+    const summary = await loadPatientClinicalRecentSummary("pat-1");
+
+    expect(summary).toMatchObject({
+      treatmentStatusLabel: "Nuevo tratamiento activo",
+      latestEncounterLabel: "Aún no registrada",
+      encountersCount: 0,
+      metrics: [],
+      metricsEmptyLabel: "Sin registros funcionales todavía",
+      medicalReferenceDiagnosisText: "Diagnóstico del activo",
+      ctaLabel: "Registrar primera visita",
+    });
+    expect(listFunctionalObservationsByEncounterId).not.toHaveBeenCalled();
+    expect(loadEpisodeClinicalContextReadModel).toHaveBeenCalledWith(activeEpisode);
+  });
 });
 
 describe("isOperationalPendingServiceRequest", () => {

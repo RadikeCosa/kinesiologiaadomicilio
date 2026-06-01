@@ -2,6 +2,7 @@ import type { EncounterStats } from "@/domain/encounter/encounter-stats";
 import { calculateEncounterStats } from "@/domain/encounter/encounter-stats";
 import type { Encounter } from "@/domain/encounter/encounter.types";
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
+import { selectPatientEpisodes } from "@/domain/episode-of-care/episode-of-care.selectors";
 import { getPatientOperationalStatus } from "@/domain/patient/patient.rules";
 import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
@@ -60,13 +61,6 @@ function sortByMostRecentEncounter(encounters: Encounter[]): Encounter[] {
   });
 }
 
-function resolveEffectiveEpisode(params: {
-  activeEpisode: EpisodeOfCare | null;
-  mostRecentEpisode: EpisodeOfCare | null;
-}): EpisodeOfCare | null {
-  return params.activeEpisode ?? params.mostRecentEpisode;
-}
-
 export async function loadPatientEncountersPageData(patientId: string): Promise<PatientEncountersPageData | null> {
   const patient = await getPatientById(patientId);
 
@@ -80,7 +74,9 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     listEncountersByPatientId(patient.id),
   ]);
 
-  const effectiveEpisode = resolveEffectiveEpisode({ activeEpisode, mostRecentEpisode });
+  const { effectiveEpisode } = selectPatientEpisodes(
+    [activeEpisode, mostRecentEpisode].filter((episode): episode is EpisodeOfCare => Boolean(episode)),
+  );
   const scopedEncounters = effectiveEpisode
     ? encounters.filter((encounter) => encounter.episodeOfCareId === effectiveEpisode.id)
     : [];

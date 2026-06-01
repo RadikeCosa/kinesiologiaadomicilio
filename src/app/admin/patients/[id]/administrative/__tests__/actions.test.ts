@@ -18,7 +18,7 @@ vi.mock("@/infrastructure/repositories/service-request.repository", () => ({
 
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
   createEpisodeOfCare: vi.fn(),
-  getActiveEpisodeByPatientId: vi.fn(),
+  listActiveEpisodesByPatientId: vi.fn(),
   listEpisodeOfCareByIncomingReferral: vi.fn(),
 }));
 vi.mock("@/infrastructure/repositories/patient.repository", () => ({
@@ -32,7 +32,7 @@ vi.mock("@/infrastructure/repositories/encounter.repository", () => ({
 }));
 
 import { createEncounter } from "@/infrastructure/repositories/encounter.repository";
-import { createEpisodeOfCare, getActiveEpisodeByPatientId, listEpisodeOfCareByIncomingReferral } from "@/infrastructure/repositories/episode-of-care.repository";
+import { createEpisodeOfCare, listActiveEpisodesByPatientId, listEpisodeOfCareByIncomingReferral } from "@/infrastructure/repositories/episode-of-care.repository";
 import { existsAnotherPatientWithDni, getPatientById, updatePatient } from "@/infrastructure/repositories/patient.repository";
 import {
   createServiceRequest,
@@ -53,6 +53,7 @@ function buildFormData(values: Record<string, string>): FormData {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(listActiveEpisodesByPatientId).mockResolvedValue([]);
   vi.mocked(getPatientById).mockResolvedValue({
     id: "pat-1",
     firstName: "Ana",
@@ -453,7 +454,6 @@ describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
     vi.mocked(getPatientById).mockResolvedValueOnce({
       id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "299-1111111",
     } as never);
-    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValueOnce(null);
     vi.mocked(existsAnotherPatientWithDni).mockResolvedValueOnce(false);
     vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([]);
     vi.mocked(updateServiceRequestStatus).mockResolvedValueOnce({} as never);
@@ -472,6 +472,37 @@ describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
     });
   });
 
+  it("blocks and logs when multiple active episodes already exist", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-multiple", patientId: "pat-1", requestedAt: "2026-04-28", reasonText: "Dolor", status: "in_review",
+    });
+    vi.mocked(getPatientById).mockResolvedValueOnce({
+      id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "Calle 123", phone: "299-1111111",
+    } as never);
+    vi.mocked(listActiveEpisodesByPatientId).mockResolvedValueOnce([
+      { id: "episode-active-old", patientId: "pat-1", status: "active", startDate: "2026-04-01" },
+      { id: "episode-active-recent", patientId: "pat-1", status: "active", startDate: "2026-05-01" },
+    ] as never);
+
+    const result = await acceptAndStartTreatmentFromServiceRequestAction(
+      "pat-1",
+      buildFormData({ id: "sr-multiple", treatmentStartDate: "2026-04-28" }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "Se detectó más de un tratamiento activo. Revisá los datos antes de iniciar otro tratamiento.",
+    });
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "cannot accept and start treatment because multiple active episodes exist",
+      { patientId: "pat-1", activeEpisodesCount: 2 },
+    );
+    expect(updateServiceRequestStatus).not.toHaveBeenCalled();
+    expect(createEpisodeOfCare).not.toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
+
   it("fails when patient is missing operational address/phone", async () => {
     vi.mocked(getServiceRequestById).mockResolvedValueOnce({
       id: "sr-2", patientId: "pat-1", requestedAt: "2026-04-28", reasonText: "Dolor", status: "in_review",
@@ -479,7 +510,6 @@ describe("acceptAndStartTreatmentFromServiceRequestAction", () => {
     vi.mocked(getPatientById).mockResolvedValueOnce({
       id: "pat-1", firstName: "Ana", lastName: "Pérez", address: "", phone: "",
     } as never);
-    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValueOnce(null);
     vi.mocked(existsAnotherPatientWithDni).mockResolvedValueOnce(false);
 
     const result = await acceptAndStartTreatmentFromServiceRequestAction("pat-1", buildFormData({ id: "sr-2", treatmentStartDate: "2026-04-28" }));

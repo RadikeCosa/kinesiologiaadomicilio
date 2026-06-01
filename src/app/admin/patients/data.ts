@@ -1,9 +1,7 @@
 import { mapEpisodeOfCareRead } from "@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper";
 import { mapPatientToListItemReadModel } from "@/infrastructure/mappers/patient/patient-read.mapper";
-import {
-  getMostRecentEpisode,
-  listEpisodesByPatientIds,
-} from "@/infrastructure/repositories/episode-of-care.repository";
+import { selectPatientEpisodes } from "@/domain/episode-of-care/episode-of-care.selectors";
+import { listEpisodesByPatientIds } from "@/infrastructure/repositories/episode-of-care.repository";
 import { listPatients } from "@/infrastructure/repositories/patient.repository";
 import type { PatientListItemReadModel } from "@/features/patients/read-models/patient-list-item.read-model";
 import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
@@ -33,6 +31,13 @@ function sortPatientsList(
   });
 }
 
+function logMultipleActiveEpisodes(patientId: string, activeEpisodesCount: number): void {
+  console.error("multiple active EpisodeOfCare resources detected while loading patients list", {
+    patientId,
+    activeEpisodesCount,
+  });
+}
+
 export async function loadPatientsList(): Promise<PatientListItemReadModel[]> {
   const patients = await listPatients();
   const episodes = await listEpisodesByPatientIds(patients.map((patient) => patient.id));
@@ -53,12 +58,20 @@ export async function loadPatientsList(): Promise<PatientListItemReadModel[]> {
 
   const patientList = patients.map((patient) => {
     const patientEpisodes = episodesByPatientId.get(patient.id) ?? [];
-    const activeEpisode = patientEpisodes.find((episode) => episode.status === "active") ?? null;
-    const latestEpisode = activeEpisode ?? getMostRecentEpisode(patientEpisodes);
+    const {
+      activeEpisode,
+      activeEpisodesCount,
+      effectiveEpisode,
+      hasMultipleActiveEpisodes,
+    } = selectPatientEpisodes(patientEpisodes);
+
+    if (hasMultipleActiveEpisodes) {
+      logMultipleActiveEpisodes(patient.id, activeEpisodesCount);
+    }
 
     return mapPatientToListItemReadModel(patient, {
       activeEpisode: activeEpisode ? mapEpisodeOfCareRead(activeEpisode) : null,
-      latestEpisode: latestEpisode ? mapEpisodeOfCareRead(latestEpisode) : null,
+      latestEpisode: effectiveEpisode ? mapEpisodeOfCareRead(effectiveEpisode) : null,
     });
   });
 

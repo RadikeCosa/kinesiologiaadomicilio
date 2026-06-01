@@ -13,7 +13,7 @@ import {
 } from "@/infrastructure/repositories/service-request.repository";
 import {
   createEpisodeOfCare,
-  getActiveEpisodeByPatientId,
+  listActiveEpisodesByPatientId,
   listEpisodeOfCareByIncomingReferral,
 } from "@/infrastructure/repositories/episode-of-care.repository";
 import { getPatientById } from "@/infrastructure/repositories/patient.repository";
@@ -36,6 +36,15 @@ export interface AcceptAndStartTreatmentFromServiceRequestActionResult {
   ok: boolean;
   message: string;
   redirectTo?: string;
+}
+
+const MULTIPLE_ACTIVE_EPISODES_MESSAGE = "Se detectó más de un tratamiento activo. Revisá los datos antes de iniciar otro tratamiento.";
+
+function logMultipleActiveEpisodes(patientId: string, activeEpisodesCount: number): void {
+  console.error("cannot accept and start treatment because multiple active episodes exist", {
+    patientId,
+    activeEpisodesCount,
+  });
 }
 
 function getOptionalFormValue(formData: FormData, key: string): string | undefined {
@@ -94,12 +103,17 @@ export async function acceptAndStartTreatmentFromServiceRequestAction(
       return { ok: false, message: "No se pudo iniciar tratamiento desde esta solicitud." };
     }
 
-    const existingActiveEpisode = await getActiveEpisodeByPatientId(patient.id);
+    const activeEpisodes = await listActiveEpisodesByPatientId(patient.id);
+    if (activeEpisodes.length > 1) {
+      logMultipleActiveEpisodes(patient.id, activeEpisodes.length);
+      return { ok: false, message: MULTIPLE_ACTIVE_EPISODES_MESSAGE };
+    }
+
     const duplicatePatientByDni = patient.dni?.trim()
       ? await existsAnotherPatientWithDni({ dni: patient.dni, excludePatientId: patient.id })
       : false;
     const validation = canStartEpisodeOfCare(patient, {
-      hasActiveEpisode: Boolean(existingActiveEpisode),
+      hasActiveEpisode: activeEpisodes.length > 0,
       duplicatePatientByDni,
     });
     if (!validation.ok) {

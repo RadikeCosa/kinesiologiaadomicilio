@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-05-13 (UTC)
+> Última actualización: 2026-06-01 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -58,6 +58,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - Esta convención de autolimpieza aplica a feedback de éxito transitorio; mensajes de error relevantes en otros flujos no se autohocultan por defecto salvo decisión explícita de producto/UX.
 - `/admin/patients/[id]/encounters/new`: pantalla específica para registrar una visita.
 - `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
+- Convención UX en Tratamiento (`/treatment`): si conviven tratamiento activo y ciclos cerrados, el bloque principal sigue siendo el tratamiento activo; los ciclos cerrados se muestran como historial compacto con inicio, cierre, motivo, detalle breve y solicitud vinculada cuando exista, aclarando que no reemplazan el ciclo activo actual.
 
 #### Naming vigente de superficies privadas de paciente
 - `/admin/patients/[id]/administrative` → **Gestión administrativa**
@@ -69,6 +70,13 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Tratamiento**: ciclo de atención profesional del paciente, activo o finalizado.
 - **Gestión clínica / visitas**: registro y consulta de visitas realizadas durante el tratamiento.
 - **Flujo operativo**: primero se resuelve la solicitud, luego se inicia tratamiento, con tratamiento activo se registran visitas.
+
+#### Regla defensiva ante múltiples tratamientos activos
+- La regla normal del producto sigue siendo **un único `EpisodeOfCare` activo por paciente**.
+- Si por datos corruptos, carga externa o inconsistencia del servidor aparecen múltiples `EpisodeOfCare` activos, las lecturas seleccionan de forma determinística el activo con `startDate` más reciente y marcan la inconsistencia en capa técnica.
+- Los loaders y repositorios no deben depender silenciosamente del primer recurso devuelto por HAPI.
+- Los flujos de inicio de tratamiento bloquean la creación de un nuevo ciclo si existe cualquier activo; si detectan múltiples activos, devuelven un error específico y registran logging server-side mínimo con `patientId` y cantidad de activos.
+- No se autocorrigen datos FHIR: no se cierran, borran ni migran episodios activos duplicados en este hardening.
 
 #### Convención vigente de CTAs
 - `Ir a gestión clínica` para navegar a `/admin/patients/[id]/encounters`.
@@ -168,9 +176,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Estado:** cerrado / validado contra HAPI real.
 - **Cambio operativo confirmado:** el loader de `/admin/patients` deja de hacer N+1 de `EpisodeOfCare` por paciente y consume una única lectura batch por `patientIds` (`listEpisodesByPatientIds(patientIds: string[])`).
 - **Query batch validada en servidor real:** HAPI FHIR 8.8.0 (`fhirVersion` 4.0.1) respondió correctamente `EpisodeOfCare?patient=Patient/{id1},Patient/{id2},...` (HTTP 200), incluyendo solo episodios del set solicitado y excluyendo pacientes fuera del set.
-- **Resolución de estado en loader:** los episodios se agrupan en memoria por `patientId` y desde ese agrupamiento se resuelven `activeEpisode` y `latestEpisode` sin consultas adicionales por paciente.
+- **Resolución de estado en loader:** los episodios se agrupan en memoria por `patientId` y desde ese agrupamiento se usa `selectPatientEpisodes()` para resolver `activeEpisode`, `closedEpisodes`, `mostRecentEpisode` y `effectiveEpisode` sin consultas adicionales por paciente (`latestEpisode` queda como campo legacy del read model).
 - **Orden visible vigente:** el read model resultante se ordena por prioridad operativa (`active_treatment`, `ready_to_start`, `preliminary`, `finished_treatment`) y desempata por nombre visible del paciente.
-- **Hardening preservado:** la selección de `latestEpisode` mantiene comparación temporal segura (fechas), no comparación lexicográfica de strings.
+- **Hardening preservado:** la selección temporal de episodios mantiene comparación segura por fecha, no comparación lexicográfica de strings.
 - **Aislamiento por paciente validado:** no se observó mezcla de episodios entre pacientes en runtime.
 - **Semántica visible preservada en `/admin/patients`:**
   - episodio activo → `En tratamiento`;

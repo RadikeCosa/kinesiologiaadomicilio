@@ -55,16 +55,56 @@ describe("encounters data loader", () => {
   });
 
 
-  it("does not mix previous episode metrics when active episode has no encounters", async () => {
+  it("does not mix previous finished episode metrics when active episode has no encounters", async () => {
+    const closedEpisodeOld = { id: "episode-closed-old", patientId: "pat-1", status: "finished", startDate: "2026-01-01", endDate: "2026-01-31" };
+    const closedEpisodeRecent = { id: "episode-closed-recent", patientId: "pat-1", status: "finished", startDate: "2026-02-01", endDate: "2026-02-28" };
+    const activeEpisode = { id: "episode-active", patientId: "pat-1", status: "active", startDate: "2026-03-01" };
+
     vi.mocked(getPatientById).mockResolvedValue({ id: "pat-1", firstName: "A", lastName: "B", operationalStatus: "active" } as never);
-    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue({ id: "ep-2", patientId: "pat-1", status: "active", startDate: "2026-03-01" } as never);
-    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue({ id: "ep-1", patientId: "pat-1", status: "finished", startDate: "2026-01-01" } as never);
-    vi.mocked(listEncountersByPatientId).mockResolvedValue([{ id: "enc-old", patientId: "pat-1", episodeOfCareId: "ep-1", startedAt: "2026-02-01T10:00:00Z", status: "finished" } as never]);
-    vi.mocked(listFunctionalObservationsByEncounterIds).mockResolvedValue([{ id: "obs-old", patientId: "pat-1", encounterId: "enc-old", effectiveDateTime: "2026-02-01T10:00:00Z", code: "tug_seconds", value: 10, unit: "s", status: "final" } as never]);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue(activeEpisode as never);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue(closedEpisodeRecent as never);
+    vi.mocked(listEncountersByPatientId).mockResolvedValue([
+      { id: "enc-old", patientId: "pat-1", episodeOfCareId: closedEpisodeOld.id, startedAt: "2026-01-15T10:00:00Z", status: "finished" },
+      { id: "enc-recent", patientId: "pat-1", episodeOfCareId: closedEpisodeRecent.id, startedAt: "2026-02-15T10:00:00Z", status: "finished" },
+    ] as never);
+    vi.mocked(listFunctionalObservationsByEncounterIds).mockResolvedValue([
+      { id: "obs-old", patientId: "pat-1", encounterId: "enc-old", effectiveDateTime: "2026-01-15T10:00:00Z", code: "tug_seconds", value: 10, unit: "s", status: "final" },
+      { id: "obs-recent", patientId: "pat-1", encounterId: "enc-recent", effectiveDateTime: "2026-02-15T10:00:00Z", code: "pain_nrs_0_10", value: 8, unit: "/10", status: "final" },
+    ] as never);
 
     const data = await loadPatientEncountersPageData("pat-1");
+    expect(data?.activeEpisode?.id).toBe(activeEpisode.id);
+    expect(data?.mostRecentEpisode?.id).toBe(closedEpisodeRecent.id);
     expect(data?.encounters).toHaveLength(0);
+    expect(data?.encounterStats.treatmentCount).toBe(0);
     expect(data?.functionalTrend).toEqual([]);
+    expect(listFunctionalObservationsByEncounterIds).toHaveBeenCalledWith([]);
+  });
+
+  it("uses the selected active episode only when another active cycle also has encounters", async () => {
+    const activeEpisodeOld = { id: "episode-active-old", patientId: "pat-1", status: "active", startDate: "2026-04-01" };
+    const activeEpisodeRecent = { id: "episode-active-recent", patientId: "pat-1", status: "active", startDate: "2026-05-01" };
+
+    vi.mocked(getPatientById).mockResolvedValue({ id: "pat-1", firstName: "A", lastName: "B", operationalStatus: "active" } as never);
+    vi.mocked(getActiveEpisodeByPatientId).mockResolvedValue(activeEpisodeRecent as never);
+    vi.mocked(getMostRecentEpisodeByPatientId).mockResolvedValue(activeEpisodeRecent as never);
+    vi.mocked(listEncountersByPatientId).mockResolvedValue([
+      { id: "enc-old-active", patientId: "pat-1", episodeOfCareId: activeEpisodeOld.id, startedAt: "2026-04-15T10:00:00Z", status: "finished" },
+      { id: "enc-recent-active", patientId: "pat-1", episodeOfCareId: activeEpisodeRecent.id, startedAt: "2026-05-15T10:00:00Z", status: "finished" },
+    ] as never);
+    vi.mocked(listFunctionalObservationsByEncounterIds).mockResolvedValue([
+      { id: "obs-old-active", patientId: "pat-1", encounterId: "enc-old-active", effectiveDateTime: "2026-04-15T10:00:00Z", code: "tug_seconds", value: 14, unit: "s", status: "final" },
+      { id: "obs-recent-active", patientId: "pat-1", encounterId: "enc-recent-active", effectiveDateTime: "2026-05-15T10:00:00Z", code: "pain_nrs_0_10", value: 3, unit: "/10", status: "final" },
+    ] as never);
+
+    const data = await loadPatientEncountersPageData("pat-1");
+
+    expect(data?.activeEpisode?.id).toBe(activeEpisodeRecent.id);
+    expect(data?.encounters.map((encounter) => encounter.id)).toEqual(["enc-recent-active"]);
+    expect(data?.encounters[0]?.functionalObservations).toEqual([
+      expect.objectContaining({ id: "obs-recent-active" }),
+    ]);
+    expect(listFunctionalObservationsByEncounterIds).toHaveBeenCalledWith(["enc-recent-active"]);
   });
 
   it("filters out observations from another patient and outside effective encounter set", async () => {
