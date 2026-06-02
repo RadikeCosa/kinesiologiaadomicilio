@@ -9,6 +9,20 @@ import type {
   AdminServiceRequestSummary,
 } from "./dashboard.read-model";
 
+export interface AdminDashboardMetricCard {
+  label: string;
+  value: number;
+  tone: "sky" | "indigo" | "amber" | "emerald" | "slate";
+  helper?: string;
+}
+
+export interface AdminDashboardSection {
+  title: "Requiere acción" | "En seguimiento" | "Contexto / histórico";
+  description: string;
+  metrics: AdminDashboardMetricCard[];
+  emptyMessage?: string;
+}
+
 interface DashboardPatientSnapshot {
   operationalStatus: PatientOperationalStatus;
   birthDate?: string;
@@ -103,4 +117,68 @@ export function buildAdminDashboardReadModel(
     ageSummary: buildPatientAgeSummary(patients, referenceDate),
     serviceRequestSummary,
   };
+}
+
+export function buildAdminDashboardSections(
+  dashboard: AdminDashboardReadModel,
+): AdminDashboardSection[] {
+  return [
+    {
+      title: "Requiere acción",
+      description: "Pendientes que destraban la operación o requieren decisión.",
+      emptyMessage: "No hay pendientes críticos en este momento.",
+      metrics: [
+        {
+          label: "Solicitudes en evaluación",
+          value: dashboard.serviceRequestSummary.inReview,
+          tone: "sky",
+        },
+        {
+          label: "Aceptadas pendientes de iniciar tratamiento",
+          value: dashboard.serviceRequestSummary.acceptedPendingTreatment,
+          tone: "indigo",
+        },
+        {
+          label: "Datos operativos incompletos",
+          value: dashboard.operationalSummary.preliminary,
+          tone: "amber",
+          helper: "Falta completar información mínima para avanzar con el inicio.",
+        },
+      ],
+    },
+    {
+      title: "En seguimiento",
+      description: "Casos en curso que conviene monitorear.",
+      emptyMessage: "No hay tratamientos activos para seguir hoy.",
+      metrics: [
+        {
+          label: "Pacientes en tratamiento",
+          value: dashboard.operationalSummary.activeTreatment,
+          tone: "emerald",
+        },
+        {
+          label: "Listos para iniciar tratamiento",
+          value: dashboard.operationalSummary.readyToStart,
+          tone: "slate",
+          helper: "Pacientes sin tratamiento activo con base operativa suficiente.",
+        },
+      ],
+    },
+    {
+      title: "Contexto / histórico",
+      description: "Indicadores generales para lectura global.",
+      metrics: [
+        {
+          label: "Pacientes totales",
+          value: dashboard.operationalSummary.totalPatients,
+          tone: "slate",
+        },
+        {
+          label: "Tratamientos finalizados",
+          value: dashboard.operationalSummary.finishedTreatment,
+          tone: "slate",
+        },
+      ],
+    },
+  ];
 }

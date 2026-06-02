@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { loadAdminDashboard } from "@/app/admin/data";
+import { buildAdminDashboardSections, type AdminDashboardMetricCard } from "@/app/admin/dashboard-metrics";
 
 export const metadata: Metadata = {
   title: "Administración",
@@ -15,57 +16,84 @@ function formatMetricValue(value: number | null): string {
   return String(value);
 }
 
+const METRIC_TONE_STYLES: Record<AdminDashboardMetricCard["tone"], string> = {
+  sky: "border-sky-200 bg-sky-50",
+  indigo: "border-indigo-200 bg-indigo-50",
+  amber: "border-amber-200 bg-amber-50",
+  emerald: "border-emerald-200 bg-emerald-50",
+  slate: "border-slate-200 bg-white",
+};
+
+const METRIC_LABEL_STYLES: Record<AdminDashboardMetricCard["tone"], string> = {
+  sky: "text-sky-700",
+  indigo: "text-indigo-700",
+  amber: "text-amber-700",
+  emerald: "text-emerald-700",
+  slate: "text-slate-500",
+};
+
+const METRIC_VALUE_STYLES: Record<AdminDashboardMetricCard["tone"], string> = {
+  sky: "text-sky-900",
+  indigo: "text-indigo-900",
+  amber: "text-amber-900",
+  emerald: "text-emerald-900",
+  slate: "text-slate-900",
+};
+
+function renderMetricCard(metric: AdminDashboardMetricCard) {
+  return (
+    <article className={`rounded-md border p-3 ${METRIC_TONE_STYLES[metric.tone]}`} key={metric.label}>
+      <p className={`text-xs uppercase tracking-wide ${METRIC_LABEL_STYLES[metric.tone]}`}>{metric.label}</p>
+      <p className={`mt-1 text-lg font-semibold ${METRIC_VALUE_STYLES[metric.tone]}`}>{metric.value}</p>
+      {metric.helper ? (
+        <p className="mt-2 text-xs text-slate-600">{metric.helper}</p>
+      ) : null}
+    </article>
+  );
+}
 
 export default async function AdminHomePage() {
   const dashboard = await loadAdminDashboard();
+  const sections = buildAdminDashboardSections(dashboard);
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
       <header>
         <h1 className="text-xl font-semibold text-slate-900">Panel operativo</h1>
         <p className="mt-2 text-sm text-slate-600">
-          Resumen diario para priorizar la operación clínica.
+          Prioriza qué revisar hoy y qué está en seguimiento.
         </p>
       </header>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-            Resumen operativo
-          </h2>
+      <div className="mt-4 space-y-4">
+        {sections.map((section) => {
+          const hasVisibleMetrics = section.metrics.some((metric) => metric.value > 0);
 
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <article className="rounded-md border border-slate-200 bg-white p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Pacientes totales</p>
-              <p className="mt-1 text-lg font-semibold text-slate-900">{dashboard.operationalSummary.totalPatients}</p>
+          return (
+            <article className="rounded-lg border border-slate-200 bg-slate-50 p-4" key={section.title}>
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                {section.title}
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">{section.description}</p>
+
+              {hasVisibleMetrics ? (
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {section.metrics.map((metric) => renderMetricCard(metric))}
+                </div>
+              ) : section.emptyMessage ? (
+                <p className="mt-3 rounded-md border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
+                  {section.emptyMessage}
+                </p>
+              ) : null}
             </article>
-            <article className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-emerald-700">En tratamiento</p>
-              <p className="mt-1 text-lg font-semibold text-emerald-900">{dashboard.operationalSummary.activeTreatment}</p>
-            </article>
-            <article className="rounded-md border border-slate-300 bg-slate-100 p-3">
-              <p className="text-xs uppercase tracking-wide text-slate-700">Tratamiento finalizado</p>
-              <p className="mt-1 text-lg font-semibold text-slate-900">{dashboard.operationalSummary.finishedTreatment}</p>
-            </article>
-            <article className="rounded-md border border-amber-200 bg-amber-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-amber-700">Sin tratamiento iniciado</p>
-              <p className="mt-1 text-lg font-semibold text-amber-900">{dashboard.operationalSummary.withoutStartedTreatment}</p>
-            </article>
-            <article className="rounded-md border border-sky-200 bg-sky-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-sky-700">Solicitudes en evaluación</p>
-              <p className="mt-1 text-lg font-semibold text-sky-900">{dashboard.serviceRequestSummary.inReview}</p>
-            </article>
-            <article className="rounded-md border border-indigo-200 bg-indigo-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-indigo-700">Aceptadas pendientes de tratamiento</p>
-              <p className="mt-1 text-lg font-semibold text-indigo-900">{dashboard.serviceRequestSummary.acceptedPendingTreatment}</p>
-            </article>
-          </div>
-        </article>
+          );
+        })}
 
         <article className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
             Edad de pacientes
           </h2>
+          <p className="mt-2 text-sm text-slate-600">Indicadores generales para lectura global.</p>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <article className="rounded-md border border-slate-200 bg-white p-3">

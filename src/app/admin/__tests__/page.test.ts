@@ -18,7 +18,7 @@ vi.mock("@/app/admin/data", () => ({
 }));
 
 describe("/admin page", () => {
-  it("renders simplified age metrics and main CTAs", async () => {
+  it("renders the dashboard grouped by action, tracking, and context", async () => {
     loadAdminDashboardMock.mockResolvedValueOnce({
       generatedAt: "2026-04-26T12:00:00.000Z",
       operationalSummary: {
@@ -44,6 +44,13 @@ describe("/admin page", () => {
     const element = await AdminHomePage();
     const html = renderToStaticMarkup(element);
 
+    expect(html).toContain("Prioriza qué revisar hoy y qué está en seguimiento.");
+    expect(html).toContain("Requiere acción");
+    expect(html).toContain("En seguimiento");
+    expect(html).toContain("Contexto / histórico");
+    expect(html).toContain("Datos operativos incompletos");
+    expect(html).toContain("Listos para iniciar tratamiento");
+    expect(html).not.toContain("Sin tratamiento iniciado");
     expect(html).toContain("Edad de pacientes");
     expect(html).toContain("Paciente más joven");
     expect(html).toContain("Paciente más viejo");
@@ -82,6 +89,8 @@ describe("/admin page", () => {
     const element = await AdminHomePage();
     const html = renderToStaticMarkup(element);
 
+    expect(html).toContain("No hay pendientes críticos en este momento.");
+    expect(html).toContain("No hay tratamientos activos para seguir hoy.");
     expect(html).toContain("Paciente más joven");
     expect(html).toContain("Paciente más viejo");
     expect(html).toContain("Promedio de edad");

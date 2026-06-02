@@ -42,7 +42,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `/admin/patients/[id]/treatment`
 
 #### Responsabilidad actual por ruta (superficie de pacientes)
-- `/admin`: dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes), sin gráficos.
+- `/admin`: consola operativa breve de la superficie privada, jerarquizada en `Requiere acción`, `En seguimiento` y `Contexto / histórico`, sin gráficos.
 - `/admin/configuracion/profesional`: configuración privada del profesional firmante single-user. Lectura primero cuando existen datos, formulario directo cuando está sin configurar, y edición explícita. No genera reportes ni firma documentos todavía.
 - `/admin/patients`: listado operativo de pacientes, ordenado primero por prioridad operativa (`active_treatment` → `ready_to_start` → `preliminary` → `finished_treatment`) y luego por nombre visible, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
 - `/admin/patients` incorpora filtros simples por estado operativo vía query param (`status=active`, `status=pending`, `status=finished`, `status=all`/sin query). El filtro visible `Sin tratamiento activo` (`status=pending`) agrupa por ahora `ready_to_start + preliminary` y no representa una señal fina de `ServiceRequest`.
@@ -425,8 +425,9 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
 - en `EpisodeOfCare`, el motivo/detalle de cierre se persisten en `extension[]` (URLs propias versionables para reason/detail); `note[]` no es canal principal por pérdida en roundtrip HAPI y se mantiene solo como fallback legacy de lectura.
 - en `/admin`, las métricas son derivadas de lectura (no persistidas):
-  - resumen operativo por estado de paciente;
-  - edad de pacientes con tratamiento activo o finalizado calculada solo sobre `birthDate` válido;
+  - pendientes operativos de solicitudes;
+  - seguimiento mínimo de pacientes por estado operativo;
+  - contexto / histórico con edad de pacientes con tratamiento activo o finalizado calculada solo sobre `birthDate` válido;
 - en `/admin`, la edad se mantiene como dato derivado y no se persiste;
 - en `/admin`, las métricas globales de visitas (`Encounter`) permanecen fuera de Fase 1 por falta de consulta agregada eficiente;
 - en `/admin`, Fase 1 no introduce nuevas rutas ni gráficos.
@@ -456,12 +457,15 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Estado de cierre**: Fase 1 cerrada/aprobada para `/admin`.
 - **Observaciones no bloqueantes**: cobertura de render atendida parcialmente con micro-patch no funcional en `src/app/admin/__tests__/page.test.ts` (sin cambios de loader/read model/mapper/repository/arquitectura).
 - **Comportamiento vigente de `/admin`**:
-  - card `Resumen operativo`;
+  - bloque `Requiere acción`;
+  - bloque `En seguimiento`;
+  - bloque `Contexto / histórico`;
   - card `Edad de pacientes`;
   - CTAs principales `Ver pacientes` y `Nuevo paciente`.
 - **Métricas incluidas en Fase 1**:
-  - resumen operativo: pacientes totales, en tratamiento activo, tratamiento finalizado y sin tratamiento iniciado (`preliminary + ready_to_start`);
-  - embudo de solicitudes: `in_review` (en evaluación) y `accepted` pendientes de tratamiento;
+  - requiere acción: `in_review` (solicitudes en evaluación), `accepted` pendientes de iniciar tratamiento y datos operativos incompletos (`preliminary`);
+  - seguimiento: pacientes en tratamiento activo y listos para iniciar tratamiento (`ready_to_start`);
+  - contexto / histórico: pacientes totales y tratamientos finalizados;
   - edad (pacientes con tratamiento activo o finalizado): paciente más joven, paciente más viejo y promedio.
 - **Reglas vigentes de edad**:
   - edad derivada de lectura desde `birthDate` en población con `EpisodeOfCare` activo o finalizado, no persistida;

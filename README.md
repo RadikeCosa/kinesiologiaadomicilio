@@ -37,7 +37,7 @@ El proyecto está en etapa **híbrida transicional**:
 - GA4 integrado de forma directa (sin GTM) con eventos custom.
 
 #### Privado clínico mínimo
-- `/admin` como dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes).
+- `/admin` como consola operativa breve de la superficie privada, jerarquizada en `Requiere acción`, `En seguimiento` y `Contexto / histórico`, sin gráficos.
 - Configuración privada de profesional firmante en `/admin/configuracion/profesional`, con estados `Sin configurar`, `Incompleto` y `Listo para firmar`.
 - Listado y alta de pacientes.
 - En `/admin/patients`, el listado se ordena por prioridad operativa: primero pacientes con tratamiento activo, luego sin tratamiento activo listo/preliminar y al final tratamientos finalizados.
@@ -91,7 +91,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Durante tratamiento activo, crear una nueva solicitud se mantiene como acción administrativa secundaria (no CTA clínico principal del hub).
 - `/admin/patients/[id]/treatment` mantiene el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen si existe).
 - `/admin/patients/[id]/treatment` funciona como superficie de gestión del tratamiento actual y también de historial compacto de ciclos cerrados; sin tratamiento activo pero con ciclos finalizados, prioriza el historial y ofrece acceso directo al historial de solicitudes en `/administrative#service-requests`.
-- Las métricas de `/admin` son derivadas de lectura (sin persistencia): resumen por estado operativo y métricas de edad para pacientes con `EpisodeOfCare` activo o finalizado basadas en `birthDate` válido.
+- Las métricas de `/admin` son derivadas de lectura (sin persistencia): pendientes operativos de solicitudes, seguimiento mínimo de pacientes y contexto/histórico con métricas de edad para pacientes con `EpisodeOfCare` activo o finalizado basadas en `birthDate` válido.
 - La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
 - Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
 - `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
@@ -119,20 +119,22 @@ El proyecto está en etapa **híbrida transicional**:
 
 ##### Cierre DASHBOARD-SR-001 (abril 2026)
 - **Estado**: cerrado (PR1+PR2+PR3).
-- **Resultado**: `/admin` muestra embudo SR (`in_review` y `accepted` pendiente sin vínculo `incoming-referral`) y mantiene resumen operativo + card simplificada de edad clínica.
+- **Resultado**: `/admin` muestra pendientes operativos de solicitudes (`in_review` y `accepted` pendiente sin vínculo `incoming-referral`), seguimiento mínimo de pacientes y contexto/histórico con card simplificada de edad clínica.
 - **Cierre P1 de performance confirmado (2026-05-13):** sin N+1 en `ServiceRequest` por paciente ni en `EpisodeOfCare` por `incoming-referral`; loaders resuelven agrupación/sets en memoria y mantienen métricas derivadas en lectura.
 - **No-alcances preservados:** sin cache ni read-model materializado en `/admin`.
 
 ##### Cierre Fase 1 dashboard `/admin` (abril 2026)
-- **Estado**: fase cerrada/aprobada para `/admin` como dashboard operativo mínimo.
+- **Estado**: fase cerrada/aprobada para `/admin` como consola operativa mínima.
 - **Comportamiento vigente**:
-  - card `Resumen operativo`;
+  - bloque `Requiere acción`;
+  - bloque `En seguimiento`;
+  - bloque `Contexto / histórico`;
   - card `Edad de pacientes`;
   - CTAs principales preservados: `Ver pacientes` y `Nuevo paciente`.
 - **Métricas incluidas**:
-  - resumen operativo: total, en tratamiento activo, tratamiento finalizado, sin tratamiento iniciado;
-  - embudo de solicitudes: solicitudes en evaluación y aceptadas pendientes de tratamiento (solo si no están vinculadas por incoming-referral);
-  - regla: `sin tratamiento iniciado = preliminary + ready_to_start`;
+  - requiere acción: solicitudes en evaluación, aceptadas pendientes de iniciar tratamiento y datos operativos incompletos (`preliminary`);
+  - seguimiento: pacientes en tratamiento activo y listos para iniciar tratamiento (`ready_to_start`);
+  - contexto/histórico: pacientes totales y tratamientos finalizados;
   - edad (pacientes con tratamiento activo o finalizado): paciente más joven, paciente más viejo y promedio.
 - **Reglas de edad**:
   - dato derivado de lectura (no persistido), calculado desde `birthDate` sobre pacientes con `EpisodeOfCare` activo o finalizado;
