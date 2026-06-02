@@ -1,6 +1,6 @@
 # Fuente de verdad operativa del proyecto
 
-> Última actualización: 2026-06-01 (UTC)
+> Última actualización: 2026-06-02 (UTC)
 
 ## 1) Resumen ejecutivo
 
@@ -99,8 +99,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 #### Nota de cierre documental — Fase 0 Encounter clínico estructurado (2026-05-07)
 - **Estado:** cerrada / aprobada.
 - **Checklist ejecutado:** `docs/checklist-sincronizacion-doc-codigo.md` (README, fuente operativa y auditoría FHIR alineadas con implementación vigente).
-- **Documentos actualizados:** `docs/fuente-de-verdad-operativa.md`, `README.md`, `docs/fhir/auditoria-fase0-encounter-nota-clinica-2026-05-05.md`.
-- **Documentos revisados sin cambios:** `docs/product/auditoria-preimplementacion-ai-clinica-2026-05-05.md`, `docs/checklist-sincronizacion-doc-codigo.md`.
+- **Documentos actualizados:** `docs/fuente-de-verdad-operativa.md`, `README.md`, `docs/archive/historico-fhir/auditoria-fase0-encounter-nota-clinica-2026-05-05.md`.
+- **Documentos revisados sin cambios:** `docs/archive/producto/auditorias/auditoria-preimplementacion-ai-clinica-2026-05-05.md`, `docs/checklist-sincronizacion-doc-codigo.md`.
 - **Fuera de alcance preservado:** sin IA, sin `Condition`, sin `Observation`, sin `Procedure`, sin cambios en `ServiceRequest`/`EpisodeOfCare`, sin rediseño global de `/encounters`.
 - **Hardening/regresión confirmado:** el patch posterior mantiene clinicalNote estructurada y corrige scoping/listado/métricas de `/encounters` al episodio efectivo; además ratifica que clinicalNote no altera duración ni pertenencia de visitas al episodio.
 - **Hardening visual adicional (hub paciente `/admin/patients/[id]`):** se refuerza layout legible del hub (ancho cómodo, metadata compacta y bloque de acciones con wrap/grilla responsive) para evitar compresión extrema del resumen y del bloque `Siguiente paso sugerido`.
@@ -154,7 +154,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Garantía lograda:** superior a tests unitarios de mappers aislados y aún inferior a validación end-to-end contra servidor FHIR real/HAPI.
 - **Pendientes explícitos:** prueba contra servidor FHIR real/local HAPI, mitigación N+1 de `Observation`, atomicidad/consistencia `Encounter -> Observation`.
 - **No-alcances preservados:** sin cambios UI/copy/rutas, sin cambios de dominio/flujos, sin perfiles FHIR formales, sin migraciones, sin `Procedure`/`Goal`/IA.
-- **Trazabilidad documental técnica:** `docs/fhir/fhir-harden-002-repository-roundtrip-preservacion.md`.
+- **Trazabilidad documental técnica:** `docs/archive/historico-fhir/fhir-harden-002-repository-roundtrip-preservacion.md`.
 
 
 
@@ -215,7 +215,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Comportamiento ante éxito parcial:** no se borra `Encounter`, no hay rollback compensatorio, se reportan `failedObservationCodes` y logging server-side mínimo (`patientId`, `encounterId`, códigos fallidos).
 - **Pendientes explícitos:** reintento manual dirigido para métricas de `Encounter` existente; eventual integración/validación HAPI real; N+1 de `Observation` sigue fuera de este PR.
 - **No-alcances preservados:** sin transacciones Bundle, sin colas/jobs, sin dashboard, sin cambios de recursos FHIR, sin cambios de rutas, sin rediseño UI y sin mezclar N+1/performance.
-- **Trazabilidad documental técnica:** `docs/fhir/fhir-consistency-001a-encounter-observation-partial-success.md`.
+- **Trazabilidad documental técnica:** `docs/archive/historico-fhir/fhir-consistency-001a-encounter-observation-partial-success.md`.
 
 #### Nota de cierre documental — FHIR-HARDEN-001 mappers (2026-05-12)
 - **Estado:** cerrado / aprobado.
@@ -229,7 +229,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   3. consistencia/atomicidad `Encounter -> Observation`;
   4. mitigación de N+1 en consultas de `Observation`.
 - **No-alcances preservados:** sin cambios funcionales, sin cambios UI/copy/rutas, sin cambios de dominio, sin perfiles FHIR formales, sin migraciones, sin `Procedure`/`Goal`/IA.
-- **Trazabilidad documental técnica:** `docs/fhir/fhir-harden-001-mappers-roundtrip-preservacion.md`.
+- **Trazabilidad documental técnica:** `docs/archive/historico-fhir/fhir-harden-001-mappers-roundtrip-preservacion.md`.
 
 
 
@@ -686,3 +686,15 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - No-alcances vigentes: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido y sin edición inline en `/encounters`.
 
 - Regla P1 de navegación privada: cada superficie mantiene **un CTA primario** de su tarea principal; enlaces cruzados (`/administrative`, `/treatment`, `/encounters`) se presentan como secundarios/contextuales.
+
+### Actualización técnica — Profesional firmante single-user (2026-06-02)
+- Se agrega base técnica de configuración de profesional firmante único sin UI productiva todavía.
+- Fuente FHIR propuesta/implementada: `Practitioner` con identificador singleton `https://kinesiologiaadomicilio.local/fhir/sid/signing-practitioner-config|primary`.
+- La matrícula profesional se modela como identifier separado con system `https://kinesiologiaadomicilio.local/fhir/sid/professional-license`; no debe confundirse con el identificador singleton.
+- Dominio nuevo: `SigningProfessionalConfig` con estados `missing`, `incomplete` y `ready`.
+- Regla de completitud: `ready` requiere `fullName`, `roleTitle` y `licenseNumber`; `licenseJurisdiction`, `signatureDisplay` y `professionalPhone` son opcionales.
+- Repository nuevo: lectura/upsert por singleton; si hay más de un `Practitioner` singleton, falla con error de ambigüedad y no escribe.
+- Escritura: patrón `GET -> merge -> PUT`, preservando identifiers/extensions/telecom externos y campos no propios razonables.
+- Loader reusable: `loadSigningProfessionalConfig()` devuelve read model de dominio, sin exponer FHIR crudo.
+- Validación HAPI real: `/metadata` respondió HTTP 200 (`CapabilityStatement`) y `Practitioner?identifier=...|primary` respondió HTTP 200 (`Bundle`, `total=0`).
+- No-alcances preservados: sin UI, sin ruta `/admin/configuracion/profesional`, sin cambios en navegación privada, sin reportes, sin IA, sin multiusuario, sin `PractitionerRole`, sin `Organization`.

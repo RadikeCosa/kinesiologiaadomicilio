@@ -129,3 +129,18 @@ export function buildEpisodeOfCareByIncomingReferralIdsQuery(serviceRequestIds: 
 
   return params.toString();
 }
+
+export function buildPractitionerByIdentifierQuery(input: { system: string; value: string }): string {
+  const system = input.system.trim();
+  const value = input.value.trim();
+
+  if (!system || !value) {
+    return "";
+  }
+
+  const params = new URLSearchParams({
+    identifier: `${system}|${value}`,
+  });
+
+  return params.toString();
+}
