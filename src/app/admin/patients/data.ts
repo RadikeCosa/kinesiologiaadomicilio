@@ -1,8 +1,12 @@
 import { mapEpisodeOfCareRead } from "@/infrastructure/mappers/episode-of-care/episode-of-care-read.mapper";
 import { mapPatientToListItemReadModel } from "@/infrastructure/mappers/patient/patient-read.mapper";
 import { selectPatientEpisodes } from "@/domain/episode-of-care/episode-of-care.selectors";
-import { listEpisodesByPatientIds } from "@/infrastructure/repositories/episode-of-care.repository";
+import {
+  listEpisodesByIncomingReferralIds,
+  listEpisodesByPatientIds,
+} from "@/infrastructure/repositories/episode-of-care.repository";
 import { listPatients } from "@/infrastructure/repositories/patient.repository";
+import { listServiceRequestsByPatientIds } from "@/infrastructure/repositories/service-request.repository";
 import type { PatientListItemReadModel } from "@/features/patients/read-models/patient-list-item.read-model";
 import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
 
@@ -38,7 +42,14 @@ function logMultipleActiveEpisodes(patientId: string, activeEpisodesCount: numbe
   });
 }
 
-export async function loadPatientsList(): Promise<PatientListItemReadModel[]> {
+export interface AdminPatientsListItem extends PatientListItemReadModel {
+  operationalSignals: {
+    hasInReviewRequest: boolean;
+    hasAcceptedPendingTreatment: boolean;
+  };
+}
+
+async function loadPatientsListBase(): Promise<PatientListItemReadModel[]> {
   const patients = await listPatients();
   const episodes = await listEpisodesByPatientIds(patients.map((patient) => patient.id));
 
@@ -76,4 +87,51 @@ export async function loadPatientsList(): Promise<PatientListItemReadModel[]> {
   });
 
   return sortPatientsList(patientList);
+}
+
+export async function loadPatientsList(): Promise<PatientListItemReadModel[]> {
+  return loadPatientsListBase();
+}
+
+export async function loadPatientsListWithOperationalSignals(): Promise<AdminPatientsListItem[]> {
+  const patients = await loadPatientsListBase();
+  const serviceRequests = await listServiceRequestsByPatientIds(patients.map((patient) => patient.id));
+  const acceptedServiceRequests = serviceRequests.filter((serviceRequest) => serviceRequest.status === "accepted");
+  const acceptedServiceRequestIds = acceptedServiceRequests.map((serviceRequest) => serviceRequest.id);
+  const linkedEpisodes = await listEpisodesByIncomingReferralIds(acceptedServiceRequestIds);
+  const acceptedServiceRequestIdSet = new Set(acceptedServiceRequestIds);
+  const usedServiceRequestIds = new Set(
+    linkedEpisodes
+      .map((episode) => episode.serviceRequestId?.trim())
+      .filter((serviceRequestId): serviceRequestId is string => Boolean(serviceRequestId))
+      .filter((serviceRequestId) => acceptedServiceRequestIdSet.has(serviceRequestId)),
+  );
+
+  const serviceRequestsByPatientId = new Map<string, typeof serviceRequests>();
+  for (const serviceRequest of serviceRequests) {
+    const patientId = serviceRequest.patientId.trim();
+    if (!patientId) continue;
+
+    const existing = serviceRequestsByPatientId.get(patientId);
+    if (existing) {
+      existing.push(serviceRequest);
+      continue;
+    }
+
+    serviceRequestsByPatientId.set(patientId, [serviceRequest]);
+  }
+
+  return patients.map((patient) => {
+    const patientServiceRequests = serviceRequestsByPatientId.get(patient.id) ?? [];
+
+    return {
+      ...patient,
+      operationalSignals: {
+        hasInReviewRequest: patientServiceRequests.some((serviceRequest) => serviceRequest.status === "in_review"),
+        hasAcceptedPendingTreatment: patientServiceRequests.some((serviceRequest) => (
+          serviceRequest.status === "accepted" && !usedServiceRequestIds.has(serviceRequest.id)
+        )),
+      },
+    };
+  });
 }

@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { loadPatientsList } from "@/app/admin/patients/data";
+import { loadPatientsList, loadPatientsListWithOperationalSignals } from "@/app/admin/patients/data";
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
 import type { Patient } from "@/domain/patient/patient.types";
+import type { ServiceRequest } from "@/domain/service-request/service-request.types";
 
 vi.mock("@/infrastructure/repositories/patient.repository", () => ({
   listPatients: vi.fn(),
@@ -10,10 +11,19 @@ vi.mock("@/infrastructure/repositories/patient.repository", () => ({
 
 vi.mock("@/infrastructure/repositories/episode-of-care.repository", () => ({
   listEpisodesByPatientIds: vi.fn(),
+  listEpisodesByIncomingReferralIds: vi.fn(),
 }));
 
-import { listEpisodesByPatientIds } from "@/infrastructure/repositories/episode-of-care.repository";
+vi.mock("@/infrastructure/repositories/service-request.repository", () => ({
+  listServiceRequestsByPatientIds: vi.fn(),
+}));
+
+import {
+  listEpisodesByIncomingReferralIds,
+  listEpisodesByPatientIds,
+} from "@/infrastructure/repositories/episode-of-care.repository";
 import { listPatients } from "@/infrastructure/repositories/patient.repository";
+import { listServiceRequestsByPatientIds } from "@/infrastructure/repositories/service-request.repository";
 
 function buildPatient(overrides: Partial<Patient> & Pick<Patient, "id" | "firstName" | "lastName">): Patient {
   return {
@@ -225,5 +235,67 @@ describe("loadPatientsList", () => {
       "pat-active-a",
     ]);
     expect(listEpisodesByPatientIds).toHaveBeenCalledTimes(1);
+  });
+
+  it("builds operational service request signals with batch queries", async () => {
+    const patients = [
+      buildPatient({ id: "pat-1", firstName: "Ana", lastName: "Uno" }),
+      buildPatient({ id: "pat-2", firstName: "Beto", lastName: "Dos" }),
+      buildPatient({ id: "pat-3", firstName: "Carla", lastName: "Tres" }),
+    ];
+    const serviceRequests: ServiceRequest[] = [
+      {
+        id: "sr-1",
+        patientId: "pat-1",
+        requestedAt: "2026-04-01",
+        reasonText: "Motivo 1",
+        status: "in_review",
+      },
+      {
+        id: "sr-2",
+        patientId: "pat-2",
+        requestedAt: "2026-04-02",
+        reasonText: "Motivo 2",
+        status: "accepted",
+      },
+      {
+        id: "sr-3",
+        patientId: "pat-3",
+        requestedAt: "2026-04-03",
+        reasonText: "Motivo 3",
+        status: "accepted",
+      },
+    ];
+    const linkedEpisodes: EpisodeOfCare[] = [
+      {
+        id: "epi-3",
+        patientId: "pat-3",
+        status: "active",
+        startDate: "2026-04-05",
+        serviceRequestId: "sr-3",
+      },
+    ];
+
+    vi.mocked(listPatients).mockResolvedValue(patients);
+    vi.mocked(listEpisodesByPatientIds).mockResolvedValue(linkedEpisodes);
+    vi.mocked(listServiceRequestsByPatientIds).mockResolvedValue(serviceRequests);
+    vi.mocked(listEpisodesByIncomingReferralIds).mockResolvedValue(linkedEpisodes);
+
+    const result = await loadPatientsListWithOperationalSignals();
+
+    expect(listServiceRequestsByPatientIds).toHaveBeenCalledWith(["pat-3", "pat-1", "pat-2"]);
+    expect(listEpisodesByIncomingReferralIds).toHaveBeenCalledWith(["sr-2", "sr-3"]);
+    expect(result.find((patient) => patient.id === "pat-1")?.operationalSignals).toEqual({
+      hasInReviewRequest: true,
+      hasAcceptedPendingTreatment: false,
+    });
+    expect(result.find((patient) => patient.id === "pat-2")?.operationalSignals).toEqual({
+      hasInReviewRequest: false,
+      hasAcceptedPendingTreatment: true,
+    });
+    expect(result.find((patient) => patient.id === "pat-3")?.operationalSignals).toEqual({
+      hasInReviewRequest: false,
+      hasAcceptedPendingTreatment: false,
+    });
   });
 });

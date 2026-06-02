@@ -48,9 +48,13 @@ describe("/admin page", () => {
     expect(html).toContain("Requiere acción");
     expect(html).toContain("En seguimiento");
     expect(html).toContain("Contexto / histórico");
-    expect(html).toContain("Datos operativos incompletos");
-    expect(html).toContain("Listos para iniciar tratamiento");
+    expect(html).toContain("Faltan datos");
+    expect(html).toContain("Listos para iniciar");
     expect(html).not.toContain("Sin tratamiento iniciado");
+    expect(html).toContain("Pedidos que todavía requieren revisión.");
+    expect(html).toContain("Solicitudes aceptadas que todavía no iniciaron atención.");
+    expect(html).toContain("Completar datos");
+    expect(html).toContain("Revisar pacientes");
     expect(html).toContain("Edad de pacientes");
     expect(html).toContain("Paciente más joven");
     expect(html).toContain("Paciente más viejo");

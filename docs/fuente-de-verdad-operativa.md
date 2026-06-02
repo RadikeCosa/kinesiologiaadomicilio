@@ -45,7 +45,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `/admin`: consola operativa breve de la superficie privada, jerarquizada en `Requiere acción`, `En seguimiento` y `Contexto / histórico`, sin gráficos.
 - `/admin/configuracion/profesional`: configuración privada del profesional firmante single-user. Lectura primero cuando existen datos, formulario directo cuando está sin configurar, y edición explícita. No genera reportes ni firma documentos todavía.
 - `/admin/patients`: listado operativo de pacientes, ordenado primero por prioridad operativa (`active_treatment` → `ready_to_start` → `preliminary` → `finished_treatment`) y luego por nombre visible, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
-- `/admin/patients` incorpora filtros simples por estado operativo vía query param (`status=active`, `status=pending`, `status=finished`, `status=all`/sin query). El filtro visible `Sin tratamiento activo` (`status=pending`) agrupa por ahora `ready_to_start + preliminary` y no representa una señal fina de `ServiceRequest`.
+- `/admin/patients` incorpora filtros simples por estado operativo vía query param (`status=active`, `status=pending`, `status=preliminary`, `status=ready_to_start`, `status=finished`, `status=all`/sin query) y por señal operativa de solicitudes (`signal=in_review_requests`, `signal=accepted_pending_treatment`). El filtro visible `Sin tratamiento activo` (`status=pending`) sigue agrupando `ready_to_start + preliminary`, y además existen vistas finas separadas para `preliminary` (`Faltan datos`) y `ready_to_start` (`Listos para iniciar`).
 - `/admin/patients/[id]`: hub del paciente de **lectura y navegación contextual** (no una pantalla dominada por acciones), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
 - Convención UX/UI vigente del hub (`/admin/patients/[id]`): prioridad visual de lectura **identidad/estado → resumen clínico reciente → contacto operativo → próxima acción recomendada → acciones principales/navegación estructural**.
 - En desktop, el hub usa dos columnas con **columna principal/ancha clínico-operativa** (`Resumen clínico reciente`, `Contacto operativo`, contexto compacto de cierre cuando aplica) y **columna lateral/angosta** (`Próxima acción recomendada` compacta + `Acciones principales`).
@@ -188,7 +188,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - episodio activo → `En tratamiento`;
   - sin activo pero con episodio finalizado/reciente → `Tratamiento finalizado`;
   - sin episodios → `Sin tratamiento activo`.
-- **Filtro vigente:** `/admin/patients` expone filtros visuales por query param (`active`, `pending`, `finished`, `all`); `pending` se comunica como `Sin tratamiento activo` y no consulta ni promete semántica fina de `ServiceRequest`.
+- **Filtro vigente:** `/admin/patients` expone filtros visuales por query param (`active`, `pending`, `preliminary`, `ready_to_start`, `finished`, `all`) y por señal operativa (`in_review_requests`, `accepted_pending_treatment`); `pending` se comunica como `Sin tratamiento activo`, `preliminary` y `ready_to_start` habilitan vistas finas por estado, y las señales operativas usan batch de `ServiceRequest` + `incoming-referral` sin abrir N+1.
 - **No-alcances preservados:** sin cambios en `ServiceRequest`, `incoming-referral`, UI, modelo FHIR, persistencia, cache ni read-model materializado; tampoco se aborda el N+1 restante de `/admin` por `ServiceRequest`.
 - **Validación registrada:** `/metadata` (HTTP 200, `software.name=HAPI FHIR Server`), query batch de `EpisodeOfCare` y ejecución runtime de `/admin/patients` (HTTP 200) con estados observados consistentes.
 
@@ -463,8 +463,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
   - card `Edad de pacientes`;
   - CTAs principales `Ver pacientes` y `Nuevo paciente`.
 - **Métricas incluidas en Fase 1**:
-  - requiere acción: `in_review` (solicitudes en evaluación), `accepted` pendientes de iniciar tratamiento y datos operativos incompletos (`preliminary`);
-  - seguimiento: pacientes en tratamiento activo y listos para iniciar tratamiento (`ready_to_start`);
+  - requiere acción: `in_review` (solicitudes en evaluación), `accepted` pendientes de iniciar tratamiento y pacientes a los que les faltan datos (`preliminary`);
+  - seguimiento: pacientes en tratamiento activo y listos para iniciar (`ready_to_start`);
   - contexto / histórico: pacientes totales y tratamientos finalizados;
   - edad (pacientes con tratamiento activo o finalizado): paciente más joven, paciente más viejo y promedio.
 - **Reglas vigentes de edad**:

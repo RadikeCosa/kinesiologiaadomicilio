@@ -41,7 +41,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Configuración privada de profesional firmante en `/admin/configuracion/profesional`, con estados `Sin configurar`, `Incompleto` y `Listo para firmar`.
 - Listado y alta de pacientes.
 - En `/admin/patients`, el listado se ordena por prioridad operativa: primero pacientes con tratamiento activo, luego sin tratamiento activo listo/preliminar y al final tratamientos finalizados.
-- `/admin/patients` incorpora filtros simples por estado operativo (`Todos`, `En tratamiento`, `Sin tratamiento activo`, `Finalizados`); el filtro `Sin tratamiento activo` agrupa estados operativos simples (`ready_to_start` + `preliminary`) y todavía no representa una señal fina de `ServiceRequest`.
+- `/admin/patients` incorpora filtros simples por estado operativo (`Todos`, `En tratamiento`, `Sin tratamiento activo`, `Faltan datos`, `Listos para iniciar`, `Finalizados`) y por señal operativa de solicitudes (`Solicitudes en evaluación`, `Pendientes de iniciar`); `Sin tratamiento activo` sigue agrupando `ready_to_start + preliminary`, y además existen vistas finas separadas para `preliminary` y `ready_to_start`.
 - Acceso rápido contextual desde el listado para `Registrar visita` solo en pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`).
 - Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación contextual (no dominado por acciones), con prioridad visual: identidad/estado → resumen clínico reciente → contacto operativo → próxima acción recomendada → acciones principales.
 - En desktop, el hub prioriza síntesis clínico-operativa en columna principal y orientación/navegación en columna lateral; en mobile respeta ese orden de lectura antes de acciones.
@@ -132,8 +132,8 @@ El proyecto está en etapa **híbrida transicional**:
   - card `Edad de pacientes`;
   - CTAs principales preservados: `Ver pacientes` y `Nuevo paciente`.
 - **Métricas incluidas**:
-  - requiere acción: solicitudes en evaluación, aceptadas pendientes de iniciar tratamiento y datos operativos incompletos (`preliminary`);
-  - seguimiento: pacientes en tratamiento activo y listos para iniciar tratamiento (`ready_to_start`);
+  - requiere acción: solicitudes en evaluación, pendientes de iniciar tratamiento y pacientes a los que les faltan datos (`preliminary`);
+  - seguimiento: pacientes en tratamiento activo y listos para iniciar (`ready_to_start`);
   - contexto/histórico: pacientes totales y tratamientos finalizados;
   - edad (pacientes con tratamiento activo o finalizado): paciente más joven, paciente más viejo y promedio.
 - **Reglas de edad**:

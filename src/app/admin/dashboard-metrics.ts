@@ -14,6 +14,8 @@ export interface AdminDashboardMetricCard {
   value: number;
   tone: "sky" | "indigo" | "amber" | "emerald" | "slate";
   helper?: string;
+  href?: string;
+  ctaLabel?: string;
 }
 
 export interface AdminDashboardSection {
@@ -132,17 +134,25 @@ export function buildAdminDashboardSections(
           label: "Solicitudes en evaluación",
           value: dashboard.serviceRequestSummary.inReview,
           tone: "sky",
+          helper: "Pedidos que todavía requieren revisión.",
+          href: "/admin/patients?signal=in_review_requests",
+          ctaLabel: "Ver pacientes",
         },
         {
-          label: "Aceptadas pendientes de iniciar tratamiento",
+          label: "Pendientes de iniciar tratamiento",
           value: dashboard.serviceRequestSummary.acceptedPendingTreatment,
           tone: "indigo",
+          helper: "Solicitudes aceptadas que todavía no iniciaron atención.",
+          href: "/admin/patients?signal=accepted_pending_treatment",
+          ctaLabel: "Revisar pacientes",
         },
         {
-          label: "Datos operativos incompletos",
+          label: "Faltan datos",
           value: dashboard.operationalSummary.preliminary,
           tone: "amber",
-          helper: "Falta completar información mínima para avanzar con el inicio.",
+          helper: "Falta completar información mínima para avanzar.",
+          href: "/admin/patients?status=preliminary",
+          ctaLabel: "Completar datos",
         },
       ],
     },
@@ -157,10 +167,12 @@ export function buildAdminDashboardSections(
           tone: "emerald",
         },
         {
-          label: "Listos para iniciar tratamiento",
+          label: "Listos para iniciar",
           value: dashboard.operationalSummary.readyToStart,
           tone: "slate",
-          helper: "Pacientes sin tratamiento activo con base operativa suficiente.",
+          helper: "Pacientes sin tratamiento activo que ya no tienen bloqueos mínimos.",
+          href: "/admin/patients?status=ready_to_start",
+          ctaLabel: "Ver pacientes",
         },
       ],
     },
