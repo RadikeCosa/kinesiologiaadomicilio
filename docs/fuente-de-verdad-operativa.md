@@ -32,6 +32,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 
 ### Rutas privadas
 - `/admin`
+- `/admin/configuracion/profesional`
 - `/admin/patients`
 - `/admin/patients/new`
 - `/admin/patients/[id]`
@@ -42,6 +43,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 
 #### Responsabilidad actual por ruta (superficie de pacientes)
 - `/admin`: dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes), sin gráficos.
+- `/admin/configuracion/profesional`: configuración privada del profesional firmante single-user. Lectura primero cuando existen datos, formulario directo cuando está sin configurar, y edición explícita. No genera reportes ni firma documentos todavía.
 - `/admin/patients`: listado operativo de pacientes, ordenado primero por prioridad operativa (`active_treatment` → `ready_to_start` → `preliminary` → `finished_treatment`) y luego por nombre visible, con acceso rápido contextual para `Registrar visita` cuando el paciente tiene tratamiento activo (destino: `/admin/patients/[id]/encounters/new`).
 - `/admin/patients` incorpora filtros simples por estado operativo vía query param (`status=active`, `status=pending`, `status=finished`, `status=all`/sin query). El filtro visible `Sin tratamiento activo` (`status=pending`) agrupa por ahora `ready_to_start + preliminary` y no representa una señal fina de `ServiceRequest`.
 - `/admin/patients/[id]`: hub del paciente de **lectura y navegación contextual** (no una pantalla dominada por acciones), con acción rápida contextual `Registrar visita` solo si hay tratamiento activo.
@@ -687,8 +689,8 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 
 - Regla P1 de navegación privada: cada superficie mantiene **un CTA primario** de su tarea principal; enlaces cruzados (`/administrative`, `/treatment`, `/encounters`) se presentan como secundarios/contextuales.
 
-### Actualización técnica — Profesional firmante single-user (2026-06-02)
-- Se agrega base técnica de configuración de profesional firmante único sin UI productiva todavía.
+### Actualización técnica/UI — Profesional firmante single-user (2026-06-02)
+- Se agrega base técnica y UI mínima privada de configuración de profesional firmante único.
 - Fuente FHIR propuesta/implementada: `Practitioner` con identificador singleton `https://kinesiologiaadomicilio.local/fhir/sid/signing-practitioner-config|primary`.
 - La matrícula profesional se modela como identifier separado con system `https://kinesiologiaadomicilio.local/fhir/sid/professional-license`; no debe confundirse con el identificador singleton.
 - Dominio nuevo: `SigningProfessionalConfig` con estados `missing`, `incomplete` y `ready`.
@@ -696,5 +698,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - Repository nuevo: lectura/upsert por singleton; si hay más de un `Practitioner` singleton, falla con error de ambigüedad y no escribe.
 - Escritura: patrón `GET -> merge -> PUT`, preservando identifiers/extensions/telecom externos y campos no propios razonables.
 - Loader reusable: `loadSigningProfessionalConfig()` devuelve read model de dominio, sin exponer FHIR crudo.
+- Ruta privada: `/admin/configuracion/profesional`, accesible desde navegación privada como `Configuración`.
+- UI: estado `Sin configurar` muestra formulario directo; estados `Incompleto` y `Listo para firmar` muestran lectura primero y edición explícita.
 - Validación HAPI real: `/metadata` respondió HTTP 200 (`CapabilityStatement`) y `Practitioner?identifier=...|primary` respondió HTTP 200 (`Bundle`, `total=0`).
-- No-alcances preservados: sin UI, sin ruta `/admin/configuracion/profesional`, sin cambios en navegación privada, sin reportes, sin IA, sin multiusuario, sin `PractitionerRole`, sin `Organization`.
+- No-alcances preservados: sin reportes, sin IA, sin multiusuario, sin `PractitionerRole`, sin `Organization`, sin cambios en rutas públicas, landing, GA4 ni SEO.

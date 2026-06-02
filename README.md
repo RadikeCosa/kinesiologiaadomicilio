@@ -16,6 +16,7 @@ El proyecto está en etapa **híbrida transicional**:
 
 ### Rutas privadas implementadas
 - `/admin`
+- `/admin/configuracion/profesional`
 - `/admin/patients`
 - `/admin/patients/new`
 - `/admin/patients/[id]`
@@ -37,6 +38,7 @@ El proyecto está en etapa **híbrida transicional**:
 
 #### Privado clínico mínimo
 - `/admin` como dashboard operativo mínimo de la superficie privada (resumen operativo + edad de pacientes).
+- Configuración privada de profesional firmante en `/admin/configuracion/profesional`, con estados `Sin configurar`, `Incompleto` y `Listo para firmar`.
 - Listado y alta de pacientes.
 - En `/admin/patients`, el listado se ordena por prioridad operativa: primero pacientes con tratamiento activo, luego sin tratamiento activo listo/preliminar y al final tratamientos finalizados.
 - `/admin/patients` incorpora filtros simples por estado operativo (`Todos`, `En tratamiento`, `Sin tratamiento activo`, `Finalizados`); el filtro `Sin tratamiento activo` agrupa estados operativos simples (`ready_to_start` + `preliminary`) y todavía no representa una señal fina de `ServiceRequest`.

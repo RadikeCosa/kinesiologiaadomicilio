@@ -58,6 +58,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     Nuevo paciente
                   </AdminNavLink>
                 </li>
+                <li>
+                  <AdminNavLink href="/admin/configuracion/profesional">
+                    Configuración
+                  </AdminNavLink>
+                </li>
               </ul>
             </nav>
           </div>

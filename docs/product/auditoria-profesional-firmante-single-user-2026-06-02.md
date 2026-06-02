@@ -1,8 +1,20 @@
 # Auditoria tecnica y de producto - Profesional firmante single-user
 
 Fecha: 2026-06-02  
-Estado: auditoria y recomendacion, sin implementacion  
+Estado: implementado/cerrado hasta Patch 3, sin IA ni reportes  
 Alcance: configuracion minima del profesional firmante en la superficie privada `/admin`, sin IA, sin reportes clinicos y sin multiusuario.
+
+## 0. Cierre de implementacion
+
+Estado al cierre documental del 2026-06-02:
+
+- Patch 1 implementado: dominio `SigningProfessionalConfig`, schema, reglas, tipos/mappers FHIR `Practitioner` y tests.
+- Patch 2 implementado: repository `getSigningProfessionalConfig()` / `upsertSigningProfessionalConfig()`, loader reusable `loadSigningProfessionalConfig()`, busqueda por identifier singleton y tests mockeados.
+- Patch 3 implementado: ruta privada `/admin/configuracion/profesional`, link `Configuracion` en navegacion privada, lectura primero + edicion explicita, formulario directo en estado `missing`, Server Action y tests de UI/action.
+- Validacion HAPI real ejecutada: `/metadata` respondio HTTP 200 (`CapabilityStatement`) y `Practitioner?identifier=...|primary` respondio HTTP 200 (`Bundle`, `total=0`) antes de crear datos.
+- Validacion manual ejecutada por usuario: guardado y edicion desde `/admin/configuracion/profesional` funcionando correctamente contra el entorno local.
+- Validacion automatizada: `npm test -- --run` con 88 archivos y 586 tests passing; `npx tsc --noEmit` passing.
+- No-alcances preservados: sin IA, sin reportes, sin persistencia de reportes, sin multiusuario, sin `PractitionerRole`, sin `Organization`, sin cambios en rutas publicas, landing, GA4 ni SEO.
 
 ## 1. Recomendacion ejecutiva
 
@@ -23,7 +35,7 @@ Ese identificador no representa una matricula; solo permite encontrar "el profes
 
 ### 2.1 Hallazgos en codigo y documentacion
 
-No se encontro una entidad o modulo vigente para profesional firmante:
+Hallazgo original previo a la implementacion:
 
 - No existe dominio `professional`, `practitioner`, `signature` o `settings`.
 - No existen mappers/repositorios `Practitioner`.
@@ -31,6 +43,16 @@ No se encontro una entidad o modulo vigente para profesional firmante:
 - La navegacion privada en `src/app/admin/layout.tsx` solo expone `Pacientes` y `Nuevo paciente`.
 - No hay uso de datos profesionales en `/admin` para firmar documentos, notas o reportes.
 - La auditoria de IA en `docs/product/auditoria-feature-ia-reportes-clinicos-2026-06-02.md` lista como faltante: autor profesional, identidad profesional, matricula, rol y firma.
+
+Estado implementado al cierre:
+
+- Existe dominio `src/domain/signing-professional`.
+- Existen mappers FHIR `src/infrastructure/mappers/practitioner`.
+- Existe repository `src/infrastructure/repositories/practitioner.repository.ts`.
+- Existe loader reusable `src/features/signing-professional/read-models/signing-professional-config.read-model.ts`.
+- Existe ruta privada `/admin/configuracion/profesional`.
+- La navegacion privada expone link `Configuracion`.
+- La UI no genera reportes ni firma documentos; solo configura el firmante.
 
 Si existen menciones publicas de profesional en la landing, por ejemplo textos de marketing sobre Ramiro/kinesiologo y experiencia profesional. Esos textos no deben tomarse como fuente clinica ni como configuracion firmante: pertenecen a captacion publica, no a la superficie privada ni a persistencia clinica.
 
@@ -458,7 +480,7 @@ Mitigacion:
 
 ### Patch 0 - Documentacion y decision
 
-Estado: esta auditoria.
+Estado: completado.
 
 Entregables:
 
@@ -480,7 +502,7 @@ Alcance:
 - Constantes de identificadores/extensiones.
 - Tests unitarios.
 
-Sin UI todavia.
+Estado: completado.
 
 ### Patch 2 - Repository y loader
 
@@ -495,6 +517,8 @@ Alcance:
 - Loader de pagina.
 - Tests con `fhirClient` mockeado.
 
+Estado: completado.
+
 ### Patch 3 - UI privada minima
 
 Alcance:
@@ -507,6 +531,8 @@ Alcance:
 - Mensajes de exito/error.
 - Tests de render y action.
 
+Estado: completado y validado manualmente.
+
 ### Patch 4 - Preparacion para reportes futuros
 
 Alcance:
@@ -514,6 +540,8 @@ Alcance:
 - Exponer read model reusable para futuras features de documentos.
 - Agregar helper `assertSigningProfessionalReadyForFinalReport()`.
 - Documentar consumo futuro, sin implementar reportes.
+
+Estado: pendiente futuro. No es necesario para considerar cerrada la configuracion single-user basica.
 
 ## 10. Tests recomendados
 
@@ -605,10 +633,33 @@ No requieren cambios si solo se deja esta auditoria:
 
 Revision segun `docs/checklist-sincronizacion-doc-codigo.md`:
 
-- Documentos actualizados: se agrega esta auditoria en `docs/product/`.
-- README: no requiere actualizacion porque no cambia comportamiento implementado.
-- `docs/fuente-de-verdad-operativa.md`: no requiere actualizacion porque no cambia el runtime.
-- `docs/fhir/README.md`: no requiere actualizacion porque no se implementa `Practitioner` todavia.
-- Rutas/UI/dominio/mappers/repositorios/actions: sin cambios.
-- Tests: no se agregan porque no hay implementacion.
-- Fuera de alcance deliberado: IA, reportes, multiusuario, portal, agenda, pagos, dashboard clinico, landing publica, GA4, SEO y rutas publicas.
+- Documentos actualizados:
+  - `README.md`: agrega ruta privada `/admin/configuracion/profesional` y funcionalidad de configuracion profesional.
+  - `docs/fuente-de-verdad-operativa.md`: agrega ruta, responsabilidad y cierre tecnico/UI del profesional firmante.
+  - `docs/fhir/README.md`: agrega documento activo de `Practitioner`.
+  - `docs/fhir/fhir-practitioner-profesional-firmante.md`: documenta singleton, matricula, extension de firma, preservacion y validacion HAPI.
+  - `docs/product/auditoria-profesional-firmante-single-user-2026-06-02.md`: este cierre.
+- Rutas privadas agregadas:
+  - `/admin/configuracion/profesional`.
+- Dominio/schemas/rules agregados:
+  - `src/domain/signing-professional/*`.
+- Mappers/repositorios FHIR agregados:
+  - `src/infrastructure/mappers/practitioner/*`.
+  - `src/infrastructure/repositories/practitioner.repository.ts`.
+- Loader/action/UI agregados:
+  - `src/features/signing-professional/read-models/signing-professional-config.read-model.ts`.
+  - `src/app/admin/configuracion/profesional/*`.
+  - link en `src/app/admin/layout.tsx`.
+- Tests agregados:
+  - schema/reglas;
+  - mapper;
+  - repository;
+  - loader;
+  - Server Action;
+  - page/panel/layout.
+- Validacion ejecutada:
+  - `npm test -- --run`;
+  - `npx tsc --noEmit`;
+  - HAPI real `/metadata` y busqueda `Practitioner?identifier=...|primary`;
+  - prueba manual de guardado/edicion desde UI.
+- Fuera de alcance deliberado: IA, reportes, persistencia de reportes, multiusuario, portal, agenda, pagos, dashboard clinico, landing publica, GA4, SEO, rutas publicas, `PractitionerRole`, `Organization`.
