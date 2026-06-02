@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createEncounterSchema, updateEncounterPeriodSchema } from "@/domain/encounter/encounter.schemas";
+import { createEncounterSchema, updateEncounterClinicalNoteSchema, updateEncounterPeriodSchema } from "@/domain/encounter/encounter.schemas";
 
 describe("encounter.schemas", () => {
   it("requires patientId, episodeOfCareId and startedAt", () => {
@@ -191,6 +191,49 @@ segunda línea MIXTA`,
       endedAt: "2026-04-17T11:15",
       tugSeconds: 0,
     })).toThrow();
+  });
+
+  it("validates clinical note update with empty fields", () => {
+    const parsed = updateEncounterClinicalNoteSchema.parse({
+      encounterId: " enc-1 ",
+      patientId: " pat-1 ",
+      clinicalNote: {
+        subjective: "",
+        objective: "   ",
+      },
+    });
+
+    expect(parsed).toEqual({
+      encounterId: "enc-1",
+      patientId: "pat-1",
+      clinicalNote: undefined,
+    });
+  });
+
+  it("trims clinical note update fields without changing case or line breaks", () => {
+    const parsed = updateEncounterClinicalNoteSchema.parse({
+      encounterId: "enc-1",
+      patientId: "pat-1",
+      clinicalNote: {
+        subjective: `  Refiere Dolor
+MIXTO  `,
+      },
+    });
+
+    expect(parsed.clinicalNote).toEqual({
+      subjective: `Refiere Dolor
+MIXTO`,
+    });
+  });
+
+  it("rejects clinical note update fields that are too long", () => {
+    expect(() => updateEncounterClinicalNoteSchema.parse({
+      encounterId: "enc-1",
+      patientId: "pat-1",
+      clinicalNote: {
+        subjective: "x".repeat(2001),
+      },
+    })).toThrow("clinicalNote.subjective: debe tener 2000 caracteres o menos.");
   });
 
 });

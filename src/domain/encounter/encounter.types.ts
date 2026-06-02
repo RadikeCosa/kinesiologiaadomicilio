@@ -44,3 +44,9 @@ export interface UpdateEncounterPeriodInput {
   startedAt: string;
   endedAt: string;
 }
+
+export interface UpdateEncounterClinicalNoteInput {
+  encounterId: string;
+  patientId: string;
+  clinicalNote?: EncounterClinicalNote;
+}

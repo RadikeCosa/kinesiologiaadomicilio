@@ -16,6 +16,7 @@ import {
   createInitialEncountersInlineEditState,
   startEncounterInlineEdit,
 } from "@/app/admin/patients/[id]/encounters/components/encounters-inline-edit.state";
+import { EncounterClinicalNoteEditor } from "@/app/admin/patients/[id]/encounters/components/EncounterClinicalNoteEditor";
 import { VisitShareReportPanel } from "@/app/admin/patients/[id]/encounters/components/VisitShareReportPanel";
 import type { Encounter } from "@/domain/encounter/encounter.types";
 import { ENCOUNTER_OPERATIONAL_PUNCTUALITY_LABEL } from "@/infrastructure/mappers/encounter/encounter-operational-punctuality.constants";
@@ -107,10 +108,12 @@ export function EncountersList({
   const [inlineEditState, setInlineEditState] = useState(createInitialEncountersInlineEditState);
   const [expandedClinicalEncounterIds, setExpandedClinicalEncounterIds] = useState<Record<string, boolean>>({});
   const [activeShareReportEncounterId, setActiveShareReportEncounterId] = useState<string | null>(null);
+  const [activeClinicalNoteEditorEncounterId, setActiveClinicalNoteEditorEncounterId] = useState<string | null>(null);
 
   function handleStartEditing(encounter: Encounter) {
     setInlineEditState(startEncounterInlineEdit(encounter));
     setActiveShareReportEncounterId(null);
+    setActiveClinicalNoteEditorEncounterId(null);
     clearMessage();
   }
 
@@ -372,7 +375,20 @@ export function EncountersList({
                       encounterId={encounter.id}
                       isOpen={activeShareReportEncounterId === encounter.id}
                       onClose={() => setActiveShareReportEncounterId(null)}
-                      onOpen={() => setActiveShareReportEncounterId(encounter.id)}
+                      onOpen={() => {
+                        setActiveClinicalNoteEditorEncounterId(null);
+                        setActiveShareReportEncounterId(encounter.id);
+                      }}
+                      patientId={patientId}
+                    />
+                    <EncounterClinicalNoteEditor
+                      encounter={encounter}
+                      isOpen={activeClinicalNoteEditorEncounterId === encounter.id}
+                      onClose={() => setActiveClinicalNoteEditorEncounterId(null)}
+                      onOpen={() => {
+                        setActiveShareReportEncounterId(null);
+                        setActiveClinicalNoteEditorEncounterId(encounter.id);
+                      }}
                       patientId={patientId}
                     />
                   </div>

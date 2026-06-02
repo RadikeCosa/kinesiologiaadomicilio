@@ -4,6 +4,7 @@ import type {
   CreateEncounterInput,
   EncounterClinicalNote,
   EncounterVisitStartPunctuality,
+  UpdateEncounterClinicalNoteInput,
   UpdateEncounterPeriodInput,
 } from "@/domain/encounter/encounter.types";
 import { functionalObservationInputSchema } from "@/domain/functional-observation/functional-observation.schemas";
@@ -44,6 +45,17 @@ function normalizeOptionalString(value: unknown, field: string): string | undefi
   return normalized ? normalized : undefined;
 }
 
+function normalizeOptionalClinicalText(value: unknown, field: string): string | undefined {
+  const normalized = normalizeOptionalString(value, field);
+  const maxLength = 2000;
+
+  if (normalized && normalized.length > maxLength) {
+    throw new Error(`${field}: debe tener ${maxLength} caracteres o menos.`);
+  }
+
+  return normalized;
+}
+
 function ensureEndedAtAfterStartedAt(startedAt: string, endedAt: string): void {
   const startedAtTimestamp = new Date(startedAt).getTime();
   const endedAtTimestamp = new Date(endedAt).getTime();
@@ -68,13 +80,13 @@ function parseClinicalNote(value: unknown): EncounterClinicalNote | undefined {
 
   const record = value as Record<string, unknown>;
   const clinicalNote: EncounterClinicalNote = {
-    subjective: normalizeOptionalString(record.subjective, "clinicalNote.subjective"),
-    objective: normalizeOptionalString(record.objective, "clinicalNote.objective"),
-    intervention: normalizeOptionalString(record.intervention, "clinicalNote.intervention"),
-    assessment: normalizeOptionalString(record.assessment, "clinicalNote.assessment"),
-    tolerance: normalizeOptionalString(record.tolerance, "clinicalNote.tolerance"),
-    homeInstructions: normalizeOptionalString(record.homeInstructions, "clinicalNote.homeInstructions"),
-    nextPlan: normalizeOptionalString(record.nextPlan, "clinicalNote.nextPlan"),
+    subjective: normalizeOptionalClinicalText(record.subjective, "clinicalNote.subjective"),
+    objective: normalizeOptionalClinicalText(record.objective, "clinicalNote.objective"),
+    intervention: normalizeOptionalClinicalText(record.intervention, "clinicalNote.intervention"),
+    assessment: normalizeOptionalClinicalText(record.assessment, "clinicalNote.assessment"),
+    tolerance: normalizeOptionalClinicalText(record.tolerance, "clinicalNote.tolerance"),
+    homeInstructions: normalizeOptionalClinicalText(record.homeInstructions, "clinicalNote.homeInstructions"),
+    nextPlan: normalizeOptionalClinicalText(record.nextPlan, "clinicalNote.nextPlan"),
   };
 
   const hasAnyField = Object.values(clinicalNote).some((field) => Boolean(field));
@@ -171,6 +183,18 @@ export const updateEncounterPeriodSchema = {
       patientId: normalizeRequiredString(record.patientId, "patientId"),
       startedAt,
       endedAt,
+    };
+  },
+};
+
+export const updateEncounterClinicalNoteSchema = {
+  parse(input: unknown): UpdateEncounterClinicalNoteInput {
+    const record = assertObject(input, "updateEncounterClinicalNoteSchema");
+
+    return {
+      encounterId: normalizeRequiredString(record.encounterId, "encounterId"),
+      patientId: normalizeRequiredString(record.patientId, "patientId"),
+      clinicalNote: parseClinicalNote(record.clinicalNote ?? {}),
     };
   },
 };

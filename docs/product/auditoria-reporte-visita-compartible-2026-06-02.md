@@ -899,3 +899,59 @@ Validacion ejecutada:
 - `npx tsc --noEmit`: passing.
 - `npm run test`: 620 tests passing.
 - `npm run lint`: passing.
+
+## 21. Cierre Patch 5 edicion post-creacion de nota clinica fuente
+
+Fecha: 2026-06-02.
+
+Relacion con resumen compartible:
+
+- El resumen compartible deriva de la nota clinica estructurada del `Encounter`.
+- Se habilita edicion post-creacion de esa fuente clinica para mejorar/corregir datos antes de regenerar un resumen.
+- El texto editado localmente del resumen compartible sigue sin persistirse y no reemplaza la nota clinica fuente.
+
+Archivos implementados:
+
+- `src/domain/encounter/encounter.schemas.ts`;
+- `src/infrastructure/mappers/encounter/encounter-write.mapper.ts`;
+- `src/infrastructure/repositories/encounter.repository.ts`;
+- `src/app/admin/patients/[id]/encounters/actions/update-encounter-clinical-note.action.ts`;
+- `src/app/admin/patients/[id]/encounters/components/EncounterClinicalNoteEditor.tsx`;
+- integracion en `EncountersList`;
+- tests de schema, mapper, repositorio, action y UI.
+
+Decisiones tomadas:
+
+- La edicion vive inline en `/admin/patients/[id]/encounters`.
+- El boton visible es `Editar nota clínica` cuando hay contenido y `Completar nota clínica` cuando esta vacia.
+- Se permite limpiar campos individuales o limpiar toda la nota.
+- Si todos los campos quedan vacios, se remueven las extensiones clinicas propias y no se escriben extensiones vacias.
+- El update FHIR usa `GET -> merge -> PUT` y reemplaza solo extensiones propias de clinicalNote.
+- `Encounter.note[]` legacy se preserva y no se usa como canal principal nuevo.
+- Si el resumen compartible esta abierto, no se actualiza automaticamente su texto local; el profesional puede regenerarlo desde datos actualizados.
+
+Preservaciones confirmadas:
+
+- `startedAt` y `endedAt`.
+- puntualidad operativa.
+- extensiones externas.
+- `Encounter.note[]` legacy.
+- `Observation` funcionales, que no se tocan desde este patch.
+- referencias, status, subject, episodeOfCare y period.
+
+No-alcances preservados:
+
+- Sin persistencia de reportes.
+- Sin registro de compartido/envio.
+- Sin IA.
+- Sin PDF.
+- Sin nuevos recursos FHIR.
+- Sin cambios en `/encounters/new`.
+- Sin cambios en rutas publicas, GA4, SEO ni landing publica.
+
+Validacion ejecutada:
+
+- `npm run test -- src/domain/encounter src/infrastructure/mappers/encounter src/infrastructure/repositories/__tests__/encounter.repository.test.ts src/app/admin/patients/[id]/encounters`: 158 tests passing.
+- `npx tsc --noEmit`: passing.
+- `npm run test`: 637 tests passing.
+- `npm run lint`: passing.

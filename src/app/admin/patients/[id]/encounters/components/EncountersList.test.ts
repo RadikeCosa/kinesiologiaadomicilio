@@ -14,6 +14,10 @@ vi.mock("@/app/admin/patients/[id]/encounters/actions/load-visit-share-report.ac
   loadVisitShareReportAction: vi.fn(),
 }));
 
+vi.mock("@/app/admin/patients/[id]/encounters/actions/update-encounter-clinical-note.action", () => ({
+  updateEncounterClinicalNoteAction: vi.fn(),
+}));
+
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 
 describe("EncountersList", () => {
@@ -80,6 +84,8 @@ describe("EncountersList", () => {
     expect(html).toContain("Refiere menor dolor");
     expect(html).toContain("aria-label=\"Editar horario\"");
     expect((html.match(/Resumen para compartir/g) ?? []).length).toBe(3);
+    expect(html).toContain("Editar nota clínica");
+    expect(html).toContain("Completar nota clínica");
     expect(html).not.toMatch(/WhatsApp/i);
     expect(html).not.toContain("Estado: finished");
     expect(html).not.toContain("AM");

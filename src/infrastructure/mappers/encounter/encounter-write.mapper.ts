@@ -1,4 +1,4 @@
-import type { CreateEncounterInput } from "@/domain/encounter/encounter.types";
+import type { CreateEncounterInput, EncounterClinicalNote } from "@/domain/encounter/encounter.types";
 import { buildEpisodeOfCareReference, buildPatientReference } from "@/lib/fhir/references";
 
 import { ENCOUNTER_CLINICAL_NOTE_EXTENSION_URLS } from "@/infrastructure/mappers/encounter/encounter-clinical-note.constants";
@@ -9,8 +9,7 @@ const CLINICAL_NOTE_EXTENSION_URL_SET: ReadonlySet<string> = new Set(
   Object.values(ENCOUNTER_CLINICAL_NOTE_EXTENSION_URLS),
 );
 
-function buildClinicalNoteExtensions(input: CreateEncounterInput): NonNullable<FhirEncounter["extension"]> {
-  const fields = input.clinicalNote;
+function buildClinicalNoteExtensionsFromFields(fields: EncounterClinicalNote | undefined): NonNullable<FhirEncounter["extension"]> {
 
   if (!fields) {
     return [];
@@ -25,6 +24,10 @@ function buildClinicalNoteExtensions(input: CreateEncounterInput): NonNullable<F
 
     return [{ url, valueString: value }];
   });
+}
+
+function buildClinicalNoteExtensions(input: CreateEncounterInput): NonNullable<FhirEncounter["extension"]> {
+  return buildClinicalNoteExtensionsFromFields(input.clinicalNote);
 }
 
 function buildOperationalPunctualityExtension(input: CreateEncounterInput): NonNullable<FhirEncounter["extension"]> {
@@ -76,5 +79,22 @@ export function mapEncounterTimeRangeUpdate(existing: FhirEncounter, startedAt: 
       start: startedAt,
       end: endedAt,
     },
+  };
+}
+
+export function mapEncounterClinicalNoteUpdate(
+  existing: FhirEncounter,
+  clinicalNote: EncounterClinicalNote | undefined,
+): FhirEncounter {
+  const preservedExtensions = (existing.extension ?? []).filter((extension) =>
+    !CLINICAL_NOTE_EXTENSION_URL_SET.has(extension.url ?? ""));
+  const clinicalExtensions = buildClinicalNoteExtensionsFromFields(clinicalNote);
+  const nextExtensions = [...preservedExtensions, ...clinicalExtensions];
+  const existingWithoutExtension = { ...existing };
+  delete existingWithoutExtension.extension;
+
+  return {
+    ...existingWithoutExtension,
+    ...(nextExtensions.length > 0 ? { extension: nextExtensions } : {}),
   };
 }

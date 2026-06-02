@@ -1,6 +1,7 @@
 import type {
   CreateEncounterInput,
   Encounter,
+  UpdateEncounterClinicalNoteInput,
   UpdateEncounterPeriodInput,
 } from "@/domain/encounter/encounter.types";
 import { extractResourcesByType } from "@/lib/fhir/bundle-utils";
@@ -12,6 +13,7 @@ import type { FhirBundle } from "@/lib/fhir/types";
 import { type FhirEncounter } from "@/infrastructure/mappers/encounter/encounter-fhir.types";
 import { mapFhirEncounterToDomain } from "@/infrastructure/mappers/encounter/encounter-read.mapper";
 import {
+  mapEncounterClinicalNoteUpdate,
   mapCreateEncounterInputToFhir,
   mapEncounterTimeRangeUpdate,
 } from "@/infrastructure/mappers/encounter/encounter-write.mapper";
@@ -50,6 +52,16 @@ export async function updateEncounterTimeRange(
   const existing = await fhirClient.get<FhirEncounter>(`Encounter/${input.encounterId}`);
   const updatedPayload = mapEncounterTimeRangeUpdate(existing, input.startedAt, input.endedAt);
   const updated = await fhirClient.put<FhirEncounter>(`Encounter/${input.encounterId}`, updatedPayload);
+
+  return mapFhirEncounterToDomain(updated);
+}
+
+export async function updateEncounterClinicalNote(
+  input: UpdateEncounterClinicalNoteInput,
+): Promise<Encounter> {
+  const existing = await fhirClient.get<FhirEncounter>(`Encounter/${input.encounterId}`);
+  const payload = mapEncounterClinicalNoteUpdate(existing, input.clinicalNote);
+  const updated = await fhirClient.put<FhirEncounter>(`Encounter/${input.encounterId}`, payload);
 
   return mapFhirEncounterToDomain(updated);
 }

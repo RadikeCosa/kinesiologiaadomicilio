@@ -58,6 +58,7 @@ El proyecto está en etapa **híbrida transicional**:
 - Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
 - Registro y listado de visitas realizadas (`Encounter` base): alta en `/encounters/new` y listado operativo en `/encounters`.
 - En Fase 0 clínica, cada `Encounter` puede incluir una nota clínica estructurada mínima opcional (`subjective`, `objective`, `intervention`, `assessment`, `tolerance`, `homeInstructions`, `nextPlan`).
+- En `/admin/patients/[id]/encounters`, la nota clínica estructurada puede editarse post-creación desde un panel inline por visita; esta nota es fuente clínica interna y no se mezcla con el resumen compartible.
 - En `/admin/patients/[id]/encounters`, cada visita registrada permite preparar un `Resumen para compartir` en panel inline, con texto determinístico editable basado en nombre de pila, horario/duración de la visita, campos clínicos registrados, métricas y puntualidad operativa opcional, botón de copiar y WhatsApp prellenado bajo acción explícita; no persiste reportes, no registra envío, no modifica la nota clínica interna y no integra IA en esta fase.
 - En `/admin/patients/[id]/encounters` se muestran estadísticas clínicas mínimas derivadas (sin persistencia nueva) con scope de episodio efectivo (activo si existe; si no, último registrado): visitas del tratamiento, última visita, primera visita, frecuencia promedio, duración promedio y tiempo total registrado.
 - Las métricas de duración en `/encounters` pueden ser parciales por datos legacy (ej. `start===end`) o encuentros sin cierre; la UI explicita cobertura como helper (`Duración calculada sobre X de Y visitas del tratamiento`).
@@ -177,10 +178,21 @@ El proyecto está en etapa **híbrida transicional**:
 ## Scripts disponibles
 
 - `npm run dev`
+- `npm run dev:fhir-dev`
+- `npm run dev:fhir-real`
 - `npm run build`
 - `npm run start`
 - `npm run lint`
 - `npm run test`
+
+## FHIR local
+
+- `8081` = entorno dev con datos descartables.
+- `8080` = entorno real-local con datos reales.
+- `npm run dev` y `npm run dev:fhir-dev` apuntan a `http://localhost:8081/fhir`.
+- `npm run dev:fhir-real` apunta a `http://localhost:8080/fhir`.
+- Next.js usa solo `FHIR_BASE_URL`; no usa credenciales PostgreSQL ni variables `spring.datasource`.
+- Antes de iniciar Next, debe estar levantado el servidor HAPI FHIR correspondiente al entorno elegido.
 
 ## Desarrollo local
 
@@ -188,9 +200,13 @@ El proyecto está en etapa **híbrida transicional**:
    ```bash
    npm install
    ```
-2. Levantar entorno local:
+2. Levantar entorno local seguro por defecto:
    ```bash
    npm run dev
+   ```
+   Para operar explícitamente contra el entorno real/local:
+   ```bash
+   npm run dev:fhir-real
    ```
 3. Abrir:
    - `http://localhost:3000`

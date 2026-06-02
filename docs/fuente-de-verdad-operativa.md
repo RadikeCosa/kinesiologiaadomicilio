@@ -54,10 +54,11 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - `Próxima acción recomendada` debe permanecer compacta (recomendación breve + apoyo corto) y no duplicar contenido clínico.
 - `Acciones principales` cumplen rol de navegación secundaria/estructural.
 - `/admin/patients/[id]/administrative`: administración no clínica con lectura + acciones (edición explícita de identidad, contacto y datos operativos) + sección de solicitudes de atención (listado/empty state y alta mínima).
-- `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (header con acción primaria `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento, listado de visitas con corrección inline rápida y acción secundaria `Resumen para compartir` por visita).
+- `/admin/patients/[id]/encounters`: superficie clínica operativa del paciente (header con acción primaria `Registrar visita` cuando hay tratamiento activo, metadata compacta de tratamiento, listado de visitas con corrección inline rápida, edición post-creación de nota clínica estructurada y acción secundaria `Resumen para compartir` por visita).
 - Convención UX en Gestión clínica (`/encounters`): evitar badges verdes duplicadas con semántica equivalente de tratamiento activo; mantener una única badge dominante para el estado principal (paciente/tratamiento) y degradar estados secundarios del bloque contextual a metadata textual.
 - Feedback de éxito transitorio en Gestión clínica: confirmaciones por query param `status` reconocido (por ejemplo `encounter-created`, `treatment-started`) se muestran al volver, se ocultan automáticamente (~5s) y limpian `status` del URL para evitar reaparición al refrescar.
 - Esta convención de autolimpieza aplica a feedback de éxito transitorio; mensajes de error relevantes en otros flujos no se autohocultan por defecto salvo decisión explícita de producto/UX.
+- `Editar nota clínica` / `Completar nota clínica` en Gestión clínica abre un panel inline por visita para editar la nota clínica estructurada fuente (`subjective`, `objective`, `intervention`, `assessment`, `tolerance`, `homeInstructions`, `nextPlan`). Esta nota es fuente clínica interna, no reporte compartible, no WhatsApp y no documento final. La actualización reemplaza solo las extensiones propias de clinicalNote en `Encounter.extension[]`, preserva horario, puntualidad, métricas `Observation`, referencias, status y extensiones externas.
 - `Resumen para compartir` en Gestión clínica abre un panel inline por visita ya registrada; compone un texto determinístico desde datos persistidos, usando nombre de pila del paciente, fecha, hora de inicio/cierre, duración calculada, campos clínicos registrados de la visita (`subjective`, `objective`, `intervention`, respuesta/tolerancia, indicaciones y próximo plan), métricas funcionales si existen y puntualidad operativa solo si está registrada. Permite edición local, copiar texto y abrir WhatsApp con mensaje prellenado bajo acción explícita. Si paciente y contacto principal tienen teléfono se muestra selector; si solo uno tiene teléfono se preselecciona; si no hay teléfono operativo queda copy-only. No modifica la nota clínica interna, no persiste reportes, no registra metadata de copiado/compartido, no envía automáticamente y no implementa IA.
 - `/admin/patients/[id]/encounters/new`: pantalla específica para registrar una visita.
 - `/admin/patients/[id]/treatment`: superficie específica de gestión de tratamiento (inicio/finalización de `EpisodeOfCare`).
@@ -548,6 +549,11 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 
 ## 7) Estado de validación local
 
+- Política vigente de entorno FHIR local:
+  - `npm run dev` usa por default seguro `FHIR_BASE_URL=http://localhost:8081/fhir` (HAPI local dev con datos descartables).
+  - `http://localhost:8080/fhir` queda reservado para uso explícito con datos reales/locales, vía `npm run dev:fhir-real`.
+  - Next.js consume solo `FHIR_BASE_URL`; no conoce credenciales PostgreSQL ni variables `spring.datasource`.
+  - Antes de iniciar Next debe estar levantado el HAPI correspondiente al entorno elegido.
 - `npm run lint`: pasa.
 - `npm run test`: pasa.
 - `npm run build`: sin errores de TypeScript detectados; en este entorno falla por configuración al faltar `FHIR_BASE_URL` durante prerender de `/admin`.
@@ -661,6 +667,7 @@ Y con implementación de `ServiceRequest` en `/admin/patients/[id]/administrativ
 - **Alcance confirmado:** el loader de `/admin/patients/[id]/encounters` dejó de consultar `Observation` funcional por visita (N+1) y ahora consume un método batch único por `encounterIds` del episodio efectivo.
 - **Query batch implementada:** `Observation?encounter=Encounter/{id1},Encounter/{id2},...`.
 - **Validación HAPI real (2026-05-12):** `GET /metadata` OK (`HTTP 200`) en `http://localhost:8080/fhir`; `software.name=HAPI FHIR Server`, `software.version=8.8.0`, `fhirVersion=4.0.1`; la query `Observation?encounter=Encounter/1004,Encounter/1005` devolvió observaciones de ambos encounters.
+- **Nota de entorno:** la validación anterior contra `8080` es histórica/específica de HAPI local real y no cambia la política vigente de desarrollo seguro por default en `8081`.
 - **Scoping preservado:** episodio efectivo (activo o, en su ausencia, último registrado); además se filtra defensivamente por `patientId` y por `encounterId` dentro del set efectivo.
 - **Filtro defensivo validado:** no se mezclaron observaciones de otro paciente (`1015`) ni de encounters fuera del episodio efectivo (`1012`).
 - **Derivados preservados:** cards por visita y tendencia funcional siguen derivándose de `Observation`; no se persisten métricas derivadas.

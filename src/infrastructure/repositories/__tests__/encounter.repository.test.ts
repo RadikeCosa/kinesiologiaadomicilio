@@ -6,6 +6,7 @@ import {
   createEncounter,
   getEncounterById,
   listEncountersByPatientId,
+  updateEncounterClinicalNote,
   updateEncounterTimeRange,
 } from "@/infrastructure/repositories/encounter.repository";
 
@@ -181,6 +182,57 @@ describe("encounter.repository (FHIR)", () => {
       "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-note-v1",
       "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-punctuality-v1",
     ]);
+  });
+
+  it("updates clinical note with GET merge PUT and preserves non-clinical fields", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Encounter",
+      id: "enc-note",
+      status: "finished",
+      subject: { reference: "Patient/pat-1" },
+      episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
+      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T11:00:00Z" },
+      extension: [
+        { url: "https://external.local/ext", valueString: "keep" },
+        { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1", valueCode: "delayed" },
+        { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "old" },
+      ],
+      note: [{ text: "clinical-subjective:v1:legacy" }],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "Encounter",
+      id: "enc-note",
+      status: "finished",
+      subject: { reference: "Patient/pat-1" },
+      episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
+      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T11:00:00Z" },
+      extension: [
+        { url: "https://external.local/ext", valueString: "keep" },
+        { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1", valueCode: "delayed" },
+        { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "new" },
+      ],
+    });
+
+    const updated = await updateEncounterClinicalNote({
+      encounterId: "enc-note",
+      patientId: "pat-1",
+      clinicalNote: {
+        subjective: "new",
+      },
+    });
+
+    expect(getSpy).toHaveBeenCalledWith("Encounter/enc-note");
+    expect(putSpy).toHaveBeenCalledWith("Encounter/enc-note", expect.objectContaining({
+      period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T11:00:00Z" },
+      note: [{ text: "clinical-subjective:v1:legacy" }],
+    }));
+    const payload = putSpy.mock.calls[0]?.[1] as { extension?: Array<{ url?: string; valueString?: string; valueCode?: string }> };
+    expect(payload.extension).toEqual([
+      { url: "https://external.local/ext", valueString: "keep" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1", valueCode: "delayed" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "new" },
+    ]);
+    expect(updated.clinicalNote).toEqual({ subjective: "new" });
   });
 
   it("lists encounters by patient using simple query", async () => {

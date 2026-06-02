@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { mapFhirEncounterToDomain } from "@/infrastructure/mappers/encounter/encounter-read.mapper";
 import {
+  mapEncounterClinicalNoteUpdate,
   mapCreateEncounterInputToFhir,
   mapEncounterTimeRangeUpdate,
 } from "@/infrastructure/mappers/encounter/encounter-write.mapper";
@@ -150,6 +151,97 @@ describe("encounter mappers", () => {
       { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1", valueCode: "delayed" },
       { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "dolor leve" },
     ]);
+  });
+
+  it("updates clinical note extensions preserving period, punctuality, external extensions and notes", () => {
+    const mapped = mapEncounterClinicalNoteUpdate(
+      {
+        resourceType: "Encounter",
+        id: "enc-1",
+        status: "finished",
+        subject: { reference: "Patient/pat-1" },
+        episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
+        period: {
+          start: "2026-04-17T10:30:00Z",
+          end: "2026-04-17T11:30:00Z",
+        },
+        extension: [
+          { url: "https://external.local/ext", valueString: "keep" },
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1", valueCode: "delayed" },
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "old" },
+        ],
+        note: [
+          { text: "clinical-subjective:v1:legacy should stay" },
+          { text: "external note" },
+        ],
+      },
+      {
+        subjective: "Refiere menor dolor",
+        objective: "Se observa mejor control postural",
+        intervention: "Marcha asistida",
+        assessment: "Buena respuesta",
+        tolerance: "Tolera sin eventos",
+        homeInstructions: "Ejercicios respiratorios",
+        nextPlan: "Progresar bipedestacion",
+      },
+    );
+
+    expect(mapped.period).toEqual({
+      start: "2026-04-17T10:30:00Z",
+      end: "2026-04-17T11:30:00Z",
+    });
+    expect(mapped.note).toEqual([
+      { text: "clinical-subjective:v1:legacy should stay" },
+      { text: "external note" },
+    ]);
+    expect(mapped.extension).toEqual([
+      { url: "https://external.local/ext", valueString: "keep" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1", valueCode: "delayed" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "Refiere menor dolor" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-objective", valueString: "Se observa mejor control postural" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-intervention", valueString: "Marcha asistida" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-assessment", valueString: "Buena respuesta" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-tolerance", valueString: "Tolera sin eventos" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-home-instructions", valueString: "Ejercicios respiratorios" },
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-next-plan", valueString: "Progresar bipedestacion" },
+    ]);
+  });
+
+  it("clears one clinical note field by replacing own extensions only", () => {
+    const mapped = mapEncounterClinicalNoteUpdate(
+      {
+        resourceType: "Encounter",
+        id: "enc-1",
+        status: "finished",
+        extension: [
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "old subjective" },
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-objective", valueString: "old objective" },
+        ],
+      },
+      {
+        objective: "new objective",
+      },
+    );
+
+    expect(mapped.extension).toEqual([
+      { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-objective", valueString: "new objective" },
+    ]);
+  });
+
+  it("clears all clinical note extensions without writing empty extension array", () => {
+    const mapped = mapEncounterClinicalNoteUpdate(
+      {
+        resourceType: "Encounter",
+        id: "enc-1",
+        status: "finished",
+        extension: [
+          { url: "https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-clinical-subjective", valueString: "old subjective" },
+        ],
+      },
+      undefined,
+    );
+
+    expect(mapped).not.toHaveProperty("extension");
   });
 
   it("maps legacy FHIR Encounter with start===end without exposing endedAt", () => {

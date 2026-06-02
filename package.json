@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "FHIR_BASE_URL=http://localhost:8081/fhir next dev --turbopack",
+    "dev:fhir-dev": "FHIR_BASE_URL=http://localhost:8081/fhir next dev --turbopack",
+    "dev:fhir-real": "FHIR_BASE_URL=http://localhost:8080/fhir next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
