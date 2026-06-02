@@ -38,6 +38,7 @@ El proyecto está en etapa **híbrida transicional**:
 
 #### Privado clínico mínimo
 - `/admin` como consola operativa breve de la superficie privada, jerarquizada en `Requiere acción`, `En seguimiento` y `Contexto / histórico`, sin gráficos.
+- Si falla la lectura inicial hacia FHIR en `/admin`, la superficie privada ahora muestra un fallback operativo controlado en lugar de romper la ruta; este fallback distingue indisponibilidad/configuración de FHIR de bugs no operacionales, que siguen escalando como error real.
 - Configuración privada de profesional firmante en `/admin/configuracion/profesional`, con estados `Sin configurar`, `Incompleto` y `Listo para firmar`.
 - Listado y alta de pacientes.
 - En `/admin/patients`, el listado se ordena por prioridad operativa: primero pacientes con tratamiento activo, luego sin tratamiento activo listo/preliminar y al final tratamientos finalizados.

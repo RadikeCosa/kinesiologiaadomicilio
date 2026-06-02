@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { createFhirNetworkError } from "@/lib/fhir/errors";
 import { loadAdminDashboard } from "@/app/admin/data";
 
 vi.mock("@/app/admin/patients/data", () => ({
@@ -86,5 +87,25 @@ describe("loadAdminDashboard", () => {
       inReview: 1,
       acceptedPendingTreatment: 1,
     });
+  });
+
+  it("translates operational FHIR failures into admin operational errors", async () => {
+    vi.mocked(loadPatientsList).mockRejectedValueOnce(createFhirNetworkError({
+      method: "GET",
+      url: "http://localhost:8080/fhir/Patient",
+      cause: new TypeError("fetch failed"),
+      kind: "network",
+    }));
+
+    await expect(loadAdminDashboard()).rejects.toMatchObject({
+      name: "AdminOperationalError",
+      message: "No se pudo acceder al servidor clínico en este momento.",
+    });
+  });
+
+  it("does not silence unexpected non-operational bugs", async () => {
+    vi.mocked(loadPatientsList).mockRejectedValueOnce(new Error("mapper exploded"));
+
+    await expect(loadAdminDashboard()).rejects.toThrow("mapper exploded");
   });
 });

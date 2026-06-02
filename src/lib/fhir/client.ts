@@ -1,7 +1,12 @@
 import { getFhirBaseUrl } from "@/lib/fhir/config";
-import { FhirClientError, buildHttpErrorMessage, extractOperationOutcome } from "@/lib/fhir/errors";
+import {
+  createFhirHttpError,
+  createFhirNetworkError,
+  extractOperationOutcome,
+} from "@/lib/fhir/errors";
 
 type FhirHttpMethod = "GET" | "POST" | "PUT";
+const FHIR_REQUEST_TIMEOUT_MS = 10000;
 
 const FHIR_JSON_HEADERS = {
   Accept: "application/fhir+json",
@@ -25,30 +30,56 @@ async function parseJsonResponse(response: Response): Promise<unknown> {
 async function request<TResponse>(method: FhirHttpMethod, path: string, body?: unknown): Promise<TResponse> {
   const baseUrl = getFhirBaseUrl();
   const url = new URL(path.replace(/^\//, ""), `${baseUrl}/`).toString();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FHIR_REQUEST_TIMEOUT_MS);
 
-  const response = await fetch(url, {
-    method,
-    headers: FHIR_JSON_HEADERS,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    cache: "no-store",
-  });
-
-  const parsedBody = await parseJsonResponse(response);
-
-  if (!response.ok) {
-    const operationOutcome = extractOperationOutcome(parsedBody);
-
-    throw new FhirClientError({
-      message: buildHttpErrorMessage({ method, url, status: response.status, operationOutcome }),
+  try {
+    const response = await fetch(url, {
       method,
-      url,
-      status: response.status,
-      body: parsedBody,
-      operationOutcome,
+      headers: FHIR_JSON_HEADERS,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      cache: "no-store",
+      signal: controller.signal,
     });
-  }
 
-  return parsedBody as TResponse;
+    const parsedBody = await parseJsonResponse(response);
+
+    if (!response.ok) {
+      const operationOutcome = extractOperationOutcome(parsedBody);
+
+      throw createFhirHttpError({
+        method,
+        url,
+        status: response.status,
+        body: parsedBody,
+        operationOutcome,
+      });
+    }
+
+    return parsedBody as TResponse;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw createFhirNetworkError({
+        method,
+        url,
+        cause: error,
+        kind: "timeout",
+      });
+    }
+
+    if (error instanceof TypeError) {
+      throw createFhirNetworkError({
+        method,
+        url,
+        cause: error,
+        kind: "network",
+      });
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export const fhirClient = {

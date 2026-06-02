@@ -69,6 +69,7 @@ Reglas operativas:
 - La UI consume modelos de dominio o read models.
 - La composición de lectura ocurre en capas server/data, no en componentes visuales.
 - Cada surface consume un read model coherente con su responsabilidad (listado, detalle, historial, etc.).
+- Los errores operacionales de infraestructura (por ejemplo, FHIR no disponible o configuración faltante) pueden tiparse en cliente/repositorio y traducirse en loaders a estados operativos seguros, sin pasar detalles técnicos sensibles a la UI.
 
 ## 6) Arquitectura objetivo de escritura
 

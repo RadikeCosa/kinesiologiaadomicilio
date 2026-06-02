@@ -4,6 +4,7 @@ import { loadPatientsList, loadPatientsListWithOperationalSignals } from "@/app/
 import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.types";
 import type { Patient } from "@/domain/patient/patient.types";
 import type { ServiceRequest } from "@/domain/service-request/service-request.types";
+import { createFhirConfigError, createFhirNetworkError } from "@/lib/fhir/errors";
 
 vi.mock("@/infrastructure/repositories/patient.repository", () => ({
   listPatients: vi.fn(),
@@ -297,5 +298,36 @@ describe("loadPatientsList", () => {
       hasInReviewRequest: false,
       hasAcceptedPendingTreatment: false,
     });
+  });
+
+  it("translates operational base-list failures into admin operational errors", async () => {
+    vi.mocked(listPatients).mockRejectedValueOnce(createFhirNetworkError({
+      method: "GET",
+      url: "http://localhost:8080/fhir/Patient",
+      cause: new TypeError("fetch failed"),
+      kind: "network",
+    }));
+
+    await expect(loadPatientsList()).rejects.toMatchObject({
+      name: "AdminOperationalError",
+      message: "No se pudo acceder al servidor clínico en este momento.",
+    });
+  });
+
+  it("translates config failures while loading operational signals", async () => {
+    vi.mocked(listPatients).mockRejectedValueOnce(createFhirConfigError({
+      message: "Missing required server env var: FHIR_BASE_URL",
+    }));
+
+    await expect(loadPatientsListWithOperationalSignals()).rejects.toMatchObject({
+      name: "AdminOperationalError",
+      message: "La integración clínica no está configurada correctamente.",
+    });
+  });
+
+  it("does not hide non-operational bugs in patients list loaders", async () => {
+    vi.mocked(listPatients).mockRejectedValueOnce(new Error("unexpected mapper bug"));
+
+    await expect(loadPatientsList()).rejects.toThrow("unexpected mapper bug");
   });
 });
