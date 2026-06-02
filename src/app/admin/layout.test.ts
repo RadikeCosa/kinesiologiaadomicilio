@@ -19,9 +19,9 @@ vi.mock("@/app/admin/components/AdminNavLink", () => ({
 
 describe("AdminLayout", () => {
   it("exposes professional configuration navigation", () => {
-    const html = renderToStaticMarkup(createElement(AdminLayout, {
-      children: createElement("div", null, "contenido"),
-    }));
+    const html = renderToStaticMarkup(
+      createElement(AdminLayout, null, createElement("div", null, "contenido")),
+    );
 
     expect(html).toContain("href=\"/admin/patients/\"");
     expect(html).toContain("href=\"/admin/patients/new\"");
