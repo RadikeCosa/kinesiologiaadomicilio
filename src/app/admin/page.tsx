@@ -16,6 +16,10 @@ function formatMetricValue(value: number | null): string {
   return String(value);
 }
 
+function isDefined<T>(value: T | undefined): value is T {
+  return value !== undefined;
+}
+
 const METRIC_TONE_STYLES: Record<AdminDashboardMetricCard["tone"], string> = {
   sky: "border-sky-200 bg-sky-50",
   indigo: "border-indigo-200 bg-indigo-50",
@@ -102,7 +106,7 @@ export default async function AdminHomePage() {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(18rem,1fr)]">
         <div className="space-y-4">
-          {[actionSection, trackingSection].filter(Boolean).map((section) => {
+          {[actionSection, trackingSection].filter(isDefined).map((section) => {
             const hasVisibleMetrics = section.metrics.some((metric) => metric.value > 0);
 
             return (
