@@ -16,6 +16,7 @@ import {
   createInitialEncountersInlineEditState,
   startEncounterInlineEdit,
 } from "@/app/admin/patients/[id]/encounters/components/encounters-inline-edit.state";
+import { VisitShareReportPanel } from "@/app/admin/patients/[id]/encounters/components/VisitShareReportPanel";
 import type { Encounter } from "@/domain/encounter/encounter.types";
 import { ENCOUNTER_OPERATIONAL_PUNCTUALITY_LABEL } from "@/infrastructure/mappers/encounter/encounter-operational-punctuality.constants";
 import {
@@ -105,9 +106,11 @@ export function EncountersList({
   const { message, setMessage, clearMessage } = useFormFeedback();
   const [inlineEditState, setInlineEditState] = useState(createInitialEncountersInlineEditState);
   const [expandedClinicalEncounterIds, setExpandedClinicalEncounterIds] = useState<Record<string, boolean>>({});
+  const [activeShareReportEncounterId, setActiveShareReportEncounterId] = useState<string | null>(null);
 
   function handleStartEditing(encounter: Encounter) {
     setInlineEditState(startEncounterInlineEdit(encounter));
+    setActiveShareReportEncounterId(null);
     clearMessage();
   }
 
@@ -281,89 +284,97 @@ export function EncountersList({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="font-medium">Fecha: {formatOccurrenceDate(encounter.startedAt)}</p>
-                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
-                        <span>Inicio: {formatTimeDisplay(encounter.startedAt)}</span>
-                        {encounter.endedAt
-                          ? <span>Cierre: {formatTimeDisplay(encounter.endedAt)}</span>
-                          : <span>Cierre: Sin cierre registrado</span>}
-                        {durationLabel ? <span>Duración: {durationLabel}</span> : <span>Duración: No calculable</span>}
-                        <span>Estado: {formatEncounterStatusLabel(encounter.status)}</span>
-                        
+                  <div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium">Fecha: {formatOccurrenceDate(encounter.startedAt)}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                          <span>Inicio: {formatTimeDisplay(encounter.startedAt)}</span>
+                          {encounter.endedAt
+                            ? <span>Cierre: {formatTimeDisplay(encounter.endedAt)}</span>
+                            : <span>Cierre: Sin cierre registrado</span>}
+                          {durationLabel ? <span>Duración: {durationLabel}</span> : <span>Duración: No calculable</span>}
+                          <span>Estado: {formatEncounterStatusLabel(encounter.status)}</span>
+                        </div>
+                        {punctualityLabel ? (
+                          <p className="mt-2 inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2 py-0.5 text-xs text-slate-700">
+                            Puntualidad: {punctualityLabel}
+                          </p>
+                        ) : null}
+                        {clinicalEntries.length > 0 ? (
+                          <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Registro clínico</p>
+                            <ul className="mt-1 space-y-1 text-xs text-slate-700">
+                              {clinicalEntries.map((entry) => (
+                                <li key={entry.label}>
+                                  <span className="font-medium">{entry.label}:</span>{" "}
+                                  {isClinicalExpanded ? entry.value : toCompactClinicalValue(entry.value ?? "")}
+                                </li>
+                              ))}
+                            </ul>
+                            {hasLongClinicalNote ? (
+                              <button
+                                className="mt-2 text-xs font-medium text-slate-700 underline-offset-2 hover:underline"
+                                onClick={() => toggleClinicalDetails(encounter.id)}
+                                type="button"
+                              >
+                                {isClinicalExpanded ? "Ocultar detalle clínico" : "Ver detalle clínico"}
+                              </button>
+                            ) : null}
+                          </div>
+                        ) : null}
+                        {orderedFunctionalObservations.length > 0 ? (
+                          <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
+                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Métricas funcionales</p>
+                            <ul className="mt-1 grid gap-x-3 gap-y-1 text-xs text-slate-700 sm:grid-cols-2">
+                              {orderedFunctionalObservations.map((metric) => (
+                                <li key={`${encounter.id}-${metric.code}`}>
+                                  <span className="font-medium">{FUNCTIONAL_LABELS[metric.code]}:</span>{" "}
+                                  {metric.code === "pain_nrs_0_10" ? `${metric.value}/10` : metric.code === "tug_seconds" ? `${metric.value} s` : `${metric.value} min`}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
                       </div>
-                      {punctualityLabel ? (
-                        <p className="mt-2 inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-2 py-0.5 text-xs text-slate-700">
-                          Puntualidad: {punctualityLabel}
-                        </p>
-                      ) : null}
-                      {clinicalEntries.length > 0 ? (
-                        <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Registro clínico</p>
-                          <ul className="mt-1 space-y-1 text-xs text-slate-700">
-                            {clinicalEntries.map((entry) => (
-                              <li key={entry.label}>
-                                <span className="font-medium">{entry.label}:</span>{" "}
-                                {isClinicalExpanded ? entry.value : toCompactClinicalValue(entry.value ?? "")}
-                              </li>
-                            ))}
-                          </ul>
-                          {hasLongClinicalNote ? (
-                            <button
-                              className="mt-2 text-xs font-medium text-slate-700 underline-offset-2 hover:underline"
-                              onClick={() => toggleClinicalDetails(encounter.id)}
-                              type="button"
-                            >
-                              {isClinicalExpanded ? "Ocultar detalle clínico" : "Ver detalle clínico"}
-                            </button>
-                          ) : null}
-                        </div>
-                      ) : null}
-                      {orderedFunctionalObservations.length > 0 ? (
-                        <div className="mt-2 rounded border border-slate-100 bg-slate-50 p-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Métricas funcionales</p>
-                          <ul className="mt-1 grid gap-x-3 gap-y-1 text-xs text-slate-700 sm:grid-cols-2">
-                            {orderedFunctionalObservations.map((metric) => (
-                              <li key={`${encounter.id}-${metric.code}`}>
-                                <span className="font-medium">{FUNCTIONAL_LABELS[metric.code]}:</span>{" "}
-                                {metric.code === "pain_nrs_0_10" ? `${metric.value}/10` : metric.code === "tug_seconds" ? `${metric.value} s` : `${metric.value} min`}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ) : null}
-                    </div>
-                    <button
-                      aria-label="Editar horario"
-                      className="inline-flex items-center justify-center rounded border border-slate-300 bg-white p-1.5 text-slate-700 hover:bg-slate-100 disabled:opacity-50"
-                      disabled={isPending}
-                      onClick={() => handleStartEditing(encounter)}
-                      type="button"
-                    >
-                      <svg
-                        aria-hidden="true"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <button
+                        aria-label="Editar horario"
+                        className="inline-flex items-center justify-center rounded border border-slate-300 bg-white p-1.5 text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                        disabled={isPending}
+                        onClick={() => handleStartEditing(encounter)}
+                        type="button"
                       >
-                        <path
-                          d="M3 17.25V21h3.75L18.81 8.94l-3.75-3.75L3 17.25Z"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.6"
-                        />
-                        <path
-                          d="M14.96 5.04 18.71 8.79"
-                          stroke="currentColor"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.6"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          aria-hidden="true"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M3 17.25V21h3.75L18.81 8.94l-3.75-3.75L3 17.25Z"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="1.6"
+                          />
+                          <path
+                            d="M14.96 5.04 18.71 8.79"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="1.6"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <VisitShareReportPanel
+                      encounterId={encounter.id}
+                      isOpen={activeShareReportEncounterId === encounter.id}
+                      onClose={() => setActiveShareReportEncounterId(null)}
+                      onOpen={() => setActiveShareReportEncounterId(encounter.id)}
+                      patientId={patientId}
+                    />
                   </div>
                 )}
               </li>

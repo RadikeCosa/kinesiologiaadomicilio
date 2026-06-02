@@ -1,7 +1,7 @@
 # Auditoria tecnica y de producto - Reporte de visita compartible
 
 Fecha: 2026-06-02  
-Estado: auditoria y recomendacion, sin implementacion  
+Estado: auditoria cerrada + Fase 1 tecnica implementada sin UI productiva  
 Alcance: reporte deterministico de una visita para revisar y compartir con paciente o familiar/contacto principal desde la superficie privada `/admin`. Sin IA, sin PDF, sin persistencia de reportes y sin envio automatico.
 
 ## 1. Recomendacion ejecutiva
@@ -288,7 +288,17 @@ Motivos:
 ```txt
 Hola {destinatarioNombre}.
 
-Resumen de la visita de kinesiologia de {pacienteNombre} del {fecha}.
+Resumen de la visita de kinesiologia de {pacienteNombreDePila} del {fecha}.
+
+Inicio registrado: {horaInicio}
+Cierre registrado: {horaCierre}
+Duracion registrada: {duracion}
+
+Refiere paciente/familia:
+{subjective}
+
+Observado en la visita:
+{objective}
 
 Trabajamos sobre:
 {intervention}
@@ -313,6 +323,9 @@ Proximo plan:
 
 Bloques condicionales:
 
+- Si no hay `subjective`, omitir "Refiere paciente/familia".
+- Si no hay `objective`, omitir "Observado en la visita".
+- Si no hay puntualidad operativa registrada, omitir "Puntualidad registrada".
 - Si no hay metricas, omitir "Metricas registradas".
 - Si no hay indicaciones, omitir bloque o mostrar advertencia fuera del texto.
 - Si no hay proximo plan, omitir bloque o advertir.
@@ -324,9 +337,11 @@ Bloques condicionales:
 - No interpretar metricas.
 - No afirmar mejoria/empeoramiento salvo que `assessment` lo diga.
 - No agregar recomendaciones no registradas.
+- La puntualidad, si se incluye, es dato operativo de baja jerarquia y no debe presentarse como evolucion clinica.
 - No incluir diagnostico por defecto en WhatsApp.
 - No incluir DNI, domicilio ni IDs.
 - Mantener tono profesional, simple y entendible.
+- En el encabezado compartible, usar nombre de pila del paciente y no incluir edad por defecto.
 - Evitar lenguaje de certificado/legal.
 
 ## 7. Completitud minima
@@ -577,9 +592,11 @@ No agregar ahora:
 
 ### Fase 0 - Auditoria/decision
 
-Estado: este documento.
+Estado: completada en este documento.
 
 ### Fase 1 - Read model + composer deterministico
+
+Estado: implementada el 2026-06-02, sin UI productiva.
 
 Alcance:
 
@@ -589,7 +606,27 @@ Alcance:
 - tests de privacidad y plantilla;
 - sin UI productiva.
 
+Entregado:
+
+- Modulo aislado `src/features/visit-share-report/`.
+- Tipos sanitizados para paciente minimo, destinatarios potenciales, visita, nota clinica, metricas funcionales, profesional firmante, completitud y resultado de composicion.
+- `loadEncounterShareableReportContext({ patientId, encounterId })` server-side:
+  - carga paciente, encuentro seleccionado, metricas funcionales de ese encuentro y profesional firmante;
+  - valida que el encuentro pertenezca al paciente;
+  - valida que el encuentro pertenezca al ciclo efectivo del paciente (activo o, si no hay activo, el mas reciente);
+  - no expone FHIR crudo ni campos administrativos como DNI, domicilio, puntualidad o IDs.
+- `evaluateVisitShareReportCompleteness(context)` con estados `ready`, `usable_with_warnings` e `insufficient`.
+- `composeVisitShareReport(context)` deterministico:
+  - prioriza `intervention`;
+  - omite bloques vacios;
+  - incluye metricas solo como valores registrados;
+  - no incluye telefonos, DNI, domicilio, IDs ni diagnosticos por defecto;
+  - incorpora firma profesional cuando hay datos disponibles.
+- Tests unitarios y mockeados para completitud, composer y read model.
+
 ### Fase 2 - UI inline en card de visita
+
+Estado: implementada el 2026-06-02, sin WhatsApp, sin persistencia y sin IA.
 
 Alcance:
 
@@ -599,7 +636,29 @@ Alcance:
 - copiar/regenerar/descartar;
 - warnings.
 
+Entregado:
+
+- Accion secundaria `Resumen para compartir` en cada card de visita de `/admin/patients/[id]/encounters`.
+- Panel inline route-local `VisitShareReportPanel` con:
+  - titulo `Resumen compartible de visita`;
+  - helper de revision humana y separacion de nota clinica interna;
+  - estado de completitud visible;
+  - warnings/faltantes;
+  - textarea editable;
+  - acciones `Copiar texto`, `Regenerar desde datos`, `Cerrar`/`Descartar`.
+- Carga bajo demanda mediante Server Action route-local:
+  - reutiliza `loadEncounterShareableReportContext`;
+  - reutiliza `composeVisitShareReport`;
+  - no duplica logica de composer en UI;
+  - no revalida ni escribe datos.
+- Se permite un solo panel abierto a la vez para evitar saturar el listado.
+- Las ediciones del textarea son locales y se reemplazan al regenerar desde datos persistidos.
+- `Copiar texto` usa el contenido actual del textarea y muestra feedback local de exito/error.
+- Tests de action, estado del panel, render del panel, render de `EncountersList` y suite de la feature.
+
 ### Fase 3 - WhatsApp prellenado
+
+Estado: implementada el 2026-06-02, sin envio automatico y sin persistencia.
 
 Alcance:
 
@@ -607,6 +666,25 @@ Alcance:
 - link `wa.me` con texto;
 - advertencia previa;
 - fallback copy-only sin telefono.
+
+Entregado:
+
+- Resolucion de destinatarios disponibles desde el contexto sanitizado:
+  - paciente si tiene telefono operativo;
+  - contacto principal si tiene telefono;
+  - selector si ambos existen;
+  - preseleccion si solo uno existe;
+  - fallback copy-only si no hay telefono.
+- Builder puro de URL WhatsApp:
+  - usa `wa.me`;
+  - encodea el texto actual del textarea con saltos de linea y caracteres especiales;
+  - no incluye telefonos dentro del cuerpo del mensaje;
+  - no envia automaticamente.
+- UI en `VisitShareReportPanel`:
+  - boton `Abrir WhatsApp`;
+  - advertencia visible antes de abrir;
+  - copy explicito cuando el destinatario seleccionado es contacto principal.
+- Tests de helper WhatsApp, action, estado de panel e integracion con listado.
 
 ### Fase 4 - Post-guardado
 
@@ -633,7 +711,7 @@ Alcance:
 
 ## 15. No-alcances
 
-- No implementar codigo en esta auditoria.
+- No implementar UI productiva en Fase 1.
 - No implementar IA.
 - No agregar OpenAI, Vercel AI SDK ni variables de entorno de IA.
 - No generar reporte evolutivo.
@@ -659,8 +737,165 @@ Si se implementa Fase 1-3:
 
 En esta auditoria:
 
-- Documentos actualizados: se agrega este documento en `docs/product/`.
-- README: no requiere actualizacion porque no cambia comportamiento implementado.
-- `docs/fuente-de-verdad-operativa.md`: no requiere actualizacion porque no cambia runtime.
+- Documentos actualizados: se agrega y actualiza este documento en `docs/product/`.
+- README: actualizado en Patch 2 y Patch 3 porque se agrega comportamiento visible en superficie privada.
+- `docs/fuente-de-verdad-operativa.md`: actualizado en Patch 2 y Patch 3 porque cambia runtime privado en `/encounters`.
 - `docs/fhir/README.md`: no requiere actualizacion porque no se agrega persistencia FHIR.
 - Fuera de alcance preservado: IA, reportes persistidos, PDF, WhatsApp automatico, rutas publicas, GA4, SEO, portal, agenda, pagos y dashboard clinico.
+
+## 17. Cierre Fase 1 tecnica
+
+Fecha: 2026-06-02.
+
+Archivos implementados:
+
+- `src/features/visit-share-report/visit-share-report.types.ts`;
+- `src/features/visit-share-report/visit-share-report.completeness.ts`;
+- `src/features/visit-share-report/visit-share-report.composer.ts`;
+- `src/features/visit-share-report/visit-share-report.read-model.ts`;
+- tests en `src/features/visit-share-report/__tests__/`.
+
+Decisiones tomadas:
+
+- El contexto de reporte no contiene FHIR crudo ni IDs internos.
+- Los telefonos solo quedan como opciones de destinatario futuro; el composer no los incluye en el cuerpo.
+- El read model no mezcla ciclos: solo acepta encuentros del ciclo efectivo.
+- No se modifica `Encounter.clinicalNote`.
+- No se persiste el texto compuesto.
+- No se agrega WhatsApp, UI, IA, PDF ni nuevas variables de entorno.
+
+Validacion ejecutada:
+
+- `npm run test -- src/features/visit-share-report`: 14 tests passing.
+- `npm run test`: 600 tests passing.
+- `npx tsc --noEmit`: passing.
+
+Proximo patch recomendado al cierre de Fase 1:
+
+- Fase 2: UI inline en `EncountersList` con accion secundaria, panel local, textarea editable, estados de completitud, warnings y boton de copiar. Implementado posteriormente en Patch 2.
+
+## 18. Cierre Patch 2 UI inline
+
+Fecha: 2026-06-02.
+
+Archivos implementados:
+
+- `src/app/admin/patients/[id]/encounters/actions/load-visit-share-report.action.ts`;
+- `src/app/admin/patients/[id]/encounters/components/VisitShareReportPanel.tsx`;
+- `src/app/admin/patients/[id]/encounters/components/visit-share-report-panel.state.ts`;
+- integracion en `src/app/admin/patients/[id]/encounters/components/EncountersList.tsx`;
+- tests route-locales de action, panel, estado e integracion con listado.
+
+Decisiones tomadas:
+
+- La carga del resumen es bajo demanda por Server Action, no por enriquecimiento masivo del loader de `/encounters`.
+- Se permite un solo panel abierto a la vez.
+- El estado `insufficient` no bloquea la visita ni persiste cambios; muestra estado/warnings y mantiene revision humana.
+- `Regenerar desde datos` reemplaza ediciones locales por el texto derivado de datos persistidos.
+- El boton copia el textarea actual, no necesariamente el texto original.
+
+No-alcances preservados:
+
+- Sin WhatsApp ni selector de destinatario.
+- Sin persistencia de reportes ni metadata de copiado/compartido.
+- Sin IA, OpenAI, Vercel AI SDK ni variables de entorno nuevas.
+- Sin PDF.
+- Sin cambios en `Encounter.clinicalNote`.
+- Sin nuevos recursos FHIR.
+- Sin cambios en rutas publicas, GA4, SEO ni landing publica.
+
+Validacion ejecutada:
+
+- `npm run test -- src/app/admin/patients/[id]/encounters src/features/visit-share-report`: 89 tests passing.
+- `npm run test`: 611 tests passing.
+- `npx tsc --noEmit`: passing.
+- `npm run lint`: passing.
+
+Proximo patch recomendado:
+
+- Fase 3: WhatsApp prellenado bajo accion explicita, con selector paciente/contacto principal y fallback copy-only cuando no haya telefono valido.
+
+## 19. Cierre Patch 3 WhatsApp prellenado
+
+Fecha: 2026-06-02.
+
+Archivos implementados:
+
+- `src/features/visit-share-report/visit-share-report.whatsapp.ts`;
+- integracion de destinatarios en `src/app/admin/patients/[id]/encounters/actions/load-visit-share-report.action.ts`;
+- integracion de selector y boton `Abrir WhatsApp` en `src/app/admin/patients/[id]/encounters/components/VisitShareReportPanel.tsx`;
+- tests en `src/features/visit-share-report/__tests__/visit-share-report.whatsapp.test.ts` y tests route-locales existentes actualizados.
+
+Decisiones tomadas:
+
+- WhatsApp se abre solo bajo click explicito del profesional.
+- El link usa el texto actual del textarea, por lo que respeta ediciones locales.
+- Se preselecciona paciente si paciente y contacto principal tienen telefono; si solo existe contacto, se usa contacto y se muestra copy explicito.
+- Sin telefono operativo no se muestra boton de WhatsApp; se conserva `Copiar texto`.
+- No se persiste reporte, destinatario, click, envio ni metadata.
+
+No-alcances preservados:
+
+- Sin WhatsApp Business API.
+- Sin envio automatico.
+- Sin persistencia de reportes ni metadata de compartido.
+- Sin IA, OpenAI, Vercel AI SDK ni variables de entorno nuevas.
+- Sin PDF.
+- Sin cambios en `Encounter.clinicalNote`.
+- Sin nuevos recursos FHIR.
+- Sin cambios en rutas publicas, GA4, SEO ni landing publica.
+
+Validacion ejecutada:
+
+- `npm run test -- src/features/visit-share-report src/app/admin/patients/[id]/encounters`: 96 tests passing.
+- `npx tsc --noEmit`: passing.
+- `npm run test`: 618 tests passing.
+- `npm run lint`: passing.
+
+Proximo patch recomendado:
+
+- Fase 4 opcional: destacar visita recien creada y ofrecer abrir el panel bajo accion explicita, sin hacerlo obligatorio ni automatico.
+
+## 20. Cierre Patch 4 fidelidad del resumen y ergonomia
+
+Fecha: 2026-06-02.
+
+Archivos modificados:
+
+- `src/features/visit-share-report/visit-share-report.types.ts`;
+- `src/features/visit-share-report/visit-share-report.read-model.ts`;
+- `src/features/visit-share-report/visit-share-report.composer.ts`;
+- `src/app/admin/patients/[id]/encounters/components/VisitShareReportPanel.tsx`;
+- tests de composer, read model y panel.
+
+Decisiones tomadas:
+
+- El resumen compartible incluye ahora `subjective` como `Refiere paciente/familia` si esta registrado.
+- El resumen compartible incluye ahora `objective` como `Observado en la visita` si esta registrado.
+- La puntualidad se incluye solo si esta registrada y como `Puntualidad registrada`, cerca de fecha/duracion.
+- La puntualidad mantiene semantica operativa, no clinica.
+- El textarea del panel aumenta su espacio vertical y permite resize manual (`min-h-[28rem]`, `max-h-[70vh]`, `resize-y`).
+
+### Ajuste posterior de minimizacion de identidad y horario
+
+- El encabezado del resumen usa nombre de pila del paciente si esta disponible.
+- La edad deja de incluirse por defecto en el cuerpo compartible.
+- Se agregan hora de inicio, hora de cierre y duracion calculada cuando estan disponibles.
+
+No-alcances preservados:
+
+- Sin IA.
+- Sin persistencia.
+- Sin envio automatico.
+- Sin WhatsApp Business API.
+- Sin PDF.
+- Sin cambios en `Encounter.clinicalNote`.
+- Sin interpretacion de metricas.
+- Sin telefonos en el cuerpo del mensaje.
+
+Validacion ejecutada:
+
+- `npm run test -- src/features/visit-share-report src/app/admin/patients/[id]/encounters`: 98 tests passing.
+- `npx tsc --noEmit`: passing.
+- `npm run test`: 620 tests passing.
+- `npm run lint`: passing.
