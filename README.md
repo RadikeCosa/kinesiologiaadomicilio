@@ -1,223 +1,202 @@
 # Kinesiología a Domicilio
 
-Landing pública + superficie privada clínica mínima desarrollada con Next.js para un servicio de kinesiología y rehabilitación a domicilio en Neuquén, Argentina.
+HealthTech case study: a real-world Next.js project that combines a public patient acquisition site with a minimal private clinical workflow for home-based physiotherapy in Neuquen, Argentina.
 
-## Estado actual (abril 2026)
+## Demo
 
-El proyecto está en etapa **híbrida transicional**:
+- Public site: https://kinesiologiaadomicilio.vercel.app
+- Private clinical surface: `/admin` exists in the codebase and is intended for local development with a local HAPI FHIR server. It is not presented as a public online demo.
 
-- **sitio de captación público** activo;
-- **app clínica privada mínima** en `/admin` con integración FHIR para flujo base de pacientes.
+## Context
 
-### Rutas públicas implementadas
-- `/` (home)
-- `/services` (servicios)
-- `/evaluar` (flujo guiado para orientar si conviene consultar)
+This project was built from an operational healthcare context, not from a generic SaaS template.
 
-### Rutas privadas implementadas
-- `/admin`
-- `/admin/configuracion/profesional`
-- `/admin/patients`
-- `/admin/patients/new`
-- `/admin/patients/[id]`
-- `/admin/patients/[id]/administrative`
-- `/admin/patients/[id]/encounters`
-- `/admin/patients/[id]/encounters/new`
-- `/admin/patients/[id]/treatment`
+I am a physiotherapist with 20+ years of experience in home care, coordination, and audit workflows. The goal of this repository is to translate real outpatient and home-care processes into a small but coherent digital product:
 
-### Funcionalidad disponible
+- acquire and qualify demand from the public website;
+- guide first contact through WhatsApp;
+- keep a minimal private workflow for patients, requests, treatment cycles, and visits;
+- model the private clinical workflow using FHIR R4 concepts that make sense for incremental implementation.
 
-#### Público
-- Header y footer globales.
-- CTA de WhatsApp reutilizable en múltiples superficies.
-- Link telefónico en footer.
-- Sección de servicios con catálogo centralizado.
-- Flujo interactivo en `/evaluar` con ramas de orientación y CTA contextual de WhatsApp.
-- SEO técnico base (metadata, Open Graph/Twitter, JSON-LD, `robots.txt`, `sitemap.xml`).
-- GA4 integrado de forma directa (sin GTM) con eventos custom.
+## Problem It Solves
 
-#### Privado clínico mínimo
-- `/admin` como consola operativa breve de la superficie privada, jerarquizada en `Requiere acción`, `En seguimiento` y `Contexto / histórico`, sin gráficos.
-- Si falla la lectura inicial hacia FHIR en `/admin`, la superficie privada ahora muestra un fallback operativo controlado en lugar de romper la ruta; este fallback distingue indisponibilidad/configuración de FHIR de bugs no operacionales, que siguen escalando como error real.
-- Configuración privada de profesional firmante en `/admin/configuracion/profesional`, con estados `Sin configurar`, `Incompleto` y `Listo para firmar`.
-- Listado y alta de pacientes.
-- En `/admin/patients`, el listado se ordena por prioridad operativa: primero pacientes con tratamiento activo, luego sin tratamiento activo listo/preliminar y al final tratamientos finalizados.
-- `/admin/patients` incorpora filtros simples por estado operativo (`Todos`, `En tratamiento`, `Sin tratamiento activo`, `Faltan datos`, `Listos para iniciar`, `Finalizados`) y por señal operativa de solicitudes (`Solicitudes en evaluación`, `Pendientes de iniciar`); `Sin tratamiento activo` sigue agrupando `ready_to_start + preliminary`, y además existen vistas finas separadas para `preliminary` y `ready_to_start`.
-- Acceso rápido contextual desde el listado para `Registrar visita` solo en pacientes con tratamiento activo (navega a `/admin/patients/[id]/encounters/new`).
-- Ficha consolidada de lectura del paciente en `/admin/patients/[id]` como hub de navegación contextual (no dominado por acciones), con prioridad visual: identidad/estado → resumen clínico reciente → contacto operativo → próxima acción recomendada → acciones principales.
-- En desktop, el hub prioriza síntesis clínico-operativa en columna principal y orientación/navegación en columna lateral; en mobile respeta ese orden de lectura antes de acciones.
-- `Próxima acción recomendada` se mantiene compacta y `Acciones principales` funcionan como navegación estructural secundaria.
-- Acción rápida contextual `Registrar visita` disponible solo cuando hay tratamiento activo.
-- Convención de contacto por entidad en superficies privadas: en el hub no se duplican CTAs entre bloque paciente y contacto principal; en `administrative` los faltantes administrativos se muestran explícitamente (`No informado` / `No informada`) y las acciones de contacto respetan el sujeto (paciente vs contacto principal).
-- Administración no clínica del paciente en `/admin/patients/[id]/administrative` con lectura + acciones, edición explícita de identidad/contacto/datos operativos y sección de solicitudes de atención (lectura, alta mínima y resolución administrativa: aceptar, cancelar, cerrar como No inició con motivo). Los motivos operativos se muestran como metadata compacta contextual (no como bloque protagonista clínico).
-- Superficie clínica operativa del paciente en `/admin/patients/[id]/encounters` (header interno con CTA primario `Registrar visita` **solo** con tratamiento activo, navegación secundaria compacta a tratamiento, metadata compacta, estadísticas clínicas mínimas derivadas y diferenciación de estado entre sin inicio/finalizado).
-- Pantalla específica de registro de visita en `/admin/patients/[id]/encounters/new`.
-- Gestión específica de tratamiento (`EpisodeOfCare`) en `/admin/patients/[id]/treatment` (inicio/finalización con motivo de cierre y detalle opcional, estado finalizado explícito y navegación secundaria a visitas).
-- En `EpisodeOfCare`, motivo y detalle de cierre se persisten en `extension[]` (URLs versionables con `valueCode`/`valueString`); `note[]` queda solo como fallback legacy de lectura por compatibilidad.
-- La gestión de tratamiento ya no vive inline en `/admin/patients/[id]/encounters`.
-- El DNI es un dato administrativo opcional: se normaliza y persiste cuando existe, pero no bloquea el inicio de tratamiento.
-- Representación visual del badge de tratamiento centralizada en `src/app/admin/patients/treatment-badge.ts` y separada de la lógica de estado operativo de dominio.
-- Registro y listado de visitas realizadas (`Encounter` base): alta en `/encounters/new` y listado operativo en `/encounters`.
-- En Fase 0 clínica, cada `Encounter` puede incluir una nota clínica estructurada mínima opcional (`subjective`, `objective`, `intervention`, `assessment`, `tolerance`, `homeInstructions`, `nextPlan`).
-- En `/admin/patients/[id]/encounters`, la nota clínica estructurada puede editarse post-creación desde un panel inline por visita; esta nota es fuente clínica interna y no se mezcla con el resumen compartible.
-- En `/admin/patients/[id]/encounters`, cada visita registrada permite preparar un `Resumen para compartir` en panel inline, con texto determinístico editable basado en nombre de pila, horario/duración de la visita, campos clínicos registrados, métricas y puntualidad operativa opcional, botón de copiar y WhatsApp prellenado bajo acción explícita; no persiste reportes, no registra envío, no modifica la nota clínica interna y no integra IA en esta fase.
-- En `/admin/patients/[id]/encounters` se muestran estadísticas clínicas mínimas derivadas (sin persistencia nueva) con scope de episodio efectivo (activo si existe; si no, último registrado): visitas del tratamiento, última visita, primera visita, frecuencia promedio, duración promedio y tiempo total registrado.
-- Las métricas de duración en `/encounters` pueden ser parciales por datos legacy (ej. `start===end`) o encuentros sin cierre; la UI explicita cobertura como helper (`Duración calculada sobre X de Y visitas del tratamiento`).
-- Estas estadísticas viven en `/encounters` y no en el hub `/admin/patients/[id]` en esta fase.
-- Contrato operativo vigente en visitas: `startedAt` + `endedAt` obligatorios tanto al registrar (`/encounters/new`) como al editar en listado (`/encounters`), con validación temporal `endedAt >= startedAt`.
-- `occurrenceDate` queda limitado a compatibilidad transicional de entrada para payloads legacy.
-- Captura y visualización administrativa de `gender` y `birthDate` en pacientes (alta, edición y detalle).
-- Persistencia/lectura FHIR real para `Patient`, `EpisodeOfCare` y `Encounter`.
-- En `/admin/patients/[id]/administrative` las solicitudes de atención (`ServiceRequest`) se muestran en listado/empty state, pueden registrarse en forma mínima (fecha, motivo y datos básicos de quién consulta: relación + nombre) y resolverse administrativamente (aceptar, cancelar y cerrar como No inició con motivo). Los motivos operativos se muestran como metadata compacta contextual (no como bloque protagonista clínico).
-- Registrar solicitudes de atención no inicia tratamiento, no habilita visitas por sí mismo y no cambia `PatientOperationalStatus`.
-- La resolución general de solicitudes puede cerrarlas o cancelarlas sin iniciar tratamiento.
-- La acción específica `Aceptar e iniciar tratamiento` desde `/administrative` sí marca la solicitud como `accepted` y crea el `EpisodeOfCare` vinculado.
-- En ese flujo, la fecha de inicio de tratamiento es explícita/editable: toma `ServiceRequest.requestedAt` como default inicial cuando es válido, y persiste la fecha elegida en `EpisodeOfCare.period.start` (`EpisodeOfCare.startDate`).
-- Semántica vigente de fechas: `requestedAt` es fecha administrativa/histórica de solicitud; baseline de tratamiento/visitas usa `EpisodeOfCare.startDate` cuando existe.
-- Las acciones cross-route usan feedback liviano por query param (`status`) para mantener confirmación en la pantalla destino.
-- `Aceptar e iniciar tratamiento` navega a `/admin/patients/[id]/treatment?status=treatment-started`.
-- `Registrar visita` navega a `/admin/patients/[id]/encounters?status=encounter-created`.
-- Los cambios de estado de solicitud revalidan `/admin/patients`, `/admin/patients/[id]`, `/admin/patients/[id]/administrative` y `/admin/patients/[id]/treatment` para evitar vistas stale.
-- El formulario de solicitud mantiene sus campos propios mínimos (fecha, motivo y datos básicos de quién consulta) y puede completar en contexto domicilio/teléfonos administrativos cuando faltan.
-- Esos datos contextuales se guardan en `Patient` (no en `ServiceRequest`) para anticipar faltantes antes de `Aceptar e iniciar tratamiento`.
-- Al iniciar tratamiento desde ese contexto, el `EpisodeOfCare` se crea vinculado a la solicitud mediante `referralRequest` (`ServiceRequest/{id}`), siempre que la solicitud accepted sea válida, pertenezca al paciente y no haya sido usada previamente; sin `serviceRequestId` no se permite iniciar tratamiento.
-- Política vigente `single-use`: una solicitud `accepted` ya vinculada a algún `EpisodeOfCare` no puede reutilizarse para iniciar otro ciclo; se requiere nueva solicitud.
-- `/admin/patients/[id]/administrative` separa solicitud activa a resolver (si existe) e histórico compacto de solicitudes con resultado operativo y vínculo a tratamiento cuando aplica.
-- Regla operacional única de solicitudes:
-  - si existe vínculo real `incoming-referral` con `EpisodeOfCare`, la solicitud se clasifica como `Aceptada — tratamiento activo` o `Aceptada — tratamiento finalizado` según el estado del episodio (histórica, sin acciones de resolución), incluso con normalización defensiva del status leído;
-  - `in_review` sin vínculo => pendiente operativa;
-  - `accepted` sin vínculo => `Pendiente de iniciar tratamiento` (compatibilidad transicional);
-  - `closed_without_treatment`/`cancelled` => históricas terminales, no compiten como pendientes.
-- Los motivos de `No inició`/`Cancelar` se intentan persistir en `statusReason.text` y, por compatibilidad con HAPI local, también se guardan en `ServiceRequest.note[]` como `resolution-reason:v1:<texto>`; la lectura prioriza `statusReason` (incluyendo fallback de `coding[].display/text`) y usa `note[]` como fallback final, y se muestran en el historial operativo junto al detalle de cierre del tratamiento cuando aplica.
-- Durante tratamiento activo, crear una nueva solicitud se mantiene como acción administrativa secundaria (no CTA clínico principal del hub).
-- `/admin/patients/[id]/treatment` mantiene el estado principal actual y agrega historial compacto de ciclos cerrados (inicio/fin, motivo, detalle y solicitud de origen si existe).
-- `/admin/patients/[id]/treatment` funciona como superficie de gestión del tratamiento actual y también de historial compacto de ciclos cerrados; sin tratamiento activo pero con ciclos finalizados, prioriza el historial y ofrece acceso directo al historial de solicitudes en `/administrative#service-requests`.
-- Las métricas de `/admin` son derivadas de lectura (sin persistencia): pendientes operativos de solicitudes, seguimiento mínimo de pacientes y contexto/histórico con métricas de edad para pacientes con `EpisodeOfCare` activo o finalizado basadas en `birthDate` válido.
-- La edad es dato derivado de UI y no se persiste; el promedio se presenta redondeado.
-- Métricas globales de visitas quedan fuera de Fase 1 por no existir aún una consulta agregada eficiente de `Encounter`.
-- `/admin` en Fase 1 no incorpora gráficos ni rutas nuevas.
-- En Fase 1 (cierre documental 2026-05-10), el contexto clínico longitudinal del tratamiento se edita en `/admin/patients/[id]/treatment` y se consume en modo read-only en `/admin/patients/[id]/encounters` (sin edición inline).
-- Terminología visible y naming interno vigentes: **Diagnóstico kinésico** / `kinesiologic_diagnosis`.
-- El marco clínico visible del ciclo se compone de 5 campos: diagnóstico médico de referencia, diagnóstico kinésico, situación funcional inicial, objetivo de tratamiento y plan marco del tratamiento.
-- Fase 2A cerrada (2026-05-10): el marco clínico en `/admin/patients/[id]/treatment` se edita campo por campo con 5 submits independientes, sin guardado masivo global.
-- En `/admin/patients/[id]/treatment` se aplica patrón lectura primero + edición después: valor actual o `No registrado`, acción `Editar ...` / `Agregar ...`, y apertura de input solo para el campo activo.
-- `/admin/patients/[id]/encounters` mantiene consumo read-only compacto del marco clínico (sin edición inline), sin `Completitud` ni “detalle longitudinal” duplicado; los campos faltantes se muestran como `No registrado`.
-- No se bloquea `Registrar visita` por marco clínico incompleto.
-- Fase 2B cerrada: se normalizó el naming interno de diagnóstico kinésico a `kinesiologic_diagnosis`.
-- No-alcances preservados: sin Goal, sin Procedure, sin IA, sin dashboard clínico, sin cierre clínico enriquecido.
-- En Fase 2A/2B PR1 se incorporó modelado mínimo de `Observation` funcional por visita (TUG, dolor 0–10, bipedestación y marcha en minutos) con captura opcional; continúan fuera de alcance `Procedure`, `Goal`, IA y tendencia avanzada/dashboard clínico.
-- En `/admin/patients/[id]/encounters` el loader ya no hace N+1 por visita para `Observation` funcional: usa lectura batch por `encounterIds` del episodio efectivo vía `Observation?encounter=Encounter/{id1},Encounter/{id2},...`, manteniendo métricas derivadas en lectura (no persistidas) y scoping por episodio efectivo.
-- En `/admin/patients` el loader ya no hace N+1 por paciente para `EpisodeOfCare`: usa una única lectura batch por `patientIds` vía `EpisodeOfCare?patient=Patient/{id1},Patient/{id2},...`, agrupa en memoria por paciente y usa `selectPatientEpisodes()` para resolver `activeEpisode`/`effectiveEpisode` (con `latestEpisode` como campo legacy del read model), preservando comparación temporal segura para el episodio más reciente y ordenando por prioridad operativa con desempate estable por nombre visible.
-- Hardening de compatibilidad: si un servidor FHIR rechaza el OR por coma en `encounter`, el repositorio aplica fallback interno controlado por encounter individual sin cambiar la firma batch consumida por el loader.
-- En `/admin` el loader ya no hace N+1 por paciente para `ServiceRequest`: usa una única lectura batch por `patientIds` vía `ServiceRequest?subject=Patient/{id1},Patient/{id2},...`, validada contra HAPI FHIR 8.8.0 (FHIR 4.0.1), incluyendo compatibilidad con la versión encoded de `URLSearchParams` (`Patient%2Fid1%2CPatient%2Fid2`).
-- En `/admin` el loader ya no hace N+1 por `ServiceRequest` `accepted` para detectar vínculo de tratamiento: usa lectura batch de `EpisodeOfCare` por `incoming-referral` (`EpisodeOfCare?incoming-referral=ServiceRequest/{id1},ServiceRequest/{id2},...`), también validada en HAPI FHIR 8.8.0 (FHIR 4.0.1), incluida su versión encoded por `URLSearchParams`.
+Small healthcare services often operate across fragmented channels: phone calls, WhatsApp, paper notes, and memory-driven coordination. This repo explores how to digitize that reality incrementally without pretending to be a full EHR.
 
-#### Mapa corto de superficies privadas de paciente (UI vigente)
-- **Gestión administrativa** (`/admin/patients/[id]/administrative`): datos del paciente y solicitudes de atención.
-- **Gestión clínica** (`/admin/patients/[id]/encounters`): registro y consulta de visitas del tratamiento.
-- **Tratamiento** (`/admin/patients/[id]/treatment`): inicio, estado y cierre del ciclo de atención.
-- Flujo operativo esperado: primero se resuelve la solicitud, luego se inicia tratamiento, y con tratamiento activo se registra la visita.
+It focuses on the transition between:
 
-##### Cierre DASHBOARD-SR-001 (abril 2026)
-- **Estado**: cerrado (PR1+PR2+PR3).
-- **Resultado**: `/admin` muestra pendientes operativos de solicitudes (`in_review` y `accepted` pendiente sin vínculo `incoming-referral`), seguimiento mínimo de pacientes y contexto/histórico con card simplificada de edad clínica.
-- **Cierre P1 de performance confirmado (2026-05-13):** sin N+1 en `ServiceRequest` por paciente ni en `EpisodeOfCare` por `incoming-referral`; loaders resuelven agrupación/sets en memoria y mantienen métricas derivadas en lectura.
-- **No-alcances preservados:** sin cache ni read-model materializado en `/admin`.
+- public demand capture;
+- administrative triage;
+- treatment activation;
+- visit registration;
+- functional follow-up;
+- family-friendly visit summaries.
 
-##### Cierre Fase 1 dashboard `/admin` (abril 2026)
-- **Estado**: fase cerrada/aprobada para `/admin` como consola operativa mínima.
-- **Comportamiento vigente**:
-  - bloque `Requiere acción`;
-  - bloque `En seguimiento`;
-  - bloque `Contexto / histórico`;
-  - card `Edad de pacientes`;
-  - CTAs principales preservados: `Ver pacientes` y `Nuevo paciente`.
-- **Métricas incluidas**:
-  - requiere acción: solicitudes en evaluación, pendientes de iniciar tratamiento y pacientes a los que les faltan datos (`preliminary`);
-  - seguimiento: pacientes en tratamiento activo y listos para iniciar (`ready_to_start`);
-  - contexto/histórico: pacientes totales y tratamientos finalizados;
-  - edad (pacientes con tratamiento activo o finalizado): paciente más joven, paciente más viejo y promedio.
-- **Reglas de edad**:
-  - dato derivado de lectura (no persistido), calculado desde `birthDate` sobre pacientes con `EpisodeOfCare` activo o finalizado;
-  - fechas válidas/calculables participan del cálculo;
-  - fechas ausentes o inválidas no participan;
-  - cuando no hay edades calculables la UI muestra `—`.
-- **Arquitectura vigente**:
-  - `src/app/admin/page.tsx` sin cálculos inline;
-  - `loadAdminDashboard()` centraliza composición;
-  - `dashboard-metrics.ts` concentra funciones puras testeables;
-  - `dashboard.read-model.ts` define contrato específico de dashboard;
-  - lógica route-local en `src/app/admin/*`, sin extracción prematura a `domain/patient`.
-- **Validación de fase**:
-  - tests unitarios de métricas;
-  - tests del loader;
-  - tests de render de `/admin`;
-  - micro-patch final de borde en render (`birthDate` válido + inválido + ausente, fallback cuando no hay edades calculables).
+## Product Scope
 
-### Estado del frente FHIR Patient
+### Public
 
-- **Fase 1 cerrada**: `gender` + `birthDate` soportados end-to-end (contrato, schemas, mappers, UI privada y tests).
-- **Fase 2 cerrada**: `Identifier.type` + tests/fixtures de identidad.
-- **Fase 3 cerrada**: `telecom`, `contact.relationship`, `name`, `address` (con `telecom`, `contact.relationship` y `name` ya resueltos incrementalmente, y deuda/trigger de `address` documentados en FHIR-018).
+- Marketing site for home-based physiotherapy in Neuquen.
+- WhatsApp CTAs with prefilled messages.
+- Guided `/evaluar` flow to orient whether a consultation makes sense.
+- Technical SEO: metadata, Open Graph, JSON-LD, `robots`, `sitemap`.
+- GA4 tracking limited to the public shell.
 
-## Fuentes de verdad principales
-- `src/lib/config.ts`: datos del negocio/contacto/base URL.
-- `src/lib/servicesData.ts`: catálogo de servicios.
-- `src/lib/navLinks.ts`: navegación global (header/footer).
-- `src/app/hero/heroContent.ts`: copy del hero.
-- `src/app/home/homeContent.ts` y `src/app/home/howItWorksContent.ts`: contenido editorial de Home.
-- `src/app/(public)/evaluar/evaluar-content.ts`: contenido del flujo `/evaluar`.
-- `src/app/admin/patients/**`: superficie privada clínica mínima.
+### Private Clinical
 
-## Stack real
+- `/admin` operational dashboard.
+- Patient management.
+- Attention requests (`ServiceRequest`) with administrative resolution.
+- Treatment cycles with `EpisodeOfCare`.
+- Home visits with `Encounter`.
+- Functional metrics with `Observation`.
+- Shareable visit summaries for families/caregivers.
+- Signing professional configuration with `Practitioner`.
 
-- **Next.js 15** (App Router)
-- **React 19**
-- **TypeScript**
-- **Tailwind CSS 4**
-- **ESLint**
-- **Vitest**
+## Why This Repo Is Professionally Relevant
 
-## Scripts disponibles
+This project is intentionally useful for roles such as:
 
-- `npm run dev`
-- `npm run dev:fhir-dev`
-- `npm run dev:fhir-real`
-- `npm run build`
-- `npm run start`
-- `npm run lint`
-- `npm run test`
+- HealthTech / digital health product teams
+- Implementation Analyst
+- Clinical Systems Analyst
+- Product Analyst (HealthTech)
+- Junior Full Stack Developer with healthcare domain knowledge
 
-## FHIR local
+It demonstrates a combination of:
 
-- `8081` = entorno dev con datos descartables.
-- `8080` = entorno real-local con datos reales.
-- `npm run dev` y `npm run dev:fhir-dev` apuntan a `http://localhost:8081/fhir`.
-- `npm run dev:fhir-real` apunta a `http://localhost:8080/fhir`.
-- Next.js usa solo `FHIR_BASE_URL`; no usa credenciales PostgreSQL ni variables `spring.datasource`.
-- Antes de iniciar Next, debe estar levantado el servidor HAPI FHIR correspondiente al entorno elegido.
+- clinical domain understanding;
+- functional analysis grounded in real workflows;
+- product scoping and incremental delivery;
+- FHIR-oriented data modeling;
+- pragmatic frontend/backend implementation in Next.js;
+- testing and documentation discipline.
 
-## Desarrollo local
+## Stack
 
-1. Instalar dependencias:
-   ```bash
-   npm install
-   ```
-2. Levantar entorno local seguro por defecto:
-   ```bash
-   npm run dev
-   ```
-   Para operar explícitamente contra el entorno real/local:
-   ```bash
-   npm run dev:fhir-real
-   ```
-3. Abrir:
-   - `http://localhost:3000`
+- Next.js 15 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Zod
+- Vitest
+- HAPI FHIR R4 integration for local/private workflow development
+- Google Analytics 4 on public routes only
 
-Checks recomendados antes de merge:
+## Architecture
+
+The repository keeps the public and private domains in the same codebase while separating responsibilities.
+
+Read path:
+
+`FHIR Server -> FHIR Client -> Repository -> Mapper -> Read model / loader -> UI`
+
+Write path:
+
+`UI Form -> Server Action -> Zod Schema -> Domain Rules -> Repository -> FHIR payload`
+
+This matters because the UI does not work directly with raw FHIR resources. The app translates infrastructure data into route-level read models and keeps technical concerns away from the presentation layer.
+
+## FHIR Modeling
+
+The private workflow uses a deliberately small subset of FHIR R4:
+
+- `Patient`: identity and administrative base
+- `ServiceRequest`: incoming attention request / intake signal
+- `EpisodeOfCare`: active or closed treatment cycle
+- `Encounter`: home visit
+- `Observation`: visit-level functional metrics
+- `Practitioner`: signing professional configuration
+
+This is not presented as a full clinical record system. It is a constrained, incremental implementation oriented to operational usefulness.
+
+## Testing And Quality
+
+- Automated tests cover domain rules, mappers, repositories, route data loaders, metadata, and UI slices.
+- The current repository snapshot includes 97 test files and 649 passing tests.
+- Public/private separation is also reinforced through route structure and search-engine blocking for `/admin`.
+
+Available checks:
 
 ```bash
 npm run lint
 npm run test
 npm run build
 ```
+
+## Local Setup
+
+### Requirements
+
+- Node.js
+- npm
+- A local HAPI FHIR server if you want to use the private clinical surface
+
+### Run
+
+```bash
+npm install
+npm run dev
+```
+
+Default local development points to a disposable FHIR environment:
+
+- `npm run dev` -> `http://localhost:8081/fhir`
+- `npm run dev:fhir-dev` -> `http://localhost:8081/fhir`
+- `npm run dev:fhir-real` -> `http://localhost:8080/fhir`
+
+## Environment Variables
+
+See [.env.example](./.env.example).
+
+Current documented variables:
+
+- `FHIR_BASE_URL`
+  Server-side only. Required for the private clinical workflow.
+- `NEXT_PUBLIC_GA_ID`
+  Optional. Enables GA4 only on public routes.
+
+## Screenshots
+
+Screenshot placeholders live in [docs/screenshots/README.md](./docs/screenshots/README.md).
+
+Recommended capture set:
+
+- Home page
+- `/services`
+- `/evaluar`
+- `/admin`
+- `/admin/patients/[id]`
+- `/admin/patients/[id]/encounters`
+
+Important: do not add screenshots with real patient data, real phone numbers, real addresses, or identifiable clinical notes.
+
+## Current Status
+
+- Public website is deployable and portfolio-safe.
+- Private clinical workflow exists and is meaningful, but remains intentionally minimal.
+- The admin side currently depends on local infrastructure and should be read as a local clinical prototype/workflow surface, not as a production SaaS admin.
+- Auth and multi-user concerns are intentionally out of scope at this stage.
+
+## Roadmap / Next Steps
+
+- Add sanitized screenshots or a short walkthrough GIF.
+- Add a compact architecture diagram for recruiters and hiring managers.
+- Expose a safe demo mode for `/admin` based on fixtures instead of local FHIR dependency.
+- Continue hardening private workflow documentation around FHIR contracts and product decisions.
+
+## Documentation Map
+
+- [docs/README.md](./docs/README.md): active documentation map for developers and reviewers
+- [docs/fuente-de-verdad-operativa.md](./docs/fuente-de-verdad-operativa.md): detailed current behavior
+- [docs/fhir/README.md](./docs/fhir/README.md): active FHIR documentation index
+- [docs/product/README.md](./docs/product/README.md): active product documentation index
+- [docs/arquitectura-objetivo-app-clinica.md](./docs/arquitectura-objetivo-app-clinica.md): product and architecture direction
+
+## Key Takeaways
+
+This repo is strongest when read as a case study in healthcare workflow digitization:
+
+- not just a landing page;
+- not a generic CRUD demo;
+- not a full EHR claim;
+- but a realistic bridge between public acquisition, care coordination, and minimal clinical operations.

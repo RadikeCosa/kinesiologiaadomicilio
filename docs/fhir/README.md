@@ -24,13 +24,15 @@ Mantener en esta carpeta solo la documentación FHIR operativa o reutilizable. L
 5. `ticket-template-fhir.md`
    - plantilla base para tickets técnicos FHIR nuevos.
 
-## Archivo histórico
+## Historial FHIR local
 
-La remediación FHIR ya cerrada, los documentos `FHIR-013` a `FHIR-022`, los hardenings, auditorías puntuales, backlog y planes de Patient se archivaron en:
+La remediación FHIR ya cerrada, los documentos `FHIR-013` a `FHIR-022`, los hardenings, auditorías puntuales, backlog y planes previos ya no se comparten en el remoto.
 
-- `docs/archive/historico-fhir/`
+Si existen localmente, viven en:
 
-Si alguno de esos documentos vuelve a ser relevante, debe referenciarse explícitamente desde `docs/fuente-de-verdad-operativa.md` o desde este índice con el contexto actualizado.
+- `docs-local/archive/historico-fhir/`
+
+Si alguno vuelve a ser relevante, conviene resumirlo o referenciar solo el contexto útil desde un documento activo.
 
 ## Flujo recomendado de trabajo
 
@@ -44,4 +46,5 @@ Si alguno de esos documentos vuelve a ser relevante, debe referenciarse explíci
 - `README.md`: estado general del producto y superficie implementada.
 - `docs/fuente-de-verdad-operativa.md`: fuente principal para comportamiento operativo vigente.
 - `docs/checklist-sincronizacion-doc-codigo.md`: control liviano antes de merge cuando cambian código, UI, dominio, FHIR o documentación.
+- `docs/product/README.md`: índice de documentación de producto activa.
 - `docs/product/solicitud-atencion-flujo-inicial.md`: contrato de producto vigente para solicitudes de atención.

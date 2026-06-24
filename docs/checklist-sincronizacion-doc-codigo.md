@@ -21,8 +21,8 @@ Usar este checklist cuando un cambio toque alguno de estos frentes:
 - [ ] ¿El `README.md` sigue describiendo correctamente el estado implementado?
 - [ ] ¿`docs/fuente-de-verdad-operativa.md` sigue alineada con el comportamiento real?
 - [ ] ¿`docs/fhir/README.md` o documentos FHIR específicos requieren actualización?
-- [ ] ¿`docs/product/*` (o `docs/producto/*` si existiera) requiere actualización si cambió una hipótesis o decisión de producto?
-- [ ] ¿Hay documentación histórica que debería moverse a `docs/archive`?
+- [ ] ¿`docs/product/README.md` o algún documento de producto activo requiere actualización?
+- [ ] ¿Hay documentación histórica que debería salir del remoto y quedar solo como material local?
 - [ ] ¿Se agregaron rutas nuevas que deban documentarse?
 - [ ] ¿Se cambió un estado operativo, badge, CTA o gate?
 - [ ] ¿Se cambió un contrato de dominio o mapper?
@@ -33,8 +33,8 @@ Usar este checklist cuando un cambio toque alguno de estos frentes:
 
 - No todos los cambios requieren tocar todos los documentos.
 - La documentación principal debe reflejar solo comportamiento vigente.
-- Documentos de producto/FHIR pueden contener hipótesis futuras si están marcadas como tales.
-- Auditorías/cierres históricos deben ir a `docs/archive` cuando ya no sean fuente activa.
+- Documentos de producto/FHIR activos deberían priorizar contratos vigentes o dirección todavía útil para desarrollo.
+- Auditorías o cierres históricos que ya no sean fuente activa deberían dejar de compartirse en el remoto.
 
 ## 4) Resultado esperado
 

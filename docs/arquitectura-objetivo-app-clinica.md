@@ -1,19 +1,41 @@
-# Arquitectura objetivo mínima — futura app clínica conviviente
+# Arquitectura y dirección del proyecto
 
-> Estado: dirección técnica objetivo (no implementación vigente)
-> Fecha: 2026-04-16 (UTC)
+> Estado: vigente como dirección técnica y de producto
+> Última actualización: 2026-06-24 (UTC)
+> Nota: reemplaza como referencia principal a `docs/decisiones-evolucion-app-clinica.md`, ahora archivado en `docs/archive/cierres/`.
 
-## 1) Propósito del documento
+## Propósito
 
-La landing pública actual se mantiene como superficie activa del proyecto.
+Este documento explica la dirección del proyecto más allá del estado puntual implementado hoy.
 
-Este documento define la arquitectura objetivo mínima de la futura app clínica conviviente en el mismo repositorio.
+Sirve para dos usos:
 
-No reemplaza la fuente de verdad operativa ni el plan por fases. Tampoco implica que esta arquitectura ya exista implementada.
+- entender qué tipo de producto se está construyendo;
+- mantener una dirección técnica consistente cuando la app clínica privada siga creciendo.
 
-## 2) Separación de dominios
+No reemplaza a `docs/fuente-de-verdad-operativa.md`, que sigue siendo la fuente principal del comportamiento vigente.
 
-La convivencia en un mismo repo no implica mezclar dominios. La dirección esperada separa tres superficies:
+## Decisiones base
+
+1. La landing pública sigue siendo una superficie activa y principal del repositorio.
+2. El mismo repo puede alojar una app clínica privada conviviente, siempre que no se mezclen dominios.
+3. Esa evolución es deliberadamente incremental: no implica que todo el modelo objetivo ya exista hoy.
+4. El foco funcional de la app clínica privada sigue siendo pequeño y operativo:
+   - paciente;
+   - contacto principal;
+   - tratamiento activo;
+   - visitas;
+   - seguimiento funcional mínimo.
+5. Siguen fuera de alcance como dirección inicial:
+   - agenda;
+   - pagos;
+   - self-booking;
+   - panel administrativo amplio;
+   - multiusuario robusto por defecto.
+
+## Separación de dominios
+
+La convivencia en un mismo repo no implica mezclar lenguaje, objetivos ni responsabilidades.
 
 ### A. Landing pública
 
@@ -21,185 +43,133 @@ La convivencia en un mismo repo no implica mezclar dominios. La dirección esper
 - `/services`
 - `/evaluar`
 
+Objetivo:
+
+- captación;
+- orientación inicial;
+- contacto;
+- SEO y medición pública.
+
 ### B. App clínica privada del profesional
 
-- Superficie bajo `/admin/...`
-- Foco inicial: flujo clínico profesional (pacientes, tratamiento activo, visitas, historial básico)
+- `/admin/...`
+
+Objetivo:
+
+- operación mínima del profesional;
+- pacientes;
+- solicitudes;
+- tratamiento;
+- visitas;
+- seguimiento clínico-operativo incremental.
 
 ### C. Portal futuro
 
 - `/portal`
-- Evolución posterior; no foco inicial de implementación
 
-Regla de diseño: estos dominios pueden compartir repositorio, pero deben mantenerse conceptualmente desacoplados en objetivos, lenguaje y responsabilidades.
+Es solo una dirección posible a futuro y no debe tratarse como implementación actual ni como prioridad inmediata.
 
-## 3) Rutas objetivo mínimas
+## Principios de arquitectura
 
-Como base mínima de arquitectura privada, se esperan las siguientes rutas:
+### Lectura
 
-- `/admin/patients`
-- `/admin/patients/[id]`
-- `/admin/patients/[id]/encounters`
-- `/admin/patients/[id]/encounters/[encounterId]`
+`FHIR Server -> FHIR Client -> Repository -> Mapper -> Read model / loader -> UI`
 
-Nota: podrán existir más rutas privadas a futuro, pero estas constituyen la base mínima esperada para el flujo profesional inicial.
+Principios:
 
-## 4) Modelo funcional mínimo
-
-Mapa conceptual mínimo esperado para la futura app clínica:
-
-- `Patient`: identidad clínica base del caso.
-- Contacto principal / quién escribe: canal y rol de contacto operativo.
-- `EpisodeOfCare`: tratamiento activo y su marco temporal/estado.
-- `Encounter`: visita/encuentro clínico.
-- `Observation`: observaciones registrables durante el seguimiento.
-- `Procedure`: acciones/intervenciones realizadas.
-
-Este mapa no pretende fijar modelado FHIR exhaustivo; define solo la base funcional mínima para diseño y consistencia.
-
-## 5) Arquitectura objetivo de lectura
-
-Dirección arquitectónica de lectura:
-
-`FHIR Server -> FHIR Client -> Repository -> Mapper -> Domain Model -> Route data loader -> UI`
-
-Reglas operativas:
-
-- FHIR no debe cruzar crudo a la UI.
-- La UI consume modelos de dominio o read models.
+- FHIR no cruza crudo a la UI.
+- La UI consume read models o modelos de dominio.
 - La composición de lectura ocurre en capas server/data, no en componentes visuales.
-- Cada surface consume un read model coherente con su responsabilidad (listado, detalle, historial, etc.).
-- Los errores operacionales de infraestructura (por ejemplo, FHIR no disponible o configuración faltante) pueden tiparse en cliente/repositorio y traducirse en loaders a estados operativos seguros, sin pasar detalles técnicos sensibles a la UI.
+- Cada superficie debe tener un read model coherente con su responsabilidad.
 
-## 6) Arquitectura objetivo de escritura
+### Escritura
 
-Dirección arquitectónica de escritura:
+`UI Form -> Server Action -> Zod Schema -> Domain Rules -> Repository -> FHIR payload`
 
-`UI Form -> Server Action -> Zod Schema -> Domain Rules -> Write Repository -> Inverse Mapper -> FHIR Client -> FHIR Server`
-
-Reglas operativas:
+Principios:
 
 - La UI no escribe directo a FHIR.
-- La Server Action es la entrada única de escritura desde UI.
-- Zod valida shape y coherencia local de entrada.
-- Domain Rules valida reglas de negocio.
-- Repository ejecuta persistencia.
-- Inverse Mapper arma payload compatible con FHIR.
-- FHIR Client ejecuta operación y valida respuesta técnica básica.
+- Server Actions concentran la entrada de escritura desde la app.
+- Zod valida shape y coherencia local.
+- Las reglas de negocio viven fuera del componente visual.
+- Repositorios y mappers sostienen la frontera técnica con FHIR.
 
-## 7) Estructura objetivo de carpetas
+## Modelo funcional objetivo
 
-Estructura mínima orientativa:
+El núcleo funcional que organiza el proyecto sigue siendo:
+
+- `Patient`
+- contacto principal / quién consulta
+- `ServiceRequest`
+- `EpisodeOfCare`
+- `Encounter`
+- `Observation`
+- `Condition`
+- `Practitioner`
+
+No es un intento de modelado FHIR exhaustivo. Es un recorte deliberado de lo necesario para digitalizar un flujo real de atención domiciliaria.
+
+## Organización del código
+
+Estructura conceptual esperada:
 
 ```text
 src/
   app/
     (public)/
-      page.tsx
-      services/page.tsx
-      evaluar/page.tsx
     admin/
-      patients/
-        page.tsx
-        data.ts
-        actions/
-      patients/[id]/
-        page.tsx
-        data.ts
-        actions/
-      patients/[id]/encounters/
-        page.tsx
-        data.ts
-        actions/
-      patients/[id]/encounters/[encounterId]/
-        page.tsx
-        data.ts
-        actions/
   domain/
-    patient/
-    episode-of-care/
-    encounter/
-    rules/
   infrastructure/
-    repositories/
-    mappers/
+  features/
   lib/
-    fhir/
-    auth/
 ```
 
-Criterio de ubicación:
+Criterios:
 
-- En `app/...` vive lo route-local (orquestación de ruta, loaders de lectura, acciones de escritura de la superficie).
-- Fuera de `app/...` vive lo reusable de dominio/infraestructura (reglas, repositorios, mappers, cliente FHIR, utilidades de auth).
+- `app/` contiene orquestación route-local, loaders y server actions de cada superficie.
+- `domain/` contiene reglas, tipos y contratos de negocio.
+- `infrastructure/` contiene repositorios, mappers y cliente FHIR.
+- `features/` agrupa lógica reusable de capacidades concretas cuando no pertenece a una sola ruta.
+- `lib/` contiene utilidades transversales.
 
-## 8) Convenciones de organización
+## Convenciones de diseño técnico
 
-Reglas operativas recomendadas:
+- La UI usa lenguaje de producto: por ejemplo, “visita” en lugar de imponer `Encounter` en todos los textos.
+- Los nombres técnicos de FHIR se preservan en dominio e infraestructura cuando agregan precisión.
+- Los componentes route-locales deben quedarse cerca de su superficie.
+- No conviene extraer abstracciones prematuras si todavía no hay más de un consumidor real.
 
-- UI usa lenguaje de producto (por ejemplo, “visita”); dominio/FHIR conserva nombres técnicos (`Encounter`).
-- `page.tsx` orquesta la ruta y delega lógica.
-- `data.ts` compone lectura y entrega read models.
-- `actions/` encapsula escritura vía Server Actions.
-- `*.schema.ts` concentra validación con Zod.
-- Componentes route-locales se ubican cerca de su ruta.
-- Componentes realmente compartidos van fuera de la ruta (por ejemplo en `src/components/` u otra carpeta común definida).
+## Auth como dirección futura
 
-## 9) Auth mínima transicional (V2)
+La superficie privada sigue siendo mínima y transicional. Si se expone con mayor ambición en el futuro, la dirección aceptada es:
 
-Dirección técnica mínima para exponer rutas privadas en producción:
+- auth mínima primero;
+- preferentemente single-user al inicio;
+- secretos solo server-side;
+- sin `localStorage` como mecanismo principal de sesión.
 
-- Se requiere auth mínima antes de considerar operativa la superficie privada.
-- Primer esquema aceptado: single-user.
-- Middleware + cookie `httpOnly` como estrategia transicional.
-- Credenciales basadas en variables de entorno como punto de partida.
-- Debe diseñarse de forma reemplazable por un esquema más robusto.
-- No usar secretos en cliente ni `localStorage` como mecanismo principal de sesión.
+Esto es dirección futura, no una afirmación sobre el estado actual.
 
-Nota: librerías y detalles de implementación se definen en documentación técnica específica cuando corresponda.
+## Testing como dirección
 
-## 10) Estrategia de testing objetivo
+Prioridades vigentes:
 
-### A. Unit tests
+- unit tests para reglas, mappers y helpers;
+- integration tests para actions, repositorios y loaders;
+- E2E solo cuando el flujo completo realmente lo justifique.
 
-Cobertura prioritaria para:
+El principio sigue siendo incremental: testear lógica crítica a medida que aparece, sin exigir una infraestructura de testing sobredimensionada antes de tiempo.
 
-- domain rules
-- mappers
-- formatters/helpers
-- auth helpers mínimos
+## Cómo usar este documento
 
-### B. Integration tests
+Usalo para:
 
-Cobertura prioritaria para:
+- evaluar si una propuesta nueva respeta la dirección del proyecto;
+- evitar mezclar dominio público con dominio clínico privado;
+- decidir dónde debería vivir una nueva responsabilidad técnica.
 
-- server actions
-- repositories
-- loaders / data composition
+No lo uses para:
 
-### C. E2E
-
-Cuando exista flujo mínimo completo, cubrir:
-
-- login
-- alta de paciente
-- tratamiento activo
-- registro de visita
-- consulta básica
-
-## 11) Momento de entrada del testing
-
-- No esperar al final del proyecto para empezar a testear.
-- Tampoco frenar el arranque por exigir cobertura total desde día uno.
-- Comenzar por lógica crítica a medida que aparezca.
-- Exigir mayor integración y E2E al cierre de V1/V2.
-
-## 12) Alcance y límites del documento
-
-Este documento define arquitectura objetivo mínima.
-
-No describe implementación actual ni debe leerse como estado vigente del repositorio.
-
-ADRs o documentos técnicos más específicos podrán refinar estas decisiones sin contradecir el encuadre de producto.
-
-No reemplaza la documentación operativa ni el plan por fases; funciona como guía técnica intermedia para implementación futura.
+- inferir estado implementado hoy;
+- prometer features futuras en README o demos;
+- contradecir `docs/fuente-de-verdad-operativa.md`.
