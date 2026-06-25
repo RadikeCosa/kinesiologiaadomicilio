@@ -95,6 +95,9 @@ describe("/admin/patients page", () => {
     expect(html).toContain("href=\"/admin/patients/pat-finished\"");
     expect(html).toContain("href=\"/admin/patients/pat-pre\"");
     expect(html).toContain("PhoneContactActions");
+    expect(html).toContain("Solicitud en evaluación");
+    expect(html).toContain("Solicitud aceptada sin iniciar");
+    expect(html).toContain("En tratamiento");
 
     expect(html).toContain("href=\"/admin/patients/pat-active/encounters/new\"");
     expect(html).toContain("Registrar visita");
@@ -128,10 +131,13 @@ describe("/admin/patients page", () => {
     expect(html).toContain("href=\"/admin/patients?status=ready_to_start\"");
     expect(html).toContain("href=\"/admin/patients?status=finished\"");
     expect(html).toContain("aria-current=\"page\"");
-    expect(html).toContain("Estado del paciente");
-    expect(html).toContain("Señales de solicitudes");
-    expect(html).toContain("Vistas puntuales para revisar pedidos y comienzos pendientes.");
+    expect(html).toContain("Estado operativo");
+    expect(html).toContain("Filtro principal del listado según situación actual del paciente.");
     expect(html).toContain("Sin tratamiento activo");
+    expect(html).not.toContain("Señales de solicitud");
+    expect(html).not.toContain("Solicitudes en evaluación");
+    expect(html).not.toContain("Aceptadas sin iniciar");
+    expect(html).not.toContain("href=\"/admin/patients?signal=");
 
     expect(html).toContain("href=\"/admin/patients/pat-ready\"");
     expect(html).toContain("href=\"/admin/patients/pat-pre\"");
@@ -249,29 +255,31 @@ describe("/admin/patients page", () => {
     expect(html).not.toContain("Registrar visita");
   });
 
-  it("supports filters by service request operational signal", async () => {
+  it("does not render signal filters while keeping signal information secondary on cards", async () => {
     loadPatientsListWithOperationalSignalsMock.mockResolvedValueOnce(patientFixtures);
 
-    const inReviewElement = await AdminPatientsPage({
-      searchParams: Promise.resolve({ signal: "in_review_requests" }),
+    const element = await AdminPatientsPage({
+      searchParams: Promise.resolve({ status: "all" }),
     });
-    const inReviewHtml = renderToStaticMarkup(inReviewElement);
+    const html = renderToStaticMarkup(element);
 
-    expect(inReviewHtml).toContain("Solicitudes en evaluación");
-    expect(inReviewHtml).toContain("href=\"/admin/patients/pat-active\"");
-    expect(inReviewHtml).not.toContain("href=\"/admin/patients/pat-ready\"");
-    expect(inReviewHtml).not.toContain("href=\"/admin/patients/pat-pre\"");
+    expect(html).toContain("href=\"/admin/patients/pat-active\"");
+    expect(html).toContain("Solicitud en evaluación");
+    expect(html).toContain("Solicitud aceptada sin iniciar");
+    expect(html).not.toContain("Señales de solicitud");
+    expect(html).not.toContain("href=\"/admin/patients?signal=");
+  });
 
+  it("keeps alias query params for status compatibility", async () => {
     loadPatientsListWithOperationalSignalsMock.mockResolvedValueOnce(patientFixtures);
 
-    const acceptedPendingElement = await AdminPatientsPage({
-      searchParams: Promise.resolve({ signal: "accepted_pending_treatment" }),
+    const element = await AdminPatientsPage({
+      searchParams: Promise.resolve({ status: "active_treatment" }),
     });
-    const acceptedPendingHtml = renderToStaticMarkup(acceptedPendingElement);
+    const html = renderToStaticMarkup(element);
 
-    expect(acceptedPendingHtml).toContain("Pendientes de iniciar");
-    expect(acceptedPendingHtml).toContain("href=\"/admin/patients/pat-ready\"");
-    expect(acceptedPendingHtml).not.toContain("href=\"/admin/patients/pat-active\"");
-    expect(acceptedPendingHtml).not.toContain("href=\"/admin/patients/pat-pre\"");
+    expect(html).toContain("href=\"/admin/patients/pat-active\"");
+    expect(html).not.toContain("href=\"/admin/patients/pat-ready\"");
+    expect(html).not.toContain("href=\"/admin/patients/pat-pre\"");
   });
 });

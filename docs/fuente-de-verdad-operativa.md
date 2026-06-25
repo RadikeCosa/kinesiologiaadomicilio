@@ -117,7 +117,7 @@ Reglas clave:
 ### Superficie privada
 
 - Dashboard operativo mínimo en `/admin`.
-- Listado de pacientes con filtros por estado operativo y señales de solicitud.
+- Listado de pacientes con filtros por estado operativo y señales de solicitud solo como información secundaria por paciente.
 - Hub de paciente con jerarquía clínica-operativa.
 - Gestión administrativa con solicitudes de atención.
 - Gestión clínica con listado de visitas, edición de nota, puntualidad operativa, tendencia funcional y resumen compartible.

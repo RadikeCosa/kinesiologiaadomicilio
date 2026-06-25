@@ -22,48 +22,56 @@ export const metadata: Metadata = {
 
 type PatientsStatusFilter =
   | "active"
+  | "active_treatment"
   | "pending"
   | "preliminary"
   | "ready_to_start"
   | "finished"
+  | "finished_treatment"
   | "all";
 
 interface AdminPatientsPageProps {
-  searchParams?: Promise<{ status?: string | string[]; signal?: string | string[] }>;
+  searchParams?: Promise<{ status?: string | string[] }>;
 }
 
-type PatientsSignalFilter = "in_review_requests" | "accepted_pending_treatment" | "all";
+function buildPatientsStatusHref(
+  status?: Exclude<PatientsStatusFilter, "all">,
+): string {
+  const searchParams = new URLSearchParams();
+
+  if (status) {
+    searchParams.set("status", status);
+  }
+
+  const search = searchParams.toString();
+
+  return search ? `/admin/patients?${search}` : "/admin/patients";
+}
 
 const STATUS_FILTERS: Array<{
   value: PatientsStatusFilter;
   label: string;
-  href: string;
 }> = [
-  { value: "all", label: "Todos", href: "/admin/patients" },
+  { value: "all", label: "Todos" },
   {
     value: "active",
     label: "En tratamiento",
-    href: "/admin/patients?status=active",
   },
   {
     value: "pending",
     label: "Sin tratamiento activo",
-    href: "/admin/patients?status=pending",
   },
   {
     value: "preliminary",
     label: "Faltan datos",
-    href: "/admin/patients?status=preliminary",
   },
   {
     value: "ready_to_start",
     label: "Listos para iniciar",
-    href: "/admin/patients?status=ready_to_start",
   },
   {
     value: "finished",
     label: "Finalizados",
-    href: "/admin/patients?status=finished",
   },
 ];
 
@@ -76,51 +84,36 @@ const EMPTY_STATE_BY_FILTER: Record<PatientsStatusFilter, string> = {
   all: "No hay pacientes para mostrar.",
 };
 
-const SIGNAL_FILTERS: Array<{
-  value: PatientsSignalFilter;
-  label: string;
-  href: string;
-}> = [
-  { value: "all", label: "Todas", href: "/admin/patients" },
-  {
-    value: "in_review_requests",
-    label: "Solicitudes en evaluación",
-    href: "/admin/patients?signal=in_review_requests",
-  },
-  {
-    value: "accepted_pending_treatment",
-    label: "Pendientes de iniciar",
-    href: "/admin/patients?signal=accepted_pending_treatment",
-  },
-];
-
-const EMPTY_STATE_BY_SIGNAL: Record<Exclude<PatientsSignalFilter, "all">, string> = {
-  in_review_requests: "No hay pacientes con solicitudes en evaluación.",
-  accepted_pending_treatment: "No hay pacientes con solicitudes aceptadas pendientes de iniciar.",
-};
-
 const OPERATIONAL_STATUSES_BY_FILTER: Record<
   Exclude<PatientsStatusFilter, "all">,
   PatientOperationalStatus[]
 > = {
   active: ["active_treatment"],
+  active_treatment: ["active_treatment"],
   pending: ["ready_to_start", "preliminary"],
   preliminary: ["preliminary"],
   ready_to_start: ["ready_to_start"],
   finished: ["finished_treatment"],
+  finished_treatment: ["finished_treatment"],
 };
 
 function normalizeStatusFilter(status?: string | string[]): PatientsStatusFilter {
   const value = Array.isArray(status) ? status[0] : status;
 
+  if (value === "active" || value === "active_treatment") {
+    return "active";
+  }
+
   if (
-    value === "active"
-    || value === "pending"
+    value === "pending"
     || value === "preliminary"
     || value === "ready_to_start"
-    || value === "finished"
   ) {
     return value;
+  }
+
+  if (value === "finished" || value === "finished_treatment") {
+    return "finished";
   }
 
   return "all";
@@ -137,34 +130,15 @@ function matchesStatusFilter(
   return OPERATIONAL_STATUSES_BY_FILTER[filter].includes(operationalStatus);
 }
 
-function normalizeSignalFilter(signal?: string | string[]): PatientsSignalFilter {
-  const value = Array.isArray(signal) ? signal[0] : signal;
-
-  if (value === "in_review_requests" || value === "accepted_pending_treatment") {
-    return value;
-  }
-
-  return "all";
-}
-
 export default async function AdminPatientsPage({
   searchParams,
 }: AdminPatientsPageProps) {
   const resolvedSearchParams = await searchParams;
   const activeFilter = normalizeStatusFilter(resolvedSearchParams?.status);
-  const activeSignalFilter = normalizeSignalFilter(resolvedSearchParams?.signal);
   const patients = await loadPatientsListWithOperationalSignals();
-  const filteredPatients = patients.filter((patient) => {
-    if (activeSignalFilter === "in_review_requests") {
-      return patient.operationalSignals.hasInReviewRequest;
-    }
-
-    if (activeSignalFilter === "accepted_pending_treatment") {
-      return patient.operationalSignals.hasAcceptedPendingTreatment;
-    }
-
-    return matchesStatusFilter(patient.operationalStatus, activeFilter);
-  });
+  const filteredPatients = patients.filter((patient) =>
+    matchesStatusFilter(patient.operationalStatus, activeFilter),
+  );
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -187,7 +161,10 @@ export default async function AdminPatientsPage({
 
       <nav aria-label="Filtrar pacientes por estado" className="mt-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-          Estado del paciente
+          Estado operativo
+        </p>
+        <p className="mt-1 text-xs text-slate-600">
+          Filtro principal del listado según situación actual del paciente.
         </p>
         <div className="flex flex-wrap gap-2">
           {STATUS_FILTERS.map((filter) => {
@@ -202,39 +179,9 @@ export default async function AdminPatientsPage({
                     ? "border-slate-900 bg-slate-900 text-white"
                     : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                 }`}
-                href={filter.href}
-              >
-                {filter.label}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-
-      <nav
-        aria-label="Filtrar pacientes por señales operativas"
-        className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
-      >
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-          Señales de solicitudes
-        </p>
-        <p className="mt-1 text-xs text-slate-600">
-          Vistas puntuales para revisar pedidos y comienzos pendientes.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {SIGNAL_FILTERS.map((filter) => {
-            const isActive = filter.value === activeSignalFilter;
-
-            return (
-              <Link
-                key={filter.value}
-                aria-current={isActive ? "page" : undefined}
-                className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
-                  isActive
-                    ? "border-slate-700 bg-slate-700 text-white"
-                    : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                }`}
-                href={filter.href}
+                href={buildPatientsStatusHref(
+                  filter.value === "all" ? undefined : filter.value,
+                )}
               >
                 {filter.label}
               </Link>
@@ -246,9 +193,7 @@ export default async function AdminPatientsPage({
       <section className="mt-4 space-y-2.5">
         {filteredPatients.length === 0 ? (
           <p className="rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
-            {activeSignalFilter === "all"
-              ? EMPTY_STATE_BY_FILTER[activeFilter]
-              : EMPTY_STATE_BY_SIGNAL[activeSignalFilter]}
+            {EMPTY_STATE_BY_FILTER[activeFilter]}
           </p>
         ) : (
           filteredPatients.map((patient) => {
@@ -280,6 +225,22 @@ export default async function AdminPatientsPage({
                       {treatmentBadge.label}
                     </span>
                   </div>
+
+                  {patient.operationalSignals.hasInReviewRequest
+                    || patient.operationalSignals.hasAcceptedPendingTreatment ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {patient.operationalSignals.hasInReviewRequest ? (
+                          <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                            Solicitud en evaluación
+                          </span>
+                        ) : null}
+                        {patient.operationalSignals.hasAcceptedPendingTreatment ? (
+                          <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                            Solicitud aceptada sin iniciar
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
 
                   <div className="flex flex-wrap items-center justify-between gap-2.5">
                     <p className="text-xs text-slate-600">
