@@ -5,8 +5,11 @@
   "scripts": {
     "dev": "FHIR_BASE_URL=http://localhost:8081/fhir next dev --turbopack",
     "dev:fhir-dev": "FHIR_BASE_URL=http://localhost:8081/fhir next dev --turbopack",
+    "dev:fhir-test": "FHIR_BASE_URL=http://localhost:8081/fhir next dev --turbopack",
     "dev:fhir-real": "FHIR_BASE_URL=http://localhost:8080/fhir next dev --turbopack",
     "build": "next build",
+    "build:fhir-test": "FHIR_BASE_URL=http://localhost:8081/fhir next build",
+    "build:fhir-real": "FHIR_BASE_URL=http://localhost:8080/fhir next build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",

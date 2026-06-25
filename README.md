@@ -140,9 +140,12 @@ npm run dev
 
 Default local development points to a disposable FHIR environment:
 
-- `npm run dev` -> `http://localhost:8081/fhir`
-- `npm run dev:fhir-dev` -> `http://localhost:8081/fhir`
-- `npm run dev:fhir-real` -> `http://localhost:8080/fhir`
+- `npm run dev` -> `http://localhost:8081/fhir` (dev/test, datos descartables)
+- `npm run dev:fhir-dev` -> `http://localhost:8081/fhir` (dev/test, datos descartables)
+- `npm run dev:fhir-test` -> `http://localhost:8081/fhir` (alias explícito para dev/test)
+- `npm run dev:fhir-real` -> `http://localhost:8080/fhir` (local-real, datos reales/locales)
+
+The private admin shows the active FHIR environment in the header so it is clear which endpoint is being used for the current run.
 
 ## Environment Variables
 
@@ -151,7 +154,7 @@ See [.env.example](./.env.example).
 Current documented variables:
 
 - `FHIR_BASE_URL`
-  Server-side only. Required for the private clinical workflow.
+  Server-side only. Required for the private clinical workflow. Use it via scripts or a local env file; it is not exposed via `NEXT_PUBLIC_*`.
 - `NEXT_PUBLIC_GA_ID`
   Optional. Enables GA4 only on public routes.
 

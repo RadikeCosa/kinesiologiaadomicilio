@@ -95,6 +95,8 @@ Avoid ceremonial doc churn.
 ## Environment And Runtime
 
 - `FHIR_BASE_URL` is required for the private/admin workflow.
+- The private/admin workflow uses one FHIR endpoint per execution. For local work, `http://localhost:8081/fhir` is the dev/test endpoint and `http://localhost:8080/fhir` is the local-real endpoint.
+- The active FHIR environment is surfaced in `/admin` as an operational label; do not present `/admin` as a public demo.
 - `NEXT_PUBLIC_GA_ID` is optional and only affects public-route analytics.
 - `/admin` is intentionally blocked from indexing.
 - The public site can be presented as deployable.

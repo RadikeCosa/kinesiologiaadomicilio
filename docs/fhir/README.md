@@ -15,6 +15,15 @@ Esta carpeta ya no mantiene varios documentos operativos separados: el contrato 
 2. Usar esta guía cuando el cambio toque recursos FHIR, repositorios, mappers, loaders, actions, schemas o UI con impacto de contrato.
 3. Si aparece contexto viejo útil, recuperarlo desde `docs/archive/historico-fhir/`, pero reintroducir al flujo activo solo lo necesario.
 
+## Entornos FHIR operativos
+
+Para el desarrollo local del repo, la app Next.js usa un único endpoint FHIR por ejecución:
+
+- `http://localhost:8081/fhir` → entorno dev/test, datos descartables.
+- `http://localhost:8080/fhir` → entorno local-real, datos reales/locales.
+
+La selección se define por `FHIR_BASE_URL` a través del script de ejecución o de la variable de entorno del proceso. La admin muestra el entorno activo para reducir confusión operativa.
+
 ## Recursos FHIR activos
 
 El modelado vigente del repo usa:

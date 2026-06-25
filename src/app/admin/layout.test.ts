@@ -19,6 +19,8 @@ vi.mock("@/app/admin/components/AdminNavLink", () => ({
 
 describe("AdminLayout", () => {
   it("exposes professional configuration navigation", () => {
+    vi.stubEnv("FHIR_BASE_URL", "http://localhost:8081/fhir");
+
     const html = renderToStaticMarkup(
       createElement(AdminLayout, null, createElement("div", null, "contenido")),
     );
@@ -27,5 +29,6 @@ describe("AdminLayout", () => {
     expect(html).toContain("href=\"/admin/patients/new\"");
     expect(html).toContain("href=\"/admin/configuracion/profesional\"");
     expect(html).toContain("Configuración");
+    expect(html).toContain("Entorno FHIR: FHIR dev/test");
   });
 });

@@ -146,9 +146,12 @@ La UI no debería consumir FHIR crudo.
 ## Entorno y runtime
 
 - `FHIR_BASE_URL` es obligatorio para la superficie privada.
-- `NEXT_PUBLIC_GA_ID` es opcional y solo afecta el tracking público.
-- `npm run dev` usa por defecto `http://localhost:8081/fhir`.
+- La app apunta a un único endpoint FHIR por ejecución; la selección se define por script o variable de entorno.
+- `http://localhost:8081/fhir` corresponde al entorno dev/test y a datos descartables.
+- `http://localhost:8080/fhir` corresponde al entorno local-real y a datos reales/locales.
+- `npm run dev` y `npm run dev:fhir-dev` usan por defecto `http://localhost:8081/fhir`.
 - `npm run dev:fhir-real` apunta a `http://localhost:8080/fhir`.
+- `NEXT_PUBLIC_GA_ID` es opcional y solo afecta el tracking público.
 - `/admin` está marcado como `noindex/nofollow` y además desautorizado en `robots.txt`.
 
 ## Fuentes activas relacionadas

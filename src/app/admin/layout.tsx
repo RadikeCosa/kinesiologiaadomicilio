@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/Container";
 import { AdminNavLink } from "@/app/admin/components/AdminNavLink";
-
+import { getFhirEnvironmentInfo } from "@/lib/fhir/config";
 
 export const metadata: Metadata = {
   robots: {
@@ -22,6 +22,14 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const fhirEnvironment = getFhirEnvironmentInfo();
+  const toneStyles: Record<string, string> = {
+    info: "border-sky-200 bg-sky-50 text-sky-700",
+    warning: "border-amber-200 bg-amber-50 text-amber-700",
+    neutral: "border-slate-200 bg-slate-100 text-slate-700",
+    danger: "border-rose-200 bg-rose-50 text-rose-700",
+  };
+
   return (
     <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
@@ -45,6 +53,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </span>
               </div>
             </Link>
+
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${toneStyles[fhirEnvironment.tone]}`}
+              >
+                Entorno FHIR: {fhirEnvironment.label}
+              </span>
+              <span className="text-[11px] text-slate-500">
+                {fhirEnvironment.endpointLabel}
+              </span>
+            </div>
 
             <nav aria-label="Navegación principal de admin">
               <ul className="flex items-center gap-1 sm:gap-3">
