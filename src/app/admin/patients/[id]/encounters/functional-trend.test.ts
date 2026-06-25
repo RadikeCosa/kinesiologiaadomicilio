@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildFunctionalTrendSummary, formatFunctionalDelta } from "@/app/admin/patients/[id]/encounters/functional-trend";
+import {
+  buildFunctionalTrendSummary,
+  formatFunctionalDelta,
+  formatFunctionalValue,
+} from "@/app/admin/patients/[id]/encounters/functional-trend";
 
 const base = { id: "e1", patientId: "p1", episodeOfCareId: "ep1", status: "finished" as const, startedAt: "2026-01-01T10:00:00Z" };
 
@@ -31,7 +35,17 @@ describe("functional trend summary", () => {
   });
 
   it("formats delta with signs", () => {
-    expect(formatFunctionalDelta(2, "min")).toBe("+2 min");
-    expect(formatFunctionalDelta(-1.5, "s")).toBe("-1.5 s");
+    expect(formatFunctionalDelta("standing_tolerance_minutes", 2)).toBe("+2 min");
+    expect(formatFunctionalDelta("tug_seconds", -1.3333)).toBe("-1.3 s");
+    expect(formatFunctionalDelta("pain_nrs_0_10", 2)).toBe("+2");
+    expect(formatFunctionalDelta("gait_duration_minutes", 2.4)).toBe("+2 min");
+  });
+
+  it("formats values by metric display rules", () => {
+    expect(formatFunctionalValue("tug_seconds", 18.555)).toBe("18.6 s");
+    expect(formatFunctionalValue("standing_tolerance_minutes", 6.0)).toBe("6 min");
+    expect(formatFunctionalValue("standing_tolerance_minutes", 6.25)).toBe("6.3 min");
+    expect(formatFunctionalValue("pain_nrs_0_10", 4.4)).toBe("4/10");
+    expect(formatFunctionalValue("gait_duration_minutes", 5.6)).toBe("6 min");
   });
 });

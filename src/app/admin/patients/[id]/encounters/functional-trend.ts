@@ -2,7 +2,7 @@ import type { Encounter } from "@/domain/encounter/encounter.types";
 
 const FUNCTIONAL_ORDER = ["tug_seconds", "pain_nrs_0_10", "standing_tolerance_minutes", "gait_duration_minutes"] as const;
 
-type FunctionalCode = typeof FUNCTIONAL_ORDER[number];
+export type FunctionalCode = typeof FUNCTIONAL_ORDER[number];
 
 const META: Record<FunctionalCode, { label: string; unit: "s" | "min" | "/10" }> = {
   tug_seconds: { label: "TUG", unit: "s" },
@@ -20,6 +20,28 @@ export interface FunctionalObservationTrendSummary {
   previousValue?: number;
   previousDate?: string;
   delta?: number;
+}
+
+function roundToSingleDecimal(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function normalizeDisplayNumber(code: FunctionalCode, value: number): number {
+  if (code === "pain_nrs_0_10" || code === "gait_duration_minutes") {
+    return Math.round(value);
+  }
+
+  return roundToSingleDecimal(value);
+}
+
+function formatDisplayNumber(code: FunctionalCode, value: number): string {
+  const normalized = normalizeDisplayNumber(code, value);
+
+  if (Object.is(normalized, -0)) {
+    return "0";
+  }
+
+  return String(normalized);
 }
 
 export function buildFunctionalTrendSummary(encounters: Encounter[]): FunctionalObservationTrendSummary[] {
@@ -58,13 +80,20 @@ export function buildFunctionalTrendSummary(encounters: Encounter[]): Functional
   });
 }
 
-export function formatFunctionalValue(value: number, unit: "s" | "min" | "/10"): string {
-  if (unit === "/10") return `${value}/10`;
-  return `${value} ${unit}`;
+export function formatFunctionalValue(code: FunctionalCode, value: number): string {
+  const formattedValue = formatDisplayNumber(code, value);
+  const unit = META[code].unit;
+
+  if (unit === "/10") return `${formattedValue}/10`;
+  return `${formattedValue} ${unit}`;
 }
 
-export function formatFunctionalDelta(delta: number, unit: "s" | "min" | "/10"): string {
-  const sign = delta > 0 ? "+" : "";
-  if (unit === "/10") return `${sign}${delta}`;
-  return `${sign}${delta} ${unit}`;
+export function formatFunctionalDelta(code: FunctionalCode, delta: number): string {
+  const normalizedDelta = normalizeDisplayNumber(code, delta);
+  const sign = normalizedDelta > 0 ? "+" : "";
+  const formattedValue = formatDisplayNumber(code, normalizedDelta);
+  const unit = META[code].unit;
+
+  if (unit === "/10") return `${sign}${formattedValue}`;
+  return `${sign}${formattedValue} ${unit}`;
 }

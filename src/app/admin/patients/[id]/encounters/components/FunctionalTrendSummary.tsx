@@ -17,20 +17,20 @@ export function FunctionalTrendSummary({ trend }: Props) {
             <p className="text-sm font-semibold text-slate-900">{item.label}</p>
             <div className="mt-2 rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
               <p className="text-[11px] uppercase tracking-wide text-slate-500">Último</p>
-              <p className="text-sm font-semibold text-slate-900">{formatFunctionalValue(item.latestValue, item.unit)}</p>
+              <p className="text-sm font-semibold text-slate-900">{formatFunctionalValue(item.code, item.latestValue)}</p>
               <p className="text-[11px] text-slate-500">{formatDateDisplay(item.latestDate)}</p>
             </div>
             {item.previousValue !== undefined ? (
               <div className="mt-2 space-y-1 text-xs text-slate-700">
                 <p>
                   <span className="font-medium text-slate-800">Previo:</span>{" "}
-                  {formatFunctionalValue(item.previousValue, item.unit)}
+                  {formatFunctionalValue(item.code, item.previousValue)}
                   <span className="text-slate-500"> ({formatDateDisplay(item.previousDate)})</span>
                 </p>
                 <p>
                   <span className="font-medium text-slate-800">Cambio:</span>{" "}
                   <span className="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-slate-800">
-                    {formatFunctionalDelta(item.delta ?? 0, item.unit)}
+                    {formatFunctionalDelta(item.code, item.delta ?? 0)}
                   </span>
                 </p>
               </div>

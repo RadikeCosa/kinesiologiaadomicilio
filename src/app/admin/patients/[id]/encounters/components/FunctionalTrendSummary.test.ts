@@ -36,6 +36,42 @@ describe("FunctionalTrendSummary", () => {
     expect(html.indexOf("Bipedestación")).toBeLessThan(html.indexOf("Marcha"));
   });
 
+  it("renders rounded decimal display for trend values and deltas", () => {
+    const html = renderToStaticMarkup(
+      createElement(FunctionalTrendSummary, {
+        trend: [
+          {
+            code: "tug_seconds",
+            label: "TUG",
+            latestValue: 18.555,
+            latestDate: "2026-05-08",
+            previousValue: 19.888,
+            previousDate: "2026-05-01",
+            delta: -1.3333,
+            unit: "s",
+          },
+          {
+            code: "standing_tolerance_minutes",
+            label: "Bipedestación",
+            latestValue: 6,
+            latestDate: "2026-05-08",
+            previousValue: 4.666,
+            previousDate: "2026-05-01",
+            delta: 1.334,
+            unit: "min",
+          },
+        ],
+      }),
+    );
+
+    expect(html).toContain("18.6 s");
+    expect(html).toContain("19.9 s");
+    expect(html).toContain("-1.3 s");
+    expect(html).toContain("6 min");
+    expect(html).toContain("4.7 min");
+    expect(html).toContain("+1.3 min");
+  });
+
   it("renders single-measure state as sin comparación previa", () => {
     const html = renderToStaticMarkup(
       createElement(FunctionalTrendSummary, {

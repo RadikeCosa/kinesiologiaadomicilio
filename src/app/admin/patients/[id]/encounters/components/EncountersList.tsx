@@ -25,6 +25,7 @@ import {
   formatEncounterStatusLabel,
   formatTimeDisplay,
 } from "@/lib/patient-admin-display";
+import { formatFunctionalValue } from "@/app/admin/patients/[id]/encounters/functional-trend";
 
 interface EncountersListProps {
   patientId: string;
@@ -333,7 +334,7 @@ export function EncountersList({
                               {orderedFunctionalObservations.map((metric) => (
                                 <li key={`${encounter.id}-${metric.code}`}>
                                   <span className="font-medium">{FUNCTIONAL_LABELS[metric.code]}:</span>{" "}
-                                  {metric.code === "pain_nrs_0_10" ? `${metric.value}/10` : metric.code === "tug_seconds" ? `${metric.value} s` : `${metric.value} min`}
+                                  {formatFunctionalValue(metric.code, metric.value)}
                                 </li>
                               ))}
                             </ul>
