@@ -1,8 +1,8 @@
-# Screenshots Placeholder
+# Screenshots
 
-Add sanitized screenshots here before using this repository as a portfolio centerpiece.
+Guardar acá solo screenshots sanitizadas antes de usar este repo como pieza fuerte de portfolio.
 
-Suggested filenames:
+Nombres sugeridos:
 
 - `public-home.png`
 - `public-services.png`
@@ -11,9 +11,9 @@ Suggested filenames:
 - `admin-patient-detail.png`
 - `admin-encounters.png`
 
-Rules:
+Reglas:
 
-- Use fictional or fully sanitized data only.
-- Do not expose real patient names, DNI, phone numbers, addresses, or clinical notes.
-- Prefer captures from disposable fixtures or a future mock/demo mode.
-- If the private workflow still depends on local HAPI FHIR, mention that clearly in the README instead of implying a public admin demo.
+- Usar solo datos ficticios o completamente sanitizados.
+- No exponer nombres reales de pacientes, DNI, teléfonos, direcciones ni notas clínicas.
+- Preferir capturas hechas con fixtures descartables o con un futuro mock/demo mode seguro.
+- Si el flujo privado sigue dependiendo de HAPI FHIR local, aclararlo en el README en lugar de sugerir un demo público de `/admin`.

@@ -9,7 +9,11 @@ Esta carpeta mantiene solo documentación de producto que todavía sirve para de
 
 ## Qué ya no queda acá
 
-Las auditorías de UX, dashboard, IA, demo/mock, landing growth y decisiones ya absorbidas por implementación o por la fuente operativa dejaron de compartirse en el remoto.
+Las auditorías de UX, dashboard, IA, demo/mock, landing growth y decisiones ya absorbidas por implementación o por la fuente operativa no deberían seguir mezcladas con la documentación activa.
+
+Si siguen siendo útiles como referencia versionada, viven en:
+
+- `docs/archive/`
 
 Si existen localmente, viven en:
 

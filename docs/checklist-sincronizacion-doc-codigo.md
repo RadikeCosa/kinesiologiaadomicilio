@@ -20,7 +20,8 @@ Usar este checklist cuando un cambio toque alguno de estos frentes:
 
 - [ ] ¿El `README.md` sigue describiendo correctamente el estado implementado?
 - [ ] ¿`docs/fuente-de-verdad-operativa.md` sigue alineada con el comportamiento real?
-- [ ] ¿`docs/fhir/README.md` o documentos FHIR específicos requieren actualización?
+- [ ] ¿`docs/fhir/README.md` requiere actualización?
+- [ ] ¿`docs/normalization-data/README.md` requiere actualización?
 - [ ] ¿`docs/product/README.md` o algún documento de producto activo requiere actualización?
 - [ ] ¿Hay documentación histórica que debería salir del remoto y quedar solo como material local?
 - [ ] ¿Se agregaron rutas nuevas que deban documentarse?
@@ -28,6 +29,7 @@ Usar este checklist cuando un cambio toque alguno de estos frentes:
 - [ ] ¿Se cambió un contrato de dominio o mapper?
 - [ ] ¿Los tests cubren el comportamiento nuevo o modificado?
 - [ ] ¿Hay referencias rotas o nombres de archivo viejos?
+- [ ] ¿`docs/archive/README.md` sigue reflejando el archivo real?
 
 ## 3) Regla de alcance
 

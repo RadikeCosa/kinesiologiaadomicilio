@@ -1,9 +1,14 @@
-# Analytics y medición — estado actual (handoff técnico)
+# Analytics y medición
+
+> Estado: vigente
+> Última actualización: 2026-06-25 (UTC)
+> Alcance: tracking público con GA4 directo, sin GTM.
 
 ## Resumen
 El proyecto usa **Google Analytics 4 (GA4) directo** vía Next.js, sin Google Tag Manager.
 
 Implementa:
+
 - eventos automáticos de GA4 (por integración estándar),
 - eventos custom de intención de contacto,
 - eventos de profundidad de scroll.
@@ -84,3 +89,4 @@ Nota documental: `/evaluar` está instrumentada como superficie activa; hoy figu
 - No hay GTM en el repo.
 - No hay evidencia versionada de QA de Realtime/DebugView dentro del repositorio.
 - Para análisis de parámetros custom, GA4 requiere configurar dimensiones personalizadas.
+- `/admin` queda fuera del tracking público por diseño.

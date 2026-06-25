@@ -12,7 +12,7 @@ Esta carpeta quedó reducida a documentación útil para dos lectores:
 2. `docs/fuente-de-verdad-operativa.md`
    Comportamiento vigente confirmado en código.
 3. `docs/fhir/README.md`
-   Índice de documentación FHIR activa.
+   Referencia FHIR activa consolidada.
 
 ## Para recruiters
 
@@ -32,14 +32,20 @@ Estas piezas explican el contexto clínico, el valor profesional del proyecto y 
   Punto de entrada para contratos y checklists FHIR.
 - `docs/analytics-handoff.md`
   Tracking público vigente con GA4.
-- `docs/normalization-data/`
+- `docs/normalization-data/README.md`
   Convenciones de normalización y display de datos administrativos.
 - `docs/checklist-sincronizacion-doc-codigo.md`
   Checklist liviano para evitar drift entre código y documentación.
+- `docs/archive/README.md`
+  Mapa del material histórico que sigue versionado.
 
-## Historial local
+## Historial y archivo
 
-La documentación histórica o ya absorbida por documentos activos dejó de compartirse en el repo remoto.
+La documentación histórica o ya absorbida por documentos activos no debería quedar mezclada con la documentación principal.
+
+Si sigue siendo útil como referencia versionada, vive en:
+
+- `docs/archive/`
 
 Si existe localmente, vive en:
 
