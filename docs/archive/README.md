@@ -17,6 +17,15 @@ entonces debería vivir acá y no en la superficie activa de `docs/`.
 
 ## Estructura actual
 
+### `audits/`
+
+Auditorías históricas o supersedidas por una auditoría posterior más precisa.
+
+Incluye hoy:
+
+- `auditoria-congruencia-docs-agents-estado-actual-2026-06-25.md`
+- `auditoria-manejo-entornos-fhir-next-2026-06-25.md`
+
 ### `historico-fhir/`
 
 Material FHIR que antes estaba separado en varios archivos y quedó consolidado en `docs/fhir/README.md`.

@@ -36,6 +36,8 @@ Estas piezas explican el contexto clínico, el valor profesional del proyecto y 
   Convenciones de normalización y display de datos administrativos.
 - `docs/checklist-sincronizacion-doc-codigo.md`
   Checklist liviano para evitar drift entre código y documentación.
+- `docs/audits/auditoria-congruencia-post-entornos-fhir-2026-06-25.md`
+  Auditoría vigente más reciente para el cierre documental posterior al Patch 1 de entornos FHIR.
 - `docs/archive/README.md`
   Mapa del material histórico que sigue versionado.
 
@@ -46,6 +48,11 @@ La documentación histórica o ya absorbida por documentos activos no debería q
 Si sigue siendo útil como referencia versionada, vive en:
 
 - `docs/archive/`
+
+En particular:
+
+- la auditoría post-patch vigente puede permanecer en `docs/audits/` si sigue guiando el siguiente patch;
+- auditorías pre-patch o ya supersedidas deberían moverse a `docs/archive/`.
 
 Si existe localmente, vive en:
 

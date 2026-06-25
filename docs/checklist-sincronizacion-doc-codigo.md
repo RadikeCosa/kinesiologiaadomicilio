@@ -30,6 +30,7 @@ Usar este checklist cuando un cambio toque alguno de estos frentes:
 - [ ] ¿Los tests cubren el comportamiento nuevo o modificado?
 - [ ] ¿Hay referencias rotas o nombres de archivo viejos?
 - [ ] ¿`docs/archive/README.md` sigue reflejando el archivo real?
+- [ ] Si el cambio resuelve hallazgos de una auditoría reciente, ¿esa auditoría sigue vigente o debe marcarse como supersedida, archivarse o referenciarse desde una auditoría posterior?
 
 ## 3) Regla de alcance
 
@@ -37,6 +38,7 @@ Usar este checklist cuando un cambio toque alguno de estos frentes:
 - La documentación principal debe reflejar solo comportamiento vigente.
 - Documentos de producto/FHIR activos deberían priorizar contratos vigentes o dirección todavía útil para desarrollo.
 - Auditorías o cierres históricos que ya no sean fuente activa deberían dejar de compartirse en el remoto.
+- Si un patch deja una auditoría reciente desactualizada, conviene ordenarla en el mismo movimiento documental y no postergarlo.
 
 ## 4) Resultado esperado
 

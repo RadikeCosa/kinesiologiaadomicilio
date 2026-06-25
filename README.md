@@ -6,6 +6,7 @@ HealthTech case study: a real-world Next.js project that combines a public patie
 
 - Public site: https://kinesiologiaadomicilio.vercel.app
 - Private clinical surface: `/admin` exists in the codebase and is intended for local development with a local HAPI FHIR server. It is not presented as a public online demo.
+- No mock/demo mode is implemented today for `/admin`; the private surface still depends on local FHIR infrastructure.
 
 ## Context
 
@@ -105,6 +106,7 @@ The private workflow uses a deliberately small subset of FHIR R4:
 - `EpisodeOfCare`: active or closed treatment cycle
 - `Encounter`: home visit
 - `Observation`: visit-level functional metrics
+- `Condition`: reference medical diagnosis and kinesiologic diagnosis in the treatment context
 - `Practitioner`: signing professional configuration
 
 This is not presented as a full clinical record system. It is a constrained, incremental implementation oriented to operational usefulness.
@@ -112,7 +114,7 @@ This is not presented as a full clinical record system. It is a constrained, inc
 ## Testing And Quality
 
 - Automated tests cover domain rules, mappers, repositories, route data loaders, metadata, and UI slices.
-- The current repository snapshot includes 97 test files and 649 passing tests.
+- The current repository snapshot includes 98 test files and 653 passing tests.
 - Public/private separation is also reinforced through route structure and search-engine blocking for `/admin`.
 
 Available checks:
@@ -120,8 +122,15 @@ Available checks:
 ```bash
 npm run lint
 npm run test
-npm run build
+FHIR_BASE_URL=http://localhost:8081/fhir npm run build
+npm run build:fhir-test
+npm run build:fhir-real
 ```
+
+Recommended default validation uses the disposable FHIR dev/test endpoint:
+
+- `npm run build:fhir-test` for the usual safe build check
+- `FHIR_BASE_URL=http://localhost:8081/fhir npm run build` when you want the explicit env-based equivalent
 
 ## Local Setup
 
@@ -146,6 +155,7 @@ Default local development points to a disposable FHIR environment:
 - `npm run dev:fhir-real` -> `http://localhost:8080/fhir` (local-real, datos reales/locales)
 
 The private admin shows the active FHIR environment in the header so it is clear which endpoint is being used for the current run.
+Next points to a single FHIR endpoint per execution; the active endpoint is selected by `FHIR_BASE_URL` through the chosen script or server-side env.
 
 ## Environment Variables
 
@@ -178,6 +188,7 @@ Important: do not add screenshots with real patient data, real phone numbers, re
 - Public website is deployable and portfolio-safe.
 - Private clinical workflow exists and is meaningful, but remains intentionally minimal.
 - The admin side currently depends on local infrastructure and should be read as a local clinical prototype/workflow surface, not as a production SaaS admin.
+- `/admin` is intentionally private/local, not a public demo surface.
 - Auth and multi-user concerns are intentionally out of scope at this stage.
 
 ## Roadmap / Next Steps
