@@ -248,7 +248,7 @@ export function EncounterCreateForm({
               <h3 className="text-sm font-medium text-slate-900">Métricas funcionales</h3>
               <span className="rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">Opcional</span>
             </div>
-            <p className="mt-1 text-xs text-slate-600">Cargá mediciones rápidas para seguir evolución funcional.</p>
+            <p className="mt-1 text-xs text-slate-600">Cargá mediciones rápidas cuando ayuden a seguir evolución funcional o a comparar visitas del mismo ciclo.</p>
           </summary>
           <div className="mt-3 grid gap-3 md:grid-cols-4">
             <label className="text-sm">
@@ -286,7 +286,7 @@ export function EncounterCreateForm({
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-600">
-              Ayuda a dejar trazabilidad clínica de la sesión y preparar futuros informes.
+              Ayuda a dejar trazabilidad clínica de la sesión y mejora la reutilización futura para resúmenes, seguimiento e informes.
             </p>
           </summary>
           <div className="mt-3 space-y-3">
@@ -295,10 +295,12 @@ export function EncounterCreateForm({
               <div className="mt-2 grid gap-3">
                 <label className="text-sm">
                   <span className="block text-slate-700">Qué refiere el paciente o familia</span>
+                  <span className="mt-1 block text-xs text-slate-500">Síntomas, cambios percibidos, dificultades o comentarios relevantes traídos a esta visita.</span>
                   <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={subjective} onChange={(event) => setSubjective(event.target.value)} />
                 </label>
                 <label className="text-sm">
                   <span className="block text-slate-700">Qué se observa</span>
+                  <span className="mt-1 block text-xs text-slate-500">Hallazgos observables de esta sesión: postura, movilidad, marcha, tolerancia o desempeño funcional.</span>
                   <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={objective} onChange={(event) => setObjective(event.target.value)} />
                 </label>
               </div>
@@ -308,14 +310,17 @@ export function EncounterCreateForm({
               <div className="mt-2 grid gap-3">
                 <label className="text-sm">
                   <span className="block text-slate-700">Qué se trabajó</span>
+                  <span className="mt-1 block text-xs text-slate-500">Dejá el contenido principal de la intervención. Este campo mejora mucho la utilidad del resumen compartible.</span>
                   <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={intervention} onChange={(event) => setIntervention(event.target.value)} />
                 </label>
                 <label className="text-sm">
                   <span className="block text-slate-700">Respuesta o evolución de la sesión</span>
+                  <span className="mt-1 block text-xs text-slate-500">Usalo para tu interpretación clínica de la visita: respuesta observada, cambios, progreso o dificultades relevantes.</span>
                   <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={assessment} onChange={(event) => setAssessment(event.target.value)} />
                 </label>
                 <label className="text-sm">
                   <span className="block text-slate-700">Tolerancia</span>
+                  <span className="mt-1 block text-xs text-slate-500">Describí tolerancia, fatiga, dolor, síntomas o respuesta al esfuerzo durante la sesión.</span>
                   <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={tolerance} onChange={(event) => setTolerance(event.target.value)} />
                 </label>
               </div>
@@ -325,10 +330,12 @@ export function EncounterCreateForm({
               <div className="mt-2 grid gap-3">
                 <label className="text-sm">
                   <span className="block text-slate-700">Indicaciones domiciliarias</span>
+                  <span className="mt-1 block text-xs text-slate-500">Qué debería continuar la persona o familia hasta la próxima visita. Este campo mejora la utilidad del resumen compartible.</span>
                   <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={homeInstructions} onChange={(event) => setHomeInstructions(event.target.value)} />
                 </label>
                 <label className="text-sm">
                   <span className="block text-slate-700">Plan para próxima sesión</span>
+                  <span className="mt-1 block text-xs text-slate-500">Dejá el próximo paso previsto del ciclo. También mejora la utilidad del resumen compartible.</span>
                   <textarea className="mt-1 w-full rounded border border-slate-300 p-2" rows={2} value={nextPlan} onChange={(event) => setNextPlan(event.target.value)} />
                 </label>
               </div>

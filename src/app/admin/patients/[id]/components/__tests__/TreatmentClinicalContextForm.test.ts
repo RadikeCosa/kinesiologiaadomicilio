@@ -30,6 +30,11 @@ describe("TreatmentClinicalContextForm", () => {
     expect(html).toContain("Editar situación funcional inicial");
     expect(html).toContain("Editar objetivo de tratamiento");
     expect(html).toContain("Editar plan marco del tratamiento");
+    expect(html).toContain("diagnóstico de referencia con el que llega o fue orientado el tratamiento");
+    expect(html).toContain("interpretación kinésica actual del problema funcional");
+    expect(html).toContain("basal del ciclo");
+    expect(html).toContain("metas observables o verificables del ciclo");
+    expect(html).toContain("estrategia longitudinal del tratamiento");
     expect(html).not.toContain("Guardar contexto clínico");
   });
 });

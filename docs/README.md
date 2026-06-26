@@ -36,8 +36,10 @@ Estas piezas explican el contexto clínico, el valor profesional del proyecto y 
   Convenciones de normalización y display de datos administrativos.
 - `docs/checklist-sincronizacion-doc-codigo.md`
   Checklist liviano para evitar drift entre código y documentación.
-- `docs/audits/auditoria-congruencia-post-entornos-fhir-2026-06-25.md`
-  Auditoría vigente más reciente para el cierre documental posterior al Patch 1 de entornos FHIR.
+- `docs/audits/auditoria-evolucion-resumenes-informes-clinicos-2026-06-25.md`
+  Auditoría clínica vigente para la dirección actual de resúmenes e informes: mantener el resumen compartible como derivado y efímero, sin persistencia de informes todavía.
+- `docs/audits/auditoria-dato-fuente-resumenes-reevaluaciones-informes-2026-06-26.md`
+  Auditoría vigente sobre calidad y completitud del dato fuente clínico que guía mejoras mínimas de captura sin cambiar persistencia ni FHIR.
 - `docs/archive/README.md`
   Mapa del material histórico que sigue versionado.
 

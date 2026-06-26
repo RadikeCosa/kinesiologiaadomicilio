@@ -67,6 +67,7 @@ describe("EncounterClinicalNoteEditor", () => {
 
     expect(html).toContain("Nota clínica estructurada");
     expect(html).toContain("Esta nota es la fuente clínica interna de la visita.");
+    expect(html).toContain("intervención, indicaciones domiciliarias y próximo plan");
     expect(html).toContain("Subjetivo / referido por paciente");
     expect(html).toContain("Objetivo / observado");
     expect(html).toContain("Intervención realizada");
@@ -74,6 +75,11 @@ describe("EncounterClinicalNoteEditor", () => {
     expect(html).toContain("Tolerancia");
     expect(html).toContain("Indicaciones domiciliarias");
     expect(html).toContain("Próximo plan");
+    expect(html).toContain("síntomas, cambios percibidos, dificultades o comentarios relevantes");
+    expect(html).toContain("Qué observás durante la visita");
+    expect(html).toContain("mejora mucho la utilidad del resumen compartible");
+    expect(html).toContain("Interpretación clínica de la visita");
+    expect(html).toContain("fatiga, dolor, síntomas o respuesta al esfuerzo");
     expect(html).toContain("Refiere menor dolor");
     expect(html).toContain("Marcha asistida");
     expect(html).toContain("Guardar nota clínica");

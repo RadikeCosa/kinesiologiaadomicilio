@@ -22,37 +22,37 @@ const CLINICAL_NOTE_FIELDS: Array<{
   {
     key: "subjective",
     label: "Subjetivo / referido por paciente",
-    helper: "Qué refiere el paciente o familia.",
+    helper: "Qué refiere el paciente o familia en esta visita: síntomas, cambios percibidos, dificultades o comentarios relevantes.",
   },
   {
     key: "objective",
     label: "Objetivo / observado",
-    helper: "Qué se observa durante la visita.",
+    helper: "Qué observás durante la visita: postura, movilidad, marcha, tolerancia o desempeño funcional.",
   },
   {
     key: "intervention",
     label: "Intervención realizada",
-    helper: "Trabajo realizado durante la sesión.",
+    helper: "Trabajo principal realizado durante la sesión. Este campo mejora mucho la utilidad del resumen compartible.",
   },
   {
     key: "assessment",
     label: "Evaluación o respuesta clínica",
-    helper: "Respuesta clínica o evolución observada en esta visita.",
+    helper: "Interpretación clínica de la visita: respuesta observada, cambios, progreso o dificultades relevantes.",
   },
   {
     key: "tolerance",
     label: "Tolerancia",
-    helper: "Tolerancia del paciente durante la sesión.",
+    helper: "Describí tolerancia, fatiga, dolor, síntomas o respuesta al esfuerzo durante la sesión.",
   },
   {
     key: "homeInstructions",
     label: "Indicaciones domiciliarias",
-    helper: "Indicaciones para continuar en casa.",
+    helper: "Qué debería continuar la persona o familia hasta la próxima visita. Mejora la utilidad del resumen compartible.",
   },
   {
     key: "nextPlan",
     label: "Próximo plan",
-    helper: "Plan previsto para la próxima visita.",
+    helper: "Próximo paso previsto del ciclo o foco de la próxima visita. Mejora la utilidad del resumen compartible.",
   },
 ];
 
@@ -122,6 +122,9 @@ export function EncounterClinicalNoteEditor({
           <h3 className="text-sm font-semibold text-slate-900">Nota clínica estructurada</h3>
           <p className="mt-1 max-w-2xl text-xs text-slate-600">
             Esta nota es la fuente clínica interna de la visita. Los resúmenes compartibles se generan a partir de estos datos, pero no reemplazan esta nota.
+          </p>
+          <p className="mt-1 max-w-2xl text-xs text-slate-600">
+            Si completás intervención, indicaciones domiciliarias y próximo plan, después suele quedar más fácil armar un resumen útil de la visita.
           </p>
           {!hasClinicalNoteContent(encounter.clinicalNote) ? (
             <p className="mt-2 rounded border border-dashed border-slate-300 bg-slate-50 p-2 text-xs text-slate-600">

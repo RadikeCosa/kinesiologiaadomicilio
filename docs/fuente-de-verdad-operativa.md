@@ -95,6 +95,7 @@ Reglas clave:
 
 - `Encounter` es la unidad principal de la visita realizada.
 - La nota clínica estructurada vive en `Encounter.extension[]`; no es el mismo artefacto que el resumen compartible.
+- El resumen compartible de visita sigue siendo texto derivado y efímero: no se persisten informes, ni comunicaciones clínicas, ni artefactos formales con `Communication`, `DocumentReference` o `Composition`.
 - Las métricas funcionales (`Observation`) son anexos opcionales de la visita.
 - La creación de visita puede tener éxito parcial si fallan observaciones funcionales: no hay rollback compensatorio del `Encounter`.
 

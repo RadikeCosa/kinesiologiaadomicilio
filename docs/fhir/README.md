@@ -36,6 +36,8 @@ El modelado vigente del repo usa:
 - `Condition`
 - `Practitioner`
 
+Estos son los únicos recursos FHIR activos documentados para el runtime actual. `Communication`, `DocumentReference` y `Composition` fueron evaluados como posible dirección futura para resúmenes o informes, pero hoy no forman parte de la implementación vigente.
+
 Dirección arquitectónica vigente:
 
 - lectura: `FHIR Server -> FHIR Client -> Repository -> Mapper -> Read model / loader -> UI`
