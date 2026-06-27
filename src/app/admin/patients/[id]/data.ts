@@ -112,6 +112,16 @@ export interface PatientClinicalRecentSummary {
   ctaLabel: "Ver gestión clínica" | "Registrar primera visita";
 }
 
+export async function loadActiveTreatmentEncountersCount(patientId: string, activeEpisodeId?: string): Promise<number> {
+  if (!patientId.trim() || !activeEpisodeId?.trim()) {
+    return 0;
+  }
+
+  const encounters = await listEncountersByPatientId(patientId);
+
+  return encounters.filter((encounter) => encounter.episodeOfCareId === activeEpisodeId).length;
+}
+
 function formatMetricValue(value: number, unit: "/10" | "min" | "s"): string {
   if (unit === "/10") {
     return `${value}/10`;
