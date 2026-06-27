@@ -55,7 +55,7 @@ En paralelo, el repo ya incluye una superficie privada clínica mínima y transi
 - `/admin/patients/[id]/encounters/new`
   Registro puntual de una nueva visita.
 - `/admin/patients/[id]/treatment`
-  Inicio, estado, contexto clínico longitudinal y cierre del tratamiento.
+  Inicio, estado, contexto general del tratamiento y cierre del tratamiento.
 
 ## Naming visible vigente
 
@@ -122,7 +122,7 @@ Reglas clave:
 - Hub de paciente con jerarquía clínica-operativa.
 - Gestión administrativa con solicitudes de atención.
 - Gestión clínica con listado de visitas, edición de nota, puntualidad operativa, tendencia funcional y resumen compartible.
-- Gestión de tratamiento con inicio, cierre, historial compacto y contexto clínico longitudinal.
+- Gestión de tratamiento con inicio, cierre, historial compacto y contexto general del tratamiento.
 - Configuración del profesional firmante single-user.
 
 ## FHIR y arquitectura

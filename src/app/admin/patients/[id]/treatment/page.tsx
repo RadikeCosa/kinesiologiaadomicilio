@@ -50,7 +50,7 @@ export default async function AdminPatientTreatmentPage({
   const { id } = await params;
   const resolvedSearchParams = await searchParams;
   const statusMessage = resolvedSearchParams?.status === "treatment-started"
-    ? "Tratamiento iniciado. Revisá o completá el marco clínico inicial."
+    ? "Tratamiento iniciado. Revisá o completá el contexto general del tratamiento."
     : undefined;
   const patient = await loadPatientDetail(id);
   const treatmentServiceRequestContext = patient
@@ -102,23 +102,22 @@ export default async function AdminPatientTreatmentPage({
         <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold text-slate-900">Tratamiento · Marco clínico del ciclo</h1>
+              <h1 className="text-2xl font-semibold text-slate-900">Tratamiento · Contexto general del tratamiento</h1>
               <span
                 className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge?.className}`}
               >
                 {treatmentBadge?.label}
               </span>
             </div>
-            <p className="mt-2 text-sm text-slate-600">Definí aquí el marco clínico longitudinal del ciclo activo. La evolución de cada visita se registra en Gestión clínica (Visitas).</p>
+            <p className="mt-2 text-sm text-slate-600">Organizá acá el contexto general del tratamiento. Las visitas se registran y se revisan desde Gestión clínica.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {activeEpisode ? (
-              <Link className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800" href={`/admin/patients/${patient.id}/encounters`}>
-                Ver / registrar visitas del ciclo
-              </Link>
-            ) : null}
             <Link
-              className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              className={`inline-flex items-center justify-center rounded px-3 py-2 text-sm font-medium ${
+                activeEpisode
+                  ? "bg-slate-900 text-white hover:bg-slate-800"
+                  : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+              }`}
               href={`/admin/patients/${patient.id}/encounters`}
             >
               Ir a gestión clínica
@@ -173,11 +172,13 @@ export default async function AdminPatientTreatmentPage({
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Tratamiento activo</h2>
             <p className="mt-3 text-sm text-slate-700">Inicio: {formatDateDisplay(activeEpisode.startDate)}</p>
+            <p className="mt-2 text-sm text-slate-700">Ya podés registrar visitas desde Gestión clínica. Mantené acá el contexto general que organiza el tratamiento.</p>
           </>
         ) : hasClosedEpisodes ? (
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">No hay tratamiento activo</h2>
-            <p className="mt-3 text-sm text-slate-700">Si corresponde continuar la atención, registrá una nueva solicitud para iniciar otro ciclo.</p>
+            <p className="mt-3 text-sm text-slate-700">No se pueden registrar visitas hasta iniciar un tratamiento activo.</p>
+            <p className="mt-2 text-sm text-slate-700">Si corresponde continuar la atención, primero registrá una nueva solicitud de atención y luego iniciá el tratamiento desde una solicitud aceptada.</p>
             <Link className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/administrative#service-requests`}>
               Ver historial de solicitudes
             </Link>
@@ -185,7 +186,8 @@ export default async function AdminPatientTreatmentPage({
         ) : (
           <>
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">No hay tratamientos registrados</h2>
-            <p className="mt-3 text-sm text-slate-700">Iniciá un tratamiento desde una solicitud aceptada.</p>
+            <p className="mt-3 text-sm text-slate-700">No se pueden registrar visitas hasta iniciar un tratamiento activo.</p>
+            <p className="mt-2 text-sm text-slate-700">El inicio debe hacerse desde una solicitud de atención aceptada.</p>
             <Link className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/administrative#service-requests`}>
               Ir a solicitudes
             </Link>
