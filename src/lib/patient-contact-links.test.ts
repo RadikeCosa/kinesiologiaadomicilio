@@ -58,7 +58,7 @@ describe("patient-contact-links", () => {
       mainContact: { phone: "+54 299 555 0202" },
     })).toEqual({
       href: "https://wa.me/542995550101",
-      visibleLabel: "WhatsApp paciente",
+      visibleLabel: "Mensaje",
       accessibleLabel: "Enviar WhatsApp al paciente",
       displayPhone: "+54 299 555-0101",
       targetKind: "patient",
@@ -71,7 +71,7 @@ describe("patient-contact-links", () => {
       mainContact: { phone: "+54 299 555 0202" },
     })).toEqual({
       href: "https://wa.me/542995550202",
-      visibleLabel: "WhatsApp contacto principal",
+      visibleLabel: "Mensaje",
       accessibleLabel: "Enviar WhatsApp al contacto principal",
       displayPhone: "+54 299 555-0202",
       targetKind: "mainContact",

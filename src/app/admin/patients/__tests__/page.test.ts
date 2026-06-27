@@ -90,13 +90,11 @@ describe("/admin/patients page", () => {
 
     expect(html).toContain("Pacientes");
     expect(html).toContain("href=\"/admin/patients/new\"");
+    expect(html).toContain("Listado operativo priorizado por estado.");
+    expect(html).toContain("href=\"/admin/patients?status=all\"");
     expect(html).toContain("href=\"/admin/patients/pat-active\"");
-    expect(html).toContain("href=\"/admin/patients/pat-ready\"");
-    expect(html).toContain("href=\"/admin/patients/pat-finished\"");
-    expect(html).toContain("href=\"/admin/patients/pat-pre\"");
     expect(html).toContain("PhoneContactActions");
     expect(html).toContain("Solicitud en evaluación");
-    expect(html).toContain("Solicitud aceptada sin iniciar");
     expect(html).toContain("En tratamiento");
 
     expect(html).toContain("href=\"/admin/patients/pat-active/encounters/new\"");
@@ -104,17 +102,18 @@ describe("/admin/patients page", () => {
     expect(html).not.toContain("href=\"/admin/patients/pat-finished/encounters/new\"");
     expect(html).not.toContain("href=\"/admin/patients/pat-pre/encounters/new\"");
     expect(html).not.toContain("href=\"/admin/patients/pat-ready/encounters/new\"");
+    expect(html).not.toContain("href=\"/admin/patients/pat-ready\"");
+    expect(html).not.toContain("href=\"/admin/patients/pat-finished\"");
+    expect(html).not.toContain("href=\"/admin/patients/pat-pre\"");
 
     expect(html).toContain("Dirección: Calle 1");
-    expect(html).toContain("Dirección: Sin dirección");
-    expect(html).toContain("Dirección: Calle 3");
     expect(html).toContain("href=\"https://www.google.com/maps/search/?api=1&amp;query=Calle%201%2C%20Neuqu%C3%A9n%2C%20Argentina\"");
-    expect(html).toContain("href=\"https://www.google.com/maps/search/?api=1&amp;query=Calle%203%2C%20Neuqu%C3%A9n%2C%20Argentina\"");
     expect(html).not.toContain("query=Calle%202");
-    expect(html).not.toContain(">Calle 1</a>");
+    expect(html).toContain(">Mapa</a>");
     expect(html).toContain("aria-label=\"Abrir en Maps\"");
     expect(html).toContain("rel=\"noreferrer\"");
     expect(html).toContain("target=\"_blank\"");
+    expect(html).toContain("border-t border-slate-200");
   });
 
   it("filters patients by status query param and marks the active filter", async () => {
@@ -125,15 +124,13 @@ describe("/admin/patients page", () => {
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("href=\"/admin/patients?status=active\"");
-    expect(html).toContain("href=\"/admin/patients?status=pending\"");
+    expect(html).toContain("href=\"/admin/patients\"");
     expect(html).toContain("href=\"/admin/patients?status=preliminary\"");
     expect(html).toContain("href=\"/admin/patients?status=ready_to_start\"");
     expect(html).toContain("href=\"/admin/patients?status=finished\"");
     expect(html).toContain("aria-current=\"page\"");
     expect(html).toContain("Estado operativo");
-    expect(html).toContain("Filtro principal del listado según situación actual del paciente.");
-    expect(html).toContain("Sin tratamiento activo");
+    expect(html).not.toContain("href=\"/admin/patients?status=pending\"");
     expect(html).not.toContain("Señales de solicitud");
     expect(html).not.toContain("Solicitudes en evaluación");
     expect(html).not.toContain("Aceptadas sin iniciar");
@@ -201,13 +198,16 @@ describe("/admin/patients page", () => {
     expect(readyHtml).not.toContain("href=\"/admin/patients/pat-pre\"");
     expect(readyHtml).not.toContain("href=\"/admin/patients/pat-active\"");
     expect(readyHtml).not.toContain("href=\"/admin/patients/pat-finished\"");
+    expect(readyHtml).toContain("Listo para iniciar");
+    expect(readyHtml).toContain("href=\"/admin/patients/pat-ready/treatment\"");
+    expect(readyHtml).not.toContain("Registrar visita");
   });
 
   it("renders filter-specific empty states", async () => {
     loadPatientsListWithOperationalSignalsMock.mockResolvedValueOnce([]);
     const allElement = await AdminPatientsPage({});
     const allHtml = renderToStaticMarkup(allElement);
-    expect(allHtml).toContain("No hay pacientes para mostrar.");
+    expect(allHtml).toContain("No hay pacientes en tratamiento.");
 
     loadPatientsListWithOperationalSignalsMock.mockResolvedValueOnce([]);
     const activeElement = await AdminPatientsPage({
@@ -251,7 +251,7 @@ describe("/admin/patients page", () => {
     const element = await AdminPatientsPage({});
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("No hay pacientes para mostrar.");
+    expect(html).toContain("No hay pacientes en tratamiento.");
     expect(html).not.toContain("Registrar visita");
   });
 
@@ -265,7 +265,7 @@ describe("/admin/patients page", () => {
 
     expect(html).toContain("href=\"/admin/patients/pat-active\"");
     expect(html).toContain("Solicitud en evaluación");
-    expect(html).toContain("Solicitud aceptada sin iniciar");
+    expect(html).toContain("Aceptada, sin iniciar");
     expect(html).not.toContain("Señales de solicitud");
     expect(html).not.toContain("href=\"/admin/patients?signal=");
   });

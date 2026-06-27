@@ -12,7 +12,7 @@ describe("PhoneContactActions", () => {
       entity: "patient",
     }));
 
-    expect(html).toContain("WhatsApp paciente");
+    expect(html).toContain(">Mensaje<");
     expect(html).toContain('aria-label="Enviar WhatsApp al paciente"');
     expect(html).toContain('title="Enviar WhatsApp al paciente"');
     expect(html).toContain("https://wa.me/542995550101");
@@ -25,7 +25,7 @@ describe("PhoneContactActions", () => {
       entity: "patient",
     }));
 
-    expect(html).toContain("WhatsApp contacto principal");
+    expect(html).toContain(">Mensaje<");
     expect(html).toContain('aria-label="Enviar WhatsApp al contacto principal"');
     expect(html).toContain('title="Enviar WhatsApp al contacto principal"');
     expect(html).toContain("https://wa.me/542995550202");
@@ -61,5 +61,6 @@ describe("PhoneContactActions", () => {
     expect(html).toContain('aria-label="Enviar WhatsApp al contacto principal"');
     expect(html).toContain('title="Enviar WhatsApp al contacto principal"');
     expect(html).not.toContain('aria-label="Enviar WhatsApp al paciente"');
+    expect(html).toContain(">Mensaje<");
   });
 });
