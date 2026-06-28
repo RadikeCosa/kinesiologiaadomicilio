@@ -85,6 +85,24 @@ describe("composeTreatmentReport", () => {
     expect(closure.initialText).toContain("Sintesis final y recomendaciones:");
   });
 
+  it("formats encounter statistics with the same human-readable convention as clinical management", () => {
+    const result = composeTreatmentReport(buildContext({
+      encounterSummary: {
+        count: 3,
+        firstVisitStartedAt: "2026-05-10T10:00:00.000Z",
+        lastVisitStartedAt: "2026-05-17T10:00:00.000Z",
+        averageDurationMinutes: 48,
+        totalDurationMinutes: 143,
+        averageDaysBetweenVisits: 0.75,
+      },
+    }));
+
+    expect(result.initialText).toContain("Duracion promedio registrada: 48 min");
+    expect(result.initialText).toContain("Tiempo total registrado: 2 h 23 min");
+    expect(result.initialText).toContain("Frecuencia promedio: menos de 1 día");
+    expect(result.initialText).not.toContain("0.75");
+  });
+
   it("omits empty sections and warns when important data is missing", () => {
     const result = composeTreatmentReport(buildContext({
       clinicalContext: {

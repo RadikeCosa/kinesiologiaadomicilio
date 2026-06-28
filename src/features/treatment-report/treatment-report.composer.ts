@@ -1,4 +1,8 @@
 import { formatDateDisplay } from "@/lib/patient-admin-display";
+import {
+  formatEncounterAverageVisitFrequency,
+  formatEncounterMinutesAsDuration,
+} from "@/lib/encounter-stats-display";
 
 import { evaluateTreatmentReportCompleteness } from "@/features/treatment-report/treatment-report.completeness";
 import type {
@@ -13,25 +17,6 @@ function normalizeText(value: string | undefined): string {
 
 function hasText(value: string | undefined): boolean {
   return Boolean(normalizeText(value));
-}
-
-function formatMinutes(value: number | null): string | null {
-  if (value === null) {
-    return null;
-  }
-
-  const hours = Math.floor(value / 60);
-  const minutes = value % 60;
-
-  if (hours === 0) {
-    return `${minutes} min`;
-  }
-
-  if (minutes === 0) {
-    return `${hours} h`;
-  }
-
-  return `${hours} h ${minutes} min`;
 }
 
 function formatFunctionalMetricLine(metric: TreatmentReportContext["functionalTrend"][number]): string {
@@ -130,14 +115,16 @@ export function composeTreatmentReport(
     context.encounterSummary.lastVisitStartedAt
       ? `Ultima sesion: ${formatDateDisplay(context.encounterSummary.lastVisitStartedAt)}`
       : "",
-    formatMinutes(context.encounterSummary.averageDurationMinutes)
-      ? `Duracion promedio registrada: ${formatMinutes(context.encounterSummary.averageDurationMinutes)}`
+    context.encounterSummary.averageDurationMinutes !== null
+      ? `Duracion promedio registrada: ${formatEncounterMinutesAsDuration(context.encounterSummary.averageDurationMinutes)}`
       : "",
-    formatMinutes(context.encounterSummary.totalDurationMinutes)
-      ? `Tiempo total registrado: ${formatMinutes(context.encounterSummary.totalDurationMinutes)}`
+    context.encounterSummary.totalDurationMinutes !== null
+      ? `Tiempo total registrado: ${formatEncounterMinutesAsDuration(context.encounterSummary.totalDurationMinutes)}`
       : "",
     typeof context.encounterSummary.averageDaysBetweenVisits === "number"
-      ? `Frecuencia promedio: una sesion cada ${Math.round(context.encounterSummary.averageDaysBetweenVisits)} dias`
+      ? `Frecuencia promedio: ${formatEncounterAverageVisitFrequency({
+        averageDaysBetweenEpisodeVisits: context.encounterSummary.averageDaysBetweenVisits,
+      }).toLowerCase()}`
       : "",
   ].filter(Boolean);
 

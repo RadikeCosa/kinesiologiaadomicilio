@@ -1,27 +1,12 @@
 import type { EncounterStats } from "@/domain/encounter/encounter-stats";
 import { formatDateTimeDisplay } from "@/lib/patient-admin-display";
+import {
+  formatEncounterAverageVisitFrequency,
+  formatEncounterMinutesAsDuration,
+} from "@/lib/encounter-stats-display";
 
 interface EncounterStatsSummaryProps {
   stats: EncounterStats;
-}
-
-function formatMinutesAsDuration(value: number | null): string {
-  if (value === null) {
-    return "—";
-  }
-
-  const hours = Math.floor(value / 60);
-  const minutes = value % 60;
-
-  if (hours === 0) {
-    return `${minutes} min`;
-  }
-
-  if (minutes === 0) {
-    return `${hours} h`;
-  }
-
-  return `${hours} h ${minutes} min`;
 }
 
 function formatLastVisit(value: string | null): string {
@@ -52,23 +37,6 @@ function formatFirstVisitFromTreatmentStart(stats: EncounterStats): string {
   }
 
   return `A los ${roundedDays} días del inicio`;
-}
-
-function formatAverageVisitFrequency(stats: EncounterStats): string {
-  if (stats.averageDaysBetweenEpisodeVisits === null) {
-    return "Aún no calculable";
-  }
-
-  if (stats.averageDaysBetweenEpisodeVisits < 1) {
-    return "Menos de 1 día";
-  }
-
-  if (stats.averageDaysBetweenEpisodeVisits < 1.5) {
-    return "Una visita cada 1 día";
-  }
-
-  const roundedDays = Math.round(stats.averageDaysBetweenEpisodeVisits);
-  return `Una visita cada ${roundedDays} días`;
 }
 
 interface MetricCardProps {
@@ -108,9 +76,9 @@ export function EncounterStatsSummary({ stats }: EncounterStatsSummaryProps) {
         </article>
         <MetricCard label="Última visita" value={formatLastVisit(stats.lastStartedAt)} />
         <MetricCard label="Primera visita" value={formatFirstVisitFromTreatmentStart(stats)} />
-        <MetricCard label="Frecuencia promedio" value={formatAverageVisitFrequency(stats)} />
-        <MetricCard label="Duración promedio" value={formatMinutesAsDuration(stats.averageDurationMinutes)} />
-        <MetricCard label="Tiempo total registrado" value={formatMinutesAsDuration(stats.totalDurationMinutes)} />
+        <MetricCard label="Frecuencia promedio" value={formatEncounterAverageVisitFrequency(stats)} />
+        <MetricCard label="Duración promedio" value={formatEncounterMinutesAsDuration(stats.averageDurationMinutes)} />
+        <MetricCard label="Tiempo total registrado" value={formatEncounterMinutesAsDuration(stats.totalDurationMinutes)} />
       </div>
 
       {stats.durationExcludedCount > 0 ? (
