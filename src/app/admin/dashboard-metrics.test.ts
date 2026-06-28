@@ -148,7 +148,7 @@ describe("dashboard-metrics", () => {
         metrics: [
           { label: "Pacientes en tratamiento", value: 3, tone: "emerald" },
           {
-            label: "Listos para iniciar",
+            label: "Preparar inicio",
             value: 3,
             tone: "slate",
             helper: "Pacientes sin tratamiento activo que ya no tienen bloqueos mínimos.",

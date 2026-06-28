@@ -192,13 +192,13 @@ describe("/admin/patients page", () => {
     });
     const readyHtml = renderToStaticMarkup(readyElement);
 
-    expect(readyHtml).toContain("Listos para iniciar");
+    expect(readyHtml).toContain("Preparar inicio");
     expect(readyHtml).toContain("aria-current=\"page\"");
     expect(readyHtml).toContain("href=\"/admin/patients/pat-ready\"");
     expect(readyHtml).not.toContain("href=\"/admin/patients/pat-pre\"");
     expect(readyHtml).not.toContain("href=\"/admin/patients/pat-active\"");
     expect(readyHtml).not.toContain("href=\"/admin/patients/pat-finished\"");
-    expect(readyHtml).toContain("Listo para iniciar");
+    expect(readyHtml).toContain("Preparar inicio");
     expect(readyHtml).toContain("href=\"/admin/patients/pat-ready/treatment\"");
     expect(readyHtml).not.toContain("Registrar visita");
   });
@@ -242,7 +242,7 @@ describe("/admin/patients page", () => {
       searchParams: Promise.resolve({ status: "ready_to_start" }),
     });
     const readyHtml = renderToStaticMarkup(readyElement);
-    expect(readyHtml).toContain("No hay pacientes listos para iniciar tratamiento.");
+    expect(readyHtml).toContain("No hay pacientes en preparación de inicio.");
   });
 
   it("renders empty state without register encounter CTA", async () => {

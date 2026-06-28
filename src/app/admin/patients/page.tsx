@@ -62,7 +62,7 @@ const STATUS_FILTERS: Array<{
   },
   {
     value: "ready_to_start",
-    label: "Listos para iniciar",
+    label: "Preparar inicio",
   },
   {
     value: "finished",
@@ -74,7 +74,7 @@ const EMPTY_STATE_BY_FILTER: Record<PatientsStatusFilter, string> = {
   active: "No hay pacientes en tratamiento.",
   pending: "No hay pacientes sin tratamiento activo.",
   preliminary: "No hay pacientes con datos pendientes para iniciar.",
-  ready_to_start: "No hay pacientes listos para iniciar tratamiento.",
+  ready_to_start: "No hay pacientes en preparación de inicio.",
   finished: "No hay pacientes con tratamiento finalizado.",
   all: "No hay pacientes para mostrar.",
 };

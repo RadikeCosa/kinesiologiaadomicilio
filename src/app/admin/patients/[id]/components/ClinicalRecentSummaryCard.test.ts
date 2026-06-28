@@ -24,15 +24,16 @@ describe("ClinicalRecentSummaryCard", () => {
         kinesiologicDiagnosisText: "Disfunción lumbopélvica",
         ctaLabel: "Ver gestión clínica",
       },
+      briefClinicalSignal: "Dolor: 4/10",
     }));
-    expect(html).toContain("Resumen clínico reciente");
-    expect(html).toContain("Síntesis rápida. El detalle está en Gestión clínica.");
+    expect(html).toContain("Estado actual");
+    expect(html).toContain("Orientación breve del caso. El detalle está en Gestión clínica y Tratamiento.");
     expect(html).toContain("Estado del tratamiento:</span> Tratamiento activo");
     expect(html).toContain("Última visita:</span> 08/05/2026");
     expect(html).toContain("Visitas del episodio:</span> 4");
-    expect(html).toContain("Diagnóstico médico:</span> Lumbalgia mecánica");
-    expect(html).toContain("Impresión kinésica:</span> Disfunción lumbopélvica");
-    expect(html).toContain("Dolor: 4/10 · Marcha: 12 min");
+    expect(html).toContain("Señal clínica breve:</span> Dolor: 4/10");
+    expect(html).not.toContain("Diagnóstico médico:");
+    expect(html).not.toContain("Impresión kinésica:");
     expect(html).toContain("Ver gestión clínica");
   });
 
@@ -47,10 +48,10 @@ describe("ClinicalRecentSummaryCard", () => {
         metricsEmptyLabel: "Sin registros funcionales todavía",
         ctaLabel: "Registrar primera visita",
       },
+      briefClinicalSignal: "Marco clínico incompleto",
     }));
-    expect(html).toContain("Marco clínico:</span> incompleto");
+    expect(html).toContain("Señal clínica breve:</span> Marco clínico incompleto");
     expect(html).toContain("Aún no registrada");
-    expect(html).toContain("Sin registros funcionales todavía");
     expect(html).toContain("Registrar primera visita");
   });
 });

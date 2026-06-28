@@ -56,6 +56,7 @@ En paralelo, el repo ya incluye una superficie privada clínica mínima y transi
   Registro puntual de una nueva visita.
 - `/admin/patients/[id]/treatment`
   Inicio, estado, contexto general del tratamiento y cierre del tratamiento.
+  Tambien concentra la preparacion del informe derivado de tratamiento/episodio en Fase 1.
 
 ## Naming visible vigente
 
@@ -105,6 +106,7 @@ Reglas clave:
 - `/encounters` lo consume en modo read-only.
 - Diagnóstico médico de referencia y diagnóstico kinésico se persisten como `Condition`.
 - Situación funcional inicial, objetivos terapéuticos y plan marco viven en `EpisodeOfCare.extension[]`.
+- El informe de tratamiento/episodio en Fase 1 se prepara en `/treatment/report`, se deriva de datos ya registrados, se puede editar localmente antes de copiarlo y no se persiste en FHIR.
 
 ## Estado funcional vigente
 
@@ -122,7 +124,7 @@ Reglas clave:
 - Hub de paciente con jerarquía clínica-operativa.
 - Gestión administrativa con solicitudes de atención.
 - Gestión clínica con listado de visitas, edición de nota, puntualidad operativa, tendencia funcional y resumen compartible.
-- Gestión de tratamiento con inicio, cierre, historial compacto y contexto general del tratamiento.
+- Gestión de tratamiento con inicio, cierre, historial compacto, contexto general del tratamiento e informe derivado de tratamiento/episodio no persistido.
 - Configuración del profesional firmante single-user.
 
 ## FHIR y arquitectura

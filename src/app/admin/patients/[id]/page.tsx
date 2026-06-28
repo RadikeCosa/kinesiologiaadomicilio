@@ -4,6 +4,7 @@ import Link from "next/link";
 import { MapsLinkAction } from "@/app/admin/patients/components/MapsLinkAction";
 import { PhoneContactBlock } from "@/app/admin/patients/components/PhoneContactBlock";
 import { loadPatientClinicalRecentSummary, loadPatientDetail, loadPatientHubServiceRequestContext } from "@/app/admin/patients/[id]/data";
+import { buildPatientHubViewModel } from "@/app/admin/patients/[id]/patient-hub-view-model";
 import {
   buildGoogleMapsSearchHref,
   formatAddressDisplay,
@@ -11,11 +12,9 @@ import {
 import {
   calculateAgeFromBirthDate,
   formatContactRelationshipLabel,
-  formatDateDisplay,
 } from "@/lib/patient-admin-display";
 
 import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-badge";
-import { EPISODE_OF_CARE_CLOSURE_REASON_LABELS } from "@/domain/episode-of-care/episode-of-care.types";
 import { ClinicalRecentSummaryCard } from "@/app/admin/patients/[id]/components/ClinicalRecentSummaryCard";
 import { PatientIdentityHeaderCard } from "@/app/admin/patients/[id]/components/PatientIdentityHeaderCard";
 
@@ -34,118 +33,29 @@ export async function generateMetadata({
   };
 }
 
-function getTreatmentSummary(
-  patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>,
-) {
-  const treatmentBadge = getTreatmentBadgePresentation(
-    patient.operationalStatus,
-  );
-
-  if (patient.activeEpisode) {
-    return {
-      badgeLabel: treatmentBadge.label,
-      badgeClassName: treatmentBadge.className,
-      detail: `Inicio: ${formatDateDisplay(patient.activeEpisode.startDate)}`,
-    };
-  }
-
-  if (patient.latestEpisode?.status === "finished") {
-    return {
-      badgeLabel: treatmentBadge.label,
-      badgeClassName: treatmentBadge.className,
-      detail: `Fin: ${formatDateDisplay(patient.latestEpisode.endDate)}`,
-    };
-  }
-
-  return {
-    badgeLabel: treatmentBadge.label,
-    badgeClassName: treatmentBadge.className,
-    detail: null,
-  };
-}
-
-function getPrimaryPatientAction(
-  patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>,
-): "clinical" | "administrative" {
-  return patient.activeEpisode ? "clinical" : "administrative";
-}
-
-function getNextStepSuggestion(input: {
-  hasActiveEpisode: boolean;
-  latestEpisodeFinished: boolean;
-  serviceRequestContext: Awaited<ReturnType<typeof loadPatientHubServiceRequestContext>> | null;
-}) {
-  if (input.hasActiveEpisode) {
-    return "Registrá visitas desde Gestión clínica.";
-  }
-
-  if (input.serviceRequestContext?.pendingAcceptedServiceRequestId) {
-    return "Iniciá el tratamiento desde la solicitud aceptada.";
-  }
-
-  if (input.serviceRequestContext?.hasInReview) {
-    return "Continuá la resolución administrativa de la solicitud.";
-  }
-
-  if (!input.serviceRequestContext?.hasServiceRequests) {
-    return "Registrá la primera solicitud de atención.";
-  }
-
-  if (input.latestEpisodeFinished) {
-    return "Si requiere un nuevo ciclo, registrá una nueva solicitud de atención.";
-  }
-
-  return "Registrá la primera solicitud de atención.";
-}
-
-function getLatestServiceRequestSummary(serviceRequestContext: Awaited<ReturnType<typeof loadPatientHubServiceRequestContext>> | null): string | null {
-  if (!serviceRequestContext?.latestClosedRequestStatus || !serviceRequestContext.latestClosedRequestReason) {
-    return null;
-  }
-
-  const statusLabel = serviceRequestContext.latestClosedRequestStatus === "closed_without_treatment"
-    ? "No inició"
-    : "Cancelada";
-
-  return `Última solicitud: ${statusLabel} — Motivo: ${serviceRequestContext.latestClosedRequestReason}`;
-}
-
-function getLatestEpisodeSummary(patient: NonNullable<Awaited<ReturnType<typeof loadPatientDetail>>>): string | null {
-  if (patient.latestEpisode?.status !== "finished" || !patient.latestEpisode.closureReason) {
-    return null;
-  }
-
-  const reasonLabel = EPISODE_OF_CARE_CLOSURE_REASON_LABELS[patient.latestEpisode.closureReason];
-
-  return `Último tratamiento: finalizado — Motivo: ${reasonLabel}`;
-}
-
 export default async function AdminPatientDetailPage({
   params,
 }: AdminPatientDetailPageProps) {
   const { id } = await params;
   const patient = await loadPatientDetail(id);
-
-  const treatmentSummary = patient ? getTreatmentSummary(patient) : null;
   const serviceRequestContext = patient
     ? await loadPatientHubServiceRequestContext(patient.id)
     : null;
   const clinicalRecentSummary = patient
     ? await loadPatientClinicalRecentSummary(patient.id)
     : null;
-  const primaryAction = patient ? getPrimaryPatientAction(patient) : null;
-  const isClinicalPrimary = primaryAction === "clinical";
   const mapsHref = patient ? buildGoogleMapsSearchHref(patient.address) : null;
   const addressLabel = patient ? formatAddressDisplay(patient.address) : null;
   const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
-  const latestServiceRequestSummary = getLatestServiceRequestSummary(serviceRequestContext);
-  const latestEpisodeSummary = patient ? getLatestEpisodeSummary(patient) : null;
-  const nextStepSuggestion = patient
-    ? getNextStepSuggestion({
-      hasActiveEpisode: Boolean(patient.activeEpisode),
-      latestEpisodeFinished: patient.latestEpisode?.status === "finished",
-      serviceRequestContext,
-    })
+  const treatmentBadge = patient
+    ? getTreatmentBadgePresentation(patient.operationalStatus)
+    : null;
+  const hubViewModel = patient && serviceRequestContext && clinicalRecentSummary
+    ? buildPatientHubViewModel({
+        patient,
+        clinicalRecentSummary,
+        serviceRequestContext,
+      })
     : null;
 
   return (
@@ -161,32 +71,47 @@ export default async function AdminPatientDetailPage({
         <div className="mt-3 space-y-4">
           <PatientIdentityHeaderCard
             fullName={patient.fullName}
-            treatmentBadgeClassName={treatmentSummary?.badgeClassName ?? ""}
-            treatmentBadgeLabel={treatmentSummary?.badgeLabel ?? ""}
+            treatmentBadgeClassName={treatmentBadge?.className ?? ""}
+            treatmentBadgeLabel={treatmentBadge?.label ?? ""}
             dni={patient.dni}
             age={patientAge}
-            treatmentDetail={treatmentSummary?.detail}
+            treatmentDetail={hubViewModel?.headerStatusDetail}
           />
 
-          <section className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
+          {hubViewModel?.missingRequirementLabels.length ? (
+            <section className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {hubViewModel.missingRequirementLabels.map((label) => (
+                  <span
+                    className="inline-flex items-center rounded-full border border-amber-300 bg-white px-2 py-0.5 text-xs font-medium text-amber-900"
+                    key={label}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          <section className="grid gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)] lg:items-start">
             <div className="space-y-3">
-              {clinicalRecentSummary ? (
+              {clinicalRecentSummary && hubViewModel ? (
                 <ClinicalRecentSummaryCard
                   patientId={patient.id}
                   summary={clinicalRecentSummary}
+                  briefClinicalSignal={hubViewModel.briefClinicalSignal}
                   showCta={false}
                 />
               ) : null}
 
               <section className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-800">
                 <h2 className="text-sm font-semibold text-slate-900">Contacto operativo</h2>
-
-                <div className="mt-2 grid gap-2">
-                  <section className="rounded-md border border-slate-300 bg-white p-2.5">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-900">
-                      Paciente
-                    </h3>
-                    <div className="mt-1.5">
+                <div className="mt-3 grid gap-3">
+                  <div className="grid gap-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Teléfono del paciente
+                    </p>
+                    <div>
                       <PhoneContactBlock
                         phone={patient.phone}
                         entity="patient"
@@ -195,92 +120,74 @@ export default async function AdminPatientDetailPage({
                         phoneLabel="Teléfono del paciente"
                       />
                     </div>
-                  </section>
-
-                  <section className="rounded-md border border-slate-200 bg-slate-50 p-2.5">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
-                      Dirección
-                    </h3>
-                    <p className="mt-1.5 text-sm text-slate-700">{addressLabel}</p>
-                    {mapsHref ? (
-                      <MapsLinkAction
-                        className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-sky-700 underline-offset-2 hover:underline"
-                        href={mapsHref}
-                      />
-                    ) : null}
-                  </section>
+                  </div>
 
                   {patient.mainContact ? (
-                    <section className="rounded-md border border-slate-200 bg-slate-50 p-2.5">
-                      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+                    <div className="grid gap-1">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                         Contacto principal
-                      </h3>
-                      <dl className="mt-1.5 space-y-1">
+                      </p>
+                      <dl className="space-y-1 text-sm text-slate-700">
                         <div>
                           <dt className="font-medium">Nombre</dt>
                           <dd>{patient.mainContact.name ?? "No informado"}</dd>
                         </div>
                         <div>
                           <dt className="font-medium">Vínculo</dt>
-                          <dd>
-                            {formatContactRelationshipLabel(
-                              patient.mainContact.relationship,
-                            )}
-                          </dd>
+                          <dd>{formatContactRelationshipLabel(patient.mainContact.relationship)}</dd>
                         </div>
                       </dl>
-                      <div className="mt-1.5">
+                      <div>
                         <PhoneContactBlock
                           phone={patient.mainContact.phone}
                           entity="mainContact"
                           phoneLabel="Teléfono del contacto principal"
                         />
                       </div>
-                    </section>
+                    </div>
                   ) : null}
+
+                  <div className="grid gap-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                      Dirección
+                    </p>
+                    <p className="text-sm text-slate-700">{addressLabel}</p>
+                    {mapsHref ? (
+                      <MapsLinkAction
+                        className="inline-flex items-center gap-1 text-xs font-medium text-sky-700 underline-offset-2 hover:underline"
+                        href={mapsHref}
+                      />
+                    ) : null}
+                  </div>
                 </div>
               </section>
-
-              {(latestEpisodeSummary || latestServiceRequestSummary) ? (
-                <section className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-                  {latestEpisodeSummary ? (
-                    <p>{latestEpisodeSummary}</p>
-                  ) : null}
-                  {latestServiceRequestSummary ? (
-                    <p className={latestEpisodeSummary ? "mt-1" : undefined}>{latestServiceRequestSummary}</p>
-                  ) : null}
-                </section>
-              ) : null}
             </div>
 
             <aside className="space-y-3">
-              {nextStepSuggestion ? (
+              {hubViewModel ? (
                 <section className="rounded-md border border-sky-200 bg-sky-50 px-3 py-2">
                   <h2 className="text-sm font-semibold text-sky-950">Próxima acción recomendada</h2>
-                  <p className="mt-1 text-sm text-sky-900">{nextStepSuggestion}</p>
-                  <p className="mt-1 text-xs text-sky-800">Priorizá una acción y continuá en la superficie indicada.</p>
+                  <p className="mt-1 text-sm text-sky-900">{hubViewModel.primaryAction.supportingCopy}</p>
+                  <Link
+                    className="mt-3 inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
+                    href={hubViewModel.primaryAction.href}
+                  >
+                    {hubViewModel.primaryAction.label}
+                  </Link>
                 </section>
               ) : null}
 
               <section className="rounded-md border border-slate-200 bg-white p-3">
-                <h2 className="text-sm font-semibold text-slate-900">Acciones principales</h2>
+                <h2 className="text-sm font-semibold text-slate-900">Navegación secundaria</h2>
                 <div className="mt-2 grid gap-2 sm:grid-cols-1">
                   <Link
-                    className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
-                      isClinicalPrimary
-                        ? "bg-slate-900 text-white hover:bg-slate-700"
-                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                    }`}
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                     href={`/admin/patients/${patient.id}/encounters`}
                   >
                     Gestión clínica
                   </Link>
                   <Link
-                    className={`inline-flex items-center justify-center whitespace-nowrap rounded px-3 py-2 text-sm font-medium ${
-                      !isClinicalPrimary
-                        ? "bg-slate-900 text-white hover:bg-slate-700"
-                        : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-                    }`}
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                     href={`/admin/patients/${patient.id}/administrative`}
                   >
                     Gestión administrativa
@@ -291,25 +198,15 @@ export default async function AdminPatientDetailPage({
                   >
                     Tratamiento
                   </Link>
+                  {!patient.activeEpisode ? (
+                    <Link
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                      href={`/admin/patients/${patient.id}/administrative?newServiceRequest=1#service-requests`}
+                    >
+                      Crear solicitud de atención
+                    </Link>
+                  ) : null}
                 </div>
-
-                {!patient.activeEpisode ? (
-                  <Link
-                    className="mt-2 inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                    href={`/admin/patients/${patient.id}/administrative?newServiceRequest=1#service-requests`}
-                  >
-                    Crear solicitud de atención
-                  </Link>
-                ) : null}
-
-                {patient.activeEpisode ? (
-                  <Link
-                    className="mt-2 inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                    href={`/admin/patients/${patient.id}/encounters/new`}
-                  >
-                    Registrar visita
-                  </Link>
-                ) : null}
               </section>
             </aside>
           </section>

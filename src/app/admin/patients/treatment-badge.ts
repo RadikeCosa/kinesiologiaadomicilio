@@ -14,7 +14,7 @@ const TREATMENT_BADGES_BY_STATUS: Record<
     className: "border-rose-200 bg-rose-50 text-rose-800",
   },
   ready_to_start: {
-    label: "Listo para iniciar",
+    label: "Preparar inicio",
     className: "border-sky-200 bg-sky-50 text-sky-800",
   },
   active_treatment: {

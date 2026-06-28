@@ -212,6 +212,14 @@ export default async function AdminPatientTreatmentPage({
                 Ir a gestión clínica
               </Link>
             ) : null}
+            {activeEpisode ? (
+              <Link
+                className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                href={`/admin/patients/${patient.id}/treatment/report?mode=progress&episodeId=${activeEpisode.id}`}
+              >
+                Preparar informe de progreso
+              </Link>
+            ) : null}
             <Link
               className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
               href={`/admin/patients/${patient.id}/administrative`}
@@ -250,9 +258,14 @@ export default async function AdminPatientTreatmentPage({
               <p>Cierre: {latestClosedEpisode.endDate ? formatDateDisplay(latestClosedEpisode.endDate) : "Sin fecha registrada"}</p>
               <p>Motivo: {latestClosedEpisode.closureReason ? EPISODE_OF_CARE_CLOSURE_REASON_LABELS[latestClosedEpisode.closureReason as keyof typeof EPISODE_OF_CARE_CLOSURE_REASON_LABELS] ?? latestClosedEpisode.closureReason : "Sin dato"}</p>
             </div>
-            <Link className="mt-3 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/administrative#service-requests`}>
-              Gestión administrativa para nuevo ciclo
-            </Link>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/treatment/report?mode=closure&episodeId=${latestClosedEpisode.id}`}>
+                Preparar informe de cierre
+              </Link>
+              <Link className="inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100" href={`/admin/patients/${patient.id}/administrative#service-requests`}>
+                Gestión administrativa para nuevo ciclo
+              </Link>
+            </div>
           </section>
         ) : null}
       </section>

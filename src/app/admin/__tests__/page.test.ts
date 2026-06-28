@@ -49,7 +49,7 @@ describe("/admin page", () => {
     expect(html).toContain("En seguimiento");
     expect(html).toContain("Contexto / histórico");
     expect(html).toContain("Faltan datos");
-    expect(html).toContain("Listos para iniciar");
+    expect(html).toContain("Preparar inicio");
     expect(html).not.toContain("Sin tratamiento iniciado");
     expect(html).toContain("Pedidos que todavía requieren revisión.");
     expect(html).toContain("Solicitudes aceptadas que todavía no iniciaron atención.");

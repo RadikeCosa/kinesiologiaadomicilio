@@ -90,28 +90,29 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Gestión administrativa");
     expect(html).toContain("Tratamiento");
     expect(html).toContain("Próxima acción recomendada");
-    expect(html).toContain("Priorizá una acción y continuá en la superficie indicada.");
-    expect(html).toContain("Resumen clínico reciente");
-    expect(html).toContain("Síntesis rápida. El detalle está en Gestión clínica.");
+    expect(html).toContain("Estado actual");
+    expect(html).toContain("Orientación breve del caso. El detalle está en Gestión clínica y Tratamiento.");
     expect(html).toContain("Última visita:</span> No disponible");
-    expect(html).not.toContain("href=\"/admin/patients/pat-1/encounters\">Ver gestión clínica");
+    expect(html).toContain("Navegación secundaria");
+    expect(html).not.toContain("Diagnóstico médico:");
+    expect(html).not.toContain("Impresión kinésica:");
 
-    const summaryIndex = html.indexOf("Resumen clínico reciente");
+    const summaryIndex = html.indexOf("Estado actual");
     const contactIndex = html.indexOf("Contacto operativo");
     const suggestionIndex = html.indexOf("Próxima acción recomendada");
-    const actionsIndex = html.indexOf("Acciones principales");
+    const actionsIndex = html.indexOf("Navegación secundaria");
 
     expect(contactIndex).toBeGreaterThan(summaryIndex);
-    expect(suggestionIndex).toBeGreaterThan(contactIndex);
-    expect(actionsIndex).toBeGreaterThan(suggestionIndex);
+    expect(actionsIndex).toBeGreaterThan(-1);
+    expect(suggestionIndex).toBeGreaterThan(-1);
 
-    const patientContactIndex = html.indexOf("Paciente");
-    const addressIndex = html.indexOf("Dirección");
+    const patientContactIndex = html.indexOf("Teléfono del paciente");
     const mainContactIndex = html.indexOf("Contacto principal");
+    const addressIndex = html.indexOf("Dirección");
 
     expect(patientContactIndex).toBeGreaterThan(-1);
-    expect(addressIndex).toBeGreaterThan(patientContactIndex);
-    expect(mainContactIndex).toBeGreaterThan(addressIndex);
+    expect(mainContactIndex).toBeGreaterThan(patientContactIndex);
+    expect(addressIndex).toBeGreaterThan(mainContactIndex);
   });
 
   it("renders compact diagnosis rows in clinical summary without edit controls", async () => {
@@ -119,14 +120,16 @@ describe("/admin/patients/[id] page", () => {
     mockClinicalRecentSummary({
       medicalReferenceDiagnosisText: "Artrosis de rodilla",
       kinesiologicDiagnosisText: "Déficit de control femoropatelar",
+      metrics: [{ label: "Dolor", value: "4/10" }],
     });
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient());
 
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Diagnóstico médico:</span> Artrosis de rodilla");
-    expect(html).toContain("Impresión kinésica:</span> Déficit de control femoropatelar");
+    expect(html).toContain("Señal clínica breve:</span> Dolor: 4/10");
+    expect(html).not.toContain("Artrosis de rodilla");
+    expect(html).not.toContain("Déficit de control femoropatelar");
     expect(html).not.toContain("Editar diagnóstico médico");
     expect(html).not.toContain("Agregar diagnóstico médico");
     expect(html).not.toContain("<form");
@@ -155,7 +158,7 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Edad:");
     expect(html).toContain("Registrar visita");
     expect(html).toContain("DNI: No informado");
-    expect(html).toContain("Registrá visitas desde Gestión clínica.");
+    expect(html).toContain("El tratamiento está activo. Registrá la próxima visita desde Gestión clínica.");
   });
 
   it("uses main contact actions in hub when patient phone is missing", async () => {
@@ -175,8 +178,8 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
     expect(html).toContain("Teléfono del paciente:</span> No informado");
-    expect((html.match(/WhatsApp contacto principal/g) ?? []).length).toBe(1);
-    expect(html).not.toContain("WhatsApp paciente");
+    expect(html).toContain("Enviar WhatsApp al contacto principal");
+    expect(html).not.toContain("Enviar WhatsApp al paciente");
   });
 
   it("prioritizes patient channel in hub when both patient and main contact phones exist", async () => {
@@ -197,9 +200,10 @@ describe("/admin/patients/[id] page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Teléfono del paciente:</span> +54 299 555-0101");
-    expect(html).toContain("WhatsApp paciente");
+    expect(html).toContain("Enviar WhatsApp al paciente");
     expect(html).toContain("https://wa.me/542995550101");
     expect(html).toContain("Teléfono del contacto principal:</span> +54 299 555-0202");
+    expect(html).toContain("Enviar WhatsApp al contacto principal");
     expect(html).toContain("https://wa.me/542995550202");
   });
 
@@ -212,7 +216,9 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Continuá la resolución administrativa de la solicitud.");
+    expect(html).toContain("Preparar inicio");
+    expect(html).not.toContain("Listo para iniciar");
+    expect(html).toContain("Todavía no hay una solicitud aceptada lista para iniciar tratamiento.");
   });
 
   it("shows next-step suggestion for accepted pending treatment", async () => {
@@ -223,7 +229,8 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Iniciá el tratamiento desde la solicitud aceptada.");
+    expect(html).toContain("Ya hay una solicitud aceptada disponible para iniciar un nuevo tratamiento.");
+    expect(html).toContain("href=\"/admin/patients/pat-1/treatment\"");
   });
 
   it("shows next-step suggestion for finished treatment without useful service request", async () => {
@@ -237,7 +244,7 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Si requiere un nuevo ciclo, registrá una nueva solicitud de atención.");
+    expect(html).toContain("Si corresponde un nuevo ciclo, registrá o resolvé una nueva solicitud de atención.");
   });
 
   it("renders direct CTA to create service request in administrative", async () => {
@@ -254,6 +261,58 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain('href="/admin/patients/pat-1/administrative?newServiceRequest=1#service-requests"');
   });
 
+  it("does not render Registrar visita for preliminary", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient());
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).not.toContain('href="/admin/patients/pat-1/encounters/new"');
+  });
+
+  it("does not render Registrar visita for ready_to_start", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        operationalStatus: "ready_to_start",
+        address: "Belgrano 123",
+        phone: "+54 299 555 0101",
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).not.toContain('href="/admin/patients/pat-1/encounters/new"');
+  });
+
+  it("does not render Registrar visita for finished_treatment", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary({
+      treatmentStatusLabel: "Tratamiento finalizado",
+    });
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        operationalStatus: "finished_treatment",
+        latestEpisode: {
+          id: "ep-1",
+          patientId: "pat-1",
+          status: "finished",
+          startDate: "2026-01-01",
+          endDate: "2026-02-01",
+        },
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).not.toContain('href="/admin/patients/pat-1/encounters/new"');
+  });
+
   it("renders not found state when patient does not exist", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(null);
 
@@ -263,33 +322,4 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Paciente no encontrado");
     expect(html).toContain("No se encontró el paciente solicitado.");
   });
-
-
-  it("renders compact operational reasons for latest finished treatment and latest closed request", async () => {
-    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({
-      hasServiceRequests: true,
-      hasInReview: false,
-      pendingAcceptedServiceRequestId: undefined,
-      latestClosedRequestStatus: "closed_without_treatment",
-      latestClosedRequestReason: "Motivos económicos",
-    });
-    loadPatientDetailMock.mockResolvedValueOnce(buildPatient({
-      operationalStatus: "finished_treatment",
-      latestEpisode: {
-        id: "ep-1",
-        patientId: "pat-1",
-        status: "finished",
-        startDate: "2026-01-01",
-        endDate: "2026-02-01",
-        closureReason: "treatment_completed",
-      },
-    }));
-
-    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
-    const html = renderToStaticMarkup(element);
-
-    expect(html).toContain("Último tratamiento: finalizado — Motivo: Tratamiento completado");
-    expect(html).toContain("Última solicitud: No inició — Motivo: Motivos económicos");
-  });
-
 });

@@ -167,7 +167,7 @@ export function buildAdminDashboardSections(
           tone: "emerald",
         },
         {
-          label: "Listos para iniciar",
+          label: "Preparar inicio",
           value: dashboard.operationalSummary.readyToStart,
           tone: "slate",
           helper: "Pacientes sin tratamiento activo que ya no tienen bloqueos mínimos.",

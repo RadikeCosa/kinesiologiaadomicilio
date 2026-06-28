@@ -84,6 +84,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Solicitud aceptada disponible");
+    expect(html).toContain("Listo para iniciar");
     expect(html).toContain("Fecha: 10/04/2026");
     expect(html).toContain("Motivo: Dolor lumbar");
     expect(html).toContain("Diagnóstico informado: Lumbalgia");
@@ -119,6 +120,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain(">Paciente</p>");
     expect(html).toContain(">Tratamiento</p>");
     expect(html).toContain("Sin tratamiento activo");
+    expect(html).not.toContain("Listo para iniciar");
     expect(html).toContain("Para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
     expect(html).toContain("Ver solicitudes");
     expect(html).toContain('href="/admin/patients/pat-1/administrative#service-requests"');
@@ -225,6 +227,8 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html.indexOf("TreatmentClinicalContextForm")).toBeLessThan(html.indexOf("Atajos útiles"));
     expect(html.indexOf("Atajos útiles")).toBeLessThan(html.indexOf("Cerrar tratamiento"));
     expect(html).toContain("Ir a gestión clínica");
+    expect(html).toContain("Preparar informe de progreso");
+    expect(html).toContain('href="/admin/patients/pat-1/treatment/report?mode=progress&amp;episodeId=epi-1"');
     expect(html).toContain("Completá el contexto clínico acá y registrá cada visita desde Gestión clínica.");
     expect(html.match(/href=\"\/admin\/patients\/pat-1\/encounters\"/g)?.length).toBe(1);
     expect(html).not.toContain("Ver / registrar visitas del ciclo");
@@ -272,6 +276,8 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain("Sin tratamiento activo");
     expect(html).toContain("Para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
     expect(html).toContain("Último tratamiento finalizado: 01/03/2026.");
+    expect(html).toContain("Preparar informe de cierre");
+    expect(html).toContain('href="/admin/patients/pat-1/treatment/report?mode=closure&amp;episodeId=epi-closed"');
     expect(html).toContain('href="/admin/patients/pat-1/administrative#service-requests"');
   });
 
@@ -328,6 +334,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain("En curso");
     expect(html).toContain("2 sesiones registradas");
     expect(html).toContain("Completá el contexto clínico acá y registrá cada visita desde Gestión clínica.");
+    expect(html).toContain("Preparar informe de progreso");
     expect(html).toContain("TreatmentClinicalContextForm");
     expect(html).toContain("Historial de ciclos cerrados");
     expect(html).toContain("Bloque secundario de antecedentes. No reemplaza el estado actual del tratamiento.");

@@ -65,9 +65,10 @@ describe("PatientAdministrativeEditor", () => {
 
     expect(html).toContain("Teléfono del paciente:</span> No informado");
     expect(html).not.toContain("WhatsApp paciente");
-    expect(html).toContain("WhatsApp contacto principal");
+    expect(html).toContain(">Mensaje<");
     expect(html).toContain('aria-label="Enviar WhatsApp al contacto principal"');
     expect(html).toContain('title="Enviar WhatsApp al contacto principal"');
+    expect(html).toContain("https://wa.me/542995550102");
   });
 
   it("shows explicit fallbacks for missing administrative fields", () => {
