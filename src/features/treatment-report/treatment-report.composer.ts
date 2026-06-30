@@ -3,6 +3,10 @@ import {
   formatEncounterAverageVisitFrequency,
   formatEncounterMinutesAsDuration,
 } from "@/lib/encounter-stats-display";
+import {
+  formatFunctionalDelta,
+  formatFunctionalValue,
+} from "@/app/admin/patients/[id]/encounters/functional-trend";
 
 import { evaluateTreatmentReportCompleteness } from "@/features/treatment-report/treatment-report.completeness";
 import type {
@@ -20,16 +24,13 @@ function hasText(value: string | undefined): boolean {
 }
 
 function formatFunctionalMetricLine(metric: TreatmentReportContext["functionalTrend"][number]): string {
-  const latestUnit = metric.unit === "/10" ? `${metric.latestValue}/10` : `${metric.latestValue} ${metric.unit}`;
+  const latestUnit = formatFunctionalValue(metric.code, metric.latestValue);
 
   if (typeof metric.delta !== "number") {
     return `- ${metric.label}: ${latestUnit}`;
   }
 
-  const sign = metric.delta > 0 ? "+" : "";
-  const deltaValue = metric.unit === "/10"
-    ? `${sign}${metric.delta}`
-    : `${sign}${metric.delta} ${metric.unit}`;
+  const deltaValue = formatFunctionalDelta(metric.code, metric.delta);
 
   return `- ${metric.label}: ${latestUnit} (cambio vs previo: ${deltaValue})`;
 }

@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 
 import {
   createServiceRequestSchema,
+  updateServiceRequestRequestedAtSchema,
   updateServiceRequestStatusSchema,
 } from "@/domain/service-request/service-request.schemas";
 import {
   createServiceRequest,
   getServiceRequestById,
+  updateServiceRequestRequestedAt,
   updateServiceRequestStatus,
 } from "@/infrastructure/repositories/service-request.repository";
 import {
@@ -29,6 +31,10 @@ export interface CreatePatientServiceRequestActionResult {
 }
 
 export interface UpdatePatientServiceRequestStatusActionResult {
+  ok: boolean;
+  message: string;
+}
+export interface UpdatePatientServiceRequestRequestedAtActionResult {
   ok: boolean;
   message: string;
 }
@@ -67,6 +73,15 @@ function isValidIsoDate(value: string): boolean {
   const day = Number(match[3]);
   const date = new Date(Date.UTC(year, month - 1, day));
   return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+function isTerminalServiceRequestStatus(status: string): boolean {
+  return status === "cancelled" || status === "closed_without_treatment" || status === "entered_in_error";
+}
+
+async function isServiceRequestLinkedToTreatment(serviceRequestId: string): Promise<boolean> {
+  const linkedEpisodes = await listEpisodeOfCareByIncomingReferral(serviceRequestId);
+  return linkedEpisodes.length > 0;
 }
 
 export async function acceptAndStartTreatmentFromServiceRequestAction(
@@ -263,6 +278,123 @@ export async function updatePatientServiceRequestStatusAction(
     const message = error instanceof Error && error.message
       ? error.message
       : "No se pudo actualizar la solicitud de atención.";
+
+    return {
+      ok: false,
+      message,
+    };
+  }
+}
+
+export async function updatePatientServiceRequestRequestedAtAction(
+  patientId: string,
+  formData: FormData,
+): Promise<UpdatePatientServiceRequestRequestedAtActionResult> {
+  try {
+    const parsedInput = updateServiceRequestRequestedAtSchema.parse({
+      id: getOptionalFormValue(formData, "id") ?? getOptionalFormValue(formData, "serviceRequestId"),
+      requestedAt: getOptionalFormValue(formData, "requestedAt"),
+    });
+
+    const existingServiceRequest = await getServiceRequestById(parsedInput.id);
+
+    if (!existingServiceRequest || existingServiceRequest.patientId !== patientId) {
+      return {
+        ok: false,
+        message: "No se pudo actualizar la fecha de la solicitud.",
+      };
+    }
+
+    if (isTerminalServiceRequestStatus(existingServiceRequest.status)) {
+      return {
+        ok: false,
+        message: "No se pudo actualizar la fecha de la solicitud.",
+      };
+    }
+
+    if (await isServiceRequestLinkedToTreatment(existingServiceRequest.id)) {
+      return {
+        ok: false,
+        message: "No se puede editar ni eliminar una solicitud ya usada para iniciar tratamiento.",
+      };
+    }
+
+    await updateServiceRequestRequestedAt(parsedInput);
+    revalidatePath("/admin/patients");
+    revalidatePath(`/admin/patients/${patientId}`);
+    revalidatePath(`/admin/patients/${patientId}/administrative`);
+    revalidatePath(`/admin/patients/${patientId}/treatment`);
+
+    return {
+      ok: true,
+      message: "Fecha actualizada correctamente.",
+    };
+  } catch (error) {
+    const message = error instanceof Error && error.message
+      ? error.message
+      : "No se pudo actualizar la fecha de la solicitud.";
+
+    return {
+      ok: false,
+      message,
+    };
+  }
+}
+
+export async function markPatientServiceRequestAsEnteredInErrorAction(
+  patientId: string,
+  formData: FormData,
+): Promise<UpdatePatientServiceRequestStatusActionResult> {
+  try {
+    const id = getOptionalFormValue(formData, "id") ?? getOptionalFormValue(formData, "serviceRequestId");
+
+    if (!id?.trim()) {
+      return {
+        ok: false,
+        message: "No se pudo eliminar la solicitud de atención.",
+      };
+    }
+
+    const existingServiceRequest = await getServiceRequestById(id);
+
+    if (!existingServiceRequest || existingServiceRequest.patientId !== patientId) {
+      return {
+        ok: false,
+        message: "No se pudo eliminar la solicitud de atención.",
+      };
+    }
+
+    if (isTerminalServiceRequestStatus(existingServiceRequest.status)) {
+      return {
+        ok: false,
+        message: "No se pudo eliminar la solicitud de atención.",
+      };
+    }
+
+    if (await isServiceRequestLinkedToTreatment(existingServiceRequest.id)) {
+      return {
+        ok: false,
+        message: "No se puede editar ni eliminar una solicitud ya usada para iniciar tratamiento.",
+      };
+    }
+
+    await updateServiceRequestStatus({
+      id: existingServiceRequest.id,
+      status: "entered_in_error",
+    });
+    revalidatePath("/admin/patients");
+    revalidatePath(`/admin/patients/${patientId}`);
+    revalidatePath(`/admin/patients/${patientId}/administrative`);
+    revalidatePath(`/admin/patients/${patientId}/treatment`);
+
+    return {
+      ok: true,
+      message: "Solicitud marcada como carga errónea.",
+    };
+  } catch (error) {
+    const message = error instanceof Error && error.message
+      ? error.message
+      : "No se pudo eliminar la solicitud de atención.";
 
     return {
       ok: false,

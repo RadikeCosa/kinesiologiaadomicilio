@@ -42,3 +42,8 @@ export interface UpdateServiceRequestStatusInput {
   status: ServiceRequestStatus;
   closedReasonText?: string;
 }
+
+export interface UpdateServiceRequestRequestedAtInput {
+  id: string;
+  requestedAt: string;
+}

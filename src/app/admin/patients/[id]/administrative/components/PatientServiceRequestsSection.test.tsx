@@ -66,8 +66,11 @@ describe("PatientServiceRequestsSection", () => {
 
     expect(html).toContain("href=\"/admin/patients/pat-9/treatment?serviceRequestId=sr-a\"");
     expect(html).toContain("Iniciar tratamiento");
+    expect(html).toContain("Editar fecha");
+    expect(html).toContain("Eliminar carga errónea");
     expect(html).toContain("Estado clínico vinculado: Pendiente de iniciar tratamiento");
     expect(html).toContain("Se realiza en la pantalla de Tratamiento.");
+    expect(html).not.toContain("Fecha de inicio del tratamiento");
     expect(html).not.toContain("serviceRequestId=sr-r");
     expect(html).not.toContain("serviceRequestId=sr-cw");
     expect(html).not.toContain("serviceRequestId=sr-c");
@@ -91,6 +94,8 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("No contesta llamadas");
     expect(html).toContain("Derivó por otra cobertura");
     expect(html).toContain("Sin acción pendiente.");
+    expect(html).not.toContain("Editar fecha");
+    expect(html).not.toContain("Eliminar carga errónea");
     expect(html).not.toContain("serviceRequestId=sr-cw");
     expect(html).not.toContain("serviceRequestId=sr-c");
   });

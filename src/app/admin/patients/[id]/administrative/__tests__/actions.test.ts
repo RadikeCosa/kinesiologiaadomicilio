@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   acceptAndStartTreatmentFromServiceRequestAction,
   createPatientServiceRequestAction,
+  markPatientServiceRequestAsEnteredInErrorAction,
+  updatePatientServiceRequestRequestedAtAction,
   updatePatientServiceRequestStatusAction,
 } from "@/app/admin/patients/[id]/administrative/actions";
 
@@ -13,6 +15,7 @@ vi.mock("next/cache", () => ({
 vi.mock("@/infrastructure/repositories/service-request.repository", () => ({
   createServiceRequest: vi.fn(),
   getServiceRequestById: vi.fn(),
+  updateServiceRequestRequestedAt: vi.fn(),
   updateServiceRequestStatus: vi.fn(),
 }));
 
@@ -37,6 +40,7 @@ import { existsAnotherPatientWithDni, getPatientById, updatePatient } from "@/in
 import {
   createServiceRequest,
   getServiceRequestById,
+  updateServiceRequestRequestedAt,
   updateServiceRequestStatus,
 } from "@/infrastructure/repositories/service-request.repository";
 import { revalidatePath } from "next/cache";
@@ -443,6 +447,181 @@ describe("updatePatientServiceRequestStatusAction", () => {
 
     expect(createEpisodeOfCare).not.toHaveBeenCalled();
     expect(createEncounter).not.toHaveBeenCalled();
+  });
+});
+
+describe("updatePatientServiceRequestRequestedAtAction", () => {
+  it("updates requestedAt and revalidates relevant routes", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-date",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "in_review",
+    });
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([]);
+    vi.mocked(updateServiceRequestRequestedAt).mockResolvedValueOnce({
+      id: "sr-date",
+      patientId: "pat-1",
+      requestedAt: "2026-06-29",
+      reasonText: "Dolor lumbar",
+      status: "in_review",
+    } as never);
+
+    const result = await updatePatientServiceRequestRequestedAtAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-date",
+        requestedAt: "2026-06-29",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      message: "Fecha actualizada correctamente.",
+    });
+    expect(updateServiceRequestRequestedAt).toHaveBeenCalledWith({
+      id: "sr-date",
+      requestedAt: "2026-06-29",
+    });
+    expect(getServiceRequestById).toHaveBeenCalledWith("sr-date");
+    expect(listEpisodeOfCareByIncomingReferral).toHaveBeenCalledWith("sr-date");
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients");
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1");
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/administrative");
+    expect(revalidatePath).toHaveBeenCalledWith("/admin/patients/pat-1/treatment");
+  });
+
+  it("blocks requestedAt update when service request was already used for treatment", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-used",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "accepted",
+    });
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([{ id: "ep-1" }] as never);
+
+    const result = await updatePatientServiceRequestRequestedAtAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-used",
+        requestedAt: "2026-06-29",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se puede editar ni eliminar una solicitud ya usada para iniciar tratamiento.",
+    });
+    expect(updateServiceRequestRequestedAt).not.toHaveBeenCalled();
+  });
+
+  it("blocks requestedAt update for terminal statuses", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-terminal",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Dolor lumbar",
+      status: "cancelled",
+    });
+
+    const result = await updatePatientServiceRequestRequestedAtAction(
+      "pat-1",
+      buildFormData({
+        id: "sr-terminal",
+        requestedAt: "2026-06-29",
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo actualizar la fecha de la solicitud.",
+    });
+    expect(updateServiceRequestRequestedAt).not.toHaveBeenCalled();
+  });
+});
+
+describe("markPatientServiceRequestAsEnteredInErrorAction", () => {
+  it("marks service request as entered_in_error", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-delete",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Carga doble",
+      status: "in_review",
+    });
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([]);
+    vi.mocked(updateServiceRequestStatus).mockResolvedValueOnce({
+      id: "sr-delete",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Carga doble",
+      status: "entered_in_error",
+    });
+
+    const result = await markPatientServiceRequestAsEnteredInErrorAction(
+      "pat-1",
+      buildFormData({ id: "sr-delete" }),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      message: "Solicitud marcada como carga errónea.",
+    });
+    expect(updateServiceRequestStatus).toHaveBeenCalledWith({
+      id: "sr-delete",
+      status: "entered_in_error",
+    });
+  });
+
+  it("blocks logical deletion when service request was already used for treatment", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-used-delete",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Carga doble",
+      status: "accepted",
+    });
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([{ id: "ep-1" }] as never);
+
+    const result = await markPatientServiceRequestAsEnteredInErrorAction(
+      "pat-1",
+      buildFormData({ id: "sr-used-delete" }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se puede editar ni eliminar una solicitud ya usada para iniciar tratamiento.",
+    });
+    expect(updateServiceRequestStatus).not.toHaveBeenCalledWith({
+      id: "sr-used-delete",
+      status: "entered_in_error",
+    });
+  });
+
+  it("blocks logical deletion for terminal statuses", async () => {
+    vi.mocked(getServiceRequestById).mockResolvedValueOnce({
+      id: "sr-terminal-delete",
+      patientId: "pat-1",
+      requestedAt: "2026-04-28",
+      reasonText: "Carga doble",
+      status: "closed_without_treatment",
+    });
+
+    const result = await markPatientServiceRequestAsEnteredInErrorAction(
+      "pat-1",
+      buildFormData({ id: "sr-terminal-delete" }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      message: "No se pudo eliminar la solicitud de atención.",
+    });
+    expect(updateServiceRequestStatus).not.toHaveBeenCalledWith({
+      id: "sr-terminal-delete",
+      status: "entered_in_error",
+    });
   });
 });
 

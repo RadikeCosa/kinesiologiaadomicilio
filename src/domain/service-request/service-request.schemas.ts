@@ -3,6 +3,7 @@ import type {
   CreateServiceRequestInput,
   ServiceRequestRequesterType,
   ServiceRequestStatus,
+  UpdateServiceRequestRequestedAtInput,
   UpdateServiceRequestStatusInput,
 } from "@/domain/service-request/service-request.types";
 
@@ -147,6 +148,17 @@ export const updateServiceRequestStatusSchema = {
       id: normalizeRequiredString(record.id, "id"),
       status,
       closedReasonText,
+    };
+  },
+};
+
+export const updateServiceRequestRequestedAtSchema = {
+  parse(input: unknown): UpdateServiceRequestRequestedAtInput {
+    const record = assertObject(input, "updateServiceRequestRequestedAtSchema");
+
+    return {
+      id: normalizeRequiredString(record.id, "id"),
+      requestedAt: normalizeRequiredIsoDate(record.requestedAt, "requestedAt"),
     };
   },
 };

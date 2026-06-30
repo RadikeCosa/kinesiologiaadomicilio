@@ -1,5 +1,14 @@
-import type { CreateServiceRequestInput, ServiceRequest, UpdateServiceRequestStatusInput } from "@/domain/service-request/service-request.types";
-import { createServiceRequestSchema, updateServiceRequestStatusSchema } from "@/domain/service-request/service-request.schemas";
+import type {
+  CreateServiceRequestInput,
+  ServiceRequest,
+  UpdateServiceRequestRequestedAtInput,
+  UpdateServiceRequestStatusInput,
+} from "@/domain/service-request/service-request.types";
+import {
+  createServiceRequestSchema,
+  updateServiceRequestRequestedAtSchema,
+  updateServiceRequestStatusSchema,
+} from "@/domain/service-request/service-request.schemas";
 import { extractResourcesByType } from "@/lib/fhir/bundle-utils";
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
@@ -9,6 +18,7 @@ import type { FhirBundle } from "@/lib/fhir/types";
 import { type FhirServiceRequest } from "@/infrastructure/mappers/service-request/service-request-fhir.types";
 import { mapFhirServiceRequestToDomain } from "@/infrastructure/mappers/service-request/service-request-read.mapper";
 import {
+  applyServiceRequestRequestedAtUpdateToFhir,
   applyServiceRequestStatusUpdateToFhir,
   mapCreateServiceRequestInputToFhir,
 } from "@/infrastructure/mappers/service-request/service-request-write.mapper";
@@ -102,4 +112,25 @@ export async function updateServiceRequestStatus(input: UpdateServiceRequestStat
   const mapped = mapFhirServiceRequestToDomain(updatedResource);
 
   return assertMappedServiceRequest(mapped, "updateStatus");
+}
+
+export async function updateServiceRequestRequestedAt(input: UpdateServiceRequestRequestedAtInput): Promise<ServiceRequest> {
+  const parsedInput = updateServiceRequestRequestedAtSchema.parse(input);
+
+  let existingResource: FhirServiceRequest;
+  try {
+    existingResource = await fhirClient.get<FhirServiceRequest>(`ServiceRequest/${parsedInput.id}`);
+  } catch (error) {
+    if (error instanceof FhirClientError && error.status === 404) {
+      throw new Error(`ServiceRequest not found: ${parsedInput.id}`);
+    }
+
+    throw error;
+  }
+
+  const payload = applyServiceRequestRequestedAtUpdateToFhir(existingResource, parsedInput);
+  const updatedResource = await fhirClient.put<FhirServiceRequest>(`ServiceRequest/${parsedInput.id}`, payload);
+  const mapped = mapFhirServiceRequestToDomain(updatedResource);
+
+  return assertMappedServiceRequest(mapped, "updateRequestedAt");
 }

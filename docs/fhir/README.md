@@ -84,6 +84,15 @@ Notas operativas:
 - La lectura mantiene fallback legacy desde `note[]` con prefijos `closure-reason:v1:` y `closure-detail:v1:`.
 - Este cierre describe contexto operativo, no una historia clínica longitudinal rica.
 
+### 2.1. Solicitudes de atención con `ServiceRequest`
+
+Contrato operativo vigente:
+
+- `ServiceRequest.authoredOn` persiste la fecha visible de la solicitud.
+- La edición de fecha usa `GET -> merge -> PUT` y solo está permitida para solicitudes no vinculadas a `EpisodeOfCare`.
+- La eliminación visible en la UI no hace hard delete: usa `status = entered-in-error` para cargas erróneas.
+- Si la solicitud ya está vinculada por `EpisodeOfCare.referralRequest`, no se permite ni editar la fecha ni marcarla como carga errónea.
+
 ### 3. Profesional firmante single-user con `Practitioner`
 
 La instalación privada actual usa un único `Practitioner` para configuración del profesional firmante.

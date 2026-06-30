@@ -1,6 +1,7 @@
 import type {
   CreateServiceRequestInput,
   ServiceRequestStatus,
+  UpdateServiceRequestRequestedAtInput,
   UpdateServiceRequestStatusInput,
 } from "@/domain/service-request/service-request.types";
 import { buildPatientReference } from "@/lib/fhir/references";
@@ -115,5 +116,15 @@ export function applyServiceRequestStatusUpdateToFhir(
       ? { text: closedReasonText }
       : undefined,
     note: nextNote.length ? nextNote : undefined,
+  };
+}
+
+export function applyServiceRequestRequestedAtUpdateToFhir(
+  resource: FhirServiceRequest,
+  input: UpdateServiceRequestRequestedAtInput,
+): FhirServiceRequest {
+  return {
+    ...resource,
+    authoredOn: input.requestedAt,
   };
 }

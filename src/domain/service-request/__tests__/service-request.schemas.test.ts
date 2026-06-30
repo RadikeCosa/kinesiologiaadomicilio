@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createServiceRequestSchema,
+  updateServiceRequestRequestedAtSchema,
   updateServiceRequestStatusSchema,
 } from "@/domain/service-request/service-request.schemas";
 
@@ -156,5 +157,26 @@ describe("service-request.schemas", () => {
     expect(() => createServiceRequestSchema.parse("invalid-shape")).toThrow(
       "createServiceRequestSchema: se esperaba un objeto.",
     );
+  });
+
+  it("parses requestedAt update and trims strings", () => {
+    const parsed = updateServiceRequestRequestedAtSchema.parse({
+      id: " sr-200 ",
+      requestedAt: " 2026-06-29 ",
+    });
+
+    expect(parsed).toEqual({
+      id: "sr-200",
+      requestedAt: "2026-06-29",
+    });
+  });
+
+  it("fails requestedAt update with invalid date", () => {
+    expect(() =>
+      updateServiceRequestRequestedAtSchema.parse({
+        id: "sr-200",
+        requestedAt: "2026-99-29",
+      }),
+    ).toThrow("requestedAt: formato inválido (YYYY-MM-DD).");
   });
 });

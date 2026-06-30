@@ -54,27 +54,6 @@ export default async function AdminPatientTreatmentPage({
     ? "Tratamiento iniciado. Revisá o completá el contexto general del tratamiento."
     : undefined;
   const patient = await loadPatientDetail(id);
-  const treatmentServiceRequestContext = patient
-    ? await loadTreatmentServiceRequestContext({
-        patientId: patient.id,
-        serviceRequestId: resolvedSearchParams?.serviceRequestId,
-      })
-    : { serviceRequestId: undefined, isValid: false, serviceRequest: undefined, state: "none", message: undefined };
-  const treatmentEpisodeHistory = patient ? await loadTreatmentEpisodeHistoryContext(patient.id) : [];
-  const patientAge = patient ? calculateAgeFromBirthDate(patient.birthDate) : null;
-  const activeEpisode = patient?.activeEpisode ?? null;
-  const hasActiveTreatment = Boolean(activeEpisode);
-  const hasClosedEpisodes = treatmentEpisodeHistory.length > 0;
-  const hasAnyEpisode = hasActiveTreatment || hasClosedEpisodes;
-  const canStartTreatmentFromCurrentContext = treatmentServiceRequestContext.state === "valid" && Boolean(treatmentServiceRequestContext.serviceRequestId);
-  const clinicalContext = activeEpisode ? await loadEpisodeClinicalContextReadModel(activeEpisode) : null;
-  const activeTreatmentEncountersCount = activeEpisode
-    ? await loadActiveTreatmentEncountersCount(patient.id, activeEpisode.id)
-    : 0;
-  const latestClosedEpisode = !hasActiveTreatment
-    ? treatmentEpisodeHistory.find((episode) => episode.id === patient?.latestEpisode?.id) ?? treatmentEpisodeHistory[0]
-    : null;
-  const hasValidAcceptedRequest = Boolean(treatmentServiceRequestContext.serviceRequest);
 
   if (!patient) {
     return (
@@ -91,6 +70,26 @@ export default async function AdminPatientTreatmentPage({
       </section>
     );
   }
+
+  const treatmentServiceRequestContext = await loadTreatmentServiceRequestContext({
+    patientId: patient.id,
+    serviceRequestId: resolvedSearchParams?.serviceRequestId,
+  });
+  const treatmentEpisodeHistory = await loadTreatmentEpisodeHistoryContext(patient.id);
+  const patientAge = calculateAgeFromBirthDate(patient.birthDate);
+  const activeEpisode = patient.activeEpisode ?? null;
+  const hasActiveTreatment = Boolean(activeEpisode);
+  const hasClosedEpisodes = treatmentEpisodeHistory.length > 0;
+  const hasAnyEpisode = hasActiveTreatment || hasClosedEpisodes;
+  const canStartTreatmentFromCurrentContext = treatmentServiceRequestContext.state === "valid" && Boolean(treatmentServiceRequestContext.serviceRequestId);
+  const clinicalContext = activeEpisode ? await loadEpisodeClinicalContextReadModel(activeEpisode) : null;
+  const activeTreatmentEncountersCount = activeEpisode
+    ? await loadActiveTreatmentEncountersCount(patient.id, activeEpisode.id)
+    : 0;
+  const latestClosedEpisode = !activeEpisode
+    ? treatmentEpisodeHistory.find((episode) => episode.id === patient.latestEpisode?.id) ?? treatmentEpisodeHistory[0]
+    : null;
+  const hasValidAcceptedRequest = Boolean(treatmentServiceRequestContext.serviceRequest);
 
   return (
     <section className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -130,7 +129,7 @@ export default async function AdminPatientTreatmentPage({
                 {hasActiveTreatment ? "En curso" : hasValidAcceptedRequest ? "Listo para iniciar" : "Sin tratamiento activo"}
               </h2>
               <p className="text-sm text-slate-600">{PATIENT_SURFACE_COPY.treatmentDefinition}</p>
-              {hasActiveTreatment ? (
+              {activeEpisode ? (
                 <>
                   <p className="text-sm text-sky-950">
                     Completá el contexto clínico acá y registrá cada visita desde Gestión clínica.
@@ -204,7 +203,7 @@ export default async function AdminPatientTreatmentPage({
         <section className="rounded-xl border border-slate-200 bg-slate-50 p-5">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Atajos útiles</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {hasActiveTreatment ? (
+            {activeEpisode ? (
               <Link
                 className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
                 href={`/admin/patients/${patient.id}/encounters`}
@@ -236,7 +235,7 @@ export default async function AdminPatientTreatmentPage({
             ) : null}
           </div>
 
-          {hasActiveTreatment ? (
+          {activeEpisode ? (
             <div className="mt-4 border-t border-slate-200 pt-4">
               <h2 className="text-sm font-semibold text-slate-900">Cerrar tratamiento</h2>
               <p className="mt-1 text-sm text-slate-600">Acción de cierre formal del ciclo. Usala cuando el tratamiento ya terminó.</p>

@@ -12,7 +12,7 @@ export function getServiceRequestStatusLabel(status: ServiceRequestStatus): stri
     case "cancelled":
       return "Cancelada";
     case "entered_in_error":
-      return "Error de carga";
+      return "Carga errónea";
     default:
       return "En evaluación";
   }

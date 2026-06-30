@@ -23,13 +23,15 @@ export const metadata: Metadata = {
 
 type PatientsStatusFilter =
   | "active"
-  | "active_treatment"
   | "pending"
   | "preliminary"
   | "ready_to_start"
   | "finished"
-  | "finished_treatment"
   | "all";
+
+type PatientsStatusFilterAlias =
+  | "active_treatment"
+  | "finished_treatment";
 
 interface AdminPatientsPageProps {
   searchParams?: Promise<{ status?: string | string[] }>;
@@ -84,13 +86,15 @@ const OPERATIONAL_STATUSES_BY_FILTER: Record<
   PatientOperationalStatus[]
 > = {
   active: ["active_treatment"],
-  active_treatment: ["active_treatment"],
   pending: ["ready_to_start", "preliminary"],
   preliminary: ["preliminary"],
   ready_to_start: ["ready_to_start"],
   finished: ["finished_treatment"],
-  finished_treatment: ["finished_treatment"],
 };
+
+function isLegacyPatientsStatusFilter(value: string): value is PatientsStatusFilterAlias {
+  return value === "active_treatment" || value === "finished_treatment";
+}
 
 function normalizeStatusFilter(status?: string | string[]): PatientsStatusFilter {
   const value = Array.isArray(status) ? status[0] : status;
@@ -113,6 +117,10 @@ function normalizeStatusFilter(status?: string | string[]): PatientsStatusFilter
 
   if (value === "finished" || value === "finished_treatment") {
     return "finished";
+  }
+
+  if (value && isLegacyPatientsStatusFilter(value)) {
+    return value === "active_treatment" ? "active" : "finished";
   }
 
   return "active";

@@ -6,6 +6,7 @@ import {
   mapFhirServiceRequestToDomain,
 } from "@/infrastructure/mappers/service-request/service-request-read.mapper";
 import {
+  applyServiceRequestRequestedAtUpdateToFhir,
   applyServiceRequestStatusUpdateToFhir,
   buildServiceRequestNotes,
   mapCreateServiceRequestInputToFhir,
@@ -160,6 +161,38 @@ describe("service-request mappers", () => {
 
     expect(updated.status).toBe("entered-in-error");
     expect(updated.statusReason).toBeUndefined();
+  });
+
+  it("updates authoredOn for requestedAt edits and preserves existing fields", () => {
+    const updated = applyServiceRequestRequestedAtUpdateToFhir(
+      {
+        resourceType: "ServiceRequest",
+        id: "sr-date",
+        status: "active",
+        intent: "order",
+        subject: { reference: "Patient/pat-1" },
+        authoredOn: "2026-04-28",
+        reasonCode: [{ text: "Dolor lumbar" }],
+        requester: { display: "Dra. Perez" },
+        note: [{ text: "general-note:v1:Seguimiento" }],
+      },
+      {
+        id: "sr-date",
+        requestedAt: "2026-06-29",
+      },
+    );
+
+    expect(updated).toEqual({
+      resourceType: "ServiceRequest",
+      id: "sr-date",
+      status: "active",
+      intent: "order",
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-06-29",
+      reasonCode: [{ text: "Dolor lumbar" }],
+      requester: { display: "Dra. Perez" },
+      note: [{ text: "general-note:v1:Seguimiento" }],
+    });
   });
 
   it("removes workflow-status when moving back to in_review", () => {

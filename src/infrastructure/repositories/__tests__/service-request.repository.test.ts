@@ -8,6 +8,7 @@ import {
   getServiceRequestById,
   listServiceRequestsByPatientId,
   listServiceRequestsByPatientIds,
+  updateServiceRequestRequestedAt,
   updateServiceRequestStatus,
 } from "@/infrastructure/repositories/service-request.repository";
 
@@ -409,5 +410,47 @@ describe("service-request.repository (FHIR)", () => {
         status: "accepted",
       }),
     ).rejects.toBeInstanceOf(FhirClientError);
+  });
+
+  it("updates requestedAt: GET + PUT + mapped domain response", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-date",
+      status: "active",
+      intent: "order",
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-04-20",
+      reasonCode: [{ text: "Motivo original" }],
+    });
+    const putSpy = vi.spyOn(fhirClient, "put").mockResolvedValue({
+      resourceType: "ServiceRequest",
+      id: "sr-date",
+      status: "active",
+      intent: "order",
+      subject: { reference: "Patient/pat-1" },
+      authoredOn: "2026-06-29",
+      reasonCode: [{ text: "Motivo original" }],
+    });
+
+    const updated = await updateServiceRequestRequestedAt({
+      id: " sr-date ",
+      requestedAt: " 2026-06-29 ",
+    });
+
+    expect(getSpy).toHaveBeenCalledWith("ServiceRequest/sr-date");
+    expect(putSpy).toHaveBeenCalledWith(
+      "ServiceRequest/sr-date",
+      expect.objectContaining({
+        resourceType: "ServiceRequest",
+        id: "sr-date",
+        authoredOn: "2026-06-29",
+      }),
+    );
+    expect(updated).toMatchObject({
+      id: "sr-date",
+      patientId: "pat-1",
+      requestedAt: "2026-06-29",
+      reasonText: "Motivo original",
+    });
   });
 });

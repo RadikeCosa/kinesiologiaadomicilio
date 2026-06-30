@@ -30,9 +30,11 @@ Desde ahí se pueden:
 
 - leer solicitudes existentes;
 - registrar una solicitud mínima;
+- editar la fecha de una solicitud no absorbida por tratamiento;
 - aceptar;
 - cancelar;
 - cerrar como `No inició` con motivo;
+- marcar como `Carga errónea` una solicitud registrada por error, sin hard delete FHIR;
 - derivar el inicio de tratamiento a `/treatment` cuando corresponde.
 
 ## Datos mínimos vigentes
@@ -70,6 +72,11 @@ Una solicitud `accepted` ya vinculada a un `EpisodeOfCare` no puede reutilizarse
 
 Si hace falta un nuevo tratamiento, se requiere una nueva solicitud.
 
+Esa misma restricción también bloquea:
+
+- editar la fecha de la solicitud;
+- marcarla como `Carga errónea`.
+
 ### 4. Vínculo real con tratamiento
 
 Cuando se inicia tratamiento desde una solicitud válida:
@@ -86,6 +93,7 @@ La lectura operativa vigente distingue, como mínimo:
 - `accepted` con vínculo real a tratamiento: solicitud ya absorbida por el ciclo;
 - `closed_without_treatment`: histórica terminal;
 - `cancelled`: histórica terminal.
+- `entered_in_error`: carga errónea, reservada para registros creados por error.
 
 ## Relación con tratamiento y visitas
 

@@ -10,17 +10,25 @@ vi.mock("next/navigation", () => ({
 
 const updatePatientServiceRequestStatusActionMock = vi.hoisted(() => vi.fn());
 const acceptAndStartTreatmentFromServiceRequestActionMock = vi.hoisted(() => vi.fn());
+const updatePatientServiceRequestRequestedAtActionMock = vi.hoisted(() => vi.fn());
+const markPatientServiceRequestAsEnteredInErrorActionMock = vi.hoisted(() => vi.fn());
 vi.mock("@/app/admin/patients/[id]/administrative/actions", () => ({
   updatePatientServiceRequestStatusAction: updatePatientServiceRequestStatusActionMock,
   acceptAndStartTreatmentFromServiceRequestAction: acceptAndStartTreatmentFromServiceRequestActionMock,
+  updatePatientServiceRequestRequestedAtAction: updatePatientServiceRequestRequestedAtActionMock,
+  markPatientServiceRequestAsEnteredInErrorAction: markPatientServiceRequestAsEnteredInErrorActionMock,
 }));
 
 import {
+  canEditServiceRequestRequestedAt,
+  canMarkServiceRequestEnteredInError,
   getCloseLikeStatusFromAction,
   getServiceRequestStatusActions,
   ServiceRequestStatusActions,
   buildAcceptAndStartTreatmentFormData,
   resolveInitialTreatmentStartDate,
+  submitMarkServiceRequestEnteredInErrorAction,
+  submitServiceRequestRequestedAtAction,
   submitServiceRequestStatusAction,
 } from "@/app/admin/patients/[id]/administrative/components/ServiceRequestStatusActions";
 import { formatLocalDateInputValue } from "@/lib/date-input";
@@ -44,10 +52,12 @@ describe("ServiceRequestStatusActions", () => {
     );
 
     expect(html).toContain("Aceptar e iniciar tratamiento");
-    expect(html).toContain("Fecha de inicio del tratamiento");
+    expect(html).toContain("Fecha para iniciar tratamiento");
     expect(html).toContain("value=\"2026-04-28\"");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
+    expect(html).toContain("Editar fecha");
+    expect(html).toContain("Eliminar carga errónea");
     expect(html).not.toContain("Registrar visita");
     expect(html).not.toContain("Iniciar tratamiento");
   });
@@ -64,6 +74,8 @@ describe("ServiceRequestStatusActions", () => {
 
     expect(html).not.toContain("Aceptar e iniciar tratamiento");
     expect(html).toContain("Iniciar tratamiento");
+    expect(html).toContain("Editar fecha");
+    expect(html).toContain("Eliminar carga errónea");
     expect(html).not.toContain("No inició");
   });
 
@@ -110,6 +122,15 @@ describe("ServiceRequestStatusActions", () => {
     expect(getServiceRequestStatusActions("closed_without_treatment")).toEqual([]);
     expect(getServiceRequestStatusActions("cancelled")).toEqual([]);
     expect(getServiceRequestStatusActions("entered_in_error")).toEqual([]);
+  });
+
+  it("helper returns visibility for requestedAt edit and logical deletion", () => {
+    expect(canEditServiceRequestRequestedAt("in_review")).toBe(true);
+    expect(canEditServiceRequestRequestedAt("accepted_pending_treatment")).toBe(true);
+    expect(canEditServiceRequestRequestedAt("accepted_linked_active_treatment")).toBe(false);
+    expect(canMarkServiceRequestEnteredInError("in_review")).toBe(true);
+    expect(canMarkServiceRequestEnteredInError("accepted_pending_treatment")).toBe(true);
+    expect(canMarkServiceRequestEnteredInError("closed_without_treatment")).toBe(false);
   });
 
   it("maps close actions to close-like statuses", () => {
@@ -176,6 +197,38 @@ describe("ServiceRequestStatusActions", () => {
     expect(formData.get("closedReasonText")).toBe("Paciente cancela");
   });
 
+  it("submit helper sends requestedAt payload", async () => {
+    updatePatientServiceRequestRequestedAtActionMock.mockResolvedValueOnce({
+      ok: true,
+      message: "Fecha actualizada correctamente.",
+    });
+
+    await submitServiceRequestRequestedAtAction({
+      patientId: "pat-1",
+      serviceRequestId: "sr-date",
+      requestedAt: "2026-06-29",
+    });
+
+    const [, formData] = updatePatientServiceRequestRequestedAtActionMock.mock.calls[0] as [string, FormData];
+    expect(formData.get("id")).toBe("sr-date");
+    expect(formData.get("requestedAt")).toBe("2026-06-29");
+  });
+
+  it("submit helper sends entered_in_error logical deletion payload", async () => {
+    markPatientServiceRequestAsEnteredInErrorActionMock.mockResolvedValueOnce({
+      ok: true,
+      message: "Solicitud marcada como carga errónea.",
+    });
+
+    await submitMarkServiceRequestEnteredInErrorAction({
+      patientId: "pat-1",
+      serviceRequestId: "sr-delete",
+    });
+
+    const [, formData] = markPatientServiceRequestAsEnteredInErrorActionMock.mock.calls[0] as [string, FormData];
+    expect(formData.get("id")).toBe("sr-delete");
+  });
+
   it("builds accept/start form data with the chosen treatmentStartDate", () => {
     const formData = buildAcceptAndStartTreatmentFormData({
       serviceRequestId: "sr-33",
@@ -195,5 +248,20 @@ describe("ServiceRequestStatusActions", () => {
 
   it("preserves requestedAt default when it is a valid yyyy-mm-dd", () => {
     expect(resolveInitialTreatmentStartDate("2026-05-10")).toBe("2026-05-10");
+  });
+
+  it("uses request-specific copy for requestedAt editing without the old treatment-start label", () => {
+    const html = renderToStaticMarkup(
+      createElement(ServiceRequestStatusActions, {
+        patientId: "pat-1",
+        serviceRequestId: "sr-20",
+        currentStatus: "accepted",
+        displayStatus: "accepted_pending_treatment",
+        defaultTreatmentStartDate: "2026-05-10",
+      }),
+    );
+
+    expect(html).toContain("Editar fecha");
+    expect(html).not.toContain("Fecha de inicio del tratamiento");
   });
 });

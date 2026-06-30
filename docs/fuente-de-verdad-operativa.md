@@ -83,6 +83,8 @@ Reglas clave:
 - Registrar una solicitud no habilita visitas por sí mismo.
 - Iniciar tratamiento requiere una solicitud `accepted`, válida y no usada previamente.
 - Política vigente: `single-use` para solicitudes ya vinculadas a un `EpisodeOfCare`.
+- En `Gestión administrativa`, la fecha de una solicitud solo puede editarse si la solicitud no fue absorbida por tratamiento.
+- La eliminación visible de solicitudes es lógica: `entered_in_error` para cargas erróneas; no hay hard delete FHIR en la UI.
 
 ## Reglas clínicas y operativas principales
 

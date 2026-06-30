@@ -103,6 +103,38 @@ describe("composeTreatmentReport", () => {
     expect(result.initialText).not.toContain("0.75");
   });
 
+  it("formats functional metrics and deltas with the same presentation helpers as clinical management", () => {
+    const result = composeTreatmentReport(buildContext({
+      functionalTrend: [
+        {
+          code: "tug_seconds",
+          label: "TUG",
+          unit: "s",
+          latestValue: 8.2,
+          latestDate: "2026-05-10T10:30:00.000Z",
+          previousValue: 8,
+          previousDate: "2026-05-03T10:30:00.000Z",
+          delta: 0.1999999999999993,
+        },
+        {
+          code: "standing_tolerance_minutes",
+          label: "Bipedestación",
+          unit: "min",
+          latestValue: 2.5,
+          latestDate: "2026-05-10T10:30:00.000Z",
+          previousValue: 8.2,
+          previousDate: "2026-05-03T10:30:00.000Z",
+          delta: -5.699999999999999,
+        },
+      ],
+    }));
+
+    expect(result.initialText).toContain("TUG: 8.2 s (cambio vs previo: +0.2 s)");
+    expect(result.initialText).toContain("Bipedestación: 2.5 min (cambio vs previo: -5.7 min)");
+    expect(result.initialText).not.toContain("0.1999999999999993");
+    expect(result.initialText).not.toContain("-5.699999999999999");
+  });
+
   it("omits empty sections and warns when important data is missing", () => {
     const result = composeTreatmentReport(buildContext({
       clinicalContext: {

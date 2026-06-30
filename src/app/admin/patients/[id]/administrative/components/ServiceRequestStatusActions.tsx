@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState, useTransition } from "react";
+import { type FormEvent, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import type { ServiceRequestStatus } from "@/domain/service-request/service-request.types";
@@ -8,6 +8,8 @@ import type { ServiceRequestDisplayStatus } from "@/app/admin/patients/[id]/data
 
 import { updatePatientServiceRequestStatusAction } from "@/app/admin/patients/[id]/administrative/actions";
 import { acceptAndStartTreatmentFromServiceRequestAction } from "@/app/admin/patients/[id]/administrative/actions";
+import { markPatientServiceRequestAsEnteredInErrorAction } from "@/app/admin/patients/[id]/administrative/actions";
+import { updatePatientServiceRequestRequestedAtAction } from "@/app/admin/patients/[id]/administrative/actions";
 import { formatLocalDateInputValue } from "@/lib/date-input";
 
 type CloseLikeStatus = "closed_without_treatment" | "cancelled";
@@ -36,6 +38,14 @@ export function getServiceRequestStatusActions(displayStatus: ServiceRequestDisp
     default:
       return [];
   }
+}
+
+export function canEditServiceRequestRequestedAt(displayStatus: ServiceRequestDisplayStatus): boolean {
+  return displayStatus === "in_review" || displayStatus === "accepted_pending_treatment";
+}
+
+export function canMarkServiceRequestEnteredInError(displayStatus: ServiceRequestDisplayStatus): boolean {
+  return displayStatus === "in_review" || displayStatus === "accepted_pending_treatment";
 }
 
 export function getCloseLikeStatusFromAction(action: ActionKind | null): CloseLikeStatus | null {
@@ -85,6 +95,28 @@ export async function submitServiceRequestStatusAction(input: {
   return updatePatientServiceRequestStatusAction(input.patientId, formData);
 }
 
+export async function submitServiceRequestRequestedAtAction(input: {
+  patientId: string;
+  serviceRequestId: string;
+  requestedAt: string;
+}) {
+  const formData = new FormData();
+  formData.set("id", input.serviceRequestId);
+  formData.set("requestedAt", input.requestedAt);
+
+  return updatePatientServiceRequestRequestedAtAction(input.patientId, formData);
+}
+
+export async function submitMarkServiceRequestEnteredInErrorAction(input: {
+  patientId: string;
+  serviceRequestId: string;
+}) {
+  const formData = new FormData();
+  formData.set("id", input.serviceRequestId);
+
+  return markPatientServiceRequestAsEnteredInErrorAction(input.patientId, formData);
+}
+
 function getActionLabel(action: ActionKind): string {
   switch (action) {
     case "accept_and_start_treatment":
@@ -113,14 +145,26 @@ export function ServiceRequestStatusActions({
   const [activeCloseAction, setActiveCloseAction] = useState<ActionKind | null>(null);
   const [closeReasonText, setCloseReasonText] = useState("");
   const [feedback, setFeedback] = useState<ActionFeedback | null>(null);
+  const [isEditingRequestedAt, setIsEditingRequestedAt] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const today = formatLocalDateInputValue();
   const initialTreatmentStartDate = resolveInitialTreatmentStartDate(defaultTreatmentStartDate);
   const [treatmentStartDate, setTreatmentStartDate] = useState(initialTreatmentStartDate);
+  const initialRequestedAt = resolveInitialTreatmentStartDate(defaultTreatmentStartDate);
+  const [requestedAt, setRequestedAt] = useState(initialRequestedAt);
+
+  useEffect(() => {
+    const nextDate = resolveInitialTreatmentStartDate(defaultTreatmentStartDate);
+    setTreatmentStartDate(nextDate);
+    setRequestedAt(nextDate);
+  }, [defaultTreatmentStartDate]);
 
   const availableActions = getServiceRequestStatusActions(displayStatus);
   const closeStatus = getCloseLikeStatusFromAction(activeCloseAction);
+  const canEditRequestedAt = canEditServiceRequestRequestedAt(displayStatus);
+  const canDeleteLogically = canMarkServiceRequestEnteredInError(displayStatus);
 
-  if (availableActions.length === 0) {
+  if (availableActions.length === 0 && !canEditRequestedAt && !canDeleteLogically) {
     return null;
   }
 
@@ -173,6 +217,45 @@ export function ServiceRequestStatusActions({
     });
   }
 
+  function handleSubmitRequestedAt(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    startTransition(async () => {
+      const result = await submitServiceRequestRequestedAtAction({
+        patientId,
+        serviceRequestId,
+        requestedAt,
+      });
+
+      if (result.ok) {
+        setFeedback({ tone: "success", text: result.message });
+        setIsEditingRequestedAt(false);
+        router.refresh();
+        return;
+      }
+
+      setFeedback({ tone: "error", text: result.message || "No se pudo actualizar la fecha de la solicitud." });
+    });
+  }
+
+  function handleMarkEnteredInError() {
+    startTransition(async () => {
+      const result = await submitMarkServiceRequestEnteredInErrorAction({
+        patientId,
+        serviceRequestId,
+      });
+
+      if (result.ok) {
+        setFeedback({ tone: "success", text: result.message });
+        setIsDeleteConfirmOpen(false);
+        router.refresh();
+        return;
+      }
+
+      setFeedback({ tone: "error", text: result.message || "No se pudo eliminar la solicitud de atención." });
+    });
+  }
+
   return (
     <div className="mt-3 rounded border border-slate-200 bg-slate-50 p-3">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Acciones</p>
@@ -193,6 +276,21 @@ export function ServiceRequestStatusActions({
         </div>
       ) : null}
       <div className="mt-2 flex flex-wrap items-center gap-2">
+        {canEditRequestedAt ? (
+          <button
+            className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+            disabled={isPending}
+            onClick={() => {
+              setIsEditingRequestedAt((value) => !value);
+              setIsDeleteConfirmOpen(false);
+              setActiveCloseAction(null);
+              setFeedback(null);
+            }}
+            type="button"
+          >
+            Editar fecha
+          </button>
+        ) : null}
         {availableActions.map((action) => {
           if (action === "accept_and_start_treatment") {
             return null;
@@ -216,6 +314,8 @@ export function ServiceRequestStatusActions({
               key={action}
               onClick={() => {
                 setActiveCloseAction(action);
+                setIsEditingRequestedAt(false);
+                setIsDeleteConfirmOpen(false);
                 setFeedback(null);
               }}
               type="button"
@@ -224,11 +324,63 @@ export function ServiceRequestStatusActions({
             </button>
           );
         })}
+        {canDeleteLogically ? (
+          <button
+            className="rounded border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+            disabled={isPending}
+            onClick={() => {
+              setIsDeleteConfirmOpen((value) => !value);
+              setActiveCloseAction(null);
+              setIsEditingRequestedAt(false);
+              setFeedback(null);
+            }}
+            type="button"
+          >
+            Eliminar carga errónea
+          </button>
+        ) : null}
       </div>
+      {isEditingRequestedAt ? (
+        <form className="mt-3 space-y-2" onSubmit={handleSubmitRequestedAt}>
+          <label className="block text-sm font-medium text-slate-800" htmlFor={`requestedAt-${serviceRequestId}`}>
+            Fecha de la solicitud
+          </label>
+          <input
+            className="w-full rounded border border-slate-300 bg-white p-2 text-sm sm:w-auto"
+            id={`requestedAt-${serviceRequestId}`}
+            max={today}
+            name="requestedAt"
+            onChange={(event) => setRequestedAt(event.target.value)}
+            required
+            type="date"
+            value={requestedAt}
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+              disabled={isPending}
+              type="submit"
+            >
+              {isPending ? "Guardando..." : "Guardar fecha"}
+            </button>
+            <button
+              className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+              disabled={isPending}
+              onClick={() => {
+                setIsEditingRequestedAt(false);
+                setRequestedAt(initialRequestedAt);
+              }}
+              type="button"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      ) : null}
       {availableActions.includes("accept_and_start_treatment") ? (
         <div className="mt-3 space-y-2">
           <label className="block text-sm font-medium text-slate-800" htmlFor={`treatmentStartDate-${serviceRequestId}`}>
-            Fecha de inicio del tratamiento
+            Fecha para iniciar tratamiento
           </label>
           <input
             className="w-full rounded border border-slate-300 bg-white p-2 text-sm sm:w-auto"
@@ -289,6 +441,34 @@ export function ServiceRequestStatusActions({
             </button>
           </div>
         </form>
+      ) : null}
+      {isDeleteConfirmOpen ? (
+        <div className="mt-3 space-y-2 rounded border border-red-200 bg-red-50 p-3">
+          <p className="text-sm text-red-900">
+            Vas a marcar esta solicitud como carga errónea. Usá esta acción solo si fue registrada por error.
+          </p>
+          <p className="text-xs text-red-800">
+            Si la solicitud fue real pero no continuó, usá Cancelar o No inició.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              className="rounded bg-red-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-800 disabled:opacity-50"
+              disabled={isPending}
+              onClick={handleMarkEnteredInError}
+              type="button"
+            >
+              {isPending ? "Guardando..." : "Confirmar eliminación"}
+            </button>
+            <button
+              className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+              disabled={isPending}
+              onClick={() => setIsDeleteConfirmOpen(false)}
+              type="button"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
       ) : null}
 
       {feedback ? (

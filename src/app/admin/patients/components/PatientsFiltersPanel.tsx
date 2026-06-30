@@ -1,23 +1,23 @@
 import Link from "next/link";
 
-export interface PatientsStatusFilterOption {
-  value: string;
+export interface PatientsFiltersPanelOption<TFilter extends string> {
+  value: TFilter;
   label: string;
 }
 
-interface PatientsFiltersPanelProps {
-  activeFilter: string;
-  filters: PatientsStatusFilterOption[];
-  buildHref: (status?: string) => string;
+interface PatientsFiltersPanelProps<TFilter extends string> {
+  activeFilter: TFilter;
+  filters: PatientsFiltersPanelOption<TFilter>[];
+  buildHref: (status?: TFilter) => string;
 }
 
-export function PatientsFiltersPanel({
+export function PatientsFiltersPanel<TFilter extends string>({
   activeFilter,
   filters,
   buildHref,
-}: PatientsFiltersPanelProps) {
-  const isFilterActive = (value: string): boolean => {
-    if (activeFilter === "pending") {
+}: PatientsFiltersPanelProps<TFilter>) {
+  const isFilterActive = (value: TFilter): boolean => {
+    if (activeFilter === "pending" && value !== "pending") {
       return value === "preliminary" || value === "ready_to_start";
     }
 
