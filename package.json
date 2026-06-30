@@ -10,6 +10,8 @@
     "build": "next build",
     "build:fhir-test": "FHIR_BASE_URL=http://localhost:8081/fhir next build",
     "build:fhir-real": "FHIR_BASE_URL=http://localhost:8080/fhir next build",
+    "seed:fhir-dev-demo": "FHIR_BASE_URL=http://localhost:8081/fhir node ./scripts/fhir-dev-demo-seed.mjs",
+    "seed:fhir-dev-demo:plan": "FHIR_BASE_URL=http://localhost:8081/fhir node ./scripts/fhir-dev-demo-seed.mjs --plan",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",

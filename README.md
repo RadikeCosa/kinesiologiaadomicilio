@@ -5,8 +5,8 @@ HealthTech case study: a real-world Next.js project that combines a public patie
 ## Demo
 
 - Public site: https://kinesiologiaadomicilio.vercel.app
-- Private clinical surface: `/admin` exists in the codebase and is intended for local development with a local HAPI FHIR server. It is not presented as a public online demo.
-- No mock/demo mode is implemented today for `/admin`; the private surface still depends on local FHIR infrastructure.
+- Private clinical workflow: `/admin` runs locally against a local HAPI FHIR server and is documented here through sanitized screenshots only.
+- `/admin` is not a production deployment, not a public editable demo, and does not offer a mock/demo mode today.
 
 ## Context
 
@@ -172,35 +172,45 @@ Current documented variables:
 
 Sanitized screenshots live in [docs/screenshots/README.md](./docs/screenshots/README.md).
 
-The public landing is deployed. The private `/admin` surface works locally against HAPI FHIR and is shown here only through sanitized screenshots captured from the disposable dev/test endpoint (`http://localhost:8081/fhir`), not from the local-real `8080` environment.
+The public landing is already deployed at https://kinesiologiaadomicilio.vercel.app, so this README links to the live site instead of duplicating landing screenshots here.
 
-There is no public editable demo for `/admin`. That private surface still depends on local infrastructure and must stay local/private for privacy reasons.
+The private `/admin` surface works locally against HAPI FHIR and is shown here only through sanitized screenshots captured from the disposable dev/test endpoint (`http://localhost:8081/fhir`), not from the local-real `8080` environment.
 
-### Public Home
+There is no public editable demo for `/admin`. That surface remains local/private because it still depends on local infrastructure and must not be represented as an online sandbox.
 
-![Public home screenshot](./docs/screenshots/public-home.png)
+### Private Clinical Workflow Preview
 
-Public acquisition surface focused on home-based physiotherapy, WhatsApp entry, and portfolio-safe presentation.
+All images below use fictitious/sanitized data from the local dev/test dataset. Do not add screenshots with real patient data, real phone numbers, real addresses, real DNI values, real family names, or identifiable clinical notes.
 
-### Public Services
-
-![Public services screenshot](./docs/screenshots/public-services.png)
-
-Services overview with scope framing, FAQs, and WhatsApp-driven consultation flow.
-
-### Public Guided Evaluation
-
-![Public guided evaluation screenshot](./docs/screenshots/public-evaluar.png)
-
-Guided `/evaluar` flow that helps orient whether a home-care consultation makes sense before first contact.
-
-### Private Admin Dashboard
+### Admin Dashboard
 
 ![Private admin dashboard screenshot](./docs/screenshots/admin-dashboard.png)
 
-Sanitized local/private dashboard running against HAPI FHIR dev/test on `localhost:8081`, shown as portfolio evidence rather than as a public online demo.
+Operational overview of the private clinical surface running locally against HAPI FHIR dev/test on `localhost:8081`.
 
-Important: do not add screenshots with real patient data, real phone numbers, real addresses, DNI values, or identifiable clinical notes.
+### Patients List
+
+![Private admin patients screenshot](./docs/screenshots/admin-patients.png)
+
+Sanitized patient list with workflow states, contact shortcuts, and clearly fictitious demographic data.
+
+### Patient Detail
+
+![Private admin patient detail screenshot](./docs/screenshots/admin-patient-detail.png)
+
+Local patient detail view with sanitized administrative and contact context for the active treatment cycle.
+
+### Treatment Context
+
+![Private admin treatment screenshot](./docs/screenshots/admin-treatment.png)
+
+Treatment context screen captured locally against HAPI FHIR dev/test, showing structure and workflow without promising an online demo mode.
+
+### Encounters And Follow-Up
+
+![Private admin encounters screenshot](./docs/screenshots/admin-encounters.png)
+
+Visit history and functional follow-up with fictitious clinical notes and demo metrics only.
 
 ## Current Status
 
