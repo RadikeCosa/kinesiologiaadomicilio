@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 import { FinishEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/FinishEpisodeOfCareForm";
 import { StartEpisodeOfCareForm } from "@/app/admin/patients/[id]/components/StartEpisodeOfCareForm";
@@ -56,19 +57,7 @@ export default async function AdminPatientTreatmentPage({
   const patient = await loadPatientDetail(id);
 
   if (!patient) {
-    return (
-      <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
-        <Link className="text-sm font-medium text-slate-700 underline-offset-2 hover:underline" href="/admin/patients">
-          ← Volver a pacientes
-        </Link>
-
-        <h2 className="mt-3 text-xl font-semibold text-slate-900">Tratamiento</h2>
-
-        <p className="mt-4 rounded border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
-          No se encontró el paciente solicitado.
-        </p>
-      </section>
-    );
+    notFound();
   }
 
   const treatmentServiceRequestContext = await loadTreatmentServiceRequestContext({
