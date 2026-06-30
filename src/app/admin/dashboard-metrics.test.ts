@@ -111,7 +111,7 @@ describe("dashboard-metrics", () => {
 
     expect(sections).toEqual([
       {
-        title: "Requiere acción",
+        title: "Prioridad operativa",
         description: "Pendientes que destraban la operación o requieren decisión.",
         emptyMessage: "No hay pendientes críticos en este momento.",
         metrics: [
@@ -120,16 +120,12 @@ describe("dashboard-metrics", () => {
             value: 4,
             tone: "sky",
             helper: "Pedidos que todavía requieren revisión.",
-            href: "/admin/patients?signal=in_review_requests",
-            ctaLabel: "Ver pacientes",
           },
           {
             label: "Pendientes de iniciar tratamiento",
             value: 1,
             tone: "indigo",
             helper: "Solicitudes aceptadas que todavía no iniciaron atención.",
-            href: "/admin/patients?signal=accepted_pending_treatment",
-            ctaLabel: "Revisar pacientes",
           },
           {
             label: "Faltan datos",
@@ -146,7 +142,12 @@ describe("dashboard-metrics", () => {
         description: "Casos en curso que conviene monitorear.",
         emptyMessage: "No hay tratamientos activos para seguir hoy.",
         metrics: [
-          { label: "Pacientes en tratamiento", value: 3, tone: "emerald" },
+          {
+            label: "Pacientes en tratamiento",
+            value: 3,
+            tone: "emerald",
+            helper: "Tratamientos activos para seguimiento operativo.",
+          },
           {
             label: "Preparar inicio",
             value: 3,
@@ -161,10 +162,56 @@ describe("dashboard-metrics", () => {
         title: "Contexto / histórico",
         description: "Indicadores generales para lectura global.",
         metrics: [
+          {
+            label: "Sin tratamiento iniciado",
+            value: 5,
+            tone: "slate",
+            helper: "Pacientes entre preparación de inicio y datos pendientes.",
+            href: "/admin/patients?status=pending",
+            ctaLabel: "Ver pendientes",
+          },
           { label: "Pacientes totales", value: 10, tone: "slate" },
           { label: "Tratamientos finalizados", value: 2, tone: "slate" },
         ],
       },
     ]);
+  });
+
+  it("does not attach pending-status CTas to request-backed metrics without a matching patients filter", () => {
+    const sections = buildAdminDashboardSections({
+      generatedAt: "2026-04-26T12:00:00.000Z",
+      operationalSummary: {
+        totalPatients: 6,
+        activeTreatment: 2,
+        finishedTreatment: 1,
+        withoutStartedTreatment: 3,
+        preliminary: 1,
+        readyToStart: 2,
+      },
+      serviceRequestSummary: {
+        inReview: 2,
+        acceptedPendingTreatment: 1,
+      },
+      ageSummary: {
+        youngest: 18,
+        oldest: 80,
+        average: 44,
+        withValidBirthDate: 4,
+        withoutValidBirthDate: 0,
+        coverage: { numerator: 4, denominator: 4, percentage: 100 },
+        note: "Calculada sobre pacientes con tratamiento iniciado o finalizado.",
+      },
+    });
+
+    const actionMetrics = sections.find((section) => section.title === "Prioridad operativa")?.metrics ?? [];
+    const inReviewMetric = actionMetrics.find((metric) => metric.label === "Solicitudes en evaluación");
+    const acceptedPendingMetric = actionMetrics.find((metric) => metric.label === "Pendientes de iniciar tratamiento");
+
+    expect(inReviewMetric).toBeDefined();
+    expect(acceptedPendingMetric).toBeDefined();
+    expect(inReviewMetric).not.toHaveProperty("href");
+    expect(inReviewMetric).not.toHaveProperty("ctaLabel");
+    expect(acceptedPendingMetric).not.toHaveProperty("href");
+    expect(acceptedPendingMetric).not.toHaveProperty("ctaLabel");
   });
 });

@@ -30,5 +30,6 @@ describe("AdminLayout", () => {
     expect(html).toContain("href=\"/admin/configuracion/profesional\"");
     expect(html).toContain("Configuración");
     expect(html).toContain("Entorno FHIR: FHIR dev/test");
+    expect(html).toContain("max-w-6xl");
   });
 });

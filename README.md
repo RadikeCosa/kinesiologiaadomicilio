@@ -168,20 +168,39 @@ Current documented variables:
 - `NEXT_PUBLIC_GA_ID`
   Optional. Enables GA4 only on public routes.
 
-## Screenshots
+## Visual Walkthrough
 
-Screenshot placeholders live in [docs/screenshots/README.md](./docs/screenshots/README.md).
+Sanitized screenshots live in [docs/screenshots/README.md](./docs/screenshots/README.md).
 
-Recommended capture set:
+The public landing is deployed. The private `/admin` surface works locally against HAPI FHIR and is shown here only through sanitized screenshots captured from the disposable dev/test endpoint (`http://localhost:8081/fhir`), not from the local-real `8080` environment.
 
-- Home page
-- `/services`
-- `/evaluar`
-- `/admin`
-- `/admin/patients/[id]`
-- `/admin/patients/[id]/encounters`
+There is no public editable demo for `/admin`. That private surface still depends on local infrastructure and must stay local/private for privacy reasons.
 
-Important: do not add screenshots with real patient data, real phone numbers, real addresses, or identifiable clinical notes.
+### Public Home
+
+![Public home screenshot](./docs/screenshots/public-home.png)
+
+Public acquisition surface focused on home-based physiotherapy, WhatsApp entry, and portfolio-safe presentation.
+
+### Public Services
+
+![Public services screenshot](./docs/screenshots/public-services.png)
+
+Services overview with scope framing, FAQs, and WhatsApp-driven consultation flow.
+
+### Public Guided Evaluation
+
+![Public guided evaluation screenshot](./docs/screenshots/public-evaluar.png)
+
+Guided `/evaluar` flow that helps orient whether a home-care consultation makes sense before first contact.
+
+### Private Admin Dashboard
+
+![Private admin dashboard screenshot](./docs/screenshots/admin-dashboard.png)
+
+Sanitized local/private dashboard running against HAPI FHIR dev/test on `localhost:8081`, shown as portfolio evidence rather than as a public online demo.
+
+Important: do not add screenshots with real patient data, real phone numbers, real addresses, DNI values, or identifiable clinical notes.
 
 ## Current Status
 
@@ -193,9 +212,7 @@ Important: do not add screenshots with real patient data, real phone numbers, re
 
 ## Roadmap / Next Steps
 
-- Add sanitized screenshots or a short walkthrough GIF.
 - Add a compact architecture diagram for recruiters and hiring managers.
-- Expose a safe demo mode for `/admin` based on fixtures instead of local FHIR dependency.
 - Continue hardening private workflow documentation around FHIR contracts and product decisions.
 
 ## Documentation Map

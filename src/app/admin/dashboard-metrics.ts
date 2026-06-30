@@ -19,7 +19,7 @@ export interface AdminDashboardMetricCard {
 }
 
 export interface AdminDashboardSection {
-  title: "Requiere acción" | "En seguimiento" | "Contexto / histórico";
+  title: "Prioridad operativa" | "En seguimiento" | "Contexto / histórico";
   description: string;
   metrics: AdminDashboardMetricCard[];
   emptyMessage?: string;
@@ -126,7 +126,7 @@ export function buildAdminDashboardSections(
 ): AdminDashboardSection[] {
   return [
     {
-      title: "Requiere acción",
+      title: "Prioridad operativa",
       description: "Pendientes que destraban la operación o requieren decisión.",
       emptyMessage: "No hay pendientes críticos en este momento.",
       metrics: [
@@ -135,16 +135,12 @@ export function buildAdminDashboardSections(
           value: dashboard.serviceRequestSummary.inReview,
           tone: "sky",
           helper: "Pedidos que todavía requieren revisión.",
-          href: "/admin/patients?signal=in_review_requests",
-          ctaLabel: "Ver pacientes",
         },
         {
           label: "Pendientes de iniciar tratamiento",
           value: dashboard.serviceRequestSummary.acceptedPendingTreatment,
           tone: "indigo",
           helper: "Solicitudes aceptadas que todavía no iniciaron atención.",
-          href: "/admin/patients?signal=accepted_pending_treatment",
-          ctaLabel: "Revisar pacientes",
         },
         {
           label: "Faltan datos",
@@ -165,6 +161,7 @@ export function buildAdminDashboardSections(
           label: "Pacientes en tratamiento",
           value: dashboard.operationalSummary.activeTreatment,
           tone: "emerald",
+          helper: "Tratamientos activos para seguimiento operativo.",
         },
         {
           label: "Preparar inicio",
@@ -180,6 +177,14 @@ export function buildAdminDashboardSections(
       title: "Contexto / histórico",
       description: "Indicadores generales para lectura global.",
       metrics: [
+        {
+          label: "Sin tratamiento iniciado",
+          value: dashboard.operationalSummary.withoutStartedTreatment,
+          tone: "slate",
+          helper: "Pacientes entre preparación de inicio y datos pendientes.",
+          href: "/admin/patients?status=pending",
+          ctaLabel: "Ver pendientes",
+        },
         {
           label: "Pacientes totales",
           value: dashboard.operationalSummary.totalPatients,

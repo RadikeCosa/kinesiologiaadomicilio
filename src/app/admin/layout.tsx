@@ -33,7 +33,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-        <Container className="max-w-4xl">
+        <Container className="max-w-6xl">
           <div className="flex h-16 items-center justify-between gap-4">
             <Link
               href="/admin/"
@@ -89,7 +89,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </header>
 
       <main id="contenido" className="flex-1 py-8 sm:py-10">
-        <Container className="max-w-4xl">{children}</Container>
+        <Container className="max-w-6xl">{children}</Container>
       </main>
     </div>
   );
