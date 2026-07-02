@@ -7,6 +7,7 @@ import {
   loadPatientHubServiceRequestContext,
   loadPatientServiceRequestHistoryContext,
   loadPatientServiceRequestContext,
+  loadTreatmentServiceRequestContext,
   sortServiceRequestsByRequestedAtDesc,
 } from "@/app/admin/patients/[id]/data";
 
@@ -263,6 +264,47 @@ describe("patient detail service-request technical composition", () => {
         closureReason: "clinical_discharge",
         closureDetail: "Alta",
       },
+    });
+  });
+
+  it("auto-resolves treatment context when there is exactly one accepted pending request", async () => {
+    vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([
+      { id: "sr-auto", patientId: "pat-1", requestedAt: "2026-04-22", reasonText: "Motivo", status: "accepted" },
+    ] as never);
+    vi.mocked(listEpisodeOfCareByIncomingReferral).mockResolvedValueOnce([]);
+
+    const context = await loadTreatmentServiceRequestContext({
+      patientId: "pat-1",
+    });
+
+    expect(context).toEqual({
+      serviceRequestId: "sr-auto",
+      isValid: true,
+      serviceRequest: expect.objectContaining({ id: "sr-auto", status: "accepted" }),
+      state: "valid",
+      message: undefined,
+    });
+  });
+
+  it("returns multiple_pending treatment context when more than one accepted pending request exists", async () => {
+    vi.mocked(listServiceRequestsByPatientId).mockResolvedValueOnce([
+      { id: "sr-1", patientId: "pat-1", requestedAt: "2026-04-22", reasonText: "Motivo 1", status: "accepted" },
+      { id: "sr-2", patientId: "pat-1", requestedAt: "2026-04-21", reasonText: "Motivo 2", status: "accepted" },
+    ] as never);
+    vi.mocked(listEpisodeOfCareByIncomingReferral)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+
+    const context = await loadTreatmentServiceRequestContext({
+      patientId: "pat-1",
+    });
+
+    expect(context).toEqual({
+      serviceRequestId: undefined,
+      isValid: false,
+      serviceRequest: undefined,
+      state: "multiple_pending",
+      message: "Hay más de una solicitud aceptada pendiente. Elegí cuál usar desde Gestión administrativa antes de iniciar tratamiento.",
     });
   });
 

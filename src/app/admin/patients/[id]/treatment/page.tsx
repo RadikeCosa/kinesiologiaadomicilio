@@ -79,6 +79,7 @@ export default async function AdminPatientTreatmentPage({
     ? treatmentEpisodeHistory.find((episode) => episode.id === patient.latestEpisode?.id) ?? treatmentEpisodeHistory[0]
     : null;
   const hasValidAcceptedRequest = Boolean(treatmentServiceRequestContext.serviceRequest);
+  const cannotAutoResolveTreatmentStart = treatmentServiceRequestContext.state === "multiple_pending";
 
   return (
     <section className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -134,7 +135,9 @@ export default async function AdminPatientTreatmentPage({
               ) : (
                 <>
                   <p className={`text-sm ${hasValidAcceptedRequest ? "text-emerald-900" : "text-slate-700"}`}>
-                    Para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.
+                    {hasValidAcceptedRequest
+                      ? "Para registrar visitas primero necesitás iniciar un tratamiento desde esta solicitud de atención aceptada."
+                      : "Aunque el paciente ya tenga datos administrativos completos, para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada."}
                   </p>
                   {hasValidAcceptedRequest ? (
                     <p className="text-sm text-emerald-900">
@@ -169,7 +172,7 @@ export default async function AdminPatientTreatmentPage({
               ) : null}
             </div>
           </section>
-        ) : treatmentServiceRequestContext.state === "already_used" ? (
+        ) : treatmentServiceRequestContext.state === "already_used" || cannotAutoResolveTreatmentStart ? (
           <p className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
             {treatmentServiceRequestContext.message}
           </p>

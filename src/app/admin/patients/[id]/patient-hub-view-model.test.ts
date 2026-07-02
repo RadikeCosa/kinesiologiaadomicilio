@@ -91,7 +91,7 @@ describe("buildPatientHubViewModel primary action matrix", () => {
     });
 
     expect(viewModel.primaryAction.label).toBe("Tratamiento");
-    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/treatment");
+    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/treatment?serviceRequestId=sr-1");
   });
 
   it("uses Registrar visita for active treatment", () => {
@@ -161,6 +161,6 @@ describe("buildPatientHubViewModel primary action matrix", () => {
     });
 
     expect(viewModel.primaryAction.label).toBe("Tratamiento");
-    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/treatment");
+    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/treatment?serviceRequestId=sr-1");
   });
 });

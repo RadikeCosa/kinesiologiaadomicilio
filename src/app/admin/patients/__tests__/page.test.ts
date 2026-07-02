@@ -200,6 +200,7 @@ describe("/admin/patients page", () => {
     expect(readyHtml).not.toContain("href=\"/admin/patients/pat-finished\"");
     expect(readyHtml).toContain("Preparar inicio");
     expect(readyHtml).toContain("href=\"/admin/patients/pat-ready/treatment\"");
+    expect(readyHtml).toContain("Ver tratamiento");
     expect(readyHtml).not.toContain("Registrar visita");
   });
 

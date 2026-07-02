@@ -218,7 +218,7 @@ describe("/admin/patients/[id] page", () => {
 
     expect(html).toContain("Preparar inicio");
     expect(html).not.toContain("Listo para iniciar");
-    expect(html).toContain("Todavía no hay una solicitud aceptada lista para iniciar tratamiento.");
+    expect(html).toContain("El paciente puede estar administrativamente listo, pero todavía no hay una solicitud aceptada lista para iniciar tratamiento.");
   });
 
   it("shows next-step suggestion for accepted pending treatment", async () => {
@@ -230,7 +230,7 @@ describe("/admin/patients/[id] page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Ya hay una solicitud aceptada disponible para iniciar un nuevo tratamiento.");
-    expect(html).toContain("href=\"/admin/patients/pat-1/treatment\"");
+    expect(html).toContain("href=\"/admin/patients/pat-1/treatment?serviceRequestId=sr-1\"");
   });
 
   it("shows next-step suggestion for finished treatment without useful service request", async () => {

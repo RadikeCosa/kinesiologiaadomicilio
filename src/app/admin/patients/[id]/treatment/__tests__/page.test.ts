@@ -99,16 +99,23 @@ describe("/admin/patients/[id]/treatment page", () => {
   });
 
 
-  it("does not show start form without serviceRequestId", async () => {
+  it("auto-resolves a single accepted pending request when serviceRequestId is missing", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(basePatient);
     loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
     loadActiveTreatmentEncountersCountMock.mockResolvedValueOnce(0);
     loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
-      serviceRequestId: undefined,
-      isValid: false,
-      state: "none",
+      serviceRequestId: "sr-auto",
+      isValid: true,
+      state: "valid",
       message: undefined,
-      serviceRequest: undefined,
+      serviceRequest: {
+        id: "sr-auto",
+        patientId: "pat-1",
+        status: "accepted",
+        requestedAt: "2026-04-11",
+        reasonText: "Control funcional",
+        createdAt: "2026-04-11T00:00:00.000Z",
+      },
     });
 
     const element = await AdminPatientTreatmentPage({
@@ -119,13 +126,15 @@ describe("/admin/patients/[id]/treatment page", () => {
 
     expect(html).toContain(">Paciente</p>");
     expect(html).toContain(">Tratamiento</p>");
-    expect(html).toContain("Sin tratamiento activo");
-    expect(html).not.toContain("Listo para iniciar");
-    expect(html).toContain("Para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
+    expect(html).toContain("Listo para iniciar");
+    expect(html).toContain("Para registrar visitas primero necesitás iniciar un tratamiento desde esta solicitud de atención aceptada.");
+    expect(html).toContain("Fecha: 11/04/2026");
+    expect(html).toContain("Motivo: Control funcional");
     expect(html).toContain("Ver solicitudes");
     expect(html).toContain('href="/admin/patients/pat-1/administrative#service-requests"');
-    expect(html).not.toContain("StartEpisodeOfCareForm");
+    expect(html).toContain("StartEpisodeOfCareForm:sr-auto");
   });
+
   it("shows warning and keeps legacy start when serviceRequestId is invalid", async () => {
     loadPatientDetailMock.mockResolvedValueOnce(basePatient);
     loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
@@ -145,7 +154,32 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("No se pudo usar la solicitud indicada para iniciar tratamiento.");
-    expect(html).toContain("Para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
+    expect(html).toContain("Aunque el paciente ya tenga datos administrativos completos, para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
+    expect(html).not.toContain("StartEpisodeOfCareForm");
+  });
+
+  it("shows clear guidance when multiple accepted pending requests exist and no serviceRequestId is provided", async () => {
+    loadPatientDetailMock.mockResolvedValueOnce(basePatient);
+    loadTreatmentEpisodeHistoryContextMock.mockResolvedValueOnce([]);
+    loadActiveTreatmentEncountersCountMock.mockResolvedValueOnce(0);
+    loadTreatmentServiceRequestContextMock.mockResolvedValueOnce({
+      serviceRequestId: undefined,
+      isValid: false,
+      state: "multiple_pending",
+      message: "Hay más de una solicitud aceptada pendiente. Elegí cuál usar desde Gestión administrativa antes de iniciar tratamiento.",
+      serviceRequest: undefined,
+    });
+
+    const element = await AdminPatientTreatmentPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({}),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Sin tratamiento activo");
+    expect(html).toContain("Hay más de una solicitud aceptada pendiente. Elegí cuál usar desde Gestión administrativa antes de iniciar tratamiento.");
+    expect(html).toContain("Ver gestión administrativa");
+    expect(html).toContain("Ver solicitudes");
     expect(html).not.toContain("StartEpisodeOfCareForm");
   });
 
@@ -169,7 +203,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Esta solicitud ya fue utilizada para iniciar un tratamiento. Para un nuevo ciclo, registrá una nueva solicitud.");
-    expect(html).toContain("Para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
+    expect(html).toContain("Aunque el paciente ya tenga datos administrativos completos, para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
     expect(html).not.toContain("StartEpisodeOfCareForm");
   });
   it("keeps one primary CTA to clinical management and no duplicate operational destination when active episode exists", async () => {
@@ -274,7 +308,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     expect(html).toContain(">Paciente</p>");
     expect(html).toContain(">Tratamiento</p>");
     expect(html).toContain("Sin tratamiento activo");
-    expect(html).toContain("Para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
+    expect(html).toContain("Aunque el paciente ya tenga datos administrativos completos, para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
     expect(html).toContain("Último tratamiento finalizado: 01/03/2026.");
     expect(html).toContain("Preparar informe de cierre");
     expect(html).toContain('href="/admin/patients/pat-1/treatment/report?mode=closure&amp;episodeId=epi-closed"');
@@ -502,7 +536,7 @@ describe("/admin/patients/[id]/treatment page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Sin tratamiento activo");
-    expect(html).toContain("Para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
+    expect(html).toContain("Aunque el paciente ya tenga datos administrativos completos, para registrar visitas primero necesitás iniciar un tratamiento desde una solicitud de atención aceptada.");
     expect(html).toContain("Último tratamiento finalizado");
     expect(html).toContain("Historial de ciclos cerrados");
     expect(html).toContain("Bloque secundario de antecedentes. No reemplaza el estado actual del tratamiento.");

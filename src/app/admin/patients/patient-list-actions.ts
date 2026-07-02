@@ -9,8 +9,9 @@ export interface PatientListAction {
 export function getPatientListActions(input: {
   patientId: string;
   operationalStatus: PatientOperationalStatus;
+  hasAcceptedPendingTreatment?: boolean;
 }): PatientListAction[] {
-  const { patientId, operationalStatus } = input;
+  const { patientId, operationalStatus, hasAcceptedPendingTreatment = false } = input;
 
   if (operationalStatus === "active_treatment") {
     return [
@@ -33,15 +34,30 @@ export function getPatientListActions(input: {
   }
 
   if (operationalStatus === "ready_to_start") {
+    if (hasAcceptedPendingTreatment) {
+      return [
+        {
+          href: `/admin/patients/${patientId}/treatment`,
+          label: "Ver tratamiento",
+          kind: "primary",
+        },
+        {
+          href: `/admin/patients/${patientId}/administrative`,
+          label: "Gestión administrativa",
+          kind: "secondary",
+        },
+      ];
+    }
+
     return [
       {
-        href: `/admin/patients/${patientId}/treatment`,
-        label: "Tratamiento",
+        href: `/admin/patients/${patientId}/administrative`,
+        label: "Gestión administrativa",
         kind: "primary",
       },
       {
-        href: `/admin/patients/${patientId}/encounters`,
-        label: "Clínica",
+        href: `/admin/patients/${patientId}/treatment`,
+        label: "Ver tratamiento",
         kind: "secondary",
       },
     ];
@@ -62,10 +78,25 @@ export function getPatientListActions(input: {
     ];
   }
 
+  if (hasAcceptedPendingTreatment) {
+    return [
+      {
+        href: `/admin/patients/${patientId}/treatment`,
+        label: "Ver tratamiento",
+        kind: "primary",
+      },
+      {
+        href: `/admin/patients/${patientId}/administrative`,
+        label: "Gestión administrativa",
+        kind: "secondary",
+      },
+    ];
+  }
+
   return [
     {
       href: `/admin/patients/${patientId}/treatment`,
-      label: "Tratamiento",
+      label: "Ver tratamiento",
       kind: "secondary",
     },
     {

@@ -55,7 +55,6 @@ export function PatientCreateForm() {
             name="firstName"
             required
           />
-          <p className="mt-1 text-xs text-slate-600">Preferentemente un número con WhatsApp para coordinar horarios y seguimiento. También podés ingresar un teléfono fijo.</p>
         </div>
 
         <div>

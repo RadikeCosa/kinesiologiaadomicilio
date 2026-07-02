@@ -186,6 +186,7 @@ export default async function AdminPatientsPage({
             const actions = getPatientListActions({
               patientId: patient.id,
               operationalStatus: patient.operationalStatus,
+              hasAcceptedPendingTreatment: patient.operationalSignals.hasAcceptedPendingTreatment,
             });
             const primaryAction = actions.find((action) => action.kind === "primary");
             const secondaryActions = actions.filter((action) => action.kind === "secondary");

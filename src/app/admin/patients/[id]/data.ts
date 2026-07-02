@@ -32,7 +32,7 @@ export interface TreatmentServiceRequestContext {
   serviceRequestId?: string;
   isValid: boolean;
   serviceRequest?: ServiceRequest;
-  state: "none" | "invalid" | "valid" | "already_used";
+  state: "none" | "invalid" | "valid" | "already_used" | "multiple_pending";
   message?: string;
 }
 export interface ServiceRequestHistoryItem {
@@ -308,6 +308,27 @@ export async function loadPatientHubServiceRequestContext(patientId: string): Pr
     latestClosedRequestReason: latestClosedRequest?.closedReasonText,
   };
 }
+
+async function loadAcceptedPendingServiceRequests(patientId: string): Promise<ServiceRequest[]> {
+  const { serviceRequests } = await loadPatientServiceRequestContext(patientId);
+  const acceptedServiceRequests = serviceRequests.filter((serviceRequest) => serviceRequest.status === "accepted");
+
+  const pendingChecks = await Promise.all(
+    acceptedServiceRequests.map(async (serviceRequest) => {
+      const linkedEpisodes = await listEpisodeOfCareByIncomingReferral(serviceRequest.id);
+
+      return isOperationalPendingServiceRequest({
+        status: serviceRequest.status,
+        hasIncomingReferralLink: linkedEpisodes.length > 0,
+      })
+        ? serviceRequest
+        : null;
+    }),
+  );
+
+  return pendingChecks.filter((serviceRequest): serviceRequest is ServiceRequest => Boolean(serviceRequest));
+}
+
 export function sortServiceRequestsByRequestedAtDesc(serviceRequests: ServiceRequest[]): ServiceRequest[] {
   return [...serviceRequests].sort((a, b) => {
     if (a.requestedAt !== b.requestedAt) {
@@ -437,6 +458,30 @@ export async function loadTreatmentServiceRequestContext(input: {
   const normalizedServiceRequestId = input.serviceRequestId?.trim();
 
   if (!normalizedServiceRequestId) {
+    const acceptedPendingServiceRequests = await loadAcceptedPendingServiceRequests(input.patientId);
+
+    if (acceptedPendingServiceRequests.length === 1) {
+      const [serviceRequest] = acceptedPendingServiceRequests;
+
+      return {
+        serviceRequestId: serviceRequest.id,
+        isValid: true,
+        serviceRequest,
+        state: "valid",
+        message: undefined,
+      };
+    }
+
+    if (acceptedPendingServiceRequests.length > 1) {
+      return {
+        serviceRequestId: undefined,
+        isValid: false,
+        serviceRequest: undefined,
+        state: "multiple_pending",
+        message: "Hay más de una solicitud aceptada pendiente. Elegí cuál usar desde Gestión administrativa antes de iniciar tratamiento.",
+      };
+    }
+
     return {
       serviceRequestId: undefined,
       isValid: false,

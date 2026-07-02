@@ -84,7 +84,7 @@ function getPrimaryAction(input: {
     && hasAcceptedPending
   ) {
     return {
-      href: `/admin/patients/${patient.id}/treatment`,
+      href: `/admin/patients/${patient.id}/treatment?serviceRequestId=${serviceRequestContext.pendingAcceptedServiceRequestId}`,
       label: "Tratamiento",
       supportingCopy: "Ya hay una solicitud aceptada disponible para iniciar un nuevo tratamiento.",
     };
@@ -109,7 +109,7 @@ function getPrimaryAction(input: {
   return {
     href: `/admin/patients/${patient.id}/administrative`,
     label: "Gestión administrativa",
-    supportingCopy: "Todavía no hay una solicitud aceptada lista para iniciar tratamiento.",
+    supportingCopy: "El paciente puede estar administrativamente listo, pero todavía no hay una solicitud aceptada lista para iniciar tratamiento.",
   };
 }
 
