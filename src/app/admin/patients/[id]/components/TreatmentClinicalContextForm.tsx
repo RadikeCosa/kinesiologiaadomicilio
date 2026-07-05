@@ -1,108 +1,249 @@
 "use client";
 
 import { FormEvent, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import { updateTreatmentClinicalContextFieldAction } from "@/app/admin/patients/[id]/actions/update-treatment-clinical-context-field.action";
 import type { EpisodeClinicalContextReadModel } from "@/app/admin/patients/[id]/clinical-context";
 
-type FieldKey = "medicalReferenceDiagnosis" | "kinesiologicDiagnosis" | "initialFunctionalStatus" | "therapeuticGoals" | "frameworkPlan";
+type FieldKey = "initialFunctionalStatus" | "medicalReferenceDiagnosis" | "kinesiologicDiagnosis" | "therapeuticGoals" | "frameworkPlan";
 type Tone = "success" | "error";
 
-export function TreatmentClinicalContextForm({ patientId, episodeOfCareId, initialData }: { patientId: string; episodeOfCareId: string; initialData: EpisodeClinicalContextReadModel | null }) {
-  const [isPending, startTransition] = useTransition();
-  const [editingField, setEditingField] = useState<FieldKey | null>(null);
-  const [messages, setMessages] = useState<Partial<Record<FieldKey, { text: string; tone: Tone }>>>({});
-  const [medicalReferenceDiagnosisText, setMedical] = useState(initialData?.medicalReferenceDiagnosisText ?? "");
-  const [kinesiologicDiagnosisText, setKinesiologic] = useState(initialData?.kinesiologicDiagnosisText ?? "");
-  const [initialFunctionalStatus, setInitial] = useState(initialData?.initialFunctionalStatus ?? "");
-  const [therapeuticGoals, setGoals] = useState(initialData?.therapeuticGoals ?? "");
-  const [frameworkPlan, setPlan] = useState(initialData?.frameworkPlan ?? "");
+interface FieldConfig {
+  key: FieldKey;
+  label: string;
+  placeholder: string;
+  rows?: number;
+}
 
-  function submitField(field: FieldKey, value: string) {
+type FormValues = Record<FieldKey, string>;
+
+const FIELD_CONFIG: FieldConfig[] = [
+  {
+    key: "initialFunctionalStatus",
+    label: "Situación funcional inicial",
+    placeholder: "Cómo estaba la persona al comenzar este tratamiento.",
+    rows: 4,
+  },
+  {
+    key: "medicalReferenceDiagnosis",
+    label: "Diagnóstico médico de referencia",
+    placeholder: "Diagnóstico o marco clínico con el que llega o fue derivado este tratamiento.",
+  },
+  {
+    key: "kinesiologicDiagnosis",
+    label: "Diagnóstico kinésico actual",
+    placeholder: "Problema funcional que organiza este tratamiento desde la mirada kinésica.",
+  },
+  {
+    key: "therapeuticGoals",
+    label: "Objetivos del tratamiento",
+    placeholder: "Metas observables o verificables del ciclo.",
+  },
+  {
+    key: "frameworkPlan",
+    label: "Plan general del tratamiento",
+    placeholder: "Estrategia general, frecuencia orientativa y ejes de trabajo.",
+    rows: 4,
+  },
+];
+
+export function buildFormValues(initialData: EpisodeClinicalContextReadModel | null): FormValues {
+  return {
+    initialFunctionalStatus: initialData?.initialFunctionalStatus ?? "",
+    medicalReferenceDiagnosis: initialData?.medicalReferenceDiagnosisText ?? "",
+    kinesiologicDiagnosis: initialData?.kinesiologicDiagnosisText ?? "",
+    therapeuticGoals: initialData?.therapeuticGoals ?? "",
+    frameworkPlan: initialData?.frameworkPlan ?? "",
+  };
+}
+
+function normalizeText(value: string): string {
+  return value.trim();
+}
+
+export function normalizeFormValues(values: FormValues): FormValues {
+  return {
+    initialFunctionalStatus: normalizeText(values.initialFunctionalStatus),
+    medicalReferenceDiagnosis: normalizeText(values.medicalReferenceDiagnosis),
+    kinesiologicDiagnosis: normalizeText(values.kinesiologicDiagnosis),
+    therapeuticGoals: normalizeText(values.therapeuticGoals),
+    frameworkPlan: normalizeText(values.frameworkPlan),
+  };
+}
+
+export function getChangedFieldKeys(persistedValues: FormValues, draftValues: FormValues): FieldKey[] {
+  const normalizedDraftValues = normalizeFormValues(draftValues);
+
+  return FIELD_CONFIG
+    .filter(({ key }) => normalizeText(persistedValues[key]) !== normalizedDraftValues[key])
+    .map(({ key }) => key);
+}
+
+export function resetDraftValues(persistedValues: FormValues): FormValues {
+  return { ...persistedValues };
+}
+
+export function TreatmentClinicalContextForm({
+  patientId,
+  episodeOfCareId,
+  initialData,
+  initialEditing = false,
+}: {
+  patientId: string;
+  episodeOfCareId: string;
+  initialData: EpisodeClinicalContextReadModel | null;
+  initialEditing?: boolean;
+}) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [isEditing, setIsEditing] = useState(initialEditing);
+  const [message, setMessage] = useState<{ text: string; tone: Tone } | null>(null);
+  const [persistedValues, setPersistedValues] = useState<FormValues>(() => buildFormValues(initialData));
+  const [draftValues, setDraftValues] = useState<FormValues>(() => buildFormValues(initialData));
+
+  function handleEditStart() {
+    setDraftValues(resetDraftValues(persistedValues));
+    setMessage(null);
+    setIsEditing(true);
+  }
+
+  function handleCancel() {
+    setDraftValues(resetDraftValues(persistedValues));
+    setMessage(null);
+    setIsEditing(false);
+  }
+
+  function handleChange(field: FieldKey, value: string) {
+    setDraftValues((current) => ({ ...current, [field]: value }));
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const normalizedDraftValues = normalizeFormValues(draftValues);
+    const changedFields = getChangedFieldKeys(persistedValues, draftValues);
+
+    if (changedFields.length === 0) {
+      setDraftValues(resetDraftValues(persistedValues));
+      setMessage({ text: "No había cambios para guardar.", tone: "success" });
+      setIsEditing(false);
+      return;
+    }
+
     startTransition(async () => {
-      const result = await updateTreatmentClinicalContextFieldAction({ patientId, episodeOfCareId, field, value });
-      setMessages((prev) => ({ ...prev, [field]: { text: result.message ?? (result.ok ? "Guardado." : "Error al guardar."), tone: result.ok ? "success" : "error" } }));
-      if (result.ok) setEditingField(null);
+      for (const field of changedFields) {
+        const result = await updateTreatmentClinicalContextFieldAction({
+          patientId,
+          episodeOfCareId,
+          field,
+          value: draftValues[field],
+        });
+
+        if (!result.ok) {
+          setMessage({
+            text: result.message ?? "No se pudieron guardar los cambios del contexto clínico.",
+            tone: "error",
+          });
+          return;
+        }
+      }
+
+      setPersistedValues(normalizedDraftValues);
+      setDraftValues(normalizedDraftValues);
+      setMessage({ text: "Contexto clínico actualizado.", tone: "success" });
+      setIsEditing(false);
+      router.refresh();
     });
   }
 
-  function fieldForm(field: FieldKey, label: string, value: string, onChange: (value: string) => void) {
-    const hasValue = Boolean(value.trim());
-    const isEditing = editingField === field;
-    return <>
-      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/80 p-3">
-        <div className="flex items-start justify-between gap-3">
-          <p className={`min-w-0 flex-1 whitespace-pre-wrap text-sm leading-6 ${hasValue ? "text-slate-900" : "italic text-slate-500"}`}>
-            {hasValue ? value : "No registrado"}
+  return (
+    <section className="rounded-xl border border-slate-300 bg-slate-100/70 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="max-w-3xl">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Contexto general del tratamiento</h2>
+          <p className="mt-2 text-sm text-slate-600">
+            Este bloque organiza el tratamiento a lo largo del ciclo y no reemplaza el registro de visitas.
           </p>
-          {!isEditing ? (
+        </div>
+        {!isEditing ? (
+          <button
+            className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            onClick={handleEditStart}
+            type="button"
+          >
+            Editar contexto clínico
+          </button>
+        ) : null}
+      </div>
+
+      {!isEditing ? (
+        <div className="mt-4 space-y-4 rounded-xl border border-slate-200 bg-white p-4">
+          {FIELD_CONFIG.map((field, index) => {
+            const value = persistedValues[field.key];
+            const hasValue = Boolean(value);
+
+            return (
+              <section
+                className={index > 0 ? "border-t border-slate-200 pt-4" : ""}
+                key={field.key}
+              >
+                <h3 className="text-sm font-medium text-slate-900">{field.label}</h3>
+                <p className={`mt-1 whitespace-pre-wrap text-sm leading-6 ${hasValue ? "text-slate-700" : "text-slate-400"}`}>
+                  {hasValue ? value : "Sin dato"}
+                </p>
+              </section>
+            );
+          })}
+        </div>
+      ) : (
+        <form className="mt-4 rounded-xl border border-slate-200 bg-white p-4" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            {FIELD_CONFIG.map((field) => (
+              <div key={field.key}>
+                <label className="block text-sm font-medium text-slate-900" htmlFor={field.key}>
+                  {field.label}
+                </label>
+                <textarea
+                  className="mt-1 w-full rounded border border-slate-300 bg-white p-3 text-sm text-slate-800"
+                  id={field.key}
+                  onChange={(event) => handleChange(field.key, event.target.value)}
+                  placeholder={field.placeholder}
+                  rows={field.rows ?? 3}
+                  value={draftValues[field.key]}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4">
             <button
-              aria-label={hasValue ? `Editar ${label.toLowerCase()}` : `Agregar ${label.toLowerCase()}`}
-              className="shrink-0 rounded border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100"
-              onClick={() => setEditingField(field)}
+              className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+              disabled={isPending}
+              type="submit"
+            >
+              {isPending ? "Guardando..." : "Guardar cambios"}
+            </button>
+            <button
+              className="rounded border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              disabled={isPending}
+              onClick={handleCancel}
               type="button"
             >
-              {hasValue ? "Editar" : "Agregar"}
+              Cancelar
             </button>
-          ) : null}
-        </div>
-      </div>
-      {messages[field] ? <p className={`mt-2 text-sm ${messages[field]?.tone === "success" ? "text-emerald-700" : "text-red-700"}`}>{messages[field]?.text}</p> : null}
-      {isEditing ? (
-        <form className="mt-2" onSubmit={(event: FormEvent<HTMLFormElement>) => { event.preventDefault(); submitField(field, value); }}>
-          <label className="sr-only" htmlFor={field}>{label}</label>
-          <textarea className="mt-1 w-full rounded border p-2 text-sm" id={field} placeholder={label} rows={3} value={value} onChange={(event) => onChange(event.target.value)} />
-          <div className="mt-2 flex gap-2">
-            <button className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white" disabled={isPending} type="submit">{isPending ? "Guardando..." : "Guardar"}</button>
-            <button className="rounded border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700" onClick={() => setEditingField(null)} type="button">Cancelar</button>
           </div>
         </form>
+      )}
+
+      {message ? (
+        <p
+          aria-live="polite"
+          className={`mt-3 text-sm ${message.tone === "success" ? "text-emerald-700" : "text-red-700"}`}
+        >
+          {message.text}
+        </p>
       ) : null}
-    </>;
-  }
-
-  return <section className="rounded-xl border border-slate-300 bg-slate-100/70 p-5"><h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Contexto general del tratamiento</h2><p className="mt-2 text-xs text-slate-600">Cada campo se guarda de forma independiente y organiza el tratamiento sin reemplazar el registro de visitas.</p>
-    <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
-      <section>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Referencia inicial</p>
-        <p className="mt-1 text-xs text-slate-500">Base clínica y funcional con la que se inicia o se encuadra este tratamiento.</p>
-        <h3 className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-700">Situación funcional al inicio</h3>
-        <p className="mt-1 text-xs text-slate-500">Describí cómo estaba la persona al comenzar este tratamiento en movilidad, dolor, tolerancia, marcha o actividades relevantes. Evitá usarlo para evolución puntual de una visita.</p>
-        {fieldForm("initialFunctionalStatus", "Situación funcional al inicio", initialFunctionalStatus, setInitial)}
-      </section>
-
-      <section className="mt-5 border-t border-slate-200 pt-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Referencia médica</p>
-        <p className="mt-1 text-xs text-slate-500">Diagnóstico o marco clínico con el que llega o fue derivado este tratamiento.</p>
-        <h3 className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-700">Diagnóstico médico de referencia</h3>
-        <p className="mt-1 text-xs text-slate-500">Dejá el diagnóstico con el que llega o fue derivado este tratamiento. No hace falta resumir toda la evolución acá.</p>
-        {fieldForm("medicalReferenceDiagnosis", "Diagnóstico médico de referencia", medicalReferenceDiagnosisText, setMedical)}
-      </section>
-
-      <section className="mt-5 border-t border-slate-200 pt-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-sky-800">Síntesis kinésica</p>
-        <p className="mt-1 text-xs text-slate-500">Este bloque resume la lectura funcional actual que organiza el tratamiento.</p>
-        <h3 className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-700">Diagnóstico kinésico actual</h3>
-        <p className="mt-1 text-xs text-slate-500">Describí el problema funcional que organiza este tratamiento desde la mirada kinésica actual.</p>
-        {fieldForm("kinesiologicDiagnosis", "Diagnóstico kinésico actual", kinesiologicDiagnosisText, setKinesiologic)}
-      </section>
-
-      <section className="mt-5 border-t border-slate-200 pt-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Dirección terapéutica</p>
-        <p className="mt-1 text-xs text-slate-500">Metas y plan general que orientan el tratamiento a lo largo del ciclo.</p>
-
-        <div className="mt-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-700">Objetivos del tratamiento</h3>
-          <p className="mt-1 text-xs text-slate-500">Redactalos como metas observables o verificables del ciclo, no solo como intención general.</p>
-          {fieldForm("therapeuticGoals", "Objetivos del tratamiento", therapeuticGoals, setGoals)}
-        </div>
-
-        <div className="mt-5 border-t border-slate-200 pt-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-700">Plan general del tratamiento</h3>
-          <p className="mt-1 text-xs text-slate-500">Usalo para dejar la estrategia general, la frecuencia orientativa y los ejes de trabajo. No hace falta repetir lo hecho en cada visita.</p>
-          {fieldForm("frameworkPlan", "Plan general del tratamiento", frameworkPlan, setPlan)}
-        </div>
-      </section>
-    </div>
-  </section>;
+    </section>
+  );
 }
