@@ -66,6 +66,7 @@ describe("/admin page", () => {
     expect(html).toContain("Administración clínica");
     expect(html).toContain("Consola operativa privada");
     expect(html).toContain("Acciones principales");
+    expect(html).toContain("href=\"/admin/requests/new\"");
     expect(html).toContain("href=\"/admin/patients\"");
     expect(html).toContain("href=\"/admin/patients/new\"");
     expect(html).toContain("data-dashboard-section=\"prioridad-operativa\"");

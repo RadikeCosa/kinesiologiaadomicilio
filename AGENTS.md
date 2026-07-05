@@ -47,6 +47,7 @@ Public scope includes:
 
 - `/admin`
 - `/admin/configuracion/profesional`
+- `/admin/requests/new`
 - `/admin/patients`
 - `/admin/patients/new`
 - `/admin/patients/[id]`
@@ -58,6 +59,7 @@ Public scope includes:
 Private scope currently includes:
 
 - an operational dashboard under `/admin`;
+- a request-first intake entry for new cases under `/admin/requests/new`;
 - patient management;
 - attention requests with `ServiceRequest`;
 - treatment cycles with `EpisodeOfCare`;
@@ -131,6 +133,7 @@ If demo assets are needed, use sanitized or fictional data only.
 - Keep changes small and verifiable.
 - Preserve existing product language when working in established surfaces.
 - Start from the actual code and current docs, not from older assumptions.
+- For new operational cases, prefer `Nueva solicitud de atención` as the entrypoint when the implemented flow supports it; do not remove or replace `/admin/patients/new`, which still exists for direct administrative creation.
 - If changing visible behavior, prefer the naming and responsibilities defined in `docs/fuente-de-verdad-operativa.md`, especially for `Gestión administrativa`, `Gestión clínica`, and `Tratamiento`.
 
 ## Validation

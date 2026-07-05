@@ -89,7 +89,7 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Gestión clínica");
     expect(html).toContain("Gestión administrativa");
     expect(html).toContain("Tratamiento");
-    expect(html).toContain("Próxima acción recomendada");
+    expect(html).toContain("Próximo paso recomendado");
     expect(html).toContain("Estado actual");
     expect(html).toContain("Orientación breve del caso. El detalle está en Gestión clínica y Tratamiento.");
     expect(html).toContain("Última visita:</span> No disponible");
@@ -99,7 +99,7 @@ describe("/admin/patients/[id] page", () => {
 
     const summaryIndex = html.indexOf("Estado actual");
     const contactIndex = html.indexOf("Contacto operativo");
-    const suggestionIndex = html.indexOf("Próxima acción recomendada");
+    const suggestionIndex = html.indexOf("Próximo paso recomendado");
     const actionsIndex = html.indexOf("Navegación secundaria");
 
     expect(contactIndex).toBeGreaterThan(summaryIndex);
@@ -218,7 +218,43 @@ describe("/admin/patients/[id] page", () => {
 
     expect(html).toContain("Preparar inicio");
     expect(html).not.toContain("Listo para iniciar");
-    expect(html).toContain("El paciente puede estar administrativamente listo, pero todavía no hay una solicitud aceptada lista para iniciar tratamiento.");
+    expect(html).toContain("Solicitud pendiente de revisión");
+    expect(html).toContain("Hay una solicitud de atención cargada. Revisala para aceptarla, cancelarla o cerrarla sin iniciar tratamiento.");
+    expect(html).toContain("Revisar solicitud");
+    expect(html).toContain("href=\"/admin/patients/pat-1/administrative#service-requests\"");
+    expect(html).not.toContain("Registrar solicitud");
+  });
+
+  it("shows post-intake success guidance when requestCreated=1 and the request is still in review", async () => {
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({
+      hasServiceRequests: true,
+      hasInReview: true,
+      pendingAcceptedServiceRequestId: undefined,
+      latestClosedRequestStatus: undefined,
+      latestClosedRequestReason: undefined,
+    });
+    mockClinicalRecentSummary();
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient({
+      operationalStatus: "ready_to_start",
+      address: "Belgrano 123",
+      phone: "+54 299 555 0101",
+    }));
+
+    const element = await AdminPatientDetailPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ requestCreated: "1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Solicitud registrada");
+    expect(html).toContain("La consulta inicial quedó cargada. Revisá la solicitud para decidir si avanza, se cancela o se cierra sin iniciar tratamiento.");
+    expect(html).toContain("Revisar solicitud");
+    expect(html).toContain("Completar datos administrativos");
+    expect(html).toContain("href=\"/admin/patients/pat-1/administrative#service-requests\"");
+    expect(html).toContain("href=\"/admin/patients/pat-1/administrative\"");
+    expect(html).not.toContain("Solicitud pendiente de revisión");
+    expect(html).not.toContain("Iniciar tratamiento");
+    expect(html).not.toContain("Registrar visita");
   });
 
   it("shows next-step suggestion for accepted pending treatment", async () => {
@@ -229,8 +265,84 @@ describe("/admin/patients/[id] page", () => {
     const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Ya hay una solicitud aceptada disponible para iniciar un nuevo tratamiento.");
+    expect(html).toContain("Solicitud aceptada pendiente");
+    expect(html).toContain("La solicitud ya fue aceptada. Falta iniciar el tratamiento para habilitar el registro de visitas.");
+    expect(html).toContain("Iniciar tratamiento");
     expect(html).toContain("href=\"/admin/patients/pat-1/treatment?serviceRequestId=sr-1\"");
+    expect(html).not.toContain(">Tratamiento</a>");
+    expect(html).not.toContain("Registrar solicitud");
+  });
+
+  it("does not show post-intake success guidance when treatment is active even if requestCreated=1 is present", async () => {
+    loadPatientHubServiceRequestContextMock.mockResolvedValueOnce({
+      hasServiceRequests: true,
+      hasInReview: true,
+      pendingAcceptedServiceRequestId: undefined,
+      latestClosedRequestStatus: undefined,
+      latestClosedRequestReason: undefined,
+    });
+    mockClinicalRecentSummary({
+      treatmentStatusLabel: "Tratamiento activo",
+    });
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        operationalStatus: "active_treatment",
+        activeEpisode: {
+          id: "ep-1",
+          patientId: "pat-1",
+          status: "active",
+          startDate: "2026-04-17",
+        },
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ requestCreated: "1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Tratamiento activo");
+    expect(html).toContain("Registrar visita");
+    expect(html).not.toContain("Solicitud registrada");
+    expect(html).not.toContain("Completar datos administrativos");
+  });
+
+  it("shows register-request guidance for patient without service requests or treatment", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient({
+      operationalStatus: "preliminary",
+    }));
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Próximo paso recomendado");
+    expect(html).toContain("Registrá la solicitud de atención para dejar asentado quién consulta, el motivo del pedido y la fecha de la consulta inicial.");
+    expect(html).toContain("Registrar solicitud");
+    expect(html).toContain("href=\"/admin/patients/pat-1/administrative?newServiceRequest=1#service-requests\"");
+    expect(html).not.toContain("Crear solicitud de atención");
+  });
+
+  it("does not show post-intake success guidance when requestCreated=1 is present but there is no request", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary();
+    loadPatientDetailMock.mockResolvedValueOnce(buildPatient({
+      operationalStatus: "preliminary",
+    }));
+
+    const element = await AdminPatientDetailPage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ requestCreated: "1" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Próximo paso recomendado");
+    expect(html).toContain("Registrar solicitud");
+    expect(html).not.toContain("Solicitud registrada");
+    expect(html).not.toContain("Completar datos administrativos");
+    expect(html).not.toContain("Iniciar tratamiento");
   });
 
   it("shows next-step suggestion for finished treatment without useful service request", async () => {
@@ -247,7 +359,7 @@ describe("/admin/patients/[id] page", () => {
     expect(html).toContain("Si corresponde un nuevo ciclo, registrá o resolvé una nueva solicitud de atención.");
   });
 
-  it("renders direct CTA to create service request in administrative", async () => {
+  it("avoids duplicating the create-request CTA in secondary navigation when it is already primary", async () => {
     mockNoServiceRequestContext();
     mockClinicalRecentSummary();
     loadPatientDetailMock.mockResolvedValueOnce(buildPatient());
@@ -257,8 +369,9 @@ describe("/admin/patients/[id] page", () => {
     });
     const html = renderToStaticMarkup(element);
 
-    expect(html).toContain("Crear solicitud de atención");
+    expect(html).toContain("Registrar solicitud");
     expect(html).toContain('href="/admin/patients/pat-1/administrative?newServiceRequest=1#service-requests"');
+    expect(html).not.toContain("Crear solicitud de atención");
   });
 
   it("does not render Registrar visita for preliminary", async () => {
@@ -270,6 +383,30 @@ describe("/admin/patients/[id] page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).not.toContain('href="/admin/patients/pat-1/encounters/new"');
+  });
+
+  it("does not show register-request guidance when treatment is active", async () => {
+    mockNoServiceRequestContext();
+    mockClinicalRecentSummary({
+      treatmentStatusLabel: "Tratamiento activo",
+    });
+    loadPatientDetailMock.mockResolvedValueOnce(
+      buildPatient({
+        operationalStatus: "active_treatment",
+        activeEpisode: {
+          id: "ep-1",
+          patientId: "pat-1",
+          status: "active",
+          startDate: "2026-04-17",
+        },
+      }),
+    );
+
+    const element = await AdminPatientDetailPage({ params: Promise.resolve({ id: "pat-1" }) });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).not.toContain("Registrá la solicitud de atención para dejar asentado quién consulta, el motivo del pedido y la fecha de la consulta inicial.");
+    expect(html).not.toContain("href=\"/admin/patients/pat-1/administrative?newServiceRequest=1#service-requests\"");
   });
 
   it("does not render Registrar visita for ready_to_start", async () => {

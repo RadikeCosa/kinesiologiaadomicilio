@@ -89,6 +89,7 @@ describe("/admin/patients page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Pacientes");
+    expect(html).toContain("href=\"/admin/requests/new\"");
     expect(html).toContain("href=\"/admin/patients/new\"");
     expect(html).toContain("Listado operativo priorizado por estado.");
     expect(html).toContain("href=\"/admin/patients?status=all\"");

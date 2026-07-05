@@ -216,7 +216,13 @@ export default async function AdminHomePage() {
 
             <div className="mt-6 grid gap-3">
               <Link
-                className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-950 transition-colors hover:bg-slate-200"
+                className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-slate-700"
+                href="/admin/requests/new"
+              >
+                Nueva solicitud de atención
+              </Link>
+              <Link
+                className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-700 ring-1 ring-slate-200 transition-colors hover:bg-slate-100"
                 href="/admin/patients"
               >
                 Ver pacientes

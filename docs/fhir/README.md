@@ -88,10 +88,12 @@ Notas operativas:
 
 Contrato operativo vigente:
 
+- La nueva puerta de entrada `/admin/requests/new` crea primero un `Patient` mínimo y luego una `ServiceRequest` con `subject = Patient/{id}`.
 - `ServiceRequest.authoredOn` persiste la fecha visible de la solicitud.
 - La edición de fecha usa `GET -> merge -> PUT` y solo está permitida para solicitudes no vinculadas a `EpisodeOfCare`.
 - La eliminación visible en la UI no hace hard delete: usa `status = entered-in-error` para cargas erróneas.
 - Si la solicitud ya está vinculada por `EpisodeOfCare.referralRequest`, no se permite ni editar la fecha ni marcarla como carga errónea.
+- La creación inicial por intake deja la solicitud en estado operativo `in_review`; no crea `EpisodeOfCare` ni habilita visitas.
 
 ### 3. Profesional firmante single-user con `Practitioner`
 

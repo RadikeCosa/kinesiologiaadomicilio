@@ -110,11 +110,13 @@ describe("/admin/patients/[id]/administrative page", () => {
 
     expect(html).toContain("Nueva solicitud");
     expect(html).not.toContain("<form");
+    expect(html).toContain("Aceptar solicitud");
     expect(html).toContain("Aceptar e iniciar tratamiento");
+    expect(html).toContain("Aceptar la solicitud solo confirma que el pedido avanza. Iniciar tratamiento crea el ciclo de atención y habilita el registro de visitas.");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
     expect(html).not.toContain("Registrar visita");
-    expect(html).not.toContain("Iniciar tratamiento");
+    expect(html).not.toContain(">Iniciar tratamiento</a>");
   });
 
   it("renders empty state for service requests when there are none", async () => {
@@ -198,6 +200,31 @@ describe("/admin/patients/[id]/administrative page", () => {
     expect(html).toContain("Registrar solicitud");
     expect(html).toContain("Motivo de consulta *");
     expect(html).not.toContain("Nueva solicitud");
+  });
+
+  it("shows a recoverable banner when intake created the patient but not the request", async () => {
+    loadPatientAdministrativeContextMock.mockResolvedValueOnce({
+      patient: {
+        id: "pat-1",
+        fullName: "Ana Pérez",
+        firstName: "Ana",
+        lastName: "Pérez",
+        operationalStatus: "preliminary",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      serviceRequests: [],
+      latestServiceRequest: null,
+    });
+
+    const element = await AdminPatientAdministrativePage({
+      params: Promise.resolve({ id: "pat-1" }),
+      searchParams: Promise.resolve({ newServiceRequest: "1", status: "intake-partial" }),
+    });
+    const html = renderToStaticMarkup(element);
+
+    expect(html).toContain("Se creó el paciente, pero la solicitud inicial no se pudo registrar. Completala manualmente desde esta sección.");
+    expect(html).toContain("Registrar solicitud");
   });
 
   it("keeps create form closed when query param is absent", async () => {

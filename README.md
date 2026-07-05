@@ -22,7 +22,7 @@ The product combines:
 
 - a public acquisition site for home-based physiotherapy in Neuquen;
 - WhatsApp-first contact and guided `/evaluar` orientation;
-- a private `/admin` workflow for patients, requests, treatment cycles, visits, and functional follow-up;
+- a private `/admin` workflow with request-based intake, patients, treatment cycles, visits, and functional follow-up;
 - family-friendly visit summaries and professional signing configuration;
 - SEO and analytics on the public side only.
 
@@ -68,7 +68,7 @@ The UI does not work directly with raw FHIR resources. The app translates infras
 The private workflow uses a deliberately small subset of FHIR R4:
 
 - `Patient`: identity and administrative base
-- `ServiceRequest`: incoming attention request / intake signal
+- `ServiceRequest`: incoming attention request / intake signal, including the operational intake entry
 - `EpisodeOfCare`: active or closed treatment cycle
 - `Encounter`: home visit
 - `Observation`: visit-level functional metrics
@@ -144,6 +144,7 @@ Visit history and functional follow-up with fictitious clinical notes and demo m
 
 - Public website is deployable and portfolio-safe.
 - Private clinical workflow is functional and meaningful, but remains local/private and intentionally minimal.
+- New cases can now enter through a request-first intake flow in `/admin/requests/new`, while direct patient creation remains available for administrative use.
 - The admin side should be read as a local clinical prototype/workflow surface, not as a production SaaS admin.
 - This is not presented as a full EHR.
 - `/admin` is intentionally private/local and not a public editable demo surface.

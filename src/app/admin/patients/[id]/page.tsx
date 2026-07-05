@@ -20,6 +20,7 @@ import { PatientIdentityHeaderCard } from "@/app/admin/patients/[id]/components/
 
 interface AdminPatientDetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ requestCreated?: string }>;
 }
 
 export async function generateMetadata({
@@ -35,8 +36,10 @@ export async function generateMetadata({
 
 export default async function AdminPatientDetailPage({
   params,
+  searchParams,
 }: AdminPatientDetailPageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
   const patient = await loadPatientDetail(id);
   const serviceRequestContext = patient
     ? await loadPatientHubServiceRequestContext(patient.id)
@@ -55,8 +58,15 @@ export default async function AdminPatientDetailPage({
         patient,
         clinicalRecentSummary,
         serviceRequestContext,
+        requestCreated: resolvedSearchParams?.requestCreated === "1",
       })
     : null;
+  const hideSecondaryTreatmentLink = Boolean(
+    hubViewModel && (hubViewModel.primaryAction.label === "Iniciar tratamiento"),
+  );
+  const hideSecondaryCreateRequestLink = Boolean(
+    hubViewModel && (hubViewModel.primaryAction.label === "Registrar solicitud" || hubViewModel.primaryAction.label === "Revisar solicitud"),
+  );
 
   return (
     <section className="mx-auto w-full max-w-5xl rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -166,7 +176,7 @@ export default async function AdminPatientDetailPage({
             <aside className="space-y-3">
               {hubViewModel ? (
                 <section className="rounded-md border border-sky-200 bg-sky-50 px-3 py-2">
-                  <h2 className="text-sm font-semibold text-sky-950">Próxima acción recomendada</h2>
+                  <h2 className="text-sm font-semibold text-sky-950">{hubViewModel.title}</h2>
                   <p className="mt-1 text-sm text-sky-900">{hubViewModel.primaryAction.supportingCopy}</p>
                   <Link
                     className="mt-3 inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
@@ -174,6 +184,14 @@ export default async function AdminPatientDetailPage({
                   >
                     {hubViewModel.primaryAction.label}
                   </Link>
+                  {hubViewModel.secondaryAction ? (
+                    <Link
+                      className="mt-2 inline-flex items-center justify-center rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                      href={hubViewModel.secondaryAction.href}
+                    >
+                      {hubViewModel.secondaryAction.label}
+                    </Link>
+                  ) : null}
                 </section>
               ) : null}
 
@@ -192,13 +210,15 @@ export default async function AdminPatientDetailPage({
                   >
                     Gestión administrativa
                   </Link>
-                  <Link
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                    href={`/admin/patients/${patient.id}/treatment`}
-                  >
-                    Tratamiento
-                  </Link>
-                  {!patient.activeEpisode ? (
+                  {!hideSecondaryTreatmentLink ? (
+                    <Link
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                      href={`/admin/patients/${patient.id}/treatment`}
+                    >
+                      Tratamiento
+                    </Link>
+                  ) : null}
+                  {!patient.activeEpisode && !hideSecondaryCreateRequestLink ? (
                     <Link
                       className="inline-flex items-center justify-center whitespace-nowrap rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
                       href={`/admin/patients/${patient.id}/administrative?newServiceRequest=1#service-requests`}

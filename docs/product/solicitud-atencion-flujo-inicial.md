@@ -24,7 +24,17 @@ No es:
 
 La gestión principal de solicitudes vive en:
 
+- `/admin/requests/new`
 - `/admin/patients/[id]/administrative`
+
+Ruta de intake vigente:
+
+- `/admin/requests/new` es la puerta operativa recomendada para casos nuevos.
+- crea un `Patient` mínimo;
+- crea una `ServiceRequest` vinculada a ese paciente en estado `in_review`;
+- redirige al hub del paciente si ambas operaciones salen bien;
+- no inicia tratamiento;
+- no habilita visitas.
 
 Desde ahí se pueden:
 
@@ -43,9 +53,10 @@ La solicitud mínima puede registrar:
 
 - fecha;
 - motivo;
-- datos básicos de quién consulta: relación + nombre.
+- datos básicos de quién consulta cargados en la UI de intake: nombre y relación.
 
 Los teléfonos operativos y el domicilio de atención pertenecen al contexto administrativo del `Patient`, no al modelo principal de `ServiceRequest`.
+En `/admin/requests/new`, el teléfono de contacto y el domicilio o zona se usan para crear o completar el `Patient` mínimo que queda vinculado a la solicitud.
 
 ## Reglas operativas clave
 
@@ -56,6 +67,8 @@ Registrar una solicitud:
 - no crea `EpisodeOfCare`;
 - no habilita `Registrar visita`;
 - no cambia por sí misma el estado clínico del paciente.
+
+Esto también aplica a la nueva ruta `/admin/requests/new`: aunque cree `Patient + ServiceRequest`, el tratamiento sigue siendo un paso posterior y explícito.
 
 ### 2. Iniciar tratamiento requiere solicitud aceptada
 
@@ -99,9 +112,11 @@ La lectura operativa vigente distingue, como mínimo:
 
 El flujo operativo vigente es:
 
-1. se registra o resuelve una solicitud;
-2. si corresponde, se inicia tratamiento en `/treatment`;
-3. recién con `EpisodeOfCare` activo se habilita `Registrar visita`.
+1. para casos nuevos, se recomienda registrar la consulta inicial desde `/admin/requests/new`;
+2. eso crea `Patient + ServiceRequest in_review`;
+3. luego la solicitud se registra o resuelve en `Gestión administrativa`;
+4. si corresponde, se inicia tratamiento en `/treatment`;
+5. recién con `EpisodeOfCare` activo se habilita `Registrar visita`.
 
 Las visitas siguen dependiendo del tratamiento activo, no de la mera existencia de una solicitud.
 

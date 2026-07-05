@@ -55,8 +55,10 @@ describe("buildPatientHubViewModel primary action matrix", () => {
       serviceRequestContext: buildServiceRequestContext(),
     });
 
-    expect(viewModel.primaryAction.label).toBe("Gestión administrativa");
-    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/administrative");
+    expect(viewModel.title).toBe("Próximo paso recomendado");
+    expect(viewModel.primaryAction.label).toBe("Registrar solicitud");
+    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/administrative?newServiceRequest=1#service-requests");
+    expect(viewModel.primaryAction.supportingCopy).toContain("quién consulta");
   });
 
   it("uses Gestión administrativa for ready_to_start without accepted pending request", () => {
@@ -76,6 +78,108 @@ describe("buildPatientHubViewModel primary action matrix", () => {
     expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/administrative");
   });
 
+  it("uses Registrar solicitud for ready_to_start without any service request yet", () => {
+    const viewModel = buildPatientHubViewModel({
+      patient: buildPatient({
+        operationalStatus: "ready_to_start",
+        address: "Belgrano 123",
+        phone: "+54 299 555 0101",
+      }),
+      clinicalRecentSummary: buildSummary(),
+      serviceRequestContext: buildServiceRequestContext(),
+    });
+
+    expect(viewModel.primaryAction.label).toBe("Registrar solicitud");
+    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/administrative?newServiceRequest=1#service-requests");
+  });
+
+  it("uses review-specific copy when there is an in_review request", () => {
+    const viewModel = buildPatientHubViewModel({
+      patient: buildPatient({
+        operationalStatus: "ready_to_start",
+        address: "Belgrano 123",
+        phone: "+54 299 555 0101",
+      }),
+      clinicalRecentSummary: buildSummary(),
+      serviceRequestContext: buildServiceRequestContext({
+        hasServiceRequests: true,
+        hasInReview: true,
+      }),
+    });
+
+    expect(viewModel.title).toBe("Solicitud pendiente de revisión");
+    expect(viewModel.primaryAction.label).toBe("Revisar solicitud");
+    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/administrative#service-requests");
+    expect(viewModel.secondaryAction).toBeUndefined();
+  });
+
+  it("prioritizes post-intake continuity when requestCreated=1 and the request is still in review", () => {
+    const viewModel = buildPatientHubViewModel({
+      patient: buildPatient({
+        operationalStatus: "ready_to_start",
+        address: "Belgrano 123",
+        phone: "+54 299 555 0101",
+      }),
+      clinicalRecentSummary: buildSummary(),
+      serviceRequestContext: buildServiceRequestContext({
+        hasServiceRequests: true,
+        hasInReview: true,
+      }),
+      requestCreated: true,
+    });
+
+    expect(viewModel.title).toBe("Solicitud registrada");
+    expect(viewModel.primaryAction.label).toBe("Revisar solicitud");
+    expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/administrative#service-requests");
+    expect(viewModel.secondaryAction).toEqual({
+      href: "/admin/patients/pat-1/administrative",
+      label: "Completar datos administrativos",
+    });
+  });
+
+  it("ignores requestCreated when there is no in_review request", () => {
+    const viewModel = buildPatientHubViewModel({
+      patient: buildPatient({
+        operationalStatus: "ready_to_start",
+        address: "Belgrano 123",
+        phone: "+54 299 555 0101",
+      }),
+      clinicalRecentSummary: buildSummary(),
+      serviceRequestContext: buildServiceRequestContext(),
+      requestCreated: true,
+    });
+
+    expect(viewModel.title).toBe("Próximo paso recomendado");
+    expect(viewModel.primaryAction.label).toBe("Registrar solicitud");
+    expect(viewModel.secondaryAction).toBeUndefined();
+  });
+
+  it("ignores requestCreated when treatment is already active", () => {
+    const viewModel = buildPatientHubViewModel({
+      patient: buildPatient({
+        operationalStatus: "active_treatment",
+        activeEpisode: {
+          id: "ep-1",
+          patientId: "pat-1",
+          status: "active",
+          startDate: "2026-04-17",
+        },
+      }),
+      clinicalRecentSummary: buildSummary({
+        treatmentStatusLabel: "Tratamiento activo",
+      }),
+      serviceRequestContext: buildServiceRequestContext({
+        hasServiceRequests: true,
+        hasInReview: true,
+      }),
+      requestCreated: true,
+    });
+
+    expect(viewModel.title).toBe("Tratamiento activo");
+    expect(viewModel.primaryAction.label).toBe("Registrar visita");
+    expect(viewModel.secondaryAction).toBeUndefined();
+  });
+
   it("uses Tratamiento for ready_to_start with accepted pending request", () => {
     const viewModel = buildPatientHubViewModel({
       patient: buildPatient({
@@ -90,8 +194,10 @@ describe("buildPatientHubViewModel primary action matrix", () => {
       }),
     });
 
-    expect(viewModel.primaryAction.label).toBe("Tratamiento");
+    expect(viewModel.title).toBe("Solicitud aceptada pendiente");
+    expect(viewModel.primaryAction.label).toBe("Iniciar tratamiento");
     expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/treatment?serviceRequestId=sr-1");
+    expect(viewModel.primaryAction.supportingCopy).toContain("habilitar el registro de visitas");
   });
 
   it("uses Registrar visita for active treatment", () => {
@@ -111,6 +217,7 @@ describe("buildPatientHubViewModel primary action matrix", () => {
       serviceRequestContext: buildServiceRequestContext(),
     });
 
+    expect(viewModel.title).toBe("Tratamiento activo");
     expect(viewModel.primaryAction.label).toBe("Registrar visita");
     expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/encounters/new");
   });
@@ -160,7 +267,8 @@ describe("buildPatientHubViewModel primary action matrix", () => {
       }),
     });
 
-    expect(viewModel.primaryAction.label).toBe("Tratamiento");
+    expect(viewModel.title).toBe("Solicitud aceptada pendiente");
+    expect(viewModel.primaryAction.label).toBe("Iniciar tratamiento");
     expect(viewModel.primaryAction.href).toBe("/admin/patients/pat-1/treatment?serviceRequestId=sr-1");
   });
 });

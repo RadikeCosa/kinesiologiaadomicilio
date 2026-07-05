@@ -13,7 +13,7 @@ import { updatePatientServiceRequestRequestedAtAction } from "@/app/admin/patien
 import { formatLocalDateInputValue } from "@/lib/date-input";
 
 type CloseLikeStatus = "closed_without_treatment" | "cancelled";
-type ActionKind = "accept_and_start_treatment" | "close_without_treatment" | "cancel" | "start_treatment_legacy";
+type ActionKind = "accept_request" | "accept_and_start_treatment" | "close_without_treatment" | "cancel" | "start_treatment_legacy";
 
 interface ServiceRequestStatusActionsProps {
   patientId: string;
@@ -32,7 +32,7 @@ interface ActionFeedback {
 export function getServiceRequestStatusActions(displayStatus: ServiceRequestDisplayStatus): ActionKind[] {
   switch (displayStatus) {
     case "in_review":
-      return ["accept_and_start_treatment", "close_without_treatment", "cancel"];
+      return ["accept_request", "accept_and_start_treatment", "close_without_treatment", "cancel"];
     case "accepted_pending_treatment":
       return ["start_treatment_legacy"];
     default:
@@ -119,6 +119,8 @@ export async function submitMarkServiceRequestEnteredInErrorAction(input: {
 
 function getActionLabel(action: ActionKind): string {
   switch (action) {
+    case "accept_request":
+      return "Aceptar solicitud";
     case "accept_and_start_treatment":
       return "Aceptar e iniciar tratamiento";
     case "close_without_treatment":
@@ -181,6 +183,24 @@ export function ServiceRequestStatusActions({
         router.refresh();
         return;
       }
+
+      if (result.ok) {
+        setFeedback({ tone: "success", text: result.message });
+        router.refresh();
+        return;
+      }
+
+      setFeedback({ tone: "error", text: result.message });
+    });
+  }
+
+  function handleAcceptRequest() {
+    startTransition(async () => {
+      const result = await submitServiceRequestStatusAction({
+        patientId,
+        serviceRequestId,
+        status: "accepted",
+      });
 
       if (result.ok) {
         setFeedback({ tone: "success", text: result.message });
@@ -275,6 +295,11 @@ export function ServiceRequestStatusActions({
           </a>
         </div>
       ) : null}
+      {currentStatus === "in_review" ? (
+        <p className="mt-2 text-xs text-slate-600">
+          Aceptar la solicitud solo confirma que el pedido avanza. Iniciar tratamiento crea el ciclo de atención y habilita el registro de visitas.
+        </p>
+      ) : null}
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {canEditRequestedAt ? (
           <button
@@ -292,6 +317,19 @@ export function ServiceRequestStatusActions({
           </button>
         ) : null}
         {availableActions.map((action) => {
+          if (action === "accept_request") {
+            return (
+              <button
+                className="rounded bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+                disabled={isPending}
+                key={action}
+                onClick={handleAcceptRequest}
+                type="button"
+              >
+                {getActionLabel(action)}
+              </button>
+            );
+          }
           if (action === "accept_and_start_treatment") {
             return null;
           }

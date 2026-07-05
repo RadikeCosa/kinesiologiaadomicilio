@@ -13,7 +13,7 @@ import { getMissingTreatmentStartRequirements } from "@/domain/patient/patient.r
 
 interface AdminPatientAdministrativePageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ newServiceRequest?: string; editAdministrative?: string }>;
+  searchParams?: Promise<{ newServiceRequest?: string; editAdministrative?: string; status?: string }>;
 }
 
 export async function generateMetadata({
@@ -37,6 +37,7 @@ export default async function AdminPatientAdministrativePage({
   const resolvedSearchParams = await searchParams;
   const initialCreateOpen = resolvedSearchParams?.newServiceRequest === "1";
   const initialAdministrativeEditing = resolvedSearchParams?.editAdministrative === "1";
+  const shouldShowIntakePartialMessage = resolvedSearchParams?.status === "intake-partial";
   const { patient, serviceRequests } = await loadPatientAdministrativeContext(id);
   const serviceRequestHistoryContext = patient
     ? await loadPatientServiceRequestHistoryContext(patient.id)
@@ -84,6 +85,12 @@ export default async function AdminPatientAdministrativePage({
 
       {patient ? (
         <>
+          {shouldShowIntakePartialMessage ? (
+            <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              Se creó el paciente, pero la solicitud inicial no se pudo registrar. Completala manualmente desde esta sección.
+            </p>
+          ) : null}
+
           <div className="mt-4">
             <PatientIdentityHeaderCard
               fullName={patient.fullName}

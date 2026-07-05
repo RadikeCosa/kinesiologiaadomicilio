@@ -40,7 +40,7 @@ describe("ServiceRequestStatusActions", () => {
     vi.clearAllMocks();
   });
 
-  it("in_review exposes Aceptar, No inició y Cancelar", () => {
+  it("in_review exposes Aceptar solicitud, Aceptar e iniciar tratamiento, No inició y Cancelar", () => {
     const html = renderToStaticMarkup(
       createElement(ServiceRequestStatusActions, {
         patientId: "pat-1",
@@ -51,15 +51,17 @@ describe("ServiceRequestStatusActions", () => {
       }),
     );
 
+    expect(html).toContain("Aceptar solicitud");
     expect(html).toContain("Aceptar e iniciar tratamiento");
     expect(html).toContain("Fecha para iniciar tratamiento");
     expect(html).toContain("value=\"2026-04-28\"");
     expect(html).toContain("No inició");
     expect(html).toContain("Cancelar");
+    expect(html).toContain("Aceptar la solicitud solo confirma que el pedido avanza. Iniciar tratamiento crea el ciclo de atención y habilita el registro de visitas.");
     expect(html).toContain("Editar fecha");
     expect(html).toContain("Eliminar carga errónea");
     expect(html).not.toContain("Registrar visita");
-    expect(html).not.toContain("Iniciar tratamiento");
+    expect(html).not.toContain(">Iniciar tratamiento</a>");
   });
 
   it("accepted pending shows legacy start action and no resolution", () => {
@@ -112,6 +114,7 @@ describe("ServiceRequestStatusActions", () => {
 
   it("helper returns expected actions by status", () => {
     expect(getServiceRequestStatusActions("in_review")).toEqual([
+      "accept_request",
       "accept_and_start_treatment",
       "close_without_treatment",
       "cancel",
@@ -136,6 +139,7 @@ describe("ServiceRequestStatusActions", () => {
   it("maps close actions to close-like statuses", () => {
     expect(getCloseLikeStatusFromAction("close_without_treatment")).toBe("closed_without_treatment");
     expect(getCloseLikeStatusFromAction("cancel")).toBe("cancelled");
+    expect(getCloseLikeStatusFromAction("accept_request")).toBeNull();
     expect(getCloseLikeStatusFromAction("accept_and_start_treatment")).toBeNull();
     expect(getCloseLikeStatusFromAction(null)).toBeNull();
   });

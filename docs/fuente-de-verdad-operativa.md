@@ -30,6 +30,7 @@ En paralelo, el repo ya incluye una superficie privada clínica mínima y transi
 
 - `/admin`
 - `/admin/configuracion/profesional`
+- `/admin/requests/new`
 - `/admin/patients`
 - `/admin/patients/new`
 - `/admin/patients/[id]`
@@ -44,6 +45,8 @@ En paralelo, el repo ya incluye una superficie privada clínica mínima y transi
   Consola operativa breve, sin gráficos, orientada a prioridad de trabajo.
 - `/admin/configuracion/profesional`
   Configuración single-user del profesional firmante basada en `Practitioner`.
+- `/admin/requests/new`
+  Puerta operativa recomendada para casos nuevos: registra la consulta inicial, crea `Patient` mínimo y crea `ServiceRequest` inicial en revisión.
 - `/admin/patients`
   Listado operativo de pacientes con prioridad por estado y acceso rápido a registrar visita cuando hay tratamiento activo.
 - `/admin/patients/[id]`
@@ -73,12 +76,25 @@ CTAs estructurales vigentes:
 
 ## Flujo operativo vigente
 
-1. Se registra o resuelve una solicitud de atención.
-2. Si corresponde, se inicia tratamiento desde `/treatment`.
-3. Solo con `EpisodeOfCare` activo se habilita `Registrar visita`.
+Puerta recomendada para casos nuevos:
+
+1. Se registra la consulta inicial desde `/admin/requests/new`.
+2. Eso crea un `Patient` mínimo y una `ServiceRequest` vinculada en estado `in_review`.
+3. Luego la solicitud se revisa o resuelve.
+4. Si corresponde, se inicia tratamiento desde `/treatment`.
+5. Solo con `EpisodeOfCare` activo se habilita `Registrar visita`.
+
+El flujo previo sigue disponible como alternativa administrativa:
+
+1. Se crea paciente desde `/admin/patients/new`.
+2. Luego se registra o resuelve una solicitud de atención.
+3. Si corresponde, se inicia tratamiento desde `/treatment`.
+4. Solo con `EpisodeOfCare` activo se habilita `Registrar visita`.
 
 Reglas clave:
 
+- `Patient` sigue siendo el eje longitudinal del seguimiento.
+- `ServiceRequest` es la puerta operativa del caso nuevo.
 - `ServiceRequest` no equivale a tratamiento.
 - Registrar una solicitud no habilita visitas por sí mismo.
 - Iniciar tratamiento requiere una solicitud `accepted`, válida y no usada previamente.
@@ -122,8 +138,10 @@ Reglas clave:
 ### Superficie privada
 
 - Dashboard operativo mínimo en `/admin`.
+- Puerta de entrada por solicitud en `/admin/requests/new` para casos nuevos, con creación mínima de `Patient` + `ServiceRequest in_review`.
 - Listado de pacientes con filtros por estado operativo y señales de solicitud solo como información secundaria por paciente.
 - Hub de paciente con jerarquía clínica-operativa.
+- Alta administrativa directa en `/admin/patients/new` como alternativa para precarga, regularización o carga retrospectiva.
 - Gestión administrativa con solicitudes de atención.
 - Gestión clínica con listado de visitas, edición de nota, puntualidad operativa, tendencia funcional y resumen compartible.
 - Gestión de tratamiento con inicio, cierre, historial compacto, contexto general del tratamiento e informe derivado de tratamiento/episodio no persistido.
