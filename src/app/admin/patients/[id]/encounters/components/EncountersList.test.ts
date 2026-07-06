@@ -21,6 +21,52 @@ vi.mock("@/app/admin/patients/[id]/encounters/actions/update-encounter-clinical-
 import { EncountersList } from "@/app/admin/patients/[id]/encounters/components/EncountersList";
 
 describe("EncountersList", () => {
+  it("renders only the 5 most recent visits by default and shows a control for older history", () => {
+    const html = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [
+          { id: "enc-6", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-22T10:30:00Z", endedAt: "2026-04-22T11:00:00Z" },
+          { id: "enc-5", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-21T10:30:00Z", endedAt: "2026-04-21T11:00:00Z" },
+          { id: "enc-4", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-20T10:30:00Z", endedAt: "2026-04-20T11:00:00Z" },
+          { id: "enc-3", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-19T10:30:00Z", endedAt: "2026-04-19T11:00:00Z" },
+          { id: "enc-2", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-18T10:30:00Z", endedAt: "2026-04-18T11:00:00Z" },
+          { id: "enc-1", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-17T10:30:00Z", endedAt: "2026-04-17T11:00:00Z" },
+        ],
+      }),
+    );
+
+    expect(html).toContain("Actividad reciente");
+    expect(html).toContain("Ver anteriores (1)");
+    expect(html).toContain("22/04/2026");
+    expect(html).toContain("18/04/2026");
+    expect(html).not.toContain("17/04/2026");
+    expect(html).not.toContain("Historial anterior");
+    expect((html.match(/aria-label=\"Editar horario\"/g) ?? []).length).toBe(5);
+  });
+
+  it("does not show an older-history control when there are 5 or fewer visits", () => {
+    const html = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [
+          { id: "enc-5", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-21T10:30:00Z", endedAt: "2026-04-21T11:00:00Z" },
+          { id: "enc-4", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-20T10:30:00Z", endedAt: "2026-04-20T11:00:00Z" },
+          { id: "enc-3", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-19T10:30:00Z", endedAt: "2026-04-19T11:00:00Z" },
+          { id: "enc-2", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-18T10:30:00Z", endedAt: "2026-04-18T11:00:00Z" },
+          { id: "enc-1", patientId: "pat-1", episodeOfCareId: "ep-1", status: "finished", startedAt: "2026-04-17T10:30:00Z", endedAt: "2026-04-17T11:00:00Z" },
+        ],
+      }),
+    );
+
+    expect(html).not.toContain("Ver anteriores");
+    expect(html).not.toContain("Historial anterior");
+  });
+
   it("renders temporal metadata first and handles missing/invalid closure copy", () => {
     const html = renderToStaticMarkup(
       createElement(EncountersList, {
@@ -65,6 +111,7 @@ describe("EncountersList", () => {
 
     expect(html).toContain("Fecha: 17/04/2026");
     expect(html).toContain("16/04/2026");
+    expect(html).toContain("Actividad reciente");
     expect(html).toMatch(/\d{2}:\d{2}/);
     expect((html.match(/Cierre:/g) ?? []).length).toBe(3);
     expect(html).toContain("Cierre: Sin cierre registrado");
@@ -260,6 +307,7 @@ describe("EncountersList", () => {
       }),
     );
     expect(activeHtml).toContain("Todavía no hay visitas registradas para este tratamiento.");
+    expect(activeHtml).toContain("Actividad reciente");
 
     const finishedHtml = renderToStaticMarkup(
       createElement(EncountersList, {

@@ -113,37 +113,41 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
       </Link>
 
       <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold text-slate-900">{pageData.patient.fullName}</h1>
-          {treatmentBadge ? (
-            <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
-            >
-              {treatmentBadge.label}
-            </span>
-          ) : null}
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">Gestión clínica</p>
+            {treatmentBadge ? (
+              <span
+                className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${treatmentBadge.className}`}
+              >
+                {treatmentBadge.label}
+              </span>
+            ) : null}
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">Gestión clínica</h1>
+            <p className="mt-1 text-base text-slate-700">{pageData.patient.fullName}</p>
+          </div>
+          <p className="text-sm text-slate-600">{PATIENT_SURFACE_COPY.clinicalDefinition}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {pageData.activeEpisode ? (
-            <>
-              <Link
-                className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
-                href={`/admin/patients/${pageData.patient.id}/encounters/new`}
-              >
-                Registrar visita
-              </Link>
-            </>
+            <Link
+              className="inline-flex items-center justify-center rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"
+              href={`/admin/patients/${pageData.patient.id}/encounters/new`}
+            >
+              Registrar visita
+            </Link>
           ) : null}
         </div>
       </div>
 
-      <p className="mt-2 text-sm text-slate-600">{PATIENT_SURFACE_COPY.clinicalDefinition}</p>
       {statusMessage ? <SuccessStatusMessage message={statusMessage} /> : null}
 
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-600">
         {pageData.patient.dni ? <span>DNI: {formatDniDisplay(pageData.patient.dni)}</span> : null}
         {patientAge !== null ? <span>· Edad: {patientAge} años</span> : null}
-        <span className="font-medium">{treatmentMetadata.title}</span>
+        <span>· {treatmentMetadata.title}</span>
         <span>{treatmentMetadata.detail}</span>
       </div>
 
@@ -163,18 +167,28 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
         </div>
       ) : null}
 
+      <section className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5" aria-label="Seguimiento rápido del ciclo">
+        <div className="border-b border-slate-200 pb-4">
+          <h2 className="text-lg font-medium text-slate-900">Seguimiento rápido del ciclo</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            Lectura rápida del tratamiento actual: contexto clínico, tendencia funcional y señales del ciclo completo.
+          </p>
+        </div>
 
+        <div className="mt-4 space-y-4">
+          <ClinicalCycleContextCard
+            patientId={pageData.patient.id}
+            activeEpisode={pageData.activeEpisode}
+            mostRecentEpisode={pageData.mostRecentEpisode}
+            clinicalContext={pageData.clinicalContext}
+          />
 
-      <ClinicalCycleContextCard
-        patientId={pageData.patient.id}
-        activeEpisode={pageData.activeEpisode}
-        mostRecentEpisode={pageData.mostRecentEpisode}
-        clinicalContext={pageData.clinicalContext}
-      />
-
-      <FunctionalTrendSummary trend={pageData.functionalTrend} />
-
-      <EncounterStatsSummary stats={pageData.encounterStats} />
+          <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+            <EncounterStatsSummary stats={pageData.encounterStats} />
+            <FunctionalTrendSummary trend={pageData.functionalTrend} />
+          </div>
+        </div>
+      </section>
 
       <EncountersList
         encounters={pageData.encounters}

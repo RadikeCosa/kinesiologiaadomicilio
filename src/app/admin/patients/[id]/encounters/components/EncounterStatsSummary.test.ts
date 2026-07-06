@@ -31,7 +31,10 @@ function buildStats(overrides: Record<string, unknown> = {}) {
 describe("EncounterStatsSummary", () => {
   it("does not render punctuality KPI when there is no punctuality data", () => {
     const html = renderToStaticMarkup(React.createElement(EncounterStatsSummary, { stats: buildStats({ treatmentCount: 4 }) }));
+    expect(html).toContain("Resumen del ciclo");
     expect(html).toContain("Visitas del tratamiento");
+    expect(html).toContain("Primera visita:");
+    expect(html).toContain("Tiempo total registrado:");
     expect(html).not.toContain("Puntualidad:");
     expect(html).not.toContain("sin dato");
   });
@@ -46,6 +49,7 @@ describe("EncounterStatsSummary", () => {
       }),
     }));
 
+    expect(html).toContain("Resumen del ciclo");
     expect(html).toContain("Visitas del tratamiento");
     expect(html).toContain("Puntualidad: 8/10 en horario o demora leve");
     expect(html).toContain("2 sin dato");

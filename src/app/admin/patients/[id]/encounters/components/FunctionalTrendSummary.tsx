@@ -8,14 +8,14 @@ export function FunctionalTrendSummary({ trend }: Props) {
   if (trend.length === 0) return null;
 
   return (
-    <section className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">Tendencia funcional</h2>
-      <p className="mt-1 text-xs text-slate-600">Comparación simple entre mediciones registradas en visitas del tratamiento actual. No implica interpretación clínica automática.</p>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="h-full rounded-lg border border-slate-200 bg-white p-4">
+      <h2 className="text-sm font-semibold text-slate-900">Tendencia funcional del ciclo</h2>
+      <p className="mt-1 text-xs text-slate-600">Señales calculadas sobre las mediciones del tratamiento actual completo, no solo sobre la actividad reciente.</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {trend.map((item) => (
-          <div key={item.code} className="rounded border border-slate-200 bg-white p-3">
+          <div key={item.code} className="rounded-md bg-slate-50 p-3">
             <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-            <div className="mt-2 rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
+            <div className="mt-2 px-0 py-0">
               <p className="text-[11px] uppercase tracking-wide text-slate-500">Último</p>
               <p className="text-sm font-semibold text-slate-900">{formatFunctionalValue(item.code, item.latestValue)}</p>
               <p className="text-[11px] text-slate-500">{formatDateDisplay(item.latestDate)}</p>

@@ -164,6 +164,7 @@ describe("/admin/patients/[id]/encounters page", () => {
 
     expect(foundHtml).toContain("← Volver al paciente");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1\"");
+    expect(foundHtml).toContain("Gestión clínica");
     expect(foundHtml).toContain("Ana Pérez");
     expect(foundHtml).toContain("Registrá y consultá las visitas realizadas durante el tratamiento.");
     expect(foundHtml).toContain("DNI: 30.111.222");
@@ -174,20 +175,24 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml.match(/href=\"\/admin\/patients\/pat-1\/encounters\/new\"/g)?.length).toBe(1);
     expect(foundHtml).not.toContain("Gestionar tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
-        expect(foundHtml).toContain("Estadísticas de visitas");
+    expect(foundHtml).toContain("Seguimiento rápido del ciclo");
+    expect(foundHtml).toContain("Lectura rápida del tratamiento actual");
+    expect(foundHtml).toContain("Resumen del ciclo");
     expect(foundHtml).toContain("Contexto clínico del ciclo");
     expect(foundHtml).toContain("Ver/editar en Tratamiento");
+    expect(foundHtml).toContain("Ver detalle longitudinal");
     expect(foundHtml).toContain("Tendencia funcional");
-    expect(foundHtml.indexOf("Contexto clínico del ciclo")).toBeLessThan(foundHtml.indexOf("Tendencia funcional"));
-    expect(foundHtml.indexOf("Tendencia funcional")).toBeLessThan(foundHtml.indexOf("Estadísticas de visitas"));
+    expect(foundHtml).toContain("EncountersList");
+    expect(foundHtml.indexOf("Seguimiento rápido del ciclo")).toBeLessThan(foundHtml.indexOf("EncountersList"));
+    expect(foundHtml.indexOf("Contexto clínico del ciclo")).toBeLessThan(foundHtml.indexOf("EncountersList"));
+    expect(foundHtml.indexOf("Tendencia funcional")).toBeLessThan(foundHtml.indexOf("EncountersList"));
+    expect(foundHtml.indexOf("Resumen del ciclo")).toBeLessThan(foundHtml.indexOf("EncountersList"));
     expect(foundHtml).toContain("Visitas del tratamiento");
     expect(foundHtml).not.toContain("Puntualidad:");
-    expect(foundHtml).not.toContain("Visitas registradas");
     expect(foundHtml).toContain("Primera visita");
     expect(foundHtml).toContain("Frecuencia promedio");
     expect(foundHtml).toContain("Aún no calculable");
     expect(foundHtml).not.toContain("Excluidas del cálculo de duración");
-    expect(foundHtml).toContain("EncountersList");
   });
 
   it("renders active treatment context when closed cycles also exist", async () => {
@@ -246,6 +251,8 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(html).not.toContain("Tratamiento finalizado. Las visitas quedan disponibles como historial.");
     expect(html).not.toContain("Finalización: 31/03/2026");
     expect(html).not.toContain("Tendencia funcional");
+    expect(html).not.toContain("Estado del ciclo:");
+    expect(html).not.toContain("Cierre:</span> 31/03/2026");
   });
 
   it("shows duration helper and rhythm cards with expected copy", async () => {
@@ -467,10 +474,14 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const withContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
     expect(withContext).toContain("Contexto clínico del ciclo");
-    expect(withContext).not.toContain("Ver detalle longitudinal");
+    expect(withContext).toContain("Ver detalle longitudinal");
+    expect(withContext).toContain("Este contexto se consulta en modo lectura desde Gestión clínica y se edita en Tratamiento.");
     expect(withContext).toContain("Ver/editar en Tratamiento");
     expect(withContext).toContain("href=\"/admin/patients/pat-1/treatment\"");
     expect(withContext).toContain("Registrar visita");
+    expect(withContext).not.toContain("Estado del ciclo:");
+    expect(withContext).not.toContain("Inicio:</span>");
+    expect(withContext).not.toContain("<textarea");
 
     loadPatientEncountersPageDataMock.mockResolvedValueOnce({
       patient: { id: "pat-1", fullName: "Ana Pérez", operationalStatus: "active_treatment" },
@@ -490,8 +501,8 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const withoutContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
     expect(withoutContext).toContain("Contexto clínico del ciclo");
-    expect(withoutContext).not.toContain("Completitud:");
-    expect(withoutContext).toContain("No registrado");
+    expect(withoutContext).toContain("Ver detalle longitudinal");
+    expect(withoutContext).toContain("Sin dato");
   });
 
   it("shows compact historical context when treatment is finished", async () => {
@@ -509,9 +520,10 @@ describe("/admin/patients/[id]/encounters page", () => {
     const html = renderToStaticMarkup(element);
 
     expect(html).toContain("Visitas en modo historial.");
-    expect(html).toContain("Cierre:</span> 20/03/2026");
-    expect(html).not.toContain("Ver detalle longitudinal");
+    expect(html).toContain("Ver detalle longitudinal");
     expect(html).toContain("Ver/editar en Tratamiento");
+    expect(html).not.toContain("Estado del ciclo:");
+    expect(html).not.toContain("Cierre:</span> 20/03/2026");
   });
 
 });

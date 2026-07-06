@@ -24,7 +24,8 @@ describe("FunctionalTrendSummary", () => {
       }),
     );
 
-    expect(html).toContain("Tendencia funcional");
+    expect(html).toContain("Tendencia funcional del ciclo");
+    expect(html).toContain("tratamiento actual completo");
     expect(html).toContain("Último");
     expect(html).toContain("Previo:");
     expect(html).toContain("Cambio:");

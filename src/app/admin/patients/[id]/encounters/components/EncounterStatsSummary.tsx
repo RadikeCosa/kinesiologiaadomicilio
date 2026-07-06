@@ -57,9 +57,10 @@ export function EncounterStatsSummary({ stats }: EncounterStatsSummaryProps) {
   const hasPunctualityKpi = stats.punctualityWithDataCount > 0;
 
   return (
-    <section className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3" aria-label="Estadísticas de visitas">
-      <h2 className="text-sm font-semibold text-slate-900">Estadísticas de visitas</h2>
-      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="h-full rounded-lg border border-slate-200 bg-white p-4" aria-label="Resumen del ciclo">
+      <h2 className="text-sm font-semibold text-slate-900">Resumen del ciclo</h2>
+      <p className="mt-1 text-xs text-slate-600">Señales calculadas sobre todas las visitas del tratamiento actual.</p>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <article className="rounded border border-slate-200 bg-white px-3 py-2">
           <p className="text-xs text-slate-600">Visitas del tratamiento</p>
           <p className="mt-1 text-sm font-semibold text-slate-900">{stats.treatmentCount}</p>
@@ -75,10 +76,18 @@ export function EncounterStatsSummary({ stats }: EncounterStatsSummaryProps) {
           ) : null}
         </article>
         <MetricCard label="Última visita" value={formatLastVisit(stats.lastStartedAt)} />
-        <MetricCard label="Primera visita" value={formatFirstVisitFromTreatmentStart(stats)} />
         <MetricCard label="Frecuencia promedio" value={formatEncounterAverageVisitFrequency(stats)} />
         <MetricCard label="Duración promedio" value={formatEncounterMinutesAsDuration(stats.averageDurationMinutes)} />
-        <MetricCard label="Tiempo total registrado" value={formatEncounterMinutesAsDuration(stats.totalDurationMinutes)} />
+      </div>
+
+      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+        <p className="rounded border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+          <span className="font-medium text-slate-900">Primera visita:</span> {formatFirstVisitFromTreatmentStart(stats)}
+        </p>
+        <p className="rounded border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
+          <span className="font-medium text-slate-900">Tiempo total registrado:</span>{" "}
+          {formatEncounterMinutesAsDuration(stats.totalDurationMinutes)}
+        </p>
       </div>
 
       {stats.durationExcludedCount > 0 ? (

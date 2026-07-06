@@ -11,7 +11,7 @@ vi.mock("next/link", () => ({
 }));
 
 describe("ClinicalCycleContextCard", () => {
-  it("renders compact read-only context with neutral secondary CTA", () => {
+  it("renders secondary read-only context with expandable longitudinal detail", () => {
     const html = renderToStaticMarkup(createElement(ClinicalCycleContextCard, {
       patientId: "pat-1",
       activeEpisode: { id: "epi-1", startDate: "2026-04-01" },
@@ -21,15 +21,18 @@ describe("ClinicalCycleContextCard", () => {
       },
     }));
 
-    expect(html).toContain("Estado del ciclo:</span> Activo");
-    expect(html).not.toContain("Completitud:");
-    expect(html).toContain("Diagnóstico médico de referencia:");
-    expect(html).toContain("Diagnóstico kinésico:");
     expect(html).toContain("Situación funcional inicial:");
     expect(html).toContain("Objetivo de tratamiento:");
     expect(html).toContain("Plan marco del tratamiento:");
     expect(html).toContain("Ver/editar en Tratamiento");
-    expect(html).not.toContain("<details");
+    expect(html).toContain("Ver detalle longitudinal");
+    expect(html).toContain("<details");
+    expect(html).toContain("Este contexto se consulta en modo lectura desde Gestión clínica y se edita en Tratamiento.");
+    expect(html).toContain("Diagnóstico médico de referencia:");
+    expect(html).toContain("Diagnóstico kinésico:");
+    expect(html).not.toContain("Estado del ciclo:");
+    expect(html).not.toContain("Inicio:");
+    expect(html).not.toContain("Cierre:");
     expect(html).not.toContain("Impresión kinésica");
   });
 
@@ -41,8 +44,11 @@ describe("ClinicalCycleContextCard", () => {
       clinicalContext: { hasAnyContent: false },
     }));
 
-    expect(html).toContain("No registrado");
+    expect(html).toContain("Sin dato");
     expect(html).toContain("Ver/editar en Tratamiento");
     expect(html).toContain("Este ciclo todavía no registra contexto clínico.");
+    expect(html).toContain("Todavía no hay contexto longitudinal cargado para este ciclo.");
+    expect(html).not.toContain("textarea");
+    expect(html).not.toContain("Guardar");
   });
 });
