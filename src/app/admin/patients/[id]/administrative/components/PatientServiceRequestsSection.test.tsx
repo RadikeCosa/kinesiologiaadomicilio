@@ -6,8 +6,14 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
 }));
 vi.mock("next/link", () => ({
-  default: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) =>
-    createElement("a", { href, ...rest }, children),
+  default: ({
+    children,
+    href,
+    ...rest
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => createElement("a", { href, ...rest }, children),
 }));
 
 import {
@@ -55,21 +61,57 @@ describe("PatientServiceRequestsSection", () => {
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-9",
         serviceRequests: [
-          { id: "sr-a", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "A", status: "accepted" },
-          { id: "sr-r", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "R", status: "in_review" },
-          { id: "sr-cw", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "CW", status: "closed_without_treatment" },
-          { id: "sr-c", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "C", status: "cancelled" },
-          { id: "sr-e", patientId: "pat-9", requestedAt: "2026-04-21", reasonText: "E", status: "entered_in_error" },
+          {
+            id: "sr-a",
+            patientId: "pat-9",
+            requestedAt: "2026-04-21",
+            reasonText: "A",
+            status: "accepted",
+          },
+          {
+            id: "sr-r",
+            patientId: "pat-9",
+            requestedAt: "2026-04-21",
+            reasonText: "R",
+            status: "in_review",
+          },
+          {
+            id: "sr-cw",
+            patientId: "pat-9",
+            requestedAt: "2026-04-21",
+            reasonText: "CW",
+            status: "closed_without_treatment",
+          },
+          {
+            id: "sr-c",
+            patientId: "pat-9",
+            requestedAt: "2026-04-21",
+            reasonText: "C",
+            status: "cancelled",
+          },
+          {
+            id: "sr-e",
+            patientId: "pat-9",
+            requestedAt: "2026-04-21",
+            reasonText: "E",
+            status: "entered_in_error",
+          },
         ],
       }),
     );
 
-    expect(html).toContain("href=\"/admin/patients/pat-9/treatment?serviceRequestId=sr-a\"");
+    expect(html).toContain(
+      'href="/admin/patients/pat-9/treatment?serviceRequestId=sr-a"',
+    );
     expect(html).toContain("Iniciar tratamiento");
     expect(html).toContain("Editar fecha");
     expect(html).toContain("Eliminar carga errónea");
-    expect(html).toContain("Estado clínico vinculado: Pendiente de iniciar tratamiento");
-    expect(html).toContain("Solicitud aceptada. Falta iniciar tratamiento para habilitar visitas.");
+    expect(html).toContain(
+      "Estado clínico vinculado: Pendiente de iniciar tratamiento",
+    );
+    expect(html).toContain(
+      "Solicitud aceptada. Falta iniciar tratamiento para habilitar visitas.",
+    );
     expect(html).not.toContain("Fecha de inicio del tratamiento");
     expect(html).not.toContain("serviceRequestId=sr-r");
     expect(html).not.toContain("serviceRequestId=sr-cw");
@@ -77,14 +119,27 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).not.toContain("serviceRequestId=sr-e");
   });
 
-
   it("renders compact and status-specific reasons for closed requests", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-10",
         serviceRequests: [
-          { id: "sr-cw", patientId: "pat-10", requestedAt: "2026-04-21", reasonText: "CW", status: "closed_without_treatment", closedReasonText: "No contesta llamadas" },
-          { id: "sr-c", patientId: "pat-10", requestedAt: "2026-04-21", reasonText: "C", status: "cancelled", closedReasonText: "Derivó por otra cobertura" },
+          {
+            id: "sr-cw",
+            patientId: "pat-10",
+            requestedAt: "2026-04-21",
+            reasonText: "CW",
+            status: "closed_without_treatment",
+            closedReasonText: "No contesta llamadas",
+          },
+          {
+            id: "sr-c",
+            patientId: "pat-10",
+            requestedAt: "2026-04-21",
+            reasonText: "C",
+            status: "cancelled",
+            closedReasonText: "Derivó por otra cobertura",
+          },
         ],
       }),
     );
@@ -105,11 +160,14 @@ describe("PatientServiceRequestsSection", () => {
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-context",
         serviceRequests: [],
-        contextualMessage: "El próximo paso operativo es registrar o aceptar una solicitud de atención.",
+        contextualMessage:
+          "El próximo paso operativo es registrar o aceptar una solicitud de atención.",
       }),
     );
 
-    expect(html).toContain("El próximo paso operativo es registrar o aceptar una solicitud de atención.");
+    expect(html).toContain(
+      "El próximo paso operativo es registrar o aceptar una solicitud de atención.",
+    );
   });
   it("renders action-oriented empty state copy", () => {
     const html = renderToStaticMarkup(
@@ -119,10 +177,11 @@ describe("PatientServiceRequestsSection", () => {
       }),
     );
 
-    expect(html).toContain("Todavía no hay solicitudes. Registrá la primera para iniciar la evaluación.");
+    expect(html).toContain(
+      "Todavía no hay solicitudes. Registrá la primera para iniciar la evaluación.",
+    );
     expect(html).toContain("Nueva solicitud");
   });
-
 
   it("renders create form open when initialCreateOpen is true", () => {
     const html = renderToStaticMarkup(
@@ -150,13 +209,18 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).not.toContain("Registrar solicitud");
   });
 
-
   it("shows fallback when closed reason is missing", () => {
     const html = renderToStaticMarkup(
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-11",
         serviceRequests: [
-          { id: "sr-c", patientId: "pat-11", requestedAt: "2026-04-21", reasonText: "C", status: "cancelled" },
+          {
+            id: "sr-c",
+            patientId: "pat-11",
+            requestedAt: "2026-04-21",
+            reasonText: "C",
+            status: "cancelled",
+          },
         ],
       }),
     );
@@ -170,17 +234,33 @@ describe("PatientServiceRequestsSection", () => {
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-12",
         serviceRequests: [
-          { id: "sr-linked", patientId: "pat-12", requestedAt: "2026-04-21", reasonText: "C", status: "in_review" },
+          {
+            id: "sr-linked",
+            patientId: "pat-12",
+            requestedAt: "2026-04-21",
+            reasonText: "C",
+            status: "in_review",
+          },
         ],
         activeServiceRequest: null,
         historicalServiceRequests: [
           {
-            serviceRequest: { id: "sr-linked", patientId: "pat-12", requestedAt: "2026-04-21", reasonText: "C", status: "in_review" },
+            serviceRequest: {
+              id: "sr-linked",
+              patientId: "pat-12",
+              requestedAt: "2026-04-21",
+              reasonText: "C",
+              status: "in_review",
+            },
             displayStatus: "accepted_linked_active_treatment",
             startedTreatment: true,
             isPendingOperational: false,
             linkedEpisodeOfCareId: "ep-1",
-            linkedEpisode: { id: "ep-1", status: "active", startDate: "2026-04-22" },
+            linkedEpisode: {
+              id: "ep-1",
+              status: "active",
+              startDate: "2026-04-22",
+            },
           },
         ],
       }),
@@ -189,7 +269,9 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("Estado de solicitud: En evaluación");
     expect(html).toContain("Estado clínico vinculado: Tratamiento activo");
     expect(html).toContain("Tratamiento iniciado");
-    expect(html).not.toContain("Estado clínico vinculado: Pendiente de iniciar tratamiento");
+    expect(html).not.toContain(
+      "Estado clínico vinculado: Pendiente de iniciar tratamiento",
+    );
     expect(html).not.toContain("Aceptar e iniciar tratamiento");
     expect(html).not.toContain("No inició");
     expect(html).not.toContain("Cancelar");
@@ -200,11 +282,23 @@ describe("PatientServiceRequestsSection", () => {
       createElement(PatientServiceRequestsSection, {
         patientId: "pat-13",
         serviceRequests: [
-          { id: "sr-finished", patientId: "pat-13", requestedAt: "2026-04-21", reasonText: "C", status: "accepted" },
+          {
+            id: "sr-finished",
+            patientId: "pat-13",
+            requestedAt: "2026-04-21",
+            reasonText: "C",
+            status: "accepted",
+          },
         ],
         historicalServiceRequests: [
           {
-            serviceRequest: { id: "sr-finished", patientId: "pat-13", requestedAt: "2026-04-21", reasonText: "C", status: "accepted" },
+            serviceRequest: {
+              id: "sr-finished",
+              patientId: "pat-13",
+              requestedAt: "2026-04-21",
+              reasonText: "C",
+              status: "accepted",
+            },
             displayStatus: "accepted_linked_finished_treatment",
             startedTreatment: true,
             isPendingOperational: false,
@@ -235,5 +329,4 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).not.toContain("No inició");
     expect(html).not.toContain("Cancelar");
   });
-
 });
