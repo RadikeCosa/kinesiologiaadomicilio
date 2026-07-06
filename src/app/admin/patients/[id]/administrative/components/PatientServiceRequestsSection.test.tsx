@@ -69,7 +69,7 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("Editar fecha");
     expect(html).toContain("Eliminar carga errónea");
     expect(html).toContain("Estado clínico vinculado: Pendiente de iniciar tratamiento");
-    expect(html).toContain("Se realiza en la pantalla de Tratamiento.");
+    expect(html).toContain("Solicitud aceptada. Falta iniciar tratamiento para habilitar visitas.");
     expect(html).not.toContain("Fecha de inicio del tratamiento");
     expect(html).not.toContain("serviceRequestId=sr-r");
     expect(html).not.toContain("serviceRequestId=sr-cw");
@@ -214,7 +214,7 @@ describe("PatientServiceRequestsSection", () => {
               status: "finished",
               startDate: "2026-04-22",
               endDate: "2026-04-30",
-              closureReason: "clinical_discharge",
+              closureReason: "treatment_completed",
               closureDetail: "Alta por objetivos cumplidos",
             },
           },
@@ -229,7 +229,7 @@ describe("PatientServiceRequestsSection", () => {
     expect(html).toContain("Sin acción pendiente.");
     expect(html).toContain("Tratamiento finalizado");
     expect(html).toContain("Motivo de cierre");
-    expect(html).toContain("Alta clínica");
+    expect(html).toContain("Tratamiento completado");
     expect(html).toContain("Detalle");
     expect(html).toContain("Alta por objetivos cumplidos");
     expect(html).not.toContain("No inició");

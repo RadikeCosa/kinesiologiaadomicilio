@@ -53,3 +53,6 @@ docs/archive/
 # local tooling / visual review artifacts
 .codex/
 .codex-review/
+
+# local interview prep artifacts
+local/
