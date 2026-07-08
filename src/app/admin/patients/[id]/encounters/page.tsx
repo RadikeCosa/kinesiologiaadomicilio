@@ -12,6 +12,7 @@ import { getTreatmentBadgePresentation } from "@/app/admin/patients/treatment-ba
 import {
   calculateAgeFromBirthDate,
   formatDateDisplay,
+  formatDateTimeDisplay,
   formatDniDisplay,
 } from "@/lib/patient-admin-display";
 import { PATIENT_SURFACE_COPY } from "@/app/admin/patients/[id]/patient-surface-copy";
@@ -67,6 +68,35 @@ const ENCOUNTERS_STATUS_MESSAGES = {
   "encounter-created": "Visita registrada.",
 } as const;
 
+function buildQuickCycleSummary(params: {
+  treatmentVisitCount: number;
+  lastStartedAt: string | null;
+  hasFunctionalTrend: boolean;
+  hasClinicalContext: boolean;
+}) {
+  const {
+    treatmentVisitCount,
+    lastStartedAt,
+    hasFunctionalTrend,
+    hasClinicalContext,
+  } = params;
+
+  return {
+    treatmentVisitsLabel: treatmentVisitCount === 1
+      ? "1 visita del tratamiento"
+      : `${treatmentVisitCount} visitas del tratamiento`,
+    lastVisitLabel: treatmentVisitCount > 0 && lastStartedAt
+      ? `Última visita: ${formatDateTimeDisplay(lastStartedAt)}`
+      : "Última visita: sin visitas",
+    functionalTrendLabel: hasFunctionalTrend
+      ? "Con tendencia funcional"
+      : "Sin tendencia funcional",
+    clinicalContextLabel: hasClinicalContext
+      ? "Contexto cargado"
+      : "Falta contexto",
+  };
+}
+
 export default async function AdminPatientEncountersPage({ params, searchParams }: AdminPatientEncountersPageProps) {
   const { id } = await params;
   const resolvedSearchParams = await searchParams;
@@ -102,6 +132,15 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
   const statusMessage = resolvedSearchParams?.status
     ? ENCOUNTERS_STATUS_MESSAGES[resolvedSearchParams.status as keyof typeof ENCOUNTERS_STATUS_MESSAGES]
     : undefined;
+  const hasClinicalContext = Boolean(pageData.clinicalContext?.hasAnyContent);
+  const hasFunctionalTrend = pageData.functionalTrend.length > 0;
+  const shouldExpandQuickCycle = !hasClinicalContext || pageData.encounterStats.treatmentCount === 0;
+  const quickCycleSummary = buildQuickCycleSummary({
+    treatmentVisitCount: pageData.encounterStats.treatmentCount,
+    lastStartedAt: pageData.encounterStats.lastStartedAt,
+    hasFunctionalTrend,
+    hasClinicalContext,
+  });
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -167,15 +206,41 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
         </div>
       ) : null}
 
-      <section className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5" aria-label="Seguimiento rápido del ciclo">
-        <div className="border-b border-slate-200 pb-4">
-          <h2 className="text-lg font-medium text-slate-900">Seguimiento rápido del ciclo</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Lectura rápida del tratamiento actual: contexto clínico, tendencia funcional y señales del ciclo completo.
-          </p>
-        </div>
+      <details
+        aria-label="Seguimiento rápido del ciclo"
+        className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5"
+        open={shouldExpandQuickCycle}
+      >
+        <summary className="cursor-pointer list-none">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-medium text-slate-900">Seguimiento rápido del ciclo</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Lectura rápida del tratamiento actual: contexto clínico, tendencia funcional y señales del ciclo completo.
+              </p>
+            </div>
+            <span className="rounded-full border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700">
+              Ver detalle
+            </span>
+          </div>
 
-        <div className="mt-4 space-y-4">
+          <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-700">
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1">
+              {quickCycleSummary.treatmentVisitsLabel}
+            </span>
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1">
+              {quickCycleSummary.lastVisitLabel}
+            </span>
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1">
+              {quickCycleSummary.functionalTrendLabel}
+            </span>
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1">
+              {quickCycleSummary.clinicalContextLabel}
+            </span>
+          </div>
+        </summary>
+
+        <div className="mt-4 space-y-4 border-t border-slate-200 pt-4">
           <ClinicalCycleContextCard
             patientId={pageData.patient.id}
             activeEpisode={pageData.activeEpisode}
@@ -188,7 +253,7 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
             <FunctionalTrendSummary trend={pageData.functionalTrend} />
           </div>
         </div>
-      </section>
+      </details>
 
       <EncountersList
         encounters={pageData.encounters}

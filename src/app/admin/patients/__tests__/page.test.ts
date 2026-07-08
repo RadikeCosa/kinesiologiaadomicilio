@@ -100,6 +100,10 @@ describe("/admin/patients page", () => {
 
     expect(html).toContain("href=\"/admin/patients/pat-active/encounters/new\"");
     expect(html).toContain("Registrar visita");
+    expect(html).toContain("href=\"/admin/patients/pat-active/encounters\"");
+    expect(html).toContain("Gestión clínica");
+    expect(html).toContain("href=\"/admin/patients/pat-active/treatment\"");
+    expect(html).toContain("Tratamiento");
     expect(html).not.toContain("href=\"/admin/patients/pat-finished/encounters/new\"");
     expect(html).not.toContain("href=\"/admin/patients/pat-pre/encounters/new\"");
     expect(html).not.toContain("href=\"/admin/patients/pat-ready/encounters/new\"");
@@ -268,6 +272,9 @@ describe("/admin/patients page", () => {
     expect(html).toContain("href=\"/admin/patients/pat-active\"");
     expect(html).toContain("Solicitud en evaluación");
     expect(html).toContain("Aceptada, sin iniciar");
+    expect(html).toContain("href=\"/admin/patients/pat-finished/encounters\"");
+    expect(html).toContain("Gestión clínica");
+    expect(html).not.toContain(">Clínica</a>");
     expect(html).not.toContain("Señales de solicitud");
     expect(html).not.toContain("href=\"/admin/patients?signal=");
   });

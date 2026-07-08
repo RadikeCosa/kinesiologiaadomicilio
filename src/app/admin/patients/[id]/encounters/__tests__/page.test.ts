@@ -175,14 +175,20 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml.match(/href=\"\/admin\/patients\/pat-1\/encounters\/new\"/g)?.length).toBe(1);
     expect(foundHtml).not.toContain("Gestionar tratamiento");
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1/treatment\"");
+    expect(foundHtml).toContain("<summary");
     expect(foundHtml).toContain("Seguimiento rápido del ciclo");
     expect(foundHtml).toContain("Lectura rápida del tratamiento actual");
+    expect(foundHtml).toContain("0 visitas del tratamiento");
+    expect(foundHtml).toContain("Última visita: sin visitas");
+    expect(foundHtml).toContain("Con tendencia funcional");
+    expect(foundHtml).toContain("Falta contexto");
     expect(foundHtml).toContain("Resumen del ciclo");
     expect(foundHtml).toContain("Contexto clínico del ciclo");
     expect(foundHtml).toContain("Ver/editar en Tratamiento");
     expect(foundHtml).toContain("Ver detalle longitudinal");
     expect(foundHtml).toContain("Tendencia funcional");
     expect(foundHtml).toContain("EncountersList");
+    expect(foundHtml).toMatch(/<details[^>]*aria-label="Seguimiento rápido del ciclo"[^>]*open=""/);
     expect(foundHtml.indexOf("Seguimiento rápido del ciclo")).toBeLessThan(foundHtml.indexOf("EncountersList"));
     expect(foundHtml.indexOf("Contexto clínico del ciclo")).toBeLessThan(foundHtml.indexOf("EncountersList"));
     expect(foundHtml.indexOf("Tendencia funcional")).toBeLessThan(foundHtml.indexOf("EncountersList"));
@@ -271,6 +277,10 @@ describe("/admin/patients/[id]/encounters page", () => {
       mostRecentEpisode: null,
       encounters: [],
       functionalTrend: [],
+      clinicalContext: {
+        hasAnyContent: true,
+        therapeuticGoals: "Recuperar marcha funcional",
+      },
       encounterStats: {
         totalCount: 5,
         treatmentCount: 4,
@@ -299,6 +309,13 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(html).toContain("Duración promedio");
     expect(html).toContain("Tiempo total registrado");
     expect(html).not.toContain("Excluidas del cálculo de duración");
+    expect(html).toContain("4 visitas del tratamiento");
+    expect(html).toContain("Última visita:");
+    expect(html).toContain("17/04/2026");
+    expect(html).toContain("Sin tendencia funcional");
+    expect(html).toContain("Contexto cargado");
+    expect(html).toContain("<summary");
+    expect(html).not.toMatch(/<details[^>]*aria-label="Seguimiento rápido del ciclo"[^>]*open=""/);
     expect(html).toContain("Primera visita");
     expect(html).toContain("Al día siguiente del inicio");
     expect(html).toContain("Frecuencia promedio");
@@ -474,6 +491,11 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const withContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
     expect(withContext).toContain("Contexto clínico del ciclo");
+    expect(withContext).toContain("0 visitas del tratamiento");
+    expect(withContext).toContain("Última visita: sin visitas");
+    expect(withContext).toContain("Sin tendencia funcional");
+    expect(withContext).toContain("Contexto cargado");
+    expect(withContext).toMatch(/<details[^>]*aria-label="Seguimiento rápido del ciclo"[^>]*open=""/);
     expect(withContext).toContain("Ver detalle longitudinal");
     expect(withContext).toContain("Este contexto se consulta en modo lectura desde Gestión clínica y se edita en Tratamiento.");
     expect(withContext).toContain("Ver/editar en Tratamiento");
@@ -501,6 +523,11 @@ describe("/admin/patients/[id]/encounters page", () => {
     });
     const withoutContext = renderToStaticMarkup(await AdminPatientEncountersPage({ params: Promise.resolve({ id: "pat-1" }) }));
     expect(withoutContext).toContain("Contexto clínico del ciclo");
+    expect(withoutContext).toContain("0 visitas del tratamiento");
+    expect(withoutContext).toContain("Última visita: sin visitas");
+    expect(withoutContext).toContain("Sin tendencia funcional");
+    expect(withoutContext).toContain("Falta contexto");
+    expect(withoutContext).toMatch(/<details[^>]*aria-label="Seguimiento rápido del ciclo"[^>]*open=""/);
     expect(withoutContext).toContain("Ver detalle longitudinal");
     expect(withoutContext).toContain("Sin dato");
   });

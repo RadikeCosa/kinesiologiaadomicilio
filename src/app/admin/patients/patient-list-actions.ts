@@ -22,7 +22,7 @@ export function getPatientListActions(input: {
       },
       {
         href: `/admin/patients/${patientId}/encounters`,
-        label: "Clínica",
+        label: "Gestión clínica",
         kind: "secondary",
       },
       {
@@ -101,7 +101,7 @@ export function getPatientListActions(input: {
     },
     {
       href: `/admin/patients/${patientId}/encounters`,
-      label: "Clínica",
+      label: "Gestión clínica",
       kind: "secondary",
     },
   ];
