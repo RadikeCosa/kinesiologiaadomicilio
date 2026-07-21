@@ -19,6 +19,10 @@ import {
 import { EncounterClinicalNoteEditor } from "@/app/admin/patients/[id]/encounters/components/EncounterClinicalNoteEditor";
 import { VisitShareReportPanel } from "@/app/admin/patients/[id]/encounters/components/VisitShareReportPanel";
 import type { Encounter } from "@/domain/encounter/encounter.types";
+import {
+  TREATMENT_EVOLUTION_REPORT_TYPE_LABELS,
+  type TreatmentEvolutionReport,
+} from "@/domain/treatment-evolution-report/treatment-evolution-report.types";
 import { ENCOUNTER_OPERATIONAL_PUNCTUALITY_LABEL } from "@/infrastructure/mappers/encounter/encounter-operational-punctuality.constants";
 import {
   formatDateTimeDisplay,
@@ -30,6 +34,7 @@ import { formatFunctionalValue } from "@/app/admin/patients/[id]/encounters/func
 interface EncountersListProps {
   patientId: string;
   encounters: Encounter[];
+  savedReports?: TreatmentEvolutionReport[];
   hasActiveTreatment: boolean;
   hasFinishedTreatment: boolean;
 }
@@ -101,6 +106,7 @@ function toCompactClinicalValue(value: string): string {
 export function EncountersList({
   patientId,
   encounters,
+  savedReports = [],
   hasActiveTreatment,
   hasFinishedTreatment,
 }: EncountersListProps) {
@@ -112,8 +118,20 @@ export function EncountersList({
   const [activeShareReportEncounterId, setActiveShareReportEncounterId] = useState<string | null>(null);
   const [activeClinicalNoteEditorEncounterId, setActiveClinicalNoteEditorEncounterId] = useState<string | null>(null);
   const [showHistoricalEncounters, setShowHistoricalEncounters] = useState(false);
-  const recentEncounters = encounters.slice(0, RECENT_ENCOUNTERS_LIMIT);
-  const historicalEncounters = encounters.slice(RECENT_ENCOUNTERS_LIMIT);
+  const timelineItems = [
+    ...encounters.map((encounter) => ({
+      kind: "encounter" as const,
+      occurredAt: encounter.startedAt,
+      encounter,
+    })),
+    ...savedReports.map((report) => ({
+      kind: "report" as const,
+      occurredAt: report.createdAt,
+      report,
+    })),
+  ].sort((left, right) => new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime());
+  const recentTimelineItems = timelineItems.slice(0, RECENT_ENCOUNTERS_LIMIT);
+  const historicalTimelineItems = timelineItems.slice(RECENT_ENCOUNTERS_LIMIT);
 
   function handleStartEditing(encounter: Encounter) {
     setInlineEditState(startEncounterInlineEdit(encounter));
@@ -168,6 +186,21 @@ export function EncountersList({
       ...previous,
       [encounterId]: !previous[encounterId],
     }));
+  }
+
+  async function handleCopySavedReport(report: TreatmentEvolutionReport) {
+    try {
+      await navigator.clipboard.writeText(report.finalText);
+      setMessage({
+        text: "Informe copiado.",
+        tone: "success",
+      });
+    } catch {
+      setMessage({
+        text: "No se pudo copiar el informe.",
+        tone: "error",
+      });
+    }
   }
 
   function renderEncounter(encounter: Encounter) {
@@ -382,10 +415,50 @@ export function EncountersList({
     );
   }
 
+  function renderSavedReport(report: TreatmentEvolutionReport) {
+    return (
+      <li key={report.id} className="rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-950">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-emerald-300 bg-white px-2 py-0.5 text-[11px] font-medium text-emerald-900">
+                {TREATMENT_EVOLUTION_REPORT_TYPE_LABELS[report.reportType]}
+              </span>
+              <span className="text-xs text-emerald-900">Informe evolutivo guardado</span>
+            </div>
+            <p className="mt-2 font-medium">Fecha: {formatDateTimeDisplay(report.createdAt)}</p>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-emerald-900">
+              <span>{report.encounterCount} {report.encounterCount === 1 ? "sesión considerada" : "sesiones consideradas"}</span>
+              {report.firstEncounterStartedAt ? <span>Primera sesión: {formatDateTimeDisplay(report.firstEncounterStartedAt)}</span> : null}
+              {report.lastEncounterStartedAt ? <span>Última sesión: {formatDateTimeDisplay(report.lastEncounterStartedAt)}</span> : null}
+            </div>
+            {report.functionalMetricsSummarySnapshot ? (
+              <div className="mt-2 rounded border border-emerald-200 bg-white p-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-800">Snapshot funcional</p>
+                <p className="mt-1 whitespace-pre-wrap text-xs text-emerald-950">{report.functionalMetricsSummarySnapshot}</p>
+              </div>
+            ) : null}
+            <div className="mt-2 rounded border border-emerald-200 bg-white p-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-800">Texto guardado</p>
+              <p className="mt-1 whitespace-pre-wrap text-xs text-emerald-950">{report.finalText}</p>
+            </div>
+          </div>
+          <button
+            className="rounded border border-emerald-300 bg-white px-3 py-1.5 text-xs font-medium text-emerald-900 hover:bg-emerald-100"
+            onClick={() => handleCopySavedReport(report)}
+            type="button"
+          >
+            Copiar informe
+          </button>
+        </div>
+      </li>
+    );
+  }
+
   return (
-      <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <section className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
       <h2 className="text-lg font-medium">Actividad reciente</h2>
-      <p className="mt-1 text-xs text-slate-600">Se muestran las 5 visitas más recientes del tratamiento actual. El resumen del ciclo superior considera todas las visitas registradas.</p>
+      <p className="mt-1 text-xs text-slate-600">Se muestran los 5 registros más recientes del tratamiento actual entre visitas e informes guardados. El resumen del ciclo superior sigue considerando solo visitas reales.</p>
 
       {message ? (
         <p className={`mt-3 text-sm ${message.tone === "success" ? "text-emerald-700" : "text-red-700"}`}>
@@ -393,21 +466,25 @@ export function EncountersList({
         </p>
       ) : null}
 
-      {encounters.length === 0 ? (
-          <p className="mt-3 rounded border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
+      {timelineItems.length === 0 ? (
+        <p className="mt-3 rounded border border-dashed border-slate-300 bg-white p-3 text-sm text-slate-700">
           {hasActiveTreatment
-            ? "Todavía no hay visitas registradas para este tratamiento."
+            ? "Todavía no hay visitas ni informes guardados para este tratamiento."
             : hasFinishedTreatment
-              ? "Tratamiento finalizado. Las visitas quedan disponibles como historial."
-              : "No hay visitas registradas por el momento."}
+              ? "Tratamiento finalizado. Las visitas e informes quedan disponibles como historial."
+              : "No hay visitas ni informes guardados por el momento."}
         </p>
       ) : (
         <>
           <ul className="mt-3 space-y-2">
-            {recentEncounters.map(renderEncounter)}
+            {recentTimelineItems.map((item) => (
+              item.kind === "encounter"
+                ? renderEncounter(item.encounter)
+                : renderSavedReport(item.report)
+            ))}
           </ul>
 
-          {historicalEncounters.length > 0 ? (
+          {historicalTimelineItems.length > 0 ? (
             <div className="mt-4">
               <button
                 className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
@@ -415,18 +492,22 @@ export function EncountersList({
                 type="button"
               >
                 {showHistoricalEncounters
-                  ? `Ocultar historial anterior (${historicalEncounters.length})`
-                  : `Ver anteriores (${historicalEncounters.length})`}
+                  ? `Ocultar historial anterior (${historicalTimelineItems.length})`
+                  : `Ver anteriores (${historicalTimelineItems.length})`}
               </button>
 
               {showHistoricalEncounters ? (
                 <div className="mt-4 space-y-3">
                   <div>
                     <h3 className="text-sm font-semibold text-slate-900">Historial anterior</h3>
-                    <p className="mt-1 text-xs text-slate-600">Visitas previas del mismo tratamiento, disponibles con sus acciones y detalle clínico.</p>
+                    <p className="mt-1 text-xs text-slate-600">Registros previos del mismo tratamiento, con visitas reales e informes evolutivos guardados.</p>
                   </div>
                   <ul className="space-y-2">
-                    {historicalEncounters.map(renderEncounter)}
+                    {historicalTimelineItems.map((item) => (
+                      item.kind === "encounter"
+                        ? renderEncounter(item.encounter)
+                        : renderSavedReport(item.report)
+                    ))}
                   </ul>
                 </div>
               ) : null}

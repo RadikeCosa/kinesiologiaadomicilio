@@ -67,6 +67,41 @@ describe("EncountersList", () => {
     expect(html).not.toContain("Historial anterior");
   });
 
+  it("renders saved treatment evolution reports with differentiated copy and action", () => {
+    const html = renderToStaticMarkup(
+      createElement(EncountersList, {
+        patientId: "pat-1",
+        hasActiveTreatment: true,
+        hasFinishedTreatment: false,
+        encounters: [],
+        savedReports: [
+          {
+            id: "doc-1",
+            patientId: "pat-1",
+            episodeId: "ep-1",
+            createdAt: "2026-07-08T10:30:00Z",
+            reportType: "stage_closure",
+            treatmentStatusAtReport: "active",
+            episodeStartDate: "2026-05-01",
+            encounterCount: 5,
+            firstEncounterStartedAt: "2026-05-03T10:00:00Z",
+            lastEncounterStartedAt: "2026-07-07T10:00:00Z",
+            functionalMetricsSummarySnapshot: "Dolor: 4/10",
+            finalText: "Texto guardado del informe",
+          },
+        ],
+      }),
+    );
+
+    expect(html).toContain("Informe evolutivo guardado");
+    expect(html).toContain("Cierre de etapa");
+    expect(html).toContain("5 sesiones consideradas");
+    expect(html).toContain("Copiar informe");
+    expect(html).toContain("Texto guardado");
+    expect(html).toContain("Texto guardado del informe");
+    expect(html).not.toContain("Duración:");
+  });
+
   it("renders temporal metadata first and handles missing/invalid closure copy", () => {
     const html = renderToStaticMarkup(
       createElement(EncountersList, {
@@ -306,7 +341,7 @@ describe("EncountersList", () => {
         encounters: [],
       }),
     );
-    expect(activeHtml).toContain("Todavía no hay visitas registradas para este tratamiento.");
+    expect(activeHtml).toContain("Todavía no hay visitas ni informes guardados para este tratamiento.");
     expect(activeHtml).toContain("Actividad reciente");
 
     const finishedHtml = renderToStaticMarkup(
@@ -317,7 +352,7 @@ describe("EncountersList", () => {
         encounters: [],
       }),
     );
-    expect(finishedHtml).toContain("Tratamiento finalizado. Las visitas quedan disponibles como historial.");
+    expect(finishedHtml).toContain("Tratamiento finalizado. Las visitas e informes quedan disponibles como historial.");
 
     const noTreatmentHtml = renderToStaticMarkup(
       createElement(EncountersList, {
@@ -327,7 +362,7 @@ describe("EncountersList", () => {
         encounters: [],
       }),
     );
-    expect(noTreatmentHtml).toContain("No hay visitas registradas por el momento.");
+    expect(noTreatmentHtml).toContain("No hay visitas ni informes guardados por el momento.");
   });
 
   it("renders only clinical fields with content", () => {

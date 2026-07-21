@@ -4,7 +4,7 @@ import type {
   UpdateEncounterClinicalNoteInput,
   UpdateEncounterPeriodInput,
 } from "@/domain/encounter/encounter.types";
-import { extractResourcesByType } from "@/lib/fhir/bundle-utils";
+import { extractNextBundlePageUrl, extractResourcesByType } from "@/lib/fhir/bundle-utils";
 import { fhirClient } from "@/lib/fhir/client";
 import { FhirClientError } from "@/lib/fhir/errors";
 import { buildEncounterByPatientQuery } from "@/lib/fhir/search-params";
@@ -20,6 +20,23 @@ import {
 
 function buildSearchPath(resourceType: string, query: string): string {
   return query ? `${resourceType}?${query}` : resourceType;
+}
+
+async function listAllEncounterResourcesBySearchPath(initialSearchPath: string): Promise<FhirEncounter[]> {
+  const resources: FhirEncounter[] = [];
+  const visitedSearchPaths = new Set<string>();
+  let nextSearchPath: string | null = initialSearchPath;
+
+  while (nextSearchPath && !visitedSearchPaths.has(nextSearchPath)) {
+    visitedSearchPaths.add(nextSearchPath);
+
+    const bundle = await fhirClient.get<FhirBundle<FhirEncounter>>(nextSearchPath);
+    resources.push(...extractResourcesByType<FhirEncounter>(bundle, "Encounter"));
+
+    nextSearchPath = extractNextBundlePageUrl(bundle);
+  }
+
+  return resources;
 }
 
 export async function createEncounter(input: CreateEncounterInput): Promise<Encounter> {
@@ -71,9 +88,8 @@ export async function listEncountersByPatientId(patientId: string): Promise<Enco
     return [];
   }
 
-  const query = buildEncounterByPatientQuery(patientId);
-  const bundle = await fhirClient.get<FhirBundle<FhirEncounter>>(buildSearchPath("Encounter", query));
-  const encounters = extractResourcesByType<FhirEncounter>(bundle, "Encounter");
+  const query = buildEncounterByPatientQuery(patientId, { count: 100 });
+  const encounters = await listAllEncounterResourcesBySearchPath(buildSearchPath("Encounter", query));
 
   return encounters.map(mapFhirEncounterToDomain);
 }

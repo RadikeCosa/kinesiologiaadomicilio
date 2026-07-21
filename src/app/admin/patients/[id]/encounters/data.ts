@@ -5,7 +5,9 @@ import type { EpisodeOfCare } from "@/domain/episode-of-care/episode-of-care.typ
 import { selectPatientEpisodes } from "@/domain/episode-of-care/episode-of-care.selectors";
 import { getPatientOperationalStatus } from "@/domain/patient/patient.rules";
 import type { PatientOperationalStatus } from "@/domain/patient/patient.types";
+import type { TreatmentEvolutionReport } from "@/domain/treatment-evolution-report/treatment-evolution-report.types";
 import { listEncountersByPatientId } from "@/infrastructure/repositories/encounter.repository";
+import { listTreatmentEvolutionReportsByPatientId } from "@/infrastructure/repositories/document-reference.repository";
 import { listFunctionalObservationsByEncounterIds } from "@/infrastructure/repositories/observation.repository";
 import {
   getActiveEpisodeByPatientId,
@@ -26,6 +28,7 @@ export interface PatientEncountersPageData {
   activeEpisode: EpisodeOfCare | null;
   mostRecentEpisode: EpisodeOfCare | null;
   encounters: Encounter[];
+  savedReports: TreatmentEvolutionReport[];
   encounterStats: EncounterStats;
   clinicalContext: EpisodeClinicalContextReadModel | null;
   functionalTrend: FunctionalObservationTrendSummary[];
@@ -54,11 +57,15 @@ function sortByMostRecentEncounter(encounters: Encounter[]): Encounter[] {
     const diff = getOccurrenceTimestamp(b.startedAt) - getOccurrenceTimestamp(a.startedAt);
 
     if (diff !== 0) {
-      return diff;
+    return diff;
     }
 
     return b.startedAt.localeCompare(a.startedAt);
   });
+}
+
+function sortReportsByMostRecentCreatedAt(reports: TreatmentEvolutionReport[]): TreatmentEvolutionReport[] {
+  return [...reports].sort((a, b) => getOccurrenceTimestamp(b.createdAt) - getOccurrenceTimestamp(a.createdAt));
 }
 
 export async function loadPatientEncountersPageData(patientId: string): Promise<PatientEncountersPageData | null> {
@@ -68,10 +75,11 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     return null;
   }
 
-  const [activeEpisode, mostRecentEpisode, encounters] = await Promise.all([
+  const [activeEpisode, mostRecentEpisode, encounters, savedReports] = await Promise.all([
     getActiveEpisodeByPatientId(patient.id),
     getMostRecentEpisodeByPatientId(patient.id),
     listEncountersByPatientId(patient.id),
+    listTreatmentEvolutionReportsByPatientId(patient.id),
   ]);
 
   const { effectiveEpisode } = selectPatientEpisodes(
@@ -80,7 +88,11 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
   const scopedEncounters = effectiveEpisode
     ? encounters.filter((encounter) => encounter.episodeOfCareId === effectiveEpisode.id)
     : [];
+  const scopedReports = effectiveEpisode
+    ? savedReports.filter((report) => report.episodeId === effectiveEpisode.id)
+    : [];
   const sortedEncounters = sortByMostRecentEncounter(scopedEncounters);
+  const sortedReports = sortReportsByMostRecentCreatedAt(scopedReports);
   const effectiveEncounterIds = new Set(sortedEncounters.map((encounter) => encounter.id));
   const scopedObservations = (await listFunctionalObservationsByEncounterIds(Array.from(effectiveEncounterIds))).filter((observation) => (
     observation.patientId === patient.id
@@ -127,6 +139,7 @@ export async function loadPatientEncountersPageData(patientId: string): Promise<
     activeEpisode,
     mostRecentEpisode,
     encounters: encountersWithFunctional,
+    savedReports: sortedReports,
     encounterStats: calculateEncounterStats({
       encounters: encountersWithFunctional,
       episodeOfCareId: effectiveEpisode?.id,

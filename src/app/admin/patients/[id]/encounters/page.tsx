@@ -260,6 +260,7 @@ export default async function AdminPatientEncountersPage({ params, searchParams 
         hasActiveTreatment={Boolean(pageData.activeEpisode)}
         hasFinishedTreatment={pageData.mostRecentEpisode?.status === "finished"}
         patientId={pageData.patient.id}
+        savedReports={pageData.savedReports}
       />
     </section>
   );

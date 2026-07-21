@@ -37,7 +37,7 @@ Estas piezas explican el contexto clínico, el valor profesional del proyecto y 
 - `docs/checklist-sincronizacion-doc-codigo.md`
   Checklist liviano para evitar drift entre código y documentación.
 - `docs/audits/auditoria-evolucion-resumenes-informes-clinicos-2026-06-25.md`
-  Auditoría clínica vigente para la dirección actual de resúmenes e informes: mantener el resumen compartible como derivado y efímero, sin persistencia de informes todavía.
+  Auditoría clínica vigente de la que surgió el criterio inicial: mantener el resumen compartible de visita como derivado y efímero, y persistir los informes evolutivos de tratamiento recién cuando hubiera necesidad operativa real.
 - `docs/audits/auditoria-dato-fuente-resumenes-reevaluaciones-informes-2026-06-26.md`
   Auditoría vigente sobre calidad y completitud del dato fuente clínico que guía mejoras mínimas de captura sin cambiar persistencia ni FHIR.
 - `docs/archive/README.md`

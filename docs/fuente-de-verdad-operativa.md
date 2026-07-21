@@ -114,7 +114,7 @@ Reglas clave:
 
 - `Encounter` es la unidad principal de la visita realizada.
 - La nota clínica estructurada vive en `Encounter.extension[]`; no es el mismo artefacto que el resumen compartible.
-- El resumen compartible de visita sigue siendo texto derivado y efímero: no se persisten informes, ni comunicaciones clínicas, ni artefactos formales con `Communication`, `DocumentReference` o `Composition`.
+- El resumen compartible de visita sigue siendo texto derivado y efímero: no se persiste como `Communication` ni reemplaza la nota clínica interna.
 - Las métricas funcionales (`Observation`) son anexos opcionales de la visita.
 - La creación de visita puede tener éxito parcial si fallan observaciones funcionales: no hay rollback compensatorio del `Encounter`.
 
@@ -124,7 +124,8 @@ Reglas clave:
 - `/encounters` lo consume en modo read-only.
 - Diagnóstico médico de referencia y diagnóstico kinésico se persisten como `Condition`.
 - Situación funcional inicial, objetivos terapéuticos y plan marco viven en `EpisodeOfCare.extension[]`.
-- El informe de tratamiento/episodio en Fase 1 se prepara en `/treatment/report`, se deriva de datos ya registrados, se puede editar localmente antes de copiarlo y no se persiste en FHIR.
+- El informe de tratamiento/episodio se prepara en `/treatment/report`, se deriva de datos ya registrados y puede guardarse como snapshot inmutable en `DocumentReference`.
+- Los informes evolutivos persistidos se asocian a `Patient` + `EpisodeOfCare`, se muestran junto a las visitas en `Gestión clínica` y no alteran estadísticas ni métricas de visitas reales.
 
 ## Estado funcional vigente
 

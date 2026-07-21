@@ -19,3 +19,10 @@ export function extractSingleResource<TResource extends FhirResource>(
 ): TResource | undefined {
   return extractResourcesByType<TResource>(bundle, resourceType)[0];
 }
+
+export function extractNextBundlePageUrl(bundle: FhirBundle): string | null {
+  const nextLink = (bundle.link ?? []).find((link) => link.relation === "next");
+  const nextUrl = nextLink?.url?.trim();
+
+  return nextUrl ? nextUrl : null;
+}

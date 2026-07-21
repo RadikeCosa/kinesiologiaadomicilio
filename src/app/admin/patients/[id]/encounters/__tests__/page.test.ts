@@ -166,7 +166,7 @@ describe("/admin/patients/[id]/encounters page", () => {
     expect(foundHtml).toContain("href=\"/admin/patients/pat-1\"");
     expect(foundHtml).toContain("Gestión clínica");
     expect(foundHtml).toContain("Ana Pérez");
-    expect(foundHtml).toContain("Registrá y consultá las visitas realizadas durante el tratamiento.");
+    expect(foundHtml).toContain("Registrá y consultá las visitas e informes del tratamiento.");
     expect(foundHtml).toContain("DNI: 30.111.222");
     expect(foundHtml).toContain("Tratamiento activo");
     expect(foundHtml).toContain("Inicio: 01/04/2026");

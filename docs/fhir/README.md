@@ -35,8 +35,9 @@ El modelado vigente del repo usa:
 - `Observation`
 - `Condition`
 - `Practitioner`
+- `DocumentReference`
 
-Estos son los únicos recursos FHIR activos documentados para el runtime actual. `Communication`, `DocumentReference` y `Composition` fueron evaluados como posible dirección futura para resúmenes o informes, pero hoy no forman parte de la implementación vigente.
+Estos son los únicos recursos FHIR activos documentados para el runtime actual. `Communication` y `Composition` siguen fuera de la implementación vigente. `DocumentReference` se usa para persistir informes evolutivos de tratamiento como snapshot clínico asociado a `Patient` + `EpisodeOfCare`.
 
 Dirección arquitectónica vigente:
 

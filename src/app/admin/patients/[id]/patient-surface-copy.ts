@@ -1,7 +1,7 @@
 export const PATIENT_SURFACE_COPY = {
   requestDefinition: "Pedido inicial para evaluar si corresponde iniciar atención. Aceptarla no inicia el tratamiento por sí sola.",
   treatmentDefinition: "Ciclo de atención profesional iniciado desde una solicitud aceptada; puede estar activo o finalizado.",
-  clinicalDefinition: "Registrá y consultá las visitas realizadas durante el tratamiento.",
+  clinicalDefinition: "Registrá y consultá las visitas e informes del tratamiento.",
   requestCreatedTitle: "Solicitud registrada",
   requestCreatedDescription:
     "La consulta inicial quedó cargada. Revisá la solicitud para decidir si avanza, se cancela o se cierra sin iniciar tratamiento.",

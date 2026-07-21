@@ -59,7 +59,21 @@ export function buildActiveEpisodeOfCareByPatientQuery(patientId: string): strin
   return params.toString();
 }
 
-export function buildEncounterByPatientQuery(patientId: string): string {
+export function buildEncounterByPatientQuery(patientId: string, options?: { count?: number }): string {
+  const params = new URLSearchParams({
+    subject: buildPatientReference(patientId),
+    _sort: "-date",
+  });
+
+  if (options?.count) {
+    params.set("_count", String(options.count));
+  }
+
+  return params.toString();
+}
+
+
+export function buildServiceRequestBySubjectQuery(patientId: string): string {
   const params = new URLSearchParams({
     subject: buildPatientReference(patientId),
   });
@@ -67,8 +81,7 @@ export function buildEncounterByPatientQuery(patientId: string): string {
   return params.toString();
 }
 
-
-export function buildServiceRequestBySubjectQuery(patientId: string): string {
+export function buildDocumentReferenceBySubjectQuery(patientId: string): string {
   const params = new URLSearchParams({
     subject: buildPatientReference(patientId),
   });

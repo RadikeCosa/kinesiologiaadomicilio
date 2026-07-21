@@ -213,7 +213,12 @@ export default async function AdminPatientTreatmentReportPage({
       ) : null}
 
       <div className="mt-5">
-        <TreatmentReportEditor mode={mode} report={report} />
+        <TreatmentReportEditor
+          episodeId={context.episode.id}
+          mode={mode}
+          patientId={context.patient.id}
+          report={report}
+        />
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { extractEntries, extractResourcesByType, extractSingleResource } from "@/lib/fhir/bundle-utils";
+import { extractEntries, extractNextBundlePageUrl, extractResourcesByType, extractSingleResource } from "@/lib/fhir/bundle-utils";
 import { type FhirBundle } from "@/lib/fhir/types";
 
 describe("bundle-utils", () => {
@@ -37,5 +37,25 @@ describe("bundle-utils", () => {
     const patient = extractSingleResource<{ resourceType: "Patient"; id: string }>(bundle, "Patient");
 
     expect(patient).toEqual({ resourceType: "Patient", id: "p-1" });
+  });
+
+  it("extracts the next page URL from bundle links", () => {
+    const bundle: FhirBundle = {
+      resourceType: "Bundle",
+      link: [
+        { relation: "self", url: "http://fhir.test/Encounter?subject=Patient%2Fpat-1" },
+        { relation: "next", url: "http://fhir.test/Encounter?_getpages=abc" },
+      ],
+    };
+
+    expect(extractNextBundlePageUrl(bundle)).toBe("http://fhir.test/Encounter?_getpages=abc");
+  });
+
+  it("returns null when bundle has no next page URL", () => {
+    expect(extractNextBundlePageUrl({ resourceType: "Bundle" })).toBeNull();
+    expect(extractNextBundlePageUrl({
+      resourceType: "Bundle",
+      link: [{ relation: "next", url: "   " }],
+    })).toBeNull();
   });
 });

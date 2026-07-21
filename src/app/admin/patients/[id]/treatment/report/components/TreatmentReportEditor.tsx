@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useTransition } from "react";
 
 import type {
   TreatmentReportCompositionResult,
   TreatmentReportMode,
   TreatmentReportCompletenessStatus,
 } from "@/features/treatment-report/treatment-report.types";
+import type { TreatmentEvolutionReportType } from "@/domain/treatment-evolution-report/treatment-evolution-report.types";
+import { TREATMENT_EVOLUTION_REPORT_TYPE_LABELS } from "@/domain/treatment-evolution-report/treatment-evolution-report.types";
 import {
   applyTreatmentReportCopyFeedback,
   copyTreatmentReportText,
@@ -14,6 +17,7 @@ import {
   editTreatmentReportText,
   resetGeneratedTreatmentReportText,
 } from "@/app/admin/patients/[id]/treatment/report/components/treatment-report-editor.state";
+import { saveTreatmentEvolutionReportAction } from "@/app/admin/patients/[id]/treatment/report/actions/save-treatment-evolution-report.action";
 
 const COMPLETENESS_COPY: Record<TreatmentReportCompletenessStatus, {
   label: string;
@@ -38,6 +42,8 @@ const COMPLETENESS_COPY: Record<TreatmentReportCompletenessStatus, {
 };
 
 interface TreatmentReportEditorProps {
+  patientId: string;
+  episodeId: string;
   mode: TreatmentReportMode;
   report: TreatmentReportCompositionResult;
 }
@@ -45,10 +51,17 @@ interface TreatmentReportEditorProps {
 export const TREATMENT_REPORT_TEXTAREA_CLASS = "mt-1 min-h-[28rem] w-full resize-y rounded border border-slate-300 bg-white p-3 text-sm text-slate-800";
 
 export function TreatmentReportEditor({
+  patientId,
+  episodeId,
   mode,
   report,
 }: TreatmentReportEditorProps) {
   const [state, setState] = useState(() => createInitialTreatmentReportEditorState(report.initialText));
+  const [reportType, setReportType] = useState<TreatmentEvolutionReportType>(mode === "closure" ? "stage_closure" : "progress");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saved">("idle");
+  const [savedReportId, setSavedReportId] = useState<string | null>(null);
+  const [saveFeedback, setSaveFeedback] = useState<{ tone: "success" | "error"; text: string } | null>(null);
+  const [isPending, startTransition] = useTransition();
   const presentation = COMPLETENESS_COPY[report.completeness.status];
   const textareaId = `treatment-report-text-${mode}`;
 
@@ -61,19 +74,58 @@ export function TreatmentReportEditor({
     setState((current) => applyTreatmentReportCopyFeedback(current, ok));
   }
 
+  function markDraftAsUnsaved() {
+    setSaveStatus("idle");
+    setSavedReportId(null);
+    setSaveFeedback(null);
+  }
+
+  function handleSave() {
+    startTransition(async () => {
+      const result = await saveTreatmentEvolutionReportAction({
+        patientId,
+        episodeId,
+        mode,
+        reportType,
+        finalText: state.text,
+      });
+
+      setSaveFeedback({
+        tone: result.ok ? "success" : "error",
+        text: result.message ?? (result.ok ? "Informe guardado." : "No se pudo guardar el informe."),
+      });
+
+      if (result.ok) {
+        setSaveStatus("saved");
+        setSavedReportId(result.reportId ?? null);
+      }
+    });
+  }
+
   return (
     <section className="rounded-xl border border-slate-200 bg-slate-50 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-slate-900">Texto final editable</h2>
           <p className="mt-1 max-w-2xl text-sm text-slate-600">
-            Texto derivado a partir de datos registrados del tratamiento. Revisalo antes de copiarlo. No se guarda ni reemplaza la documentacion clinica interna.
+            Texto derivado a partir de datos registrados del tratamiento. Revisalo antes de copiarlo o guardarlo. El informe guardado queda como foto del momento y no reemplaza el contexto clinico vigente.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+            saveStatus === "saved"
+              ? "border-emerald-300 bg-emerald-50 text-emerald-900"
+              : "border-slate-300 bg-white text-slate-700"
+          }`}
+          >
+            {saveStatus === "saved" ? "Guardado" : "No guardado"}
+          </span>
           <button
             className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-            onClick={() => setState((current) => resetGeneratedTreatmentReportText(current))}
+            onClick={() => {
+              setState((current) => resetGeneratedTreatmentReportText(current));
+              markDraftAsUnsaved();
+            }}
             type="button"
           >
             Regenerar desde datos
@@ -85,6 +137,46 @@ export function TreatmentReportEditor({
           >
             Copiar
           </button>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded border border-slate-200 bg-white p-3">
+        <div className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-700" htmlFor={`report-type-${mode}`}>
+              Tipo de informe a guardar
+            </label>
+            <select
+              className="mt-1 rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800"
+              id={`report-type-${mode}`}
+              onChange={(event) => {
+                setReportType(event.target.value as TreatmentEvolutionReportType);
+                markDraftAsUnsaved();
+              }}
+              value={reportType}
+            >
+              <option value="progress">{TREATMENT_EVOLUTION_REPORT_TYPE_LABELS.progress}</option>
+              <option value="stage_closure">{TREATMENT_EVOLUTION_REPORT_TYPE_LABELS.stage_closure}</option>
+            </select>
+          </div>
+
+          <button
+            className="rounded bg-emerald-700 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
+            disabled={isPending || state.text.trim().length === 0}
+            onClick={handleSave}
+            type="button"
+          >
+            {isPending ? "Guardando..." : "Guardar informe"}
+          </button>
+
+          {savedReportId ? (
+            <Link
+              className="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
+              href={`/admin/patients/${patientId}/encounters`}
+            >
+              Ir a Gestión clínica
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -112,6 +204,7 @@ export function TreatmentReportEditor({
           className={TREATMENT_REPORT_TEXTAREA_CLASS}
           id={textareaId}
           onChange={(event) => setState((current) => editTreatmentReportText(current, event.target.value))}
+          onInput={markDraftAsUnsaved}
           value={state.text}
         />
       </div>
@@ -125,6 +218,12 @@ export function TreatmentReportEditor({
       {state.feedback ? (
         <p className={`mt-2 text-xs ${state.feedback.tone === "success" ? "text-emerald-700" : "text-red-700"}`}>
           {state.feedback.text}
+        </p>
+      ) : null}
+
+      {saveFeedback ? (
+        <p className={`mt-2 text-xs ${saveFeedback.tone === "success" ? "text-emerald-700" : "text-red-700"}`}>
+          {saveFeedback.text}
         </p>
       ) : null}
     </section>

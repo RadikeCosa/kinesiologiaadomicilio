@@ -10,6 +10,17 @@ import {
   updateEncounterTimeRange,
 } from "@/infrastructure/repositories/encounter.repository";
 
+function buildFhirEncounter(id: string, startedAt: string) {
+  return {
+    resourceType: "Encounter" as const,
+    id,
+    status: "finished",
+    subject: { reference: "Patient/pat-1" },
+    episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
+    period: { start: startedAt, end: startedAt },
+  };
+}
+
 describe("encounter.repository (FHIR)", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -235,26 +246,19 @@ describe("encounter.repository (FHIR)", () => {
     expect(updated.clinicalNote).toEqual({ subjective: "new" });
   });
 
-  it("lists encounters by patient using simple query", async () => {
+  it("lists encounters by patient using explicit date sort", async () => {
     const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
       resourceType: "Bundle",
       entry: [
         {
-          resource: {
-            resourceType: "Encounter",
-            id: "enc-1",
-            status: "finished",
-            subject: { reference: "Patient/pat-1" },
-            episodeOfCare: [{ reference: "EpisodeOfCare/epi-1" }],
-            period: { start: "2026-04-17T10:30:00Z", end: "2026-04-17T10:30:00Z" },
-          },
+          resource: buildFhirEncounter("enc-1", "2026-04-17T10:30:00Z"),
         },
       ],
     });
 
     const list = await listEncountersByPatientId("pat-1");
 
-    expect(getSpy).toHaveBeenCalledWith("Encounter?subject=Patient%2Fpat-1");
+    expect(getSpy).toHaveBeenCalledWith("Encounter?subject=Patient%2Fpat-1&_sort=-date&_count=100");
     expect(list).toEqual([
       {
         id: "enc-1",
@@ -264,6 +268,60 @@ describe("encounter.repository (FHIR)", () => {
         status: "finished",
       },
     ]);
+  });
+
+  it("follows Bundle next links and includes encounters from every page", async () => {
+    const firstPageEncounters = Array.from({ length: 20 }, (_, index) =>
+      buildFhirEncounter(`enc-page-1-${index + 1}`, `2026-04-${String(index + 1).padStart(2, "0")}T10:00:00Z`));
+    const nextUrl = "http://fhir.test/Encounter?_getpages=page-2";
+    const getSpy = vi.spyOn(fhirClient, "get")
+      .mockResolvedValueOnce({
+        resourceType: "Bundle",
+        entry: firstPageEncounters.map((resource) => ({ resource })),
+        link: [
+          { relation: "self", url: "http://fhir.test/Encounter?subject=Patient%2Fpat-1&_sort=-date&_count=100" },
+          { relation: "next", url: nextUrl },
+        ],
+      })
+      .mockResolvedValueOnce({
+        resourceType: "Bundle",
+        entry: [
+          { resource: buildFhirEncounter("enc-most-recent", "2026-07-14T11:15:00-03:00") },
+        ],
+      });
+
+    const list = await listEncountersByPatientId("pat-1");
+
+    expect(getSpy).toHaveBeenCalledTimes(2);
+    expect(getSpy).toHaveBeenNthCalledWith(1, "Encounter?subject=Patient%2Fpat-1&_sort=-date&_count=100");
+    expect(getSpy).toHaveBeenNthCalledWith(2, nextUrl);
+    expect(list).toHaveLength(21);
+    expect(list.map((encounter) => encounter.id)).toContain("enc-most-recent");
+  });
+
+  it("handles bundles without entries", async () => {
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+    });
+
+    const list = await listEncountersByPatientId("pat-1");
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(list).toEqual([]);
+  });
+
+  it("stops following next links when HAPI repeats a visited URL", async () => {
+    const initialSearchPath = "Encounter?subject=Patient%2Fpat-1&_sort=-date&_count=100";
+    const getSpy = vi.spyOn(fhirClient, "get").mockResolvedValue({
+      resourceType: "Bundle",
+      entry: [{ resource: buildFhirEncounter("enc-1", "2026-04-17T10:30:00Z") }],
+      link: [{ relation: "next", url: initialSearchPath }],
+    });
+
+    const list = await listEncountersByPatientId("pat-1");
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(list.map((encounter) => encounter.id)).toEqual(["enc-1"]);
   });
 
   it("returns empty list when patientId is blank", async () => {

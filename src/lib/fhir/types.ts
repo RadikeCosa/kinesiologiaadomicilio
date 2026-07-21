@@ -9,11 +9,17 @@ export interface FhirBundleEntry<TResource extends FhirResource = FhirResource> 
   resource?: TResource;
 }
 
+export interface FhirBundleLink {
+  relation?: string;
+  url?: string;
+}
+
 export interface FhirBundle<TResource extends FhirResource = FhirResource> {
   resourceType: "Bundle";
   type?: string;
   total?: number;
   entry?: Array<FhirBundleEntry<TResource>>;
+  link?: FhirBundleLink[];
 }
 
 export interface FhirOperationOutcomeIssue {
