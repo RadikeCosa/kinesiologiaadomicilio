@@ -13,16 +13,16 @@ import { SERVICES_PAGE_CONTENT } from "./servicesPageContent";
 import { BUSINESS_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia",
+  title: "Servicios de rehabilitación a domicilio en Neuquén Capital",
   description:
-    "Servicios de kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios, cuidados paliativos y recuperación funcional.",
+    "Situaciones atendidas en kinesiología a domicilio para adultos y adultos mayores en Neuquén Capital, con rehabilitación funcional y evaluación inicial según cada caso.",
   alternates: {
     canonical: `${BUSINESS_CONFIG.url}/services`,
   },
   openGraph: {
-    title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia",
+    title: "Servicios de rehabilitación a domicilio en Neuquén Capital",
     description:
-      "Servicios de kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios, cuidados paliativos y recuperación funcional.",
+      "Situaciones atendidas en kinesiología a domicilio para adultos y adultos mayores en Neuquén Capital, con rehabilitación funcional y evaluación inicial según cada caso.",
     url: `${BUSINESS_CONFIG.url}/services`,
     siteName: "Rehabilitación a domicilio Neuquén",
     locale: "es_AR",
@@ -32,15 +32,15 @@ export const metadata: Metadata = {
         url: "/og-placeholder.png",
         width: 1200,
         height: 630,
-        alt: "Servicios de kinesiología a domicilio en Neuquén",
+        alt: "Servicios de rehabilitación a domicilio en Neuquén Capital",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Servicios de kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia",
+    title: "Servicios de rehabilitación a domicilio en Neuquén Capital",
     description:
-      "Servicios de kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios, cuidados paliativos y recuperación funcional.",
+      "Situaciones atendidas en kinesiología a domicilio para adultos y adultos mayores en Neuquén Capital, con rehabilitación funcional y evaluación inicial según cada caso.",
     images: ["/og-placeholder.png"],
   },
   keywords: [
@@ -63,31 +63,70 @@ export default function ServicesPage() {
           </p>
         </header>
 
-        <div id="servicios-grid">
-          <ServicesGrid />
-        </div>
+        <section className="mt-12" aria-labelledby="situaciones-heading">
+          <header>
+            <h2
+              id="situaciones-heading"
+              className="text-2xl font-semibold text-slate-900 dark:text-slate-100"
+            >
+              {SERVICES_PAGE_CONTENT.situations.title}
+            </h2>
+            <p className="mt-3 text-base leading-7 text-slate-600 dark:text-slate-300">
+              {SERVICES_PAGE_CONTENT.situations.lead}
+            </p>
+          </header>
+          <ul className="mt-6 grid gap-3 text-sm leading-6 text-slate-700 dark:text-slate-200 sm:grid-cols-2">
+            {SERVICES_PAGE_CONTENT.situations.items.map((item) => (
+              <li
+                key={item}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-800"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="mt-14" aria-labelledby="servicios-heading">
+          <header>
+            <h2
+              id="servicios-heading"
+              className="text-2xl font-semibold text-slate-900 dark:text-slate-100"
+            >
+              {SERVICES_PAGE_CONTENT.services.title}
+            </h2>
+            <p className="mt-3 text-base leading-7 text-slate-600 dark:text-slate-300">
+              {SERVICES_PAGE_CONTENT.services.lead}
+            </p>
+          </header>
+          <div id="servicios-grid">
+            <ServicesGrid />
+          </div>
+        </section>
 
         <section className="mt-14 rounded-2xl border border-slate-200 bg-white p-6 text-left dark:border-neutral-700 dark:bg-neutral-800">
           <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-            Preguntas frecuentes sobre atención a domicilio en Neuquén
+            {SERVICES_PAGE_CONTENT.evaluation.title}
+          </h2>
+          <p className="mt-4 text-base leading-7 text-slate-700 dark:text-slate-200">
+            {SERVICES_PAGE_CONTENT.evaluation.description}
+          </p>
+          <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            {SERVICES_PAGE_CONTENT.evaluation.note}
+          </p>
+        </section>
+
+        <section className="mt-14 rounded-2xl border border-slate-200 bg-white p-6 text-left dark:border-neutral-700 dark:bg-neutral-800">
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            {SERVICES_PAGE_CONTENT.faq.title}
           </h2>
           <dl className="mt-6 space-y-4 text-slate-700 dark:text-slate-200">
-            <div>
-              <dt className="font-semibold">¿En qué zonas atienden?</dt>
-              <dd className="mt-1 text-sm">Atendemos en Neuquén Capital y zonas cercanas según disponibilidad y logística del día.</dd>
-            </div>
-            <div>
-              <dt className="font-semibold">¿La atención es por obra social?</dt>
-              <dd className="mt-1 text-sm">La modalidad actual es particular. Por WhatsApp te orientamos sobre disponibilidad, forma de trabajo y valor de la consulta.</dd>
-            </div>
-            <div>
-              <dt className="font-semibold">¿Cuándo conviene consultar?</dt>
-              <dd className="mt-1 text-sm">Podés consultar ante recuperación postoperatoria, pérdida de movilidad, rehabilitación funcional o necesidad de acompañamiento en domicilio.</dd>
-            </div>
-            <div>
-              <dt className="font-semibold">¿Qué información conviene enviar por WhatsApp?</dt>
-              <dd className="mt-1 text-sm">Zona/barrio, motivo de consulta, edad aproximada del paciente y franja horaria orientativa para coordinar.</dd>
-            </div>
+            {SERVICES_PAGE_CONTENT.faq.items.map((item) => (
+              <div key={item.question}>
+                <dt className="font-semibold">{item.question}</dt>
+                <dd className="mt-1 text-sm leading-6">{item.answer}</dd>
+              </div>
+            ))}
           </dl>
         </section>
 

@@ -9,36 +9,71 @@ export interface Service {
   title: string;
   shortTitle?: string;
   description: string;
+  whenToConsult: string[];
+  evaluates: string[];
+  goal: string;
   whatsappMessage: string;
 }
 
 export const servicesData: Service[] = [
   {
-    title: "Rehabilitación Post-operatoria",
+    title: "Rehabilitación postoperatoria",
     shortTitle: "Rehab post-operatoria",
     description:
-      "Acompañamiento en los primeros días y semanas después de una operación. Ramiro trabaja la movilización temprana, el uso de elementos de apoyo y los cuidados prácticos para que la recuperación sea segura y progresiva.",
+      "Acompañamiento en domicilio durante la recuperación posterior a una cirugía.",
+    whenToConsult: [
+      "Cuando cuesta movilizarse, levantarse o retomar actividades después de una cirugía.",
+    ],
+    evaluates: [
+      "Movilidad, dolor, fuerza, marcha y uso de apoyos si corresponden.",
+    ],
+    goal:
+      "Favorecer una recuperación progresiva según los objetivos de cada caso.",
     whatsappMessage: WHATSAPP_POST_OPERATIVE_MESSAGE,
   },
   {
     title: "Adultos Mayores",
     shortTitle: "Adultos mayores",
     description:
-      "Atención kinesiológica y de fisioterapia a domicilio para personas mayores que necesitan recuperar o mantener su movilidad, fuerza e independencia. Un acompañamiento pensado también para dar tranquilidad a la familia.",
+      "Atención kinesiológica para sostener o recuperar movilidad y seguridad en casa.",
+    whenToConsult: [
+      "Cuando caminar, levantarse o realizar transferencias se vuelve más difícil.",
+    ],
+    evaluates: [
+      "Equilibrio, fuerza, marcha, autonomía y necesidades de acompañamiento.",
+    ],
+    goal:
+      "Trabajar sobre la movilidad posible sin presentar el envejecimiento como enfermedad.",
     whatsappMessage: WHATSAPP_OLDER_ADULTS_MESSAGE,
   },
   {
     title: "Cuidados Paliativos",
     shortTitle: "Cuidados paliativos",
     description:
-      "Cuidados kinesicos orientados al bienestar y el confort en situaciones de cuidados paliativos.",
+      "Acompañamiento kinésico prudente cuando el foco está en confort y movilidad posible.",
+    whenToConsult: [
+      "Cuando una enfermedad compleja limita la movilidad o aumenta el tiempo en cama.",
+    ],
+    evaluates: [
+      "Confort, tolerancia, movilidad posible y riesgos asociados a inmovilidad.",
+    ],
+    goal:
+      "Adaptar objetivos sin reemplazar al equipo médico ni prometer resultados cerrados.",
     whatsappMessage: WHATSAPP_PALLIATIVE_CARE_MESSAGE,
   },
   {
     title: "Recuperación Funcional",
     shortTitle: "Recuperación funcional",
     description:
-      "Sesiones de kinesiología y rehabilitación a domicilio para adultos con dolor crónico, movilidad reducida o que buscan recuperar funcionalidad en su vida cotidiana.",
+      "Sesiones para adultos con movilidad reducida, debilidad, dolor o inactividad.",
+    whenToConsult: [
+      "Después de internación, reposo o dificultad para retomar actividades cotidianas.",
+    ],
+    evaluates: [
+      "Movilidad, dolor, fuerza, tolerancia y actividades que se buscan recuperar.",
+    ],
+    goal:
+      "Acompañar una recuperación gradual según condición clínica y objetivos personales.",
     whatsappMessage: WHATSAPP_FUNCTIONAL_RECOVERY_MESSAGE,
   },
 ];

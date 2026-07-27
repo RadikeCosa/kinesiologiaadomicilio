@@ -24,3 +24,16 @@ describe("WHATSAPP_FAMILY_MESSAGE", () => {
     expect(WHATSAPP_FAMILY_MESSAGE.toLowerCase()).not.toContain("valor");
   });
 });
+
+describe("WHATSAPP_SERVICES_GENERAL_MESSAGE", () => {
+  it("asks for useful service context without publishing price details", async () => {
+    const { WHATSAPP_SERVICES_GENERAL_MESSAGE } = await import("@/lib/whatsapp-messages");
+
+    expect(WHATSAPP_SERVICES_GENERAL_MESSAGE).toContain("Hola Ramiro");
+    expect(WHATSAPP_SERVICES_GENERAL_MESSAGE).toContain("edad aproximada");
+    expect(WHATSAPP_SERVICES_GENERAL_MESSAGE).toContain("motivo");
+    expect(WHATSAPP_SERVICES_GENERAL_MESSAGE).toContain("situación funcional");
+    expect(WHATSAPP_SERVICES_GENERAL_MESSAGE).toContain("barrio o zona de Neuquén Capital");
+    expect(WHATSAPP_SERVICES_GENERAL_MESSAGE.toLowerCase()).not.toContain("valor");
+  });
+});
