@@ -2,14 +2,20 @@ import { WHATSAPP_FAMILY_MESSAGE } from "@/lib/whatsapp-messages";
 
 export const heroContent = {
     h1: {
-        prefix: "Kinesiología y Rehabilitación",
+        prefix: "Kinesiólogo",
         highlight: "a domicilio",
-        suffix: "en Neuquén",
+        suffix: "en Neuquén Capital",
     },
     srOnly:
-        "Kinesiología y rehabilitación domiciliaria en Neuquén a cargo de Ramiro Cosa, kinesiólogo con más de 20 años de experiencia. Adultos mayores, postoperatorios y cuidados paliativos.",
+        "Kinesiología y rehabilitación domiciliaria en Neuquén Capital a cargo de Ramiro Cosa, kinesiólogo con más de 20 años de experiencia. Adultos mayores, postoperatorios y cuidados paliativos.",
     supportText:
-        "Acompañamiento kinesiológico profesional para tu familiar, en la comodidad de su hogar en Neuquén Capital.",
+        "Atención kinesiológica particular para adultos y adultos mayores, con evaluación inicial en casa y coordinación personalizada para rehabilitación o recuperación funcional.",
+    commercialSignals: [
+        "Neuquén Capital",
+        "Atención particular",
+        "Adultos y adultos mayores",
+        "Primera evaluación",
+    ],
     ctaLabel: "Consultar por mi familiar",
     whatsappMessage: WHATSAPP_FAMILY_MESSAGE,
     secondaryLinkLabel: "Ver servicios",

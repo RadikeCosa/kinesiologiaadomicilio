@@ -4,7 +4,7 @@ export const WHATSAPP_GENERAL_MESSAGE =
 export const WHATSAPP_GLOBAL_PREQUALIFIED_MESSAGE = WHATSAPP_GENERAL_MESSAGE;
 
 export const WHATSAPP_FAMILY_MESSAGE =
-  "Hola Ramiro, quería consultar por kinesiología a domicilio para un familiar.";
+  "Hola Ramiro, quería consultar por kinesiología a domicilio para un familiar. Te cuento edad aproximada, motivo principal y barrio o zona de Neuquén Capital.";
 
 export const WHATSAPP_POST_OPERATIVE_MESSAGE =
   "Hola Ramiro, quería consultar por rehabilitación post-operatoria a domicilio.";

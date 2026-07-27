@@ -58,13 +58,13 @@ const structuredData = {
 };
 
 export const metadata: Metadata = {
-  title: "Kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia en casa",
+  title: "Kinesiólogo a domicilio en Neuquén Capital | Rehabilitación en casa",
   description:
-    "Kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios y cuidados paliativos.",
+    "Atención kinesiológica a domicilio en Neuquén Capital para adultos y adultos mayores. Coordiná por WhatsApp una consulta particular con evaluación inicial.",
   openGraph: {
-    title: "Kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia en casa",
+    title: "Kinesiólogo a domicilio en Neuquén Capital | Rehabilitación en casa",
     description:
-      "Kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios y cuidados paliativos.",
+      "Atención kinesiológica a domicilio en Neuquén Capital para adultos y adultos mayores. Coordiná por WhatsApp una consulta particular con evaluación inicial.",
     url: businessUrl,
     siteName: "Rehabilitación a domicilio Neuquén",
     locale: "es_AR",
@@ -80,9 +80,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kinesiología a domicilio en Neuquén | Rehabilitación y fisioterapia en casa",
+    title: "Kinesiólogo a domicilio en Neuquén Capital | Rehabilitación en casa",
     description:
-      "Kinesiología a domicilio en Neuquén Capital y zonas cercanas según disponibilidad. Rehabilitación a domicilio y fisioterapia para adultos, postoperatorios y cuidados paliativos.",
+      "Atención kinesiológica a domicilio en Neuquén Capital para adultos y adultos mayores. Coordiná por WhatsApp una consulta particular con evaluación inicial.",
     images: ["/og-placeholder.png"],
   },
   keywords: [
