@@ -1,6 +1,6 @@
 # Screenshots
 
-Guardar acá solo screenshots sanitizadas antes de usar este repo como pieza fuerte de portfolio.
+Catálogo de capturas sanitizadas para presentar el proyecto sin exponer información clínica real. Las reglas generales de privacidad están en `docs/privacidad-entornos-y-demo.md`.
 
 Capturas privadas usadas en `README.md`:
 
@@ -17,10 +17,6 @@ Capturas públicas opcionales:
 - `public-evaluar.png`
 
 No se embeben en el `README.md` principal porque la landing pública ya puede verse directamente en Vercel y no conviene duplicar ahí previews del sitio público.
-
-Capturas pendientes:
-
-- Ninguna por ahora. Si se agregan nuevas vistas privadas, tienen que cumplir el mismo nivel de sanitización antes de entrar al repo.
 
 Estado actual:
 

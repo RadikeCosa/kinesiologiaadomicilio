@@ -55,6 +55,7 @@ Public scope includes:
 - `/admin/patients/[id]/encounters`
 - `/admin/patients/[id]/encounters/new`
 - `/admin/patients/[id]/treatment`
+- `/admin/patients/[id]/treatment/report`
 
 Private scope currently includes:
 
@@ -87,12 +88,26 @@ They should also preserve the existing route-local responsibility split instead 
 ## Documentation Rules
 
 - `README.md` is the portfolio-facing summary.
-- `docs/fuente-de-verdad-operativa.md` is the detailed operational truth.
-- `docs/fhir/README.md` is the active FHIR documentation index.
+- `docs/operacion.md` is the detailed operational truth.
+- `docs/fhir/README.md` is the active FHIR contract.
+- `docs/privacidad-entornos-y-demo.md` defines privacy and environment rules.
+- `docs/remodelacion/02-vision-y-alcance.md` defines the target private product.
+- `docs/remodelacion/03-decisiones-arquitectura.md` defines its architectural direction.
+- `docs/remodelacion/05-plan-separacion-repositorios.md` defines the transition into two repositories.
 - `docs/archive/` holds historical or superseded material.
 
 When changing behavior, update docs only if the contract actually changed.
 Avoid ceremonial doc churn.
+
+## Remodeling Status
+
+- The public landing and the private application will become separate repositories.
+- The private `kinesiologia-clinica` repository has a validated technical foundation, but legacy clinical source migration has not started.
+- This repository remains the working combined application during the transition.
+- The private frontend will be rebuilt from scratch; current `/admin` UI code is behavioral evidence, not the visual foundation.
+- Reuse domain and FHIR knowledge selectively, together with the tests that prove each retained contract.
+- Do not remove `/admin` until the new private application satisfies the cutover conditions in the separation plan.
+- PWA, offline sync, persistent authentication, device revocation and PDF reports are target V1 capabilities, not implemented behavior today.
 
 ## Environment And Runtime
 
@@ -134,7 +149,7 @@ If demo assets are needed, use sanitized or fictional data only.
 - Preserve existing product language when working in established surfaces.
 - Start from the actual code and current docs, not from older assumptions.
 - For new operational cases, prefer `Nueva solicitud de atención` as the entrypoint when the implemented flow supports it; do not remove or replace `/admin/patients/new`, which still exists for direct administrative creation.
-- If changing visible behavior, prefer the naming and responsibilities defined in `docs/fuente-de-verdad-operativa.md`, especially for `Gestión administrativa`, `Gestión clínica`, and `Tratamiento`.
+- If changing visible behavior, prefer the naming and responsibilities defined in `docs/operacion.md`, especially for `Gestión administrativa`, `Gestión clínica`, `Tratamiento`, and `Visita`.
 
 ## Validation
 

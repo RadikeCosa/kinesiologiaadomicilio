@@ -1,257 +1,417 @@
-# Documentación FHIR
+# Contrato FHIR activo
 
-> Estado: vigente
-> Última actualización: 2026-06-25 (UTC)
+> Estado: fuente técnica activa para migración
+> Fecha: 2026-09-11
+> Alcance: persistencia FHIR R4 realmente implementada y decisiones que deben preservarse al reconstruir la aplicación privada.
 
-## Objetivo
+## 1. Frontera arquitectónica
 
-Concentrar en un único documento la referencia FHIR activa y reusable del repo.
+FHIR pertenece a infraestructura. La UI y los casos de uso trabajan con dominio propio.
 
-Esta carpeta ya no mantiene varios documentos operativos separados: el contrato vigente vive acá, y el material histórico o superado quedó archivado en `docs/archive/historico-fhir/`.
+```text
+UI -> caso de uso -> dominio -> repositorio -> mapper -> HAPI FHIR R4
+```
 
-## Cómo usar este documento
+En la aplicación nueva:
 
-1. Confirmar primero el comportamiento real en `docs/fuente-de-verdad-operativa.md`.
-2. Usar esta guía cuando el cambio toque recursos FHIR, repositorios, mappers, loaders, actions, schemas o UI con impacto de contrato.
-3. Si aparece contexto viejo útil, recuperarlo desde `docs/archive/historico-fhir/`, pero reintroducir al flujo activo solo lo necesario.
+- el navegador no conocerá `FHIR_BASE_URL`;
+- la PWA no enviará recursos FHIR;
+- la API privada aplicará autenticación, reglas e idempotencia;
+- el adaptador traducirá entre dominio y FHIR;
+- HAPI FHIR seguirá siendo la fuente clínica confirmada durante V1.
 
-## Entornos FHIR operativos
+## 2. Entornos actuales
 
-Para el desarrollo local del repo, la app Next.js usa un único endpoint FHIR por ejecución:
+- `http://localhost:8081/fhir`: dev/test descartable y única fuente permitida para demo o screenshots.
+- `http://localhost:8080/fhir`: local-real; puede contener datos reales y nunca debe usarse como demo.
 
-- `http://localhost:8081/fhir` → entorno dev/test, datos descartables.
-- `http://localhost:8080/fhir` → entorno local-real, datos reales/locales.
+La selección se realiza mediante `FHIR_BASE_URL`, server-side, con un solo endpoint por ejecución.
 
-La selección se define por `FHIR_BASE_URL` a través del script de ejecución o de la variable de entorno del proceso. La admin muestra el entorno activo para reducir confusión operativa.
+## 3. Recursos activos
 
-## Recursos FHIR activos
+| Dominio | Recurso FHIR | Relación principal |
+|---|---|---|
+| Paciente | `Patient` | Eje longitudinal |
+| Solicitud | `ServiceRequest` | `subject -> Patient` |
+| Tratamiento | `EpisodeOfCare` | `patient -> Patient`, `referralRequest -> ServiceRequest` |
+| Visita | `Encounter` | `subject -> Patient`, `episodeOfCare -> EpisodeOfCare` |
+| Métrica | `Observation` | `subject -> Patient`, `encounter -> Encounter` |
+| Diagnóstico | `Condition` | `subject -> Patient`; referenciado desde diagnóstico del episodio |
+| Profesional | `Practitioner` | Singleton de configuración firmante |
+| Informe | `DocumentReference` | `subject -> Patient`, `context.related -> EpisodeOfCare` |
 
-El modelado vigente del repo usa:
+`Communication`, `Composition`, `DiagnosticReport`, `Procedure`, `Goal`, `PractitionerRole` y `Organization` no forman parte del runtime activo.
 
-- `Patient`
-- `ServiceRequest`
-- `EpisodeOfCare`
-- `Encounter`
-- `Observation`
-- `Condition`
-- `Practitioner`
-- `DocumentReference`
+## 4. Reglas transversales
 
-Estos son los únicos recursos FHIR activos documentados para el runtime actual. `Communication` y `Composition` siguen fuera de la implementación vigente. `DocumentReference` se usa para persistir informes evolutivos de tratamiento como snapshot clínico asociado a `Patient` + `EpisodeOfCare`.
+- Los mappers de lectura y escritura deben evolucionar juntos.
+- Los updates actuales siguen el patrón `GET -> merge controlado -> PUT`.
+- Los campos externos razonables deben preservarse durante un merge.
+- Un `404` de lectura individual se resuelve como ausencia cuando el repositorio lo declara así; otros errores se propagan.
+- Las búsquedas construyen parámetros con `URLSearchParams`.
+- Las referencias se normalizan a IDs de dominio al leer.
+- La UI no recibe recursos FHIR crudos.
+- La aplicación nueva deberá incorporar control de versión/concurrencia antes de permitir edición desde varios dispositivos.
 
-Dirección arquitectónica vigente:
+## 5. `Patient`
 
-- lectura: `FHIR Server -> FHIR Client -> Repository -> Mapper -> Read model / loader -> UI`
-- escritura: `UI Form -> Server Action -> Zod Schema -> Domain Rules -> Repository -> FHIR payload`
+Responsabilidad:
 
-La UI no debería consumir FHIR crudo si ya existe capa de repositorio, mapper o read model.
+- identidad;
+- nombre y apellido;
+- teléfono y domicilio;
+- contacto principal;
+- fecha de nacimiento y género;
+- DNI administrativo opcional.
 
-## Contratos activos
+### DNI
 
-### 1. Identidad operativa del paciente
+```text
+system: https://kinesiologiaadomicilio.ar/fhir/sid/dni
+type.coding.system: http://terminology.hl7.org/CodeSystem/v2-0203
+type.coding.code: NI
+type.text: DNI
+value: solo dígitos
+```
 
-- El DNI es un dato administrativo opcional: puede persistirse, pero no bloquea el inicio de tratamiento.
-- El inicio de `EpisodeOfCare` depende de una `ServiceRequest` aceptada válida más datos operativos mínimos del paciente.
-- La semántica mínima esperada para DNI en `Patient.identifier` es:
-  - `identifier.system`
-  - `identifier.value`
-  - `identifier.type`
+El DNI no bloquea el inicio de tratamiento. La búsqueda de duplicados utiliza `Patient?identifier=system|value` con el valor normalizado.
 
-Sigue fuera de alcance actual:
+Los updates preservan identifiers externos y solo reemplazan el identificador propio de DNI.
 
-- validación externa de identidad;
-- RENAPER;
-- identidad validada vs declarada;
-- MPI o identidad federada;
-- múltiples documentos con estrategia compleja de prioridad.
+## 6. `ServiceRequest`
 
-### 2. Cierre de tratamiento con `EpisodeOfCare`
+Responsabilidad:
 
-Al cerrar tratamiento:
+- pedido inicial;
+- fecha de solicitud;
+- motivo;
+- quién consulta;
+- resolución administrativa.
 
-- se persiste `status = finished`;
-- se persiste `period.end`;
-- se registra motivo de finalización;
-- se registra detalle opcional.
+### Mapeo de estados
 
-Motivo y detalle se persisten en `EpisodeOfCare.extension[]` con URLs locales versionables:
+| Dominio | FHIR |
+|---|---|
+| `in_review` | `active` sin marca de aceptación |
+| `accepted` | `active` + nota tagged `workflow-status:v1:accepted` |
+| `closed_without_treatment` | `revoked` |
+| `cancelled` | `revoked` con señal de cancelación |
+| `entered_in_error` | `entered-in-error` |
 
-- `https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason` como `valueCode`
-- `https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-detail` como `valueString`
+Campos principales:
 
-Notas operativas:
+- `subject = Patient/{id}`;
+- `authoredOn = requestedAt`;
+- `reasonCode[0].text = reasonText`;
+- `requester.display = requesterDisplay` cuando existe;
+- `statusReason` para motivo terminal cuando es soportado.
 
-- `note[]` no es el canal principal para cierre porque HAPI local lo pierde en roundtrip `PUT/GET`.
-- La lectura mantiene fallback legacy desde `note[]` con prefijos `closure-reason:v1:` y `closure-detail:v1:`.
-- Este cierre describe contexto operativo, no una historia clínica longitudinal rica.
+Compatibilidad actual en `note[]`:
 
-### 2.1. Solicitudes de atención con `ServiceRequest`
+- `reported-diagnosis:v1:`;
+- `requester-contact:v1:`;
+- `general-note:v1:`;
+- `workflow-status:v1:`;
+- `resolution-reason:v1:`.
 
-Contrato operativo vigente:
+Un tratamiento vincula su solicitud real mediante `EpisodeOfCare.referralRequest`. Esa relación determina si la solicitud ya fue absorbida y no puede reutilizarse ni editarse como libre.
 
-- La nueva puerta de entrada `/admin/requests/new` crea primero un `Patient` mínimo y luego una `ServiceRequest` con `subject = Patient/{id}`.
-- `ServiceRequest.authoredOn` persiste la fecha visible de la solicitud.
-- La edición de fecha usa `GET -> merge -> PUT` y solo está permitida para solicitudes no vinculadas a `EpisodeOfCare`.
-- La eliminación visible en la UI no hace hard delete: usa `status = entered-in-error` para cargas erróneas.
-- Si la solicitud ya está vinculada por `EpisodeOfCare.referralRequest`, no se permite ni editar la fecha ni marcarla como carga errónea.
-- La creación inicial por intake deja la solicitud en estado operativo `in_review`; no crea `EpisodeOfCare` ni habilita visitas.
+## 7. `EpisodeOfCare`
 
-### 3. Profesional firmante single-user con `Practitioner`
+Responsabilidad:
 
-La instalación privada actual usa un único `Practitioner` para configuración del profesional firmante.
+- ciclo de tratamiento;
+- inicio, estado y cierre;
+- vínculo con solicitud origen;
+- contexto clínico longitudinal;
+- referencias a diagnósticos.
 
-No se modela todavía:
+### Inicio
 
-- `PractitionerRole`;
-- `Organization`;
-- multiusuario;
-- referencias clínicas amplias desde otros recursos.
+- `status = active`;
+- `patient = Patient/{id}`;
+- `period.start = startDate`;
+- `referralRequest = ServiceRequest/{id}` cuando existe solicitud válida.
 
-Identificador singleton operativo:
+### Cierre
 
-```txt
+- `status = finished`;
+- `period.end = endDate`;
+- motivo y detalle en extensiones locales.
+
+```text
+https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-reason
+https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-closure-detail
+```
+
+La lectura preserva compatibilidad con notas legacy:
+
+- `closure-reason:v1:`;
+- `closure-detail:v1:`.
+
+HAPI local perdió `EpisodeOfCare.note[]` en roundtrips observados; por eso el contrato vigente usa extensiones para cierre.
+
+### Contexto longitudinal
+
+```text
+https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-initial-functional-status-v1
+https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-therapeutic-goals-v1
+https://kinesiologiaadomicilio.local/fhir/StructureDefinition/episodeofcare-framework-plan-v1
+```
+
+### Diagnósticos del episodio
+
+Sistema de roles:
+
+```text
+https://kinesiologiaadomicilio.local/fhir/CodeSystem/episodeofcare-diagnosis-role-v1
+```
+
+Códigos:
+
+- `medical_reference`;
+- `kinesiologic_diagnosis`.
+
+Cada entrada referencia un `Condition/{id}`.
+
+## 8. `Condition`
+
+Responsabilidad:
+
+- diagnóstico médico de referencia;
+- diagnóstico kinésico.
+
+Mapeo mínimo:
+
+- `subject -> Patient`;
+- `code.text` para descripción;
+- `clinicalStatus` cuando existe;
+- `recordedDate` cuando existe.
+
+El rol del diagnóstico dentro del tratamiento no vive en `Condition`, sino en `EpisodeOfCare.diagnosis.role`.
+
+## 9. `Encounter`
+
+Responsabilidad actual:
+
+- visita finalizada;
+- período de atención;
+- vínculo a paciente y episodio;
+- nota clínica estructurada mediante extensiones;
+- puntualidad operativa opcional.
+
+Mapeo vigente:
+
+- `status = finished`;
+- `subject = Patient/{id}`;
+- `episodeOfCare[0] = EpisodeOfCare/{id}`;
+- `period.start = startedAt`;
+- `period.end = endedAt`.
+
+La nueva V1 ampliará el dominio para representar visitas en curso y borradores, pero deberá seguir leyendo los encuentros actuales.
+
+### Extensiones de nota clínica vigentes
+
+Prefijo común:
+
+```text
+https://kinesiologiaadomicilio.local/fhir/StructureDefinition/
+```
+
+Sufijos:
+
+- `encounter-clinical-subjective`;
+- `encounter-clinical-objective`;
+- `encounter-clinical-intervention`;
+- `encounter-clinical-assessment`;
+- `encounter-clinical-tolerance`;
+- `encounter-clinical-home-instructions`;
+- `encounter-clinical-next-plan`.
+
+La lectura actual conserva fallback desde notas tagged `clinical-*:v1:`.
+
+Extensión de puntualidad:
+
+```text
+https://kinesiologiaadomicilio.local/fhir/StructureDefinition/encounter-operational-punctuality-status-v1
+```
+
+La estructura futura de captura todavía no está definida. Migrar estas extensiones no obliga a repetir el formulario actual de siete campos.
+
+## 10. `Observation`
+
+Responsabilidad:
+
+- métrica funcional objetiva;
+- vínculo con paciente y visita;
+- valor, unidad y fecha efectiva.
+
+Sistema local:
+
+```text
+https://kinesiologiaadomicilio.local/fhir/CodeSystem/functional-observations
+version: 0.1.0
+```
+
+Códigos actuales:
+
+| Dominio | FHIR | Unidad |
+|---|---|---|
+| `tug_seconds` | `tug-seconds` | `s` |
+| `pain_nrs_0_10` | `pain-nrs-0-10` | `{score}` |
+| `standing_tolerance_minutes` | `standing-tolerance-minutes` | `min` |
+| `gait_duration_minutes` | `gait-duration-minutes` | `min` |
+
+Mapeo:
+
+- `status = final` por defecto;
+- `subject = Patient/{id}`;
+- `encounter = Encounter/{id}`;
+- `effectiveDateTime` corresponde a la medición;
+- `valueQuantity` conserva valor y unidad.
+
+Actualmente las observaciones se crean después del encuentro y pueden fallar parcialmente sin rollback. La nueva aplicación debe decidir si agrupa operaciones de forma atómica o reintenta anexos fallidos explícitamente.
+
+## 11. `Practitioner`
+
+Responsabilidad:
+
+- configuración de un único profesional firmante;
+- identidad, título, matrícula, jurisdicción, teléfono y firma visible.
+
+Identificador singleton:
+
+```text
 system: https://kinesiologiaadomicilio.local/fhir/sid/signing-practitioner-config
 value: primary
 ```
 
-Búsqueda operativa:
+Matrícula:
 
-```txt
-Practitioner?identifier=https://kinesiologiaadomicilio.local/fhir/sid/signing-practitioner-config|primary
-```
-
-Matrícula profesional:
-
-```txt
+```text
 system: https://kinesiologiaadomicilio.local/fhir/sid/professional-license
-value: <matricula>
 type.text: Matricula profesional
 ```
 
-Mapeo vigente:
+Firma visible:
 
-| Dominio | FHIR |
-|---|---|
-| `id` | `Practitioner.id` |
-| `fullName` | `Practitioner.name[0].text` |
-| `roleTitle` | `Practitioner.qualification[0].code.text` |
-| `licenseNumber` | `Practitioner.identifier` con system de matrícula |
-| `licenseJurisdiction` | `Practitioner.qualification[0].issuer.display` |
-| `signatureDisplay` | extensión local `practitioner-signature-display` |
-| `professionalPhone` | `Practitioner.telecom` phone/work |
-
-Extensión local:
-
-```txt
+```text
 https://kinesiologiaadomicilio.local/fhir/StructureDefinition/practitioner-signature-display
 ```
 
-Estados de completitud:
+La búsqueda singleton debe fallar ante múltiples coincidencias; no debe elegir una silenciosamente. Los updates preservan identifiers, extensions y telecom externos.
 
-- `missing`: no existe `Practitioner` singleton.
-- `incomplete`: falta `fullName`, `roleTitle` o `licenseNumber`.
-- `ready`: existen `fullName`, `roleTitle` y `licenseNumber`.
+## 12. `DocumentReference`
 
-Reglas operativas:
+Responsabilidad actual:
 
-- la escritura usa `GET -> merge -> PUT`;
-- no se deben borrar identifiers, extensions, telecom ni otros campos externos razonables;
-- si la búsqueda devuelve más de un `Practitioner`, el repositorio debe fallar por ambigüedad y no elegir uno silenciosamente.
+- snapshot de informe de evolución o cierre de etapa;
+- asociación a paciente y episodio;
+- preservación del texto final y contexto del momento.
 
-## Checklist reusable para cambios FHIR
+Mapeo principal:
 
-### Trazabilidad
+- `status = current`;
+- `subject = Patient/{id}`;
+- `context.related = EpisodeOfCare/{id}`;
+- `date = createdAt`;
+- `content[0].attachment.contentType = text/plain; charset=utf-8`;
+- texto final codificado en base64.
 
-- [ ] El cambio referencia ticket o alcance explícito.
-- [ ] El alcance coincide con lo pedido.
-- [ ] No mezcla temas FHIR distintos sin justificación.
+Sistema y código de tipo:
 
-### Contrato y dominio
+```text
+system: https://kinesiologiaadomicilio.local/fhir/CodeSystem/documentreference-type
+code: treatment-evolution-report
+```
 
-- [ ] El cambio actualiza contrato de dominio si corresponde.
-- [ ] No introduce naming ambiguo.
-- [ ] Mantiene compatibilidad hacia atrás cuando fue requerida.
+Extensiones actuales conservan:
 
-### Capa FHIR
+- tipo de informe;
+- estado del tratamiento;
+- inicio del episodio;
+- cantidad de visitas;
+- primera y última visita;
+- snapshots de diagnósticos;
+- situación funcional inicial;
+- objetivos;
+- plan general;
+- síntesis de métricas.
 
-- [ ] Mappers read/write quedaron alineados.
-- [ ] No se inventa semántica no soportada por producto.
-- [ ] Toda simplificación nueva quedó explícita.
+La nueva V1 debe ampliar el contrato para conservar:
 
-### UI y acciones
+- texto final;
+- PDF exacto;
+- período incluido;
+- autor;
+- versión de plantilla;
+- relación entre versiones;
+- estado vigente o reemplazado.
 
-- [ ] La UI refleja el contrato vigente.
-- [ ] Actions y validación quedaron consistentes.
-- [ ] No quedaron campos a medias entre UI y persistencia.
+La elección entre attachment inline, recurso `Binary` o almacenamiento privado externo sigue abierta. El dominio no debe depender de esa elección.
 
-### Tests y validación
+## 13. Búsquedas activas
 
-- [ ] Hay cobertura de schema, mapper o integración cuando aplica.
-- [ ] No se rompieron reglas operativas existentes sin decisión explícita.
-- [ ] Se ejecutó la validación mínima razonable: `npm run lint`, `npm run test` o `FHIR_BASE_URL=http://localhost:8081/fhir npm run build`, según alcance.
+- pacientes por DNI;
+- episodios por paciente;
+- episodios activos por paciente;
+- episodios por `incoming-referral`;
+- visitas por paciente ordenadas por fecha descendente;
+- solicitudes por `subject`;
+- informes por `subject`;
+- profesional por identificador singleton.
 
-### Documentación
+La nueva aplicación deberá revisar paginación, orden y búsquedas por lotes antes de reutilizarlas en una cartera mayor.
 
-- [ ] Se actualizó `README.md` si cambió el contrato público del repo.
-- [ ] Se actualizó `docs/fuente-de-verdad-operativa.md` si cambió comportamiento vigente.
-- [ ] Se actualizó este documento si cambió contrato FHIR activo.
+## 14. Compatibilidad que debe preservarse
 
-## Plantilla breve para trabajo FHIR nuevo
+- notas tagged de `ServiceRequest`;
+- fallbacks de cierre en `EpisodeOfCare.note[]`;
+- fallbacks de nota clínica en `Encounter.note[]`;
+- extensiones y sistemas locales ya persistidos;
+- campos externos razonables durante updates;
+- informes de texto existentes en `DocumentReference`;
+- selección defensiva del episodio activo más reciente ante datos inconsistentes.
 
-Usar esta estructura cuando haga falta abrir o describir una pieza nueva:
+La compatibilidad de lectura no obliga a seguir escribiendo todos los formatos legacy.
 
-### Título
+## 15. Extracción para el repositorio nuevo
 
-`FHIR-xxx — <resumen corto>`
+Migrar por contrato y pruebas:
 
-### Objetivo
+1. tipos FHIR mínimos;
+2. errores, referencias, bundles y search params;
+3. mappers read/write;
+4. repositorios detrás de interfaces inyectables;
+5. tests de mappers y repositorios;
+6. casos de uso nuevos por encima del adaptador.
 
-Qué problema resuelve y por qué se hace ahora.
+Antes de copiar, corregir:
 
-### Contexto
+- cliente/configuración singleton;
+- dependencias de repositorios hacia helpers de display;
+- features que importan desde rutas `/admin`;
+- ausencia de control de concurrencia;
+- creación de visitas limitada a `finished`;
+- escrituras parciales de visita y observaciones;
+- soporte documental limitado a texto plano.
 
-- hallazgo origen;
-- fase;
-- dependencia con ADRs o tickets previos.
+## 16. Validación mínima del adaptador migrado
 
-### Alcance
+- roundtrip de cada recurso activo;
+- lectura de formatos legacy;
+- preservación de campos externos en updates;
+- queries codificadas correctamente;
+- error ante singleton ambiguo;
+- vínculo real solicitud → tratamiento;
+- vínculo visita → tratamiento → paciente;
+- idempotencia de nuevas visitas;
+- conflicto de versión sin sobrescritura silenciosa;
+- informe con texto y PDF versionados;
+- ningún tipo FHIR expuesto a UI.
 
-- qué entra;
-- qué capas toca;
-- qué zonas del repo cambian.
+## 17. Fuentes relacionadas
 
-### No alcance
-
-- qué queda afuera;
-- qué no debe mezclarse.
-
-### Riesgo
-
-- nivel;
-- riesgo técnico;
-- riesgo funcional.
-
-### Criterio de aceptación
-
-Resultado verificable por código, tests y docs.
-
-### Validación mínima
-
-Lint, tests, build o validación manual según el cambio.
-
-## Historial archivado
-
-Quedaron archivados en `docs/archive/historico-fhir/`:
-
-- decisiones previas ahora absorbidas por este documento;
-- contratos puntuales ya consolidados;
-- checklists o templates que antes estaban separados;
-- cualquier remediación o plan FHIR ya cerrado.
-
-## Relación con otros documentos activos
-
-- `README.md`: resumen portfolio-facing del proyecto.
-- `docs/README.md`: mapa de documentación activa.
-- `docs/fuente-de-verdad-operativa.md`: comportamiento operativo vigente.
-- `docs/checklist-sincronizacion-doc-codigo.md`: control liviano antes de merge.
-- `docs/product/solicitud-atencion-flujo-inicial.md`: contrato vigente para solicitudes de atención.
+- `docs/operacion.md`: significado y reglas del dominio.
+- `docs/remodelacion/03-decisiones-arquitectura.md`: arquitectura objetivo.
+- `docs/privacidad-entornos-y-demo.md`: límites de datos, entornos y dispositivos.

@@ -51,7 +51,7 @@ It is especially relevant for roles such as:
 
 ## Architecture
 
-The repository keeps the public and private domains in the same codebase while separating responsibilities.
+The repository currently keeps the public and private domains in the same codebase while separating responsibilities. The approved remodeling direction is to keep the landing as one product and rebuild the private application in a second, private repository. Its independent technical foundation now exists, but legacy clinical source migration has not started.
 
 Read path:
 
@@ -74,13 +74,14 @@ The private workflow uses a deliberately small subset of FHIR R4:
 - `Observation`: visit-level functional metrics
 - `Condition`: reference medical diagnosis and kinesiologic diagnosis in the treatment context
 - `Practitioner`: signing professional configuration
+- `DocumentReference`: persisted snapshots of finalized treatment reports
 
 This is not presented as a full clinical record system. It is a constrained, incremental implementation oriented to operational usefulness.
 
 ## Testing And Quality
 
 - Automated tests cover domain rules, mappers, repositories, route data loaders, metadata, and UI slices.
-- The current repository snapshot includes 98 test files and 653 passing tests.
+- The current repository snapshot includes 119 test files and 774 passing tests.
 - Public/private separation is also reinforced through route structure and search-engine blocking for `/admin`.
 
 Available checks:
@@ -149,7 +150,9 @@ Visit history and functional follow-up with fictitious clinical notes and demo m
 - This is not presented as a full EHR.
 - `/admin` is intentionally private/local and not a public editable demo surface.
 - Screenshots use fictitious/sanitized data from the local dev/test environment.
-- Auth and multi-user concerns are intentionally out of scope at this stage.
+- The current admin does not yet implement authentication. The target private V1 adds low-friction persistent access for one provisioned professional; public registration and multi-user operation remain out of scope.
+
+The agreed target, architecture and safe transition plan are documented under [docs/remodelacion](./docs/remodelacion/05-plan-separacion-repositorios.md).
 
 Further technical documentation is available in [docs/README.md](./docs/README.md).
 

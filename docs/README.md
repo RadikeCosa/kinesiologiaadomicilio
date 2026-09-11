@@ -1,66 +1,38 @@
 # Documentación activa
 
-Esta carpeta quedó reducida a documentación útil para dos lectores:
+La documentación principal distingue tres cosas: qué existe hoy, qué producto queremos construir y cómo se realizará la separación. El material reemplazado se retira de la documentación versionada y puede conservarse localmente en `docs/archive/`, que está ignorado por Git.
 
-- desarrollo actual del producto;
-- recruiters o reviewers técnicos que necesiten entender rápido qué tipo de proyecto es este repo.
+## Estado actual
 
-## Si venís por primera vez
+- [`operacion.md`](./operacion.md): términos, flujos y reglas clínicas y administrativas confirmadas.
+- [`fhir/README.md`](./fhir/README.md): frontera de integración y contratos FHIR R4 activos.
+- [`privacidad-entornos-y-demo.md`](./privacidad-entornos-y-demo.md): datos permitidos, entornos, dispositivos, logs y material demostrativo.
+- [`analytics-handoff.md`](./analytics-handoff.md): medición exclusiva de la superficie pública.
+- [`screenshots/README.md`](./screenshots/README.md): catálogo y reglas de sanitización de capturas.
 
-1. `README.md`
-   Presentación pública del proyecto como case study HealthTech.
-2. `docs/fuente-de-verdad-operativa.md`
-   Comportamiento vigente confirmado en código.
-3. `docs/fhir/README.md`
-   Referencia FHIR activa consolidada.
+## Remodelación
 
-## Para recruiters
+Leer en este orden:
 
-- `README.md`
-- `docs/screenshots/README.md`
-- `docs/arquitectura-objetivo-app-clinica.md`
+1. [`00-baseline-actual.md`](./remodelacion/00-baseline-actual.md): punto de partida verificado del repositorio combinado.
+2. [`02-vision-y-alcance.md`](./remodelacion/02-vision-y-alcance.md): usuario, problema, promesa, principios y V1 de la aplicación privada.
+3. [`03-decisiones-arquitectura.md`](./remodelacion/03-decisiones-arquitectura.md): dominio, FHIR, acceso, offline, sincronización, informes y topología.
+4. [`04-handoff-infraestructura-casa.md`](./remodelacion/04-handoff-infraestructura-casa.md): requisitos entregados al proyecto Casa.
+5. [`05-plan-separacion-repositorios.md`](./remodelacion/05-plan-separacion-repositorios.md): frontera exacta, secuencia y condiciones para dividir landing y `/admin`.
 
-Estas piezas explican el contexto clínico, el valor profesional del proyecto y la dirección técnica sin obligar a leer auditorías históricas.
+La decisión vigente es separar ambos productos en dos repositorios. `kinesiologia-clinica` ya tiene una fundación técnica independiente y documentada, pero todavía no recibió código clínico legado. `/admin` sigue operativo en este repositorio hasta que su reemplazo alcance las condiciones de corte.
 
-## Para desarrollo
+## Jerarquía de fuentes
 
-- `docs/fuente-de-verdad-operativa.md`
-  Fuente principal cuando haya dudas sobre rutas, responsabilidades, flujos y límites actuales.
-- `docs/product/solicitud-atencion-flujo-inicial.md`
-  Contrato operativo vigente para solicitudes de atención.
-- `docs/fhir/README.md`
-  Punto de entrada para contratos y checklists FHIR.
-- `docs/analytics-handoff.md`
-  Tracking público vigente con GA4.
-- `docs/normalization-data/README.md`
-  Convenciones de normalización y display de datos administrativos.
-- `docs/checklist-sincronizacion-doc-codigo.md`
-  Checklist liviano para evitar drift entre código y documentación.
-- `docs/audits/auditoria-evolucion-resumenes-informes-clinicos-2026-06-25.md`
-  Auditoría clínica vigente de la que surgió el criterio inicial: mantener el resumen compartible de visita como derivado y efímero, y persistir los informes evolutivos de tratamiento recién cuando hubiera necesidad operativa real.
-- `docs/audits/auditoria-dato-fuente-resumenes-reevaluaciones-informes-2026-06-26.md`
-  Auditoría vigente sobre calidad y completitud del dato fuente clínico que guía mejoras mínimas de captura sin cambiar persistencia ni FHIR.
-- `docs/archive/README.md`
-  Mapa del material histórico que sigue versionado.
+Cuando dos documentos parezcan contradecirse:
 
-## Historial y archivo
+1. el código y las pruebas describen lo implementado;
+2. `operacion.md`, `fhir/README.md` y `privacidad-entornos-y-demo.md` describen el contrato actual;
+3. `remodelacion/02`, `03` y `05` describen el producto objetivo y el plan de transición;
+4. `archive/` aporta contexto histórico, pero no define comportamiento vigente.
 
-La documentación histórica o ya absorbida por documentos activos no debería quedar mezclada con la documentación principal.
+Actualizar documentación solo cuando cambie un contrato, una decisión o un comportamiento verificable. Evitar documentos de seguimiento que repitan información ya consolidada.
 
-Si sigue siendo útil como referencia versionada, vive en:
+## Archivo local
 
-- `docs/archive/`
-
-En particular:
-
-- la auditoría post-patch vigente puede permanecer en `docs/audits/` si sigue guiando el siguiente patch;
-- auditorías pre-patch o ya supersedidas deberían moverse a `docs/archive/`.
-
-Si existe localmente, vive en:
-
-- `docs-local/archive/`
-
-Regla práctica:
-
-- si un documento no describe comportamiento vigente, ni guía trabajo actual, ni ayuda a explicar el proyecto hacia afuera, no debería seguir versionado en el remoto;
-- si un documento histórico vuelve a ser importante, conviene resumirlo o reintroducir solo la parte necesaria desde un documento activo.
+`docs/archive/` no se publica con el repositorio. Si una referencia histórica vuelve a ser necesaria, debe verificarse contra el código actual e incorporarse de forma concisa a una fuente activa.
