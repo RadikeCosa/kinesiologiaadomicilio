@@ -20,7 +20,7 @@ Leer en este orden:
 4. [`04-handoff-infraestructura-casa.md`](./remodelacion/04-handoff-infraestructura-casa.md): requisitos entregados al proyecto Casa.
 5. [`05-plan-separacion-repositorios.md`](./remodelacion/05-plan-separacion-repositorios.md): frontera exacta, secuencia y condiciones para dividir landing y `/admin`.
 
-La decisión vigente es separar ambos productos en dos repositorios. `kinesiologia-clinica` ya tiene una fundación técnica independiente y documentada, pero todavía no recibió código clínico legado. `/admin` sigue operativo en este repositorio hasta que su reemplazo alcance las condiciones de corte.
+La decisión vigente es separar ambos productos en dos repositorios. `kinesiologia-clinica` ya tiene una fundación técnica independiente y el primer bloque selectivo del adaptador FHIR para leer pacientes activos. Todavía no tiene interfaz clínica. `/admin` sigue operativo en este repositorio hasta que su reemplazo alcance las condiciones de corte.
 
 ## Jerarquía de fuentes
 

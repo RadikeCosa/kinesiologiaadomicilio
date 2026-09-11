@@ -1,6 +1,6 @@
 # Plan de separación de la landing y la aplicación privada
 
-> Estado: etapa 1 completada; fundación privada publicada, todavía sin migración de código legado
+> Estado: etapa 1 completada; etapa 2 iniciada con el primer bloque de lectura FHIR publicado
 > Fecha: 2026-09-11
 > Alcance: definir el corte, el orden de migración y las condiciones de seguridad. Este documento no implica que los repositorios ya estén separados.
 
@@ -16,7 +16,8 @@ El segundo repositorio ya existe:
 - copia local: `/home/ramiro/dev/kinesiologia-clinica`;
 - remoto privado: `github.com/RadikeCosa/kinesiologia-clinica`;
 - rama inicial: `main`;
-- fundación publicada: commit `2767e79`, sin código clínico legado migrado.
+- fundación publicada: commit `2767e79`;
+- primer bloque del adaptador FHIR publicado: commit `c5dd186`, con lectura server-side de pacientes activos a partir de `Patient` y `EpisodeOfCare`.
 
 La aplicación privada se construirá desde cero. Del proyecto actual se reutilizarán contratos de dominio, conocimiento FHIR, mappers, repositorios y pruebas que sigan siendo válidos; no se trasladará el frontend de `/admin` como base visual.
 
@@ -134,7 +135,7 @@ Las rutas, layouts, componentes y formularios actuales de `src/app/admin/` funci
 
 No se elimina ni modifica `/admin` en esta etapa.
 
-### Etapa 2 — Recuperar el núcleo reutilizable
+### Etapa 2 — Recuperar el núcleo reutilizable (en curso)
 
 - portar primero reglas y esquemas de dominio con sus pruebas;
 - portar mappers y contratos FHIR con pruebas de compatibilidad;
@@ -143,6 +144,15 @@ No se elimina ni modifica `/admin` en esta etapa.
 - contrastar lectura y escritura contra el endpoint descartable de HAPI FHIR.
 
 El objetivo no es copiar todo, sino conservar conocimiento probado sin arrastrar la estructura del frontend anterior.
+
+Primer bloque completado:
+
+- cliente FHIR inyectable, paginación y errores sanitizados;
+- contratos, mappers y repositorios de `Patient` y `EpisodeOfCare`;
+- caso de uso propio para listar pacientes activos;
+- pruebas unitarias y prueba de integración contra el HAPI descartable de `8081` con datos ficticios.
+
+Antes de retirar `/admin` todavía faltan, como mínimo, el contexto clínico asociado al tratamiento, la lectura y escritura de `Encounter`, las observaciones necesarias y la confirmación de una visita mediante relectura desde HAPI FHIR.
 
 ### Etapa 3 — Primer corte vertical
 
@@ -203,7 +213,7 @@ El corte final requiere, como mínimo:
 
 Hasta cumplir estas condiciones, el admin actual es el respaldo operativo y no debe eliminarse.
 
-## 7. Primer cambio autorizado cuando comience la división
+## 7. Hitos ejecutados
 
 El repositorio privado y su esqueleto técnico ya fueron creados. No se borró `/admin`, no se movieron carpetas masivamente y no se trasladó su diseño.
 
@@ -223,7 +233,7 @@ Validación del hito:
 - auditoría npm con 0 vulnerabilidades conocidas;
 - endpoint de salud verificado sin revelar `FHIR_BASE_URL`.
 
-El próximo paso es la etapa 2: seleccionar y portar el primer contrato clínico reutilizable junto con sus pruebas.
+La etapa 2 comenzó con el bloque publicado en `c5dd186`. El próximo tramo es completar la lectura del contexto clínico mínimo y el contrato de visitas, incluida su escritura idempotente y relectura desde HAPI FHIR. La interfaz privada se diseñará después sobre esos casos de uso; no se reutilizará el frontend de `/admin` como base visual.
 
 ## 8. Decisiones menores pendientes
 

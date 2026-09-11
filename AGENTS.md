@@ -102,7 +102,7 @@ Avoid ceremonial doc churn.
 ## Remodeling Status
 
 - The public landing and the private application will become separate repositories.
-- The private `kinesiologia-clinica` repository has a validated technical foundation, but legacy clinical source migration has not started.
+- The private `kinesiologia-clinica` repository has a validated technical foundation and the first selectively migrated FHIR contracts for read-only active patients. Clinical UI migration has not started.
 - This repository remains the working combined application during the transition.
 - The private frontend will be rebuilt from scratch; current `/admin` UI code is behavioral evidence, not the visual foundation.
 - Reuse domain and FHIR knowledge selectively, together with the tests that prove each retained contract.
