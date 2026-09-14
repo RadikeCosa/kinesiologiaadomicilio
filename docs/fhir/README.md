@@ -210,6 +210,8 @@ Mapeo vigente:
 
 La nueva V1 ampliará el dominio para representar visitas en curso y borradores, pero deberá seguir leyendo los encuentros actuales.
 
+El piloto online del nuevo repositorio agrega, solo para datos ficticios en `8081`, `PUT Encounter/visit-{UUID}` con una identidad estable por visita. Guarda el modo de captura y la hora de registro en las extensiones locales `encounter-capture-mode-v1` y `encounter-recorded-at-v1`. Una repetición con la misma identidad y el mismo contenido relee el recurso confirmado; un contenido distinto se trata como conflicto. Esto no implementa todavía borradores ni sincronización offline.
+
 ### Extensiones de nota clínica vigentes
 
 Prefijo común:

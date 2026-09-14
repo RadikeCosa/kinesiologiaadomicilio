@@ -51,7 +51,7 @@ It is especially relevant for roles such as:
 
 ## Architecture
 
-The repository currently keeps the public and private domains in the same codebase while separating responsibilities. The approved remodeling direction is to keep the landing as one product and rebuild the private application in a second, private repository. Its independent technical foundation now exists, but legacy clinical source migration has not started.
+The repository currently keeps the public and private domains in the same codebase while separating responsibilities. The approved remodeling direction is to keep the landing as one product and rebuild the private application in a second, private repository. Its independent foundation and a local, fictional-data pilot for patient context and online visits now exist; the legacy `/admin` remains the operational fallback.
 
 Read path:
 

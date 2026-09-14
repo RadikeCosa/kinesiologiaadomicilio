@@ -1,7 +1,7 @@
 # Plan de separación de la landing y la aplicación privada
 
-> Estado: etapa 1 completada; etapa 2 iniciada con el primer bloque de lectura FHIR publicado
-> Fecha: 2026-09-11
+> Estado: etapa 1 completada; núcleo clínico y piloto online implementados; acceso con passkeys implementado, pendiente de prueba real en dispositivos
+> Actualizado: 2026-09-14
 > Alcance: definir el corte, el orden de migración y las condiciones de seguridad. Este documento no implica que los repositorios ya estén separados.
 
 ## 1. Decisión ejecutiva
@@ -233,7 +233,19 @@ Validación del hito:
 - auditoría npm con 0 vulnerabilidades conocidas;
 - endpoint de salud verificado sin revelar `FHIR_BASE_URL`.
 
-La etapa 2 comenzó con el bloque publicado en `c5dd186`. El próximo tramo es completar la lectura del contexto clínico mínimo y el contrato de visitas, incluida su escritura idempotente y relectura desde HAPI FHIR. La interfaz privada se diseñará después sobre esos casos de uso; no se reutilizará el frontend de `/admin` como base visual.
+La etapa 2 comenzó con el bloque publicado en `c5dd186`. Después se añadieron un diagnóstico no clínico de compatibilidad WebAuthn (`c457f50`) y una lista local de pacientes activos, de solo lectura y limitada al HAPI descartable de `8081` (`010de3f`). En el trabajo posterior a ese commit se implementó un piloto local de ficha, contexto de tratamiento y visitas online con datos ficticios. El acceso con passkeys ya está implementado, pendiente de validar con credenciales reales en teléfono y computadora. Todavía no hay borradores offline, PWA ni informes en la aplicación nueva.
+
+El contrato de visita finalizada ya escribe `Encounter` y una métrica opcional en `Observation` con identidades estables, y confirma mediante relectura. El siguiente tramo es validar el flujo interactivo desde el teléfono, resolver acceso y sesiones, y luego construir borradores y sincronización. La autenticación deberá proteger toda superficie clínica antes de incorporar datos reales o ampliar el acceso. No se reutilizará el frontend de `/admin` como base visual.
+
+### Punto de control del 2026-09-14
+
+- Repositorio combinado: `main` en `982b497`, limpio y sincronizado; lint y 774 pruebas aprobadas.
+- Repositorio privado al iniciar: `main` en `010de3f`, limpio y sincronizado; lint y 23 pruebas unitarias aprobadas. El trabajo del piloto posterior todavía no constituye un corte operativo.
+- Contratos migrados: lectura server-side de `Patient` y `EpisodeOfCare` activos, cliente FHIR inyectable, paginación, errores sanitizados, contexto de tratamiento y `Condition`, lectura y escritura de `Encounter`, `Observation` opcional y reintento con identidad estable.
+- Prueba del piloto: contrato contra HAPI `8081` crea una visita ficticia, reintenta sin duplicarla y relee visita y métrica. Lint, pruebas unitarias y build del repositorio privado aprobados.
+- Pendiente para aceptar la etapa 3: recorrido interactivo desde teléfono y comprobación de ergonomía con datos ficticios; no usar datos reales. El diagnóstico de compatibilidad WebAuthn ya funcionó en Chrome de Ubuntu y Android según el profesional.
+- Acceso: una cuenta provisionada con passkeys, sesiones por dispositivo, revocación y recuperación implementadas en el repositorio privado. Pruebas automatizadas y bloqueo de rutas sin sesión aprobados; falta probar el ciclo real de registro, ingreso, revocación y recuperación en ambos dispositivos.
+- HAPI descartable de `8081`: contenedores en ejecución y `GET /fhir/metadata` responde HTTP 200. El entorno real de `8080` no se utilizó.
 
 ## 8. Decisiones menores pendientes
 
