@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { HOME_CONTENT } from "@/app/home/homeContent";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Container } from "@/components/ui/Container";
@@ -61,15 +62,15 @@ export function AboutSection() {
             </div>
           </div>
 
-          <div className="mx-auto flex aspect-square w-full max-w-xs items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-neutral-600 dark:bg-neutral-700">
-            <div className="text-center">
-              <p className="text-base font-medium text-slate-700 dark:text-slate-200">
-                {HOME_CONTENT.about.photoPlaceholderTitle}
-              </p>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-300">
-                {HOME_CONTENT.about.photoPlaceholderDescription}
-              </p>
-            </div>
+          <div className="mx-auto aspect-square w-full max-w-xs overflow-hidden rounded-2xl">
+            <Image
+              src="/ramiro-profile.png"
+              alt="Ramiro Cosa, kinesiólogo domiciliario en Neuquén"
+              width={1536}
+              height={1024}
+              sizes="(max-width: 768px) 85vw, 320px"
+              className="h-full w-full object-cover object-[65%_center]"
+            />
           </div>
         </div>
       </Container>
