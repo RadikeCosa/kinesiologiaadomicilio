@@ -1,6 +1,5 @@
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { HeroSecondaryLink } from "./components/HeroSecondaryLink";
-import { HeroServiceTypesList } from "./components/HeroServiceTypesList";
 import { HeroImage } from "./components/HeroImage";
 import { heroContent } from "./heroContent";
 import { Container } from "@/components/ui/Container";
@@ -10,55 +9,55 @@ export default function HeroSection() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="flex flex-1 items-center py-10 sm:py-12"
+      className="relative overflow-hidden bg-[#eaf2f2] py-8 dark:bg-neutral-900 sm:py-14 lg:py-20"
     >
       <Container className="max-w-6xl">
-        <div className="flex w-full flex-col items-center gap-8 sm:flex-row md:gap-12">
-          <div className="w-full max-w-2xl text-center sm:text-left">
+        <div className="grid items-center gap-8 rounded-[2rem] border border-white/80 bg-white/80 p-5 shadow-[0_24px_70px_rgba(20,52,67,0.08)] backdrop-blur sm:gap-12 sm:p-9 md:grid-cols-[0.9fr_1.1fr] md:p-12 dark:border-neutral-700 dark:bg-neutral-800/80 dark:shadow-none">
+          <div className="order-1 text-left md:order-2">
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-sky-800 dark:text-sky-300">
+              {heroContent.eyebrow}
+            </p>
             <h1
               id="hero-heading"
-              className="text-balance text-3xl font-bold leading-snug sm:text-5xl md:text-6xl"
+              className="mt-4 max-w-xl text-balance text-4xl font-bold leading-[1.08] tracking-tight text-slate-950 sm:text-5xl lg:text-[3.65rem] dark:text-white"
             >
-              {heroContent.h1.prefix}{" "}
-              <span className="text-sky-600 dark:text-sky-400">
-                {heroContent.h1.highlight}
-              </span>{" "}
-              {heroContent.h1.suffix}
+              {heroContent.h1}
             </h1>
-            <p className="sr-only">{heroContent.srOnly}</p>
-            <p className="mt-4 text-base leading-relaxed text-slate-700 dark:text-slate-300 sm:mt-6 sm:text-xl">
+            <p className="mt-5 max-w-xl text-lg leading-8 text-slate-700 dark:text-slate-200">
               {heroContent.supportText}
             </p>
-            <ul
-              aria-label="Datos principales del servicio"
-              className="mt-5 flex flex-wrap justify-center gap-2 text-sm text-slate-700 dark:text-slate-200 sm:justify-start"
-            >
-              {heroContent.commercialSignals.map((signal) => (
-                <li
-                  key={signal}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 dark:border-neutral-700 dark:bg-neutral-800"
-                >
-                  {signal}
-                </li>
-              ))}
-            </ul>
-            <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <WhatsAppButton
                 message={heroContent.whatsappMessage}
                 ctaLocation="hero"
+                ctaLabel="Hablar con Ramiro por WhatsApp"
                 variant="whatsapp"
                 size="md"
-                iconSize="h-6 w-6"
+                iconSize="h-5 w-5"
               >
-                {heroContent.ctaLabel}
+                Hablar con Ramiro
               </WhatsAppButton>
               <HeroSecondaryLink>
                 {heroContent.secondaryLinkLabel}
               </HeroSecondaryLink>
             </div>
-            <HeroServiceTypesList />
+            <ul
+              aria-label="Datos principales del servicio"
+              className="mt-7 flex flex-wrap gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-200"
+            >
+              {heroContent.commercialSignals.map((signal) => (
+                <li
+                  key={signal}
+                  className="rounded-full border border-slate-300 bg-[#f7faf9] px-3.5 py-2 dark:border-neutral-600 dark:bg-neutral-900"
+                >
+                  {signal}
+                </li>
+              ))}
+            </ul>
           </div>
-          <HeroImage />
+          <div className="order-2 md:order-1">
+            <HeroImage />
+          </div>
         </div>
       </Container>
     </section>

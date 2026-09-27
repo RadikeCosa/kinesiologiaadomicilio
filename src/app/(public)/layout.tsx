@@ -35,9 +35,8 @@ const structuredData = {
     name: BUSINESS_CONFIG.location.city,
     "@id": "https://www.wikidata.org/wiki/Q44753",
   },
-  priceRange: "$$",
   serviceType: servicesData.map((service) => service.title),
-  medicalSpecialty: "PhysicalTherapy",
+  medicalSpecialty: "https://schema.org/Physiotherapy",
   hasOfferCatalog: {
     "@type": "OfferCatalog",
     name: "Servicios de Kinesiología",
@@ -54,7 +53,6 @@ const structuredData = {
     availableLanguage: ["es"],
     areaServed: BUSINESS_CONFIG.location.countryCode,
   },
-  sameAs: [`https://wa.me/${BUSINESS_CONFIG.phoneClean}`],
 };
 
 export const metadata: Metadata = {
@@ -120,7 +118,7 @@ export default function PublicLayout({
     <>
       <a
         href="#contenido"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 rounded bg-sky-600 px-4 py-2 text-sm font-semibold text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 rounded bg-sky-800 px-4 py-2 text-sm font-semibold text-white"
       >
         Saltar al contenido principal
       </a>

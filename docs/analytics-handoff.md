@@ -1,7 +1,7 @@
 # Analytics y medición
 
 > Estado: vigente
-> Última actualización: 2026-06-25 (UTC)
+> Última actualización: 2026-09-27 (UTC)
 > Alcance: tracking público con GA4 directo, sin GTM.
 
 ## Resumen
@@ -22,15 +22,17 @@ Implementa:
 
 ## Eventos custom implementados
 
-### 1) `generate_lead`
-Se dispara desde `WhatsAppButton` en clicks de CTA de WhatsApp.
+### 1) `whatsapp_intent`
+Se dispara desde `WhatsAppButton` al hacer clic en una CTA de WhatsApp. Mide intención de contacto, no una conversación o consulta concretada. No marcar como evento clave sin una decisión explícita sobre su uso en reportes de negocio.
 
 Parámetros enviados:
 - `channel: "whatsapp"`
 - `cta_location`
 - `cta_label`
-- `destination`
+- `destination` (se elimina query y fragmento; nunca incluir mensajes precargados)
 - `page_path`
+
+El `destination` de WhatsApp se limita a la URL base de `wa.me`; el texto precargado puede contener información de salud y no debe enviarse a GA4.
 
 ### 2) `phone_click`
 Se dispara desde `PhoneLink` (actualmente en footer).

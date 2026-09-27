@@ -6,17 +6,19 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service }: ServiceCardProps) {
+  const consultationLabel = `Consultar por ${service.title}`;
+
   return (
-    <div className="flex flex-col rounded-2xl bg-white p-8 shadow-lg ring-1 ring-slate-200 transition-all hover:shadow-xl dark:bg-neutral-800 dark:ring-neutral-700">
-      <h3 className="text-xl font-semibold leading-snug tracking-tight text-slate-900 dark:text-slate-100">
+    <article className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-lg sm:p-7 dark:border-neutral-700 dark:bg-neutral-800">
+      <h3 className="text-xl font-semibold leading-snug tracking-tight text-slate-950 dark:text-white">
         {service.title}
       </h3>
-      <p className="mt-3 flex-auto text-base leading-7 text-slate-600 dark:text-slate-300">
+      <p className="mt-3 flex-auto text-base leading-7 text-slate-700 dark:text-slate-300">
         {service.description}
       </p>
-      <div className="mt-5 space-y-4 text-sm leading-6 text-slate-700 dark:text-slate-200">
+      <div className="mt-6 space-y-5 text-base leading-7 text-slate-700 dark:text-slate-200">
         <section>
-          <h4 className="font-semibold text-slate-900 dark:text-slate-100">
+          <h4 className="font-semibold text-slate-900 dark:text-white">
             Cuándo suele consultarse
           </h4>
           <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -26,7 +28,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
           </ul>
         </section>
         <section>
-          <h4 className="font-semibold text-slate-900 dark:text-slate-100">
+          <h4 className="font-semibold text-slate-900 dark:text-white">
             Qué se evalúa
           </h4>
           <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -36,7 +38,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
           </ul>
         </section>
         <section>
-          <h4 className="font-semibold text-slate-900 dark:text-slate-100">
+          <h4 className="font-semibold text-slate-900 dark:text-white">
             Objetivo general
           </h4>
           <p className="mt-2">{service.goal}</p>
@@ -45,13 +47,14 @@ export function ServiceCard({ service }: ServiceCardProps) {
       <WhatsAppButton
         message={service.whatsappMessage}
         ctaLocation="services"
-        className="mt-6 self-start"
+        ctaLabel={`${consultationLabel} por WhatsApp`}
+        className="mt-7 self-start"
         variant="whatsapp"
         size="sm"
         iconSize="h-4 w-4"
       >
-        Consultar este caso
+        {consultationLabel}
       </WhatsAppButton>
-    </div>
+    </article>
   );
 }

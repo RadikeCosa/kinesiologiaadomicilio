@@ -9,7 +9,7 @@ interface HeroSecondaryLinkProps {
 export function HeroSecondaryLink({ children }: HeroSecondaryLinkProps) {
   return (
     <Link
-      href="/services"
+      href="#como-funciona"
       className={getCtaClass({ variant: "secondary", size: "md" })}
     >
       {children}

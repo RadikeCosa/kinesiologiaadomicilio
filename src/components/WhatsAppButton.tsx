@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { WhatsAppIcon } from "./WhatsAppIcon";
 import { getWhatsAppUrl } from "@/lib/config";
-import { trackGenerateLead, type CtaLocation } from "@/lib/analytics";
+import { trackWhatsAppIntent, type CtaLocation } from "@/lib/analytics";
 import { getCtaClass } from "./ui/ctaStyles";
 
 interface WhatsAppButtonProps {
@@ -45,7 +45,7 @@ export function WhatsAppButton({
       rel="noopener noreferrer"
       className={getCtaClass({ variant, size, className })}
       onClick={() =>
-        trackGenerateLead({
+        trackWhatsAppIntent({
           ctaLocation,
           ctaLabel: resolvedLabel,
           destination: whatsappUrl,

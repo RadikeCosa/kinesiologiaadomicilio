@@ -21,9 +21,9 @@ export function Footer() {
             <div className="flex items-center gap-3">
               <span
                 aria-hidden="true"
-                className="h-2.5 w-2.5 rounded-full bg-sky-500 shadow-sm shadow-sky-500/30"
+                className="h-2.5 w-2.5 rounded-full bg-teal-700 shadow-sm shadow-teal-700/30"
               />
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-sky-800 dark:text-sky-300">
                 Contacto
               </p>
             </div>
@@ -53,7 +53,7 @@ export function Footer() {
                   destination={`tel:+${phoneClean}`}
                   ctaLocation="footer"
                   ctaLabel="Teléfono footer"
-                  className="rounded-md transition-colors hover:text-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 dark:hover:text-sky-400"
+                  className="rounded-md transition-colors hover:text-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 focus-visible:ring-offset-2 dark:hover:text-sky-400"
                 >
                   {phone}
                 </PhoneLink>
@@ -73,7 +73,7 @@ export function Footer() {
           </div>
 
           <nav aria-label="Enlaces del pie de página">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-700 dark:text-slate-300">
               Navegación
             </p>
 
@@ -82,7 +82,7 @@ export function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="rounded-md transition-colors hover:text-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 dark:hover:text-sky-400"
+                    className="rounded-md transition-colors hover:text-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 focus-visible:ring-offset-2 dark:hover:text-sky-400"
                   >
                     {label}
                   </Link>
@@ -91,7 +91,7 @@ export function Footer() {
               <li>
                 <Link
                   href="/evaluar"
-                  className="rounded-md transition-colors hover:text-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 dark:hover:text-sky-400"
+                  className="rounded-md transition-colors hover:text-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 focus-visible:ring-offset-2 dark:hover:text-sky-400"
                 >
                   Evaluar mi situación
                 </Link>
@@ -100,7 +100,7 @@ export function Footer() {
           </nav>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-700 dark:text-slate-300">
               Servicios
             </p>
 
@@ -114,7 +114,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-slate-200/80 pt-6 text-sm text-slate-500 dark:border-neutral-800 dark:text-slate-500">
+        <div className="mt-10 border-t border-slate-200/80 pt-6 text-sm text-slate-700 dark:border-neutral-800 dark:text-slate-300">
           <p>
             © {new Date().getFullYear()} {name}. Todos los derechos reservados.
           </p>

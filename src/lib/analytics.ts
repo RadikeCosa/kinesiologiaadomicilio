@@ -24,6 +24,13 @@ interface TrackScrollEventParams {
   pageTitle?: string;
 }
 
+function sanitizeDestination(destination: string): string {
+  const sensitiveSuffixIndex = destination.search(/[?#]/);
+  return sensitiveSuffixIndex === -1
+    ? destination
+    : destination.slice(0, sensitiveSuffixIndex);
+}
+
 function resolvePagePath(pagePath?: string): string {
   if (pagePath) {
     return pagePath;
@@ -48,17 +55,17 @@ function resolvePageTitle(pageTitle?: string): string {
   return "";
 }
 
-export function trackGenerateLead({
+export function trackWhatsAppIntent({
   ctaLocation,
   ctaLabel,
   destination,
   pagePath,
 }: TrackBaseEventParams): void {
-  sendGAEvent("event", "generate_lead", {
+  sendGAEvent("event", "whatsapp_intent", {
     channel: "whatsapp",
     cta_location: ctaLocation,
     cta_label: ctaLabel,
-    destination,
+    destination: sanitizeDestination(destination),
     page_path: resolvePagePath(pagePath),
   });
 }

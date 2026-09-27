@@ -34,18 +34,18 @@ export function EvaluarFlow({ content }: EvaluarFlowProps) {
       <Container className="max-w-4xl">
         {flowState === "selection" ? (
           <div>
-            <header className="text-center">
+            <header className="text-left">
               <h1 className={SECTION_TITLE_CLASS}>{content.headline}</h1>
               <p className={SECTION_LEAD_CLASS}>{content.subtitle}</p>
             </header>
 
-            <div className="mt-10 grid gap-3 sm:gap-4">
+            <div className="mt-8 grid gap-3 sm:mt-10 sm:gap-4">
               {content.branches.map((branch) => (
                 <button
                   key={branch.id}
                   type="button"
                   onClick={() => handleSelectBranch(branch)}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left text-base font-medium leading-relaxed text-slate-800 transition-colors hover:border-sky-300 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-slate-100 dark:hover:border-sky-500 dark:hover:bg-neutral-700"
+                  className="w-full min-h-14 rounded-2xl border border-slate-200 bg-white p-5 text-left text-base font-semibold leading-relaxed text-slate-800 transition-colors hover:border-sky-700 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-700 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-slate-100 dark:hover:border-sky-400 dark:hover:bg-neutral-700"
                 >
                   {branch.optionLabel}
                 </button>
@@ -56,7 +56,7 @@ export function EvaluarFlow({ content }: EvaluarFlowProps) {
 
         {flowState === "result" && selectedBranch ? (
           <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-800 sm:p-8">
-            <p className="text-sm font-semibold tracking-wide text-sky-700 dark:text-sky-300">
+            <p className="text-sm font-semibold tracking-wide text-sky-800 dark:text-sky-300">
               Situación elegida
             </p>
             <p className="mt-1 text-base leading-relaxed text-slate-700 dark:text-slate-300">

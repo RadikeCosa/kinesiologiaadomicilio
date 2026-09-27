@@ -4,7 +4,7 @@ export const HOME_CONTENT = {
   about: {
     sectionTitle: "Sobre Ramiro",
     name: "Ramiro Cosa",
-    tagline: "Más de 20 años de experiencia en kinesiología domiciliaria",
+    tagline: "Más de 20 años de experiencia profesional y más de 14 en atención domiciliaria",
     bio: "Ramiro acompaña a personas mayores y pacientes en recuperación directamente en su hogar. Tiene más de 20 años de experiencia profesional y más de 14 años de trabajo específico en atención domiciliaria, por lo que conoce bien las necesidades de quienes atraviesan una convalecencia y de las familias que los acompañan.",
     highlights: [
       "+20 años de experiencia profesional",
@@ -31,6 +31,6 @@ export const HOME_CONTENT = {
   servicesPreviewIntro: {
     title: "Nuestros Servicios",
     description:
-      "Atención kinesiológica especializada en tu hogar con equipamiento profesional",
+      "Conocé las situaciones que pueden motivar una evaluación de kinesiología a domicilio.",
   },
 } as const;
