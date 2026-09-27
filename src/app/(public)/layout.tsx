@@ -16,7 +16,7 @@ const structuredData = {
   name: BUSINESS_CONFIG.name,
   image: `${businessUrl}/og-placeholder.png`,
   url: `${businessUrl}/`,
-  logo: `${businessUrl}/favicon.ico`,
+  logo: `${businessUrl}/brand/logo-square.png`,
   description:
     "Kinesiología y rehabilitación funcional a domicilio en Neuquén: postoperatorios, adultos mayores y cuidados paliativos.",
   address: {
