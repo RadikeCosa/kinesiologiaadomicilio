@@ -33,7 +33,7 @@ function sanitizeDestination(destination: string): string {
 
 function resolvePagePath(pagePath?: string): string {
   if (pagePath) {
-    return pagePath;
+    return pagePath.split(/[?#]/, 1)[0];
   }
 
   if (typeof window !== "undefined") {
@@ -41,6 +41,10 @@ function resolvePagePath(pagePath?: string): string {
   }
 
   return "";
+}
+
+function isPublicPage(pagePath: string): boolean {
+  return ["/", "/services", "/evaluar"].includes(pagePath);
 }
 
 function resolvePageTitle(pageTitle?: string): string {
@@ -61,12 +65,14 @@ export function trackWhatsAppIntent({
   destination,
   pagePath,
 }: TrackBaseEventParams): void {
+  const resolvedPath = resolvePagePath(pagePath);
+  if (!isPublicPage(resolvedPath)) return;
   sendGAEvent("event", "whatsapp_intent", {
     channel: "whatsapp",
     cta_location: ctaLocation,
     cta_label: ctaLabel,
     destination: sanitizeDestination(destination),
-    page_path: resolvePagePath(pagePath),
+    page_path: resolvedPath,
   });
 }
 
@@ -76,12 +82,14 @@ export function trackPhoneClick({
   destination,
   pagePath,
 }: TrackBaseEventParams): void {
+  const resolvedPath = resolvePagePath(pagePath);
+  if (!isPublicPage(resolvedPath)) return;
   sendGAEvent("event", "phone_click", {
     channel: "phone",
     cta_location: ctaLocation,
     cta_label: ctaLabel,
-    destination,
-    page_path: resolvePagePath(pagePath),
+    destination: sanitizeDestination(destination),
+    page_path: resolvedPath,
   });
 }
 
@@ -90,9 +98,11 @@ export function trackScroll50({
   pagePath,
   pageTitle,
 }: TrackScrollEventParams): void {
+  const resolvedPath = resolvePagePath(pagePath);
+  if (!isPublicPage(resolvedPath)) return;
   sendGAEvent("event", "scroll_50", {
     scroll_threshold: 50,
-    page_path: resolvePagePath(pagePath),
+    page_path: resolvedPath,
     page_title: resolvePageTitle(pageTitle),
   });
 }
@@ -101,9 +111,11 @@ export function trackScroll90({
   pagePath,
   pageTitle,
 }: TrackScrollEventParams): void {
+  const resolvedPath = resolvePagePath(pagePath);
+  if (!isPublicPage(resolvedPath)) return;
   sendGAEvent("event", "scroll_90", {
     scroll_threshold: 90,
-    page_path: resolvePagePath(pagePath),
+    page_path: resolvedPath,
     page_title: resolvePageTitle(pageTitle),
   });
 }

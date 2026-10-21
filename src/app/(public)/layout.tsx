@@ -5,8 +5,13 @@ import { Footer } from "@/components/Footer";
 import { ScrollDepthTracker } from "@/components/ScrollDepthTracker";
 import { BUSINESS_CONFIG } from "@/lib/config";
 import { servicesData } from "@/lib/servicesData";
+import { getPublicAnalyticsId } from "@/lib/analytics-config";
 
-const gaId = process.env.NEXT_PUBLIC_GA_ID;
+const gaId = getPublicAnalyticsId({
+  gaId: process.env.NEXT_PUBLIC_GA_ID,
+  nodeEnv: process.env.NODE_ENV,
+  vercelEnv: process.env.VERCEL_ENV,
+});
 const businessUrl = BUSINESS_CONFIG.url;
 
 const structuredData = {
@@ -123,7 +128,7 @@ export default function PublicLayout({
         Saltar al contenido principal
       </a>
 
-      <ScrollDepthTracker />
+      {gaId ? <ScrollDepthTracker /> : null}
       {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       <Header />
 
