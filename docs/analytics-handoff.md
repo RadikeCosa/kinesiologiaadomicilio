@@ -1,94 +1,55 @@
 # Analytics y medición
 
-> Estado: vigente
-> Última actualización: 2026-09-27 (UTC)
-> Alcance: tracking público con GA4 directo, sin GTM.
+> Estado: código preparado para revisión; configuración GA4 actualizada el 21/10/2026.
+> Alcance: GA4 directo, sin GTM, solo superficie pública.
 
-## Resumen
-El proyecto usa **Google Analytics 4 (GA4) directo** vía Next.js, sin Google Tag Manager.
+## Eventos y significado
 
-Implementa:
+| Evento | Disparador | Qué significa |
+|---|---|---|
+| `whatsapp_intent` | Un clic en `WhatsAppButton` | Intención de contacto; no confirma mensaje ni consulta |
+| `phone_click` | Un clic en `PhoneLink` del pie | Intención de llamar; no confirma llamada |
+| `scroll_50` / `scroll_90` | Se alcanza el umbral | Profundidad de lectura, una vez por visita a la ruta |
 
-- eventos automáticos de GA4 (por integración estándar),
-- eventos custom de intención de contacto,
-- eventos de profundidad de scroll.
+Los eventos de contacto llevan `channel`, `cta_location`, `cta_label`, `destination` y `page_path`. El destino no incluye query ni fragmento. La ruta se limita a `/`, `/services` o `/evaluar` y se elimina cualquier query/fragmento explícito. Los helpers no emiten eventos custom para rutas privadas o desconocidas.
 
-## Integración técnica
+Las etiquetas de servicios y `/evaluar` son genéricas para no comunicar el servicio elegido ni la rama seleccionada. El mensaje precargado sigue viajando a WhatsApp al abrir el enlace, pero no se incluye en el evento custom de GA4.
 
-- Componente: `GoogleAnalytics` de `@next/third-parties/google`.
-- Ubicación de carga GA: `src/app/(public)/layout.tsx` (solo superficie pública).
-- Condición de carga: existe `NEXT_PUBLIC_GA_ID`.
-- API de envío: `sendGAEvent`.
+## Carga y entornos
 
-## Eventos custom implementados
+`GoogleAnalytics` de `@next/third-parties/google` se carga en el layout público cuando existe `NEXT_PUBLIC_GA_ID`, `NODE_ENV=production` y `VERCEL_ENV` está ausente o es `production`. Desarrollo, tests y Vercel previews no cargan la propiedad de producción. Un despliegue fuera de Vercel requiere una configuración explícita del ID.
 
-### 1) `whatsapp_intent`
-Se dispara desde `WhatsAppButton` al hacer clic en una CTA de WhatsApp. Mide intención de contacto, no una conversación o consulta concretada. No marcar como evento clave sin una decisión explícita sobre su uso en reportes de negocio.
+`/admin` y el layout raíz no montan `GoogleAnalytics`. El tracker de scroll solo se monta cuando GA está habilitado. La ausencia de ID no bloquea el contacto.
 
-Parámetros enviados:
-- `channel: "whatsapp"`
-- `cta_location`
-- `cta_label`
-- `destination` (se elimina query y fragmento; nunca incluir mensajes precargados)
-- `page_path`
+## Configuración externa verificada el 21/10/2026
 
-El `destination` de WhatsApp se limita a la URL base de `wa.me`; el texto precargado puede contener información de salud y no debe enviarse a GA4.
+- Propiedad: `532713101`; cuenta `391101522`.
+- Flujo web: `14360876717`; medición `G-78VE3ZGW6G`.
+- `whatsapp_intent` y `phone_click` marcados como eventos clave de intención; no equivalen a pacientes adquiridos.
+- Dimensiones de alcance Evento: `cta_location` (Ubicación del CTA), `cta_label` (Etiqueta del CTA), `channel` (Canal de contacto).
+- Ruta de página: usar la dimensión incorporada de GA4; no crear una duplicada.
+- Sin reglas de creación ni modificación de eventos en GA4 al auditar.
+- Filtro `Internal Traffic`: Excluir, estado Prueba. No activar exclusión hasta comprobar clasificación de tráfico propio.
+- Clics de salida automáticos: desactivados para evitar capturar URLs de WhatsApp con mensajes. Los eventos custom de contacto siguen habilitados.
 
-### 2) `phone_click`
-Se dispara desde `PhoneLink` (actualmente en footer).
+Las dimensiones nuevas pueden tardar 24–48 horas en estar disponibles; no reconstruyen el histórico anterior a su creación. Las capturas de configuración están en `analytics-evidence/`.
 
-Parámetros enviados:
-- `channel: "phone"`
-- `cta_location`
-- `cta_label`
-- `destination`
-- `page_path`
+## Transición histórica
 
-### 3) `scroll_50`
-Se dispara una vez por ruta cuando el scroll supera 50%.
+El commit `c3d165e42975d16093a15251c163898f36f74fc3`, del 27/09/2026, cambió `generate_lead` por `whatsapp_intent` y eliminó query/fragmento del destino de WhatsApp. La versión de producción auditada fue `df874fe930fb781d80d115288d75a4cfdb0dcbc3`, deployment `dpl_7p5WkCVsuGQEBnCP2GAK5vZdPadG`.
 
-Parámetros:
-- `scroll_threshold: 50`
-- `page_path`
-- `page_title`
+No hay un disparador actual de `generate_lead` en el código ni reglas de GA4 que lo recreen. La coexistencia en un informe de 28 días cruza esa transición; no demuestra duplicación por sí sola. Mantener el histórico sin sumarlo como consultas únicas. Serie diaria verificada para el período 23/09–20/10: `generate_lead`, 1 evento el 23/09 y 2 el 24/09; `whatsapp_intent`, 1 el 27/09, 2 el 28/09, 1 el 30/09 y 1 el 08/10. No hay superposición por día en este período; esto respalda la transición de implementación, sin demostrar identidades únicas entre nombres de evento.
 
-### 4) `scroll_90`
-Se dispara una vez por ruta cuando el scroll supera 90%.
+El 21/10/2026 se marcaron los contactos como eventos clave y se crearon las dimensiones. Registrar separadamente la fecha del futuro despliegue de estas correcciones. No presentar la serie histórica como si hubiera tenido esta configuración desde el inicio.
 
-Parámetros:
-- `scroll_threshold: 90`
-- `page_path`
-- `page_title`
+## Validación y publicación
 
-## Valores de `cta_location`
+Pruebas automatizadas: evento único por handler de clic, destinos sin mensajes, etiquetas genéricas de servicios, rutas privadas bloqueadas, entornos aislados y umbrales de scroll sin repetición dentro de una visita a ruta.
 
-Tipo soportado actualmente en código:
-- `"hero" | "services" | "footer" | "header" | "contact" | "how_it_works" | "evaluar" | "other"`
+Antes del despliegue: revisar diff y evidencia. Después de aprobar y publicar: comprobar todos los CTA en escritorio y móvil, confirmar en DebugView un evento por clic con `channel`, `cta_location`, `cta_label` y ruta, verificar scroll 50/90 y comprobar que `/admin` no carga el script. Probar rutas públicas sin datos personales. Las pruebas locales no sustituyen la recepción real en GA4.
 
-Valores usados en superficies actuales:
-- `header`
-- `hero`
-- `how_it_works`
-- `services`
-- `footer`
-- `evaluar`
+El flujo mostraba ausencia de datos durante las últimas 48 horas al auditar. Con este volumen no permite concluir por sí solo que la etiqueta esté rota; la recepción debe probarse explícitamente. No se certifica DebugView todavía.
 
-## Superficies instrumentadas
+## Seguimiento
 
-- Header: botón WhatsApp.
-- Hero: CTA principal WhatsApp.
-- Home / “Cómo funciona”: CTA WhatsApp.
-- Services: CTA por card + CTA final de página.
-- Evaluar: CTA WhatsApp según rama seleccionada.
-- Footer: WhatsApp + teléfono.
-- ScrollDepthTracker en `src/app/(public)/layout.tsx` (aplica a superficie pública).
-- `/admin` no carga `GoogleAnalytics` y queda fuera del tracking público por layout.
-
-Nota documental: `/evaluar` está instrumentada como superficie activa; hoy figura en el sitemap público (`/`, `/services`, `/evaluar`) aunque no esté en la navegación global principal.
-
-## Límites
-
-- No hay GTM en el repo.
-- No hay evidencia versionada de QA de Realtime/DebugView dentro del repositorio.
-- Para análisis de parámetros custom, GA4 requiere configurar dimensiones personalizadas.
-- `/admin` queda fuera del tracking público por diseño.
+Usar `analytics-seguimiento-semanal.md`. Las cuatro semanas comienzan después de validar producción. No automatizar atribución entre métricas web y conteos administrativos. No enviar nombres, números de paciente, DNI, diagnósticos, respuestas de evaluación ni notas clínicas a Analytics.

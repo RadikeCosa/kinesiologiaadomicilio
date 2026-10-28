@@ -47,7 +47,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
       <WhatsAppButton
         message={service.whatsappMessage}
         ctaLocation="services"
-        ctaLabel={`${consultationLabel} por WhatsApp`}
+        ctaLabel="Consultar servicio por WhatsApp"
         className="mt-7 self-start"
         variant="whatsapp"
         size="sm"

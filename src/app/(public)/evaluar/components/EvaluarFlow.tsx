@@ -74,7 +74,7 @@ export function EvaluarFlow({ content }: EvaluarFlowProps) {
               <WhatsAppButton
                 message={selectedBranch.whatsappMessage}
                 ctaLocation="evaluar"
-                ctaLabel={selectedBranch.ctaLabel}
+                ctaLabel="Consultar evaluación por WhatsApp"
                 variant="whatsapp"
                 size="md"
               >
